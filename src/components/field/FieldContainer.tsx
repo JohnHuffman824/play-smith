@@ -7,10 +7,8 @@ import { FootballField } from './FootballField'
  */
 export function FieldContainer() {
 	return (
-		<div className='w-full h-full flex items-center justify-center p-4 overflow-hidden'>
-			<div className='w-full max-w-full'>
-				<FootballField className='block' />
-			</div>
+		<div className='w-full h-full overflow-auto bg-[#f2f2f2]'>
+			<FootballField />
 		</div>
 	)
 }

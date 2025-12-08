@@ -50,13 +50,11 @@ export function FootballField({ className }: FootballFieldProps) {
 				/>
 			)
 
-			if (yards >= 10 && yards <= 110) {
-				const fieldYard =
-					yards <= 60
-						? Math.min(50, yards)
-						: Math.max(10, 110 - yards)
+			// Only show numbers at 10-yard intervals (20, 30, 40, 50, etc.)
+			if (yards % 10 === 0 && yards >= 20 && yards <= 100) {
+				const fieldYard = yards <= 60 ? yards - 10 : 110 - yards
 
-				if (fieldYard >= 0 && fieldYard % 10 === 0) {
+				if (fieldYard >= 10 && fieldYard <= 50) {
 					const leftNumberX =
 						(NUMBER_TOP_FROM_EDGE + NUMBER_HEIGHT / 2) *
 						SCALE
@@ -102,12 +100,12 @@ export function FootballField({ className }: FootballFieldProps) {
 			fieldMarkers.push(
 				<line
 					key={`left-hash-${yards}`}
-					x1={LEFT_HASH_POSITION * SCALE - 6}
+					x1={LEFT_HASH_POSITION * SCALE - 3}
 					y1={yPosition}
-					x2={LEFT_HASH_POSITION * SCALE + 6}
+					x2={LEFT_HASH_POSITION * SCALE + 3}
 					y2={yPosition}
 					stroke='#000000'
-					strokeWidth={1}
+					strokeWidth={0.5}
 					opacity={0.3}
 				/>
 			)
@@ -115,12 +113,12 @@ export function FootballField({ className }: FootballFieldProps) {
 			fieldMarkers.push(
 				<line
 					key={`right-hash-${yards}`}
-					x1={RIGHT_HASH_POSITION * SCALE - 6}
+					x1={RIGHT_HASH_POSITION * SCALE - 3}
 					y1={yPosition}
-					x2={RIGHT_HASH_POSITION * SCALE + 6}
+					x2={RIGHT_HASH_POSITION * SCALE + 3}
 					y2={yPosition}
 					stroke='#000000'
-					strokeWidth={1}
+					strokeWidth={0.5}
 					opacity={0.3}
 				/>
 			)
