@@ -87,3 +87,4 @@ export function createCoordinateSystem(
 ): FieldCoordinateSystem {
 	return new FieldCoordinateSystem(containerWidth, containerHeight)
 }
+

@@ -64,3 +64,4 @@ export const EVENT_RESIZE = 'resize'
 // Canvas Composite Operations
 export const COMPOSITE_DESTINATION_OUT = 'destination-out'
 export const COMPOSITE_SOURCE_OVER = 'source-over'
+

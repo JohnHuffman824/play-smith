@@ -14,3 +14,4 @@ export interface DrawingObject {
 	lineEnd: 'none' | 'arrow' | 'tShape'
 	eraseSize: number // Required for erase type
 }
+

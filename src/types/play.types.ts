@@ -18,3 +18,4 @@ export interface PlayCard {
 	name: string
 	thumbnail: string // Will store canvas data URL
 }
+
