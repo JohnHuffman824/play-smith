@@ -327,13 +327,6 @@ Run: `bun test tests/domain/types.test.ts`
 
 Expected: PASS with round-trip and empty play tests succeeding.
 
-**Step 5: Commit**
-
-```bash
-git add src/domain/*.ts tests/domain/types.test.ts
-git commit -m 'feat: add shared domain models for plays, playbooks, and users'
-```
-
 ---
 
 ### Task 4: Introduce Bun HTTP API server and routing
@@ -415,13 +408,6 @@ Run: `bun test tests/server/http/plays-routes.test.ts`
 
 Expected: PASS with correct status codes and shapes.
 
-**Step 5: Commit**
-
-```bash
-git add index.ts src/server/http.ts src/server/routes/*.ts tests/server/http/plays-routes.test.ts
-git commit -m 'feat: add Bun HTTP API for plays and playbooks skeleton'
-```
-
 ---
 
 ### Task 5: Add repository and persistence layer with `bun:sqlite`
@@ -496,13 +482,6 @@ Implement `PlaysRepositorySqlite` and `PlaybooksRepositorySqlite` with methods l
 Run: `bun test tests/server/db/plays-repository-sqlite.test.ts`
 
 Expected: PASS with repository operations working against SQLite.
-
-**Step 6: Commit**
-
-```bash
-git add src/server/db/* src/server/routes/*.ts tests/server/db/plays-repository-sqlite.test.ts
-git commit -m 'feat: add SQLite-backed repositories for plays and playbooks'
-```
 
 ---
 
@@ -592,13 +571,6 @@ Run: `bun test tests/frontend/state/whiteboard-store.test.ts`
 
 Expected: PASS with store operations mutating state as expected.
 
-**Step 5: Commit**
-
-```bash
-git add src/state/whiteboard-store.ts src/components/layout/AppShell.tsx src/components/field/FieldContainer.tsx tests/frontend/state/whiteboard-store.test.ts
-git commit -m 'feat: add whiteboard state management for components'
-```
-
 ---
 
 ### Task 7: Implement toolbar tools skeletons (Select, Add Player, Draw, Route, Add Component)
@@ -672,13 +644,6 @@ Run: `bun test tests/frontend/tools/tools-store.test.ts`
 
 Expected: PASS with `activeTool` switching correctly.
 
-**Step 5: Commit**
-
-```bash
-git add src/components/layout/Toolbar.tsx src/components/tools/*.tsx src/state/tools-store.ts tests/frontend/tools/tools-store.test.ts
-git commit -m 'feat: add toolbar tools skeleton and tools store'
-```
-
 ---
 
 ### Task 8: Connect frontend to backend API for saving and loading plays
@@ -747,13 +712,6 @@ Update `whiteboard-store` to use this client when persisting or loading the curr
 Run: `bun test tests/frontend/api/client.test.ts`
 
 Expected: PASS with save-and-load behavior working via the API client.
-
-**Step 5: Commit**
-
-```bash
-git add src/api/client.ts src/state/whiteboard-store.ts src/server/routes/plays.ts tests/frontend/api/client.test.ts
-git commit -m 'feat: connect frontend whiteboard to Bun API for play persistence'
-```
 
 ---
 
@@ -860,13 +818,6 @@ Run: `bun test tests/server/db/plays-repository-mysql.test.ts`
 
 Expected: PASS for SQLite-backed contract tests; MySQL tests pass when a test MySQL instance (self-hosted or cloud) is configured via environment variables.
 
-**Step 7: Commit**
-
-```bash
-git add src/server/db/* src/server/routes/*.ts tests/server/db/plays-repository-mysql.test.ts README.md
-git commit -m 'feat: add MySQL support that can target self-hosted or cloud instances'
-```
-
 ---
 
 ### Task 10: Implement playbook manager UI and API integration
@@ -958,13 +909,6 @@ Run:
 - `bun test tests/frontend/playbooks/playbook-manager.test.tsx`
 
 Expected: PASS, with both backend and frontend behaviors satisfying tests.
-
-**Step 8: Commit**
-
-```bash
-git add src/components/playbooks/* src/components/layout/Sidebar.tsx src/api/client.ts src/server/routes/playbooks.ts tests/frontend/playbooks/playbook-manager.test.tsx tests/server/http/playbooks-routes.test.ts
-git commit -m 'feat: add playbook manager UI and playbook CRUD API integration'
-```
 
 ---
 
@@ -1072,13 +1016,6 @@ Run:
 - `bun test tests/frontend/auth/login-page.test.tsx`
 
 Expected: PASS with auth routes and login page behavior meeting the tests.
-
-**Step 8: Commit**
-
-```bash
-git add src/server/routes/auth.ts src/server/auth/* src/server/db/users-repository.* src/server/db/schema.sql src/server/http.ts src/components/auth/LoginPage.tsx src/components/layout/AppShell.tsx src/api/client.ts tests/server/http/auth-routes.test.ts tests/frontend/auth/login-page.test.tsx
-git commit -m 'feat: add login page and basic email/password authentication'
-```
 
 ---
 
