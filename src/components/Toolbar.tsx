@@ -14,7 +14,8 @@ import {
   Undo2,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import { DrawingState, Tool } from "../App";
+import type { DrawingState, Tool } from "../types/play.types";
+import type { HashAlignment } from "../types/field.types";
 import { ColorPickerDialog } from "./ColorPickerDialog";
 import { DrawOptionsDialog } from "./DrawOptionsDialog";
 import { EraseDialog } from "./EraseDialog";
@@ -29,10 +30,8 @@ import svgPaths from "../imports/svg-ybscv0ilx3";
 interface ToolbarProps {
   drawingState: DrawingState;
   setDrawingState: (state: DrawingState) => void;
-  hashAlignment: "center" | "left" | "right";
-  setHashAlignment: (
-    alignment: "center" | "left" | "right",
-  ) => void;
+  hashAlignment: HashAlignment;
+  setHashAlignment: (alignment: HashAlignment) => void;
   showPlayBar: boolean;
   setShowPlayBar: (show: boolean) => void;
 }

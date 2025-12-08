@@ -4,7 +4,44 @@ import {
   useState,
   useLayoutEffect,
 } from "react";
-import { DrawingState } from "../App";
+import type { DrawingState } from "../types/play.types";
+import type { DrawingObject } from "../types/drawing.types";
+import type { HashAlignment } from "../types/field.types";
+import { useFieldCoordinates } from "../hooks/useFieldCoordinates";
+import {
+  FIELD_WIDTH_FEET,
+  LINEMAN_RADIUS,
+  LINEMAN_Y,
+  SPACING_CENTER_TO_CENTER,
+  LEFT_HASH_INNER_EDGE,
+  RIGHT_HASH_INNER_EDGE,
+  CENTER_X,
+  PLAYER_RADIUS_FEET,
+  DEFAULT_ERASE_SIZE,
+  ANGLE_AVERAGE_POINTS,
+  ARROW_LENGTH_MULTIPLIER,
+  TSHAPE_LENGTH_MULTIPLIER,
+  ARROW_ANGLE_DEGREES,
+  DASH_PATTERN_LENGTH_MULTIPLIER,
+  DASH_PATTERN_GAP_MULTIPLIER,
+  INITIALIZATION_DELAY_MS,
+  CURSOR_Z_INDEX,
+  MAX_HISTORY_SIZE,
+  TOOL_DRAW,
+  TOOL_ERASE,
+  TOOL_SELECT,
+  TOOL_FILL,
+  TOOL_ADD_PLAYER,
+  LINE_END_NONE,
+  LINE_END_ARROW,
+  LINE_END_TSHAPE,
+  EVENT_CLEAR_CANVAS,
+  EVENT_FILL_LINEMAN,
+  EVENT_FILL_PLAYER,
+  EVENT_RESIZE,
+  COMPOSITE_DESTINATION_OUT,
+  COMPOSITE_SOURCE_OVER,
+} from "../constants/field.constants";
 import { FootballField } from "./field/FootballField";
 import { Lineman } from "./Lineman";
 import { Player } from "./Player";
@@ -13,105 +50,9 @@ import { Pencil, PaintBucket } from "lucide-react";
 
 interface CanvasProps {
   drawingState: DrawingState;
-  hashAlignment: "center" | "left" | "right";
+  hashAlignment: HashAlignment;
   showPlayBar: boolean;
 }
-
-// Define the structure for each drawing object
-export interface DrawingObject {
-  id: string;
-  type: "draw" | "erase";
-  points: Array<{ x: number; y: number }>; // Stored in feet coordinates
-  color: string;
-  brushSize: number;
-  lineStyle: "solid" | "dashed";
-  lineEnd: "none" | "arrow" | "tShape";
-  eraseSize: number; // Required for erase type
-}
-
-// Constants - Field Dimensions
-const FIELD_WIDTH_FEET = 160;
-const FIELD_HEIGHT_FEET = 360;
-
-// Constants - Lineman Specifications
-const LINEMAN_RADIUS = 2.0;
-const LINEMAN_Y = 28.0;
-const SPACING_CENTER_TO_CENTER = 5.0;
-const LEFT_HASH_INNER_EDGE = 60;
-const RIGHT_HASH_INNER_EDGE = 100;
-const CENTER_X = 80;
-
-// Constants - Player Specifications
-const PLAYER_RADIUS_FEET = 2.0;
-
-// Constants - Drawing
-const DEFAULT_ERASE_SIZE = 20;
-const ANGLE_AVERAGE_POINTS = 10;
-const ARROW_LENGTH_MULTIPLIER = 3.5;
-const TSHAPE_LENGTH_MULTIPLIER = 2.5;
-const ARROW_ANGLE_DEGREES = Math.PI / 6;
-const DASH_PATTERN_LENGTH_MULTIPLIER = 3;
-const DASH_PATTERN_GAP_MULTIPLIER = 2;
-
-// Constants - UI
-const INITIALIZATION_DELAY_MS = 150;
-const CURSOR_Z_INDEX = 100;
-const MAX_HISTORY_SIZE = 10;
-
-// Constants - Tool Names
-const TOOL_DRAW = "draw";
-const TOOL_ERASE = "erase";
-const TOOL_SELECT = "select";
-const TOOL_FILL = "fill";
-const TOOL_ADD_PLAYER = "addPlayer";
-
-// Constants - Line Endings
-const LINE_END_NONE = "none";
-const LINE_END_ARROW = "arrow";
-const LINE_END_TSHAPE = "tShape";
-
-// Constants - Events
-const EVENT_CLEAR_CANVAS = "clearCanvas";
-const EVENT_FILL_LINEMAN = "fillLineman";
-const EVENT_FILL_PLAYER = "fillPlayer";
-const EVENT_RESIZE = "resize";
-
-// Constants - Canvas Composite Operations
-const COMPOSITE_DESTINATION_OUT = "destination-out";
-const COMPOSITE_SOURCE_OVER = "source-over";
-
-// Helper functions to convert between web pixel and feet coordinates
-// Feet coordinate system: origin (0,0) at bottom-left, Y increases upward
-// Web pixel coordinate system: origin (0,0) at top-left, Y increases downward
-const webPixelsToFeet = (
-  pixelX: number,
-  pixelY: number,
-  containerWidth: number,
-  containerHeight: number,
-) => {
-  const scale = containerWidth / FIELD_WIDTH_FEET;
-
-  const feetX = pixelX / scale;
-  // Flip Y: web pixel Y=0 is top, feet Y=0 is bottom
-  const feetY = (containerHeight - pixelY) / scale;
-
-  return { x: feetX, y: feetY };
-};
-
-const feetToWebPixels = (
-  feetX: number,
-  feetY: number,
-  containerWidth: number,
-  containerHeight: number,
-) => {
-  const scale = containerWidth / FIELD_WIDTH_FEET;
-
-  const pixelX = feetX * scale;
-  // Flip Y: feet Y=0 is bottom, web pixel Y=0 is top
-  const pixelY = containerHeight - feetY * scale;
-
-  return { x: pixelX, y: pixelY };
-};
 
 // Helper to get canvas coordinates from mouse event
 function getCanvasCoordinates(
@@ -337,6 +278,12 @@ export function Canvas({
   const [canvasDimensions, setCanvasDimensions] = useState({
     width: 0,
     height: 0,
+  });
+
+  // Coordinate system for converting between feet and pixels
+  const coordSystem = useFieldCoordinates({
+    containerWidth: canvasDimensions.width,
+    containerHeight: canvasDimensions.height,
   });
 
   // History state for undo functionality
@@ -629,7 +576,7 @@ export function Canvas({
 
     // Convert feet coordinates to pixel coordinates for rendering
     const pixelPoints = drawing.points.map((p) =>
-      feetToWebPixels(p.x, p.y, canvasWidth, canvasHeight),
+      coordSystem.feetToPixels(p.x, p.y),
     );
 
     if (drawing.type == TOOL_ERASE) {
@@ -687,12 +634,7 @@ export function Canvas({
     setDrawingPath([{ x: coords.x, y: coords.y }]);
 
     // Convert to feet coordinates for storage
-    const feetPoint = webPixelsToFeet(
-      coords.x,
-      coords.y,
-      coords.rect.width,
-      coords.rect.height,
-    );
+    const feetPoint = coordSystem.pixelsToFeet(coords.x, coords.y);
 
     // Create a new drawing object with feet coordinates
     const newDrawing: DrawingObject = {
@@ -759,12 +701,7 @@ export function Canvas({
     if (!coords) return;
 
     // Convert to feet coordinates for storage
-    const feetPoint = webPixelsToFeet(
-      coords.x,
-      coords.y,
-      coords.rect.width,
-      coords.rect.height,
-    );
+    const feetPoint = coordSystem.pixelsToFeet(coords.x, coords.y);
 
     // Update the current drawing's points with feet coordinates
     setCurrentDrawing((prev) => {
@@ -923,12 +860,7 @@ export function Canvas({
     if (!coords) return;
 
     // Convert to feet coordinates for storage
-    const feetCoords = webPixelsToFeet(
-      coords.x,
-      coords.y,
-      coords.rect.width,
-      coords.rect.height,
-    );
+    const feetCoords = coordSystem.pixelsToFeet(coords.x, coords.y);
 
     const newPlayer = {
       id: `player-${Date.now()}`,
@@ -1020,7 +952,7 @@ export function Canvas({
     drawingState.tool == TOOL_ERASE;
 
   // Calculate player cursor size based on current scale (matches actual Player component size)
-  const scale = canvasDimensions.width / FIELD_WIDTH_FEET;
+  const scale = coordSystem.scale;
   const playerCursorDiameter = PLAYER_RADIUS_FEET * 2 * scale;
 
   return (
@@ -1298,7 +1230,7 @@ function isPointNearDrawing(
   const tolerance = Math.max(15, drawing.brushSize * 2);
 
   const pixelPoints = drawing.points.map((p) =>
-    feetToWebPixels(p.x, p.y, canvasWidth, canvasHeight),
+    coordSystem.feetToPixels(p.x, p.y),
   );
 
   // Check each line segment in the drawing

@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
+import { useFieldCoordinates } from '../hooks/useFieldCoordinates';
+import { LINEMAN_RADIUS, EVENT_FILL_LINEMAN } from '../constants/field.constants';
 
 interface LinemanProps {
   id: number;
@@ -12,37 +14,6 @@ interface LinemanProps {
   interactable: boolean;
   currentTool?: string;
 }
-
-// Helper functions to convert between web pixel and feet coordinates
-const webPixelsToFeet = (
-  pixelX: number,
-  pixelY: number,
-  containerWidth: number,
-  containerHeight: number,
-) => {
-  const FIELD_WIDTH_FEET = 160;
-  const scale = containerWidth / FIELD_WIDTH_FEET;
-  
-  const feetX = pixelX / scale;
-  const feetY = (containerHeight - pixelY) / scale;
-  
-  return { x: feetX, y: feetY };
-};
-
-const feetToWebPixels = (
-  feetX: number,
-  feetY: number,
-  containerWidth: number,
-  containerHeight: number,
-) => {
-  const FIELD_WIDTH_FEET = 160;
-  const scale = containerWidth / FIELD_WIDTH_FEET;
-  
-  const pixelX = feetX * scale;
-  const pixelY = containerHeight - (feetY * scale);
-  
-  return { x: pixelX, y: pixelY };
-};
 
 export function Lineman({ 
   id, 
@@ -62,6 +33,12 @@ export function Lineman({
   const [color, setColor] = useState('#3b82f6'); // All linemen default to blue
   const linemanRef = useRef<HTMLDivElement>(null);
 
+  // Coordinate system for converting between feet and pixels
+  const coordSystem = useFieldCoordinates({
+    containerWidth,
+    containerHeight,
+  });
+
   useEffect(() => {
     setPosition({ x: initialX, y: initialY });
   }, [initialX, initialY]);
@@ -75,8 +52,8 @@ export function Lineman({
       }
     };
 
-    window.addEventListener('fillLineman', handleFillEvent);
-    return () => window.removeEventListener('fillLineman', handleFillEvent);
+    window.addEventListener(EVENT_FILL_LINEMAN, handleFillEvent);
+    return () => window.removeEventListener(EVENT_FILL_LINEMAN, handleFillEvent);
   }, [id]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -110,7 +87,7 @@ export function Lineman({
       const newY = e.clientY - parentRect.top - dragOffset.y;
 
       // Convert to feet coordinates
-      const feetCoords = webPixelsToFeet(newX, newY, containerWidth, containerHeight);
+      const feetCoords = coordSystem.pixelsToFeet(newX, newY);
       setPosition({ x: feetCoords.x, y: feetCoords.y });
       onPositionChange(id, feetCoords.x, feetCoords.y);
     };
@@ -134,12 +111,11 @@ export function Lineman({
   if (!containerWidth || !containerHeight) return null;
 
   // Convert feet to web pixels for rendering
-  const pixelPos = feetToWebPixels(position.x, position.y, containerWidth, containerHeight);
+  const pixelPos = coordSystem.feetToPixels(position.x, position.y);
   
   // 2.0ft radius (clean 2 foot radius) - convert to pixels based on scale
-  const FIELD_WIDTH_FEET = 160;
-  const scale = containerWidth / FIELD_WIDTH_FEET;
-  const radiusInPixels = 2.0 * scale;
+  const scale = coordSystem.scale;
+  const radiusInPixels = LINEMAN_RADIUS * scale;
 
   // Determine cursor style based on current tool
   const getCursor = () => {

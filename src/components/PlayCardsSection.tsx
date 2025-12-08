@@ -1,5 +1,5 @@
 import { Plus, X } from 'lucide-react';
-import { PlayCard } from '../App';
+import type { PlayCard } from '../types/play.types';
 import { useRef } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 
