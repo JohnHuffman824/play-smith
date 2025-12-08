@@ -25,15 +25,10 @@ export function FootballField({ className }: FootballFieldProps) {
 	const NUMBER_HEIGHT = 6
 	const NUMBER_TOP_FROM_EDGE = 15
 
-	// Base scale for the viewBox. The SVG scales fluidly via CSS.
-	const SCALE = 1
-	const viewportWidth = FIELD_WIDTH * SCALE
-	const viewportHeight = FIELD_LENGTH * SCALE
-
 	const fieldMarkers: React.ReactNode[] = []
 
 	for (let yards = 0; yards <= 120; yards++) {
-		const yPosition = yards * HASH_SPACING * SCALE
+		const yPosition = yards * HASH_SPACING
 		const isYardLine = yards % 5 === 0
 
 		if (isYardLine) {
@@ -42,67 +37,61 @@ export function FootballField({ className }: FootballFieldProps) {
 					key={`yard-${yards}`}
 					x1={0}
 					y1={yPosition}
-					x2={viewportWidth}
+					x2={FIELD_WIDTH}
 					y2={yPosition}
 					stroke='#000000'
-					strokeWidth={yards % 10 === 0 ? 2 : 1}
+					strokeWidth={1}
 					opacity={0.3}
 				/>
 			)
 
-			// Only show numbers at 10-yard intervals (20, 30, 40, 50, etc.)
+			// Show hashtag markers at 10-yard intervals (20, 30, 40, 50, etc.)
 			if (yards % 10 === 0 && yards >= 20 && yards <= 100) {
-				const fieldYard = yards <= 60 ? yards - 10 : 110 - yards
+				const leftNumberX =
+					(NUMBER_TOP_FROM_EDGE + NUMBER_HEIGHT / 2)
+				fieldMarkers.push(
+					<text
+						key={`label-left-${yards}`}
+						x={leftNumberX}
+						y={yPosition}
+						fontSize={NUMBER_HEIGHT}
+						fill='#000000'
+						opacity={0.4}
+						textAnchor='middle'
+						dominantBaseline='middle'
+						transform={`rotate(-90 ${leftNumberX} ${yPosition})`}
+					>
+						# | #
+					</text>
+				)
 
-				if (fieldYard >= 10 && fieldYard <= 50) {
-					const leftNumberX =
-						(NUMBER_TOP_FROM_EDGE + NUMBER_HEIGHT / 2) *
-						SCALE
-					fieldMarkers.push(
-						<text
-							key={`label-left-${yards}`}
-							x={leftNumberX}
-							y={yPosition}
-							fontSize={NUMBER_HEIGHT * SCALE}
-							fill='#000000'
-							opacity={0.4}
-							textAnchor='middle'
-							dominantBaseline='middle'
-							transform={`rotate(-90 ${leftNumberX} ${yPosition})`}
-						>
-							{fieldYard}
-						</text>
-					)
-
-					const rightNumberX =
-						(FIELD_WIDTH -
-							NUMBER_TOP_FROM_EDGE -
-							NUMBER_HEIGHT / 2) *
-						SCALE
-					fieldMarkers.push(
-						<text
-							key={`label-right-${yards}`}
-							x={rightNumberX}
-							y={yPosition}
-							fontSize={NUMBER_HEIGHT * SCALE}
-							fill='#000000'
-							opacity={0.4}
-							textAnchor='middle'
-							dominantBaseline='middle'
-							transform={`rotate(90 ${rightNumberX} ${yPosition})`}
-						>
-							{fieldYard}
-						</text>
-					)
-				}
+				const rightNumberX =
+					(FIELD_WIDTH -
+						NUMBER_TOP_FROM_EDGE -
+						NUMBER_HEIGHT / 2)
+				fieldMarkers.push(
+					<text
+						key={`label-right-${yards}`}
+						x={rightNumberX}
+						y={yPosition}
+						fontSize={NUMBER_HEIGHT}
+						fill='#000000'
+						opacity={0.4}
+						textAnchor='middle'
+						dominantBaseline='middle'
+						transform={`rotate(90 ${rightNumberX} ${yPosition})`}
+					>
+						# | #
+					</text>
+				)
 			}
 		} else {
 			fieldMarkers.push(
 				<line
 					key={`left-hash-${yards}`}
-					x1={LEFT_HASH_POSITION * SCALE - 3}
+					x1={LEFT_HASH_POSITION - 3}
 					y1={yPosition}
-					x2={LEFT_HASH_POSITION * SCALE + 3}
+					x2={LEFT_HASH_POSITION + 3}
 					y2={yPosition}
 					stroke='#000000'
 					strokeWidth={0.5}
@@ -113,9 +102,9 @@ export function FootballField({ className }: FootballFieldProps) {
 			fieldMarkers.push(
 				<line
 					key={`right-hash-${yards}`}
-					x1={RIGHT_HASH_POSITION * SCALE - 3}
+					x1={RIGHT_HASH_POSITION - 3}
 					y1={yPosition}
-					x2={RIGHT_HASH_POSITION * SCALE + 3}
+					x2={RIGHT_HASH_POSITION + 3}
 					y2={yPosition}
 					stroke='#000000'
 					strokeWidth={0.5}
@@ -131,16 +120,16 @@ export function FootballField({ className }: FootballFieldProps) {
 				x1={0}
 				y1={0}
 				x2={0}
-				y2={viewportHeight}
+				y2={FIELD_LENGTH}
 				stroke='#000000'
 				strokeWidth={3}
 				opacity={0.4}
 			/>
 			<line
-				x1={viewportWidth}
+				x1={FIELD_WIDTH}
 				y1={0}
-				x2={viewportWidth}
-				y2={viewportHeight}
+				x2={FIELD_WIDTH}
+				y2={FIELD_LENGTH}
 				stroke='#000000'
 				strokeWidth={3}
 				opacity={0.4}
@@ -148,7 +137,7 @@ export function FootballField({ className }: FootballFieldProps) {
 			<line
 				x1={0}
 				y1={0}
-				x2={viewportWidth}
+				x2={FIELD_WIDTH}
 				y2={0}
 				stroke='#000000'
 				strokeWidth={3}
@@ -156,9 +145,9 @@ export function FootballField({ className }: FootballFieldProps) {
 			/>
 			<line
 				x1={0}
-				y1={viewportHeight}
-				x2={viewportWidth}
-				y2={viewportHeight}
+				y1={FIELD_LENGTH}
+				x2={FIELD_WIDTH}
+				y2={FIELD_LENGTH}
 				stroke='#000000'
 				strokeWidth={3}
 				opacity={0.4}
@@ -168,7 +157,7 @@ export function FootballField({ className }: FootballFieldProps) {
 
 	return (
 		<svg
-			viewBox={`0 0 ${viewportWidth} ${viewportHeight}`}
+			viewBox={`0 0 ${FIELD_WIDTH} ${FIELD_LENGTH}`}
 			preserveAspectRatio='xMinYMin meet'
 			className={className}
 			style={{
