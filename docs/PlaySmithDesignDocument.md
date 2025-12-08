@@ -40,9 +40,19 @@ There will be a toolbar on the left with multiple icons to click with different 
 - Icon: Plus Icon (+)
 - Function: This will allow the user to add a copy of a saved component to the field
 
+## Playbook Management
+
+We should need a system to manage playbooks. Playbooks will essentially be collections of plays with possibly some other features (tbd). These we are oging to need export import functionality and a design for this page (maybe take inspiration from the google drive UI?).
+
+## Login
+
+We are going to need a login page with user authentication at some point. This can be a later stage development, probably around when we start migrating from SQLite to MySQL.
+
 ## Things to consider
 
 - We need to make sure we have a system to save all of these components and retrieve them efficiently. We want to ensure we have good modularity too
+- We should keep track in a logical and clear way the color scheme and styling conventions of the app so we can easily build and maintain.
+- I have an idea of being able to type a play call and intelligently generate a play based on that. We would probably need a mix of deterministic programming and LLM integration for this. (Idea, LLM interprets and formats to JSON which connects to our api for creating necessary components).
 
 ## Future ideas:
 
@@ -52,3 +62,4 @@ There will be a toolbar on the left with multiple icons to click with different 
 - Play sheet creation
 - Import/export to and from hudl?
 - Annotations at specific points on routes (UI tbd)
+- Outsource MySQL

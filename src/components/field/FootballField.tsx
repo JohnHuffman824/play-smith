@@ -9,58 +9,25 @@ import React from 'react'
  * - Hash marks 60 feet from each edge (40 feet between hashes)
  * - 3 feet between hash marks (1 yard)
  * - Numbers 6 feet tall, 15 feet from edge
- * - Dynamic height based on viewport aspect ratio
- * - Bottom-anchored, extends upward as needed
+ * - Responsive scale based on available width
  */
 interface FootballFieldProps {
 	className?: string
 }
 
 export function FootballField({ className }: FootballFieldProps) {
-	const svgRef = React.useRef<SVGSVGElement>(null)
-	const [fieldHeight, setFieldHeight] = React.useState(360)
-
 	// College football field dimensions in feet
 	const FIELD_WIDTH = 160
+	const FIELD_LENGTH = 360
 	const HASH_SPACING = 3
 	const LEFT_HASH_POSITION = 60
 	const RIGHT_HASH_POSITION = 100
 	const NUMBER_HEIGHT = 6
 	const NUMBER_TOP_FROM_EDGE = 15
 
-	// Calculate dynamic field height based on container aspect ratio
-	React.useEffect(() => {
-		const updateFieldHeight = () => {
-			if (svgRef.current) {
-				const container = svgRef.current.parentElement
-				if (container) {
-					const { width, height } = container.getBoundingClientRect()
-					if (width > 0) {
-						// Calculate height in "feet" based on aspect ratio
-						// Maintain 160 feet width, calculate proportional height
-						const calculatedHeight = (height / width) * FIELD_WIDTH
-						// Round up to nearest yard (3 feet) for clean rendering
-						const heightInYards = Math.ceil(calculatedHeight / HASH_SPACING)
-						setFieldHeight(heightInYards * HASH_SPACING)
-					}
-				}
-			}
-		}
-
-		updateFieldHeight()
-
-		const resizeObserver = new ResizeObserver(updateFieldHeight)
-		if (svgRef.current?.parentElement) {
-			resizeObserver.observe(svgRef.current.parentElement)
-		}
-
-		return () => resizeObserver.disconnect()
-	}, [FIELD_WIDTH, HASH_SPACING])
-
-	const maxYards = Math.floor(fieldHeight / HASH_SPACING)
 	const fieldMarkers: React.ReactNode[] = []
 
-	for (let yards = 0; yards <= maxYards; yards++) {
+	for (let yards = 0; yards <= 120; yards++) {
 		const yPosition = yards * HASH_SPACING
 		const isYardLine = yards % 5 === 0
 
@@ -145,25 +112,22 @@ export function FootballField({ className }: FootballFieldProps) {
 
 	const sidelines = (
 		<>
-			{/* Left sideline */}
 			<line
 				x1={0}
 				y1={0}
 				x2={0}
-				y2={fieldHeight}
+				y2={FIELD_LENGTH}
 				stroke='#a9a9a9'
 				strokeWidth={2}
 			/>
-			{/* Right sideline */}
 			<line
 				x1={FIELD_WIDTH}
 				y1={0}
 				x2={FIELD_WIDTH}
-				y2={fieldHeight}
+				y2={FIELD_LENGTH}
 				stroke='#a9a9a9'
 				strokeWidth={2}
 			/>
-			{/* Top boundary (extends as viewport grows) */}
 			<line
 				x1={0}
 				y1={0}
@@ -172,12 +136,11 @@ export function FootballField({ className }: FootballFieldProps) {
 				stroke='#a9a9a9'
 				strokeWidth={2}
 			/>
-			{/* Bottom boundary (locked to viewport bottom) */}
 			<line
 				x1={0}
-				y1={fieldHeight}
+				y1={FIELD_LENGTH}
 				x2={FIELD_WIDTH}
-				y2={fieldHeight}
+				y2={FIELD_LENGTH}
 				stroke='#a9a9a9'
 				strokeWidth={2}
 			/>
@@ -186,13 +149,12 @@ export function FootballField({ className }: FootballFieldProps) {
 
 	return (
 		<svg
-			ref={svgRef}
-			viewBox={`0 0 ${FIELD_WIDTH} ${fieldHeight}`}
-			preserveAspectRatio='none'
+			viewBox={`0 0 ${FIELD_WIDTH} ${FIELD_LENGTH}`}
+			preserveAspectRatio='xMinYMin meet'
 			className={className}
 			style={{
 				width: '100%',
-				height: '100%',
+				height: 'auto',
 				backgroundColor: '#f2f2f2',
 				display: 'block',
 			}}
