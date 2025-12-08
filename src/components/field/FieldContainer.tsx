@@ -2,12 +2,12 @@ import React from 'react'
 import { FootballField } from './FootballField'
 
 /**
- * Container component that centers the football field
- * and allows responsive horizontal scaling.
+ * Container component that allows the football field
+ * to scale dynamically to fill available width.
  */
 export function FieldContainer() {
 	return (
-		<div className='w-full h-full overflow-auto bg-[#f2f2f2]'>
+		<div className='w-full h-full overflow-auto'>
 			<FootballField />
 		</div>
 	)

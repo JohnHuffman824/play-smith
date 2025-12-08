@@ -168,11 +168,15 @@ export function FootballField({ className }: FootballFieldProps) {
 
 	return (
 		<svg
-			width='100%'
 			viewBox={`0 0 ${viewportWidth} ${viewportHeight}`}
-			style={{ backgroundColor: '#f2f2f2', height: 'auto' }}
-			preserveAspectRatio='xMidYMid meet'
-			className={`w-full h-auto ${className ?? ''}`}
+			preserveAspectRatio='xMinYMin meet'
+			className={className}
+			style={{
+				width: '100%',
+				height: 'auto',
+				backgroundColor: '#f2f2f2',
+				display: 'block',
+			}}
 		>
 			{sidelines}
 			{fieldMarkers}
