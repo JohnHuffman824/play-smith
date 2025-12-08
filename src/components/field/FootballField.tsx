@@ -21,9 +21,8 @@ export function FootballField() {
 	const NUMBER_HEIGHT = 6
 	const NUMBER_TOP_FROM_EDGE = 15
 
-	// Base scale (pixels per foot) for the viewBox. The SVG will scale
-	// fluidly to available width while preserving aspect ratio.
-	const SCALE = 3
+	// Base scale for the viewBox. The SVG scales fluidly via CSS.
+	const SCALE = 1
 	const viewportWidth = FIELD_WIDTH * SCALE
 	const viewportHeight = FIELD_LENGTH * SCALE
 
@@ -48,10 +47,10 @@ export function FootballField() {
 			)
 
 			if (yards >= 10 && yards <= 110) {
-				const symmetricYard = Math.min(yards, 120 - yards)
-				const fieldYard = Math.min(symmetricYard, 50)
+				const fieldYard =
+					yards <= 60 ? yards - 10 : 110 - yards
 
-				if (fieldYard % 10 === 0) {
+				if (fieldYard >= 0 && fieldYard % 10 === 0) {
 					const leftNumberX =
 						(NUMBER_TOP_FROM_EDGE + NUMBER_HEIGHT / 2) *
 						SCALE
