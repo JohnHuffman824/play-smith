@@ -39,49 +39,47 @@ export function FootballField({ className }: FootballFieldProps) {
 					y1={yPosition}
 					x2={FIELD_WIDTH}
 					y2={yPosition}
-					stroke='#000000'
+					stroke='#a9a9a9'
 					strokeWidth={1}
-					opacity={0.3}
 				/>
 			)
 
-			// Show hashtag markers at 10-yard intervals (20, 30, 40, 50, etc.)
+			// Show hashtag markers at 10-yard intervals
+			// Position: top at 15 feet from edge, 6 feet tall
 			if (yards % 10 === 0 && yards >= 20 && yards <= 100) {
 				const leftNumberX =
-					(NUMBER_TOP_FROM_EDGE + NUMBER_HEIGHT / 2)
+					NUMBER_TOP_FROM_EDGE + NUMBER_HEIGHT / 2
 				fieldMarkers.push(
 					<text
 						key={`label-left-${yards}`}
 						x={leftNumberX}
 						y={yPosition}
 						fontSize={NUMBER_HEIGHT}
-						fill='#000000'
-						opacity={0.4}
+						fill='#919191'
 						textAnchor='middle'
 						dominantBaseline='middle'
 						transform={`rotate(-90 ${leftNumberX} ${yPosition})`}
 					>
-						# | #
+						#  #
 					</text>
 				)
 
 				const rightNumberX =
-					(FIELD_WIDTH -
-						NUMBER_TOP_FROM_EDGE -
-						NUMBER_HEIGHT / 2)
+					FIELD_WIDTH -
+					NUMBER_TOP_FROM_EDGE -
+					NUMBER_HEIGHT / 2
 				fieldMarkers.push(
 					<text
 						key={`label-right-${yards}`}
 						x={rightNumberX}
 						y={yPosition}
 						fontSize={NUMBER_HEIGHT}
-						fill='#000000'
-						opacity={0.4}
+						fill='#919191'
 						textAnchor='middle'
 						dominantBaseline='middle'
 						transform={`rotate(90 ${rightNumberX} ${yPosition})`}
 					>
-						# | #
+						#  #
 					</text>
 				)
 			}
@@ -93,9 +91,8 @@ export function FootballField({ className }: FootballFieldProps) {
 					y1={yPosition}
 					x2={LEFT_HASH_POSITION + 3}
 					y2={yPosition}
-					stroke='#000000'
+					stroke='#a9a9a9'
 					strokeWidth={0.5}
-					opacity={0.3}
 				/>
 			)
 
@@ -106,9 +103,8 @@ export function FootballField({ className }: FootballFieldProps) {
 					y1={yPosition}
 					x2={RIGHT_HASH_POSITION + 3}
 					y2={yPosition}
-					stroke='#000000'
+					stroke='#a9a9a9'
 					strokeWidth={0.5}
-					opacity={0.3}
 				/>
 			)
 		}
@@ -121,36 +117,32 @@ export function FootballField({ className }: FootballFieldProps) {
 				y1={0}
 				x2={0}
 				y2={FIELD_LENGTH}
-				stroke='#000000'
+				stroke='#919191'
 				strokeWidth={3}
-				opacity={0.4}
 			/>
 			<line
 				x1={FIELD_WIDTH}
 				y1={0}
 				x2={FIELD_WIDTH}
 				y2={FIELD_LENGTH}
-				stroke='#000000'
+				stroke='#919191'
 				strokeWidth={3}
-				opacity={0.4}
 			/>
 			<line
 				x1={0}
 				y1={0}
 				x2={FIELD_WIDTH}
 				y2={0}
-				stroke='#000000'
+				stroke='#919191'
 				strokeWidth={3}
-				opacity={0.4}
 			/>
 			<line
 				x1={0}
 				y1={FIELD_LENGTH}
 				x2={FIELD_WIDTH}
 				y2={FIELD_LENGTH}
-				stroke='#000000'
+				stroke='#919191'
 				strokeWidth={3}
-				opacity={0.4}
 			/>
 		</>
 	)
