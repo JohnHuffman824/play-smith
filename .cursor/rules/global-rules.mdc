@@ -1,0 +1,156 @@
+---
+description: Core coding standards and principles for building Play Smith, this applys across all languages and file types. Contains fundamental formatting rules, architecture guidelines, and best practices.
+alwaysApply: true
+---
+
+# Global Rules for Play Smiith
+
+## Core Principles [CORE]
+
+- **Applicability**: These rules apply ONLY to new code and modified code. Do not
+	rewrite existing, unmodified code to meet these standards
+
+## Code Style [STYLE]
+
+### Methods
+- Method Length: Methods should be concise, with long methods refactored into
+	smaller, focused ones
+- Screenful Guideline: Keep methods short enough to be read without
+	scrolling on a typical laptop screen, or about 30 lines. This applies to
+	functions and methods, not classes or entire files.
+- Methods should NEVER be more than 45 lines long
+- Method comments: Use method-level comments to explain how a method works.
+	Use inline comments to clarify implementation details or complex logic
+
+### Line Length
+- For new code, keep each line under 80 characters total length
+  - Count characters starting from column 1 (absolute position), not from the
+    start of indentation
+  - When a line exceeds 80 characters, break it at a logical point
+  - For deeply nested code, consider refactoring or extracting variables to
+    avoid excessive line breaks
+
+### Formatting
+- ALWAYS use tabs for indentation rather than spaces
+- Follow consistent brace style (1TBS - "One True Brace Style") with opening
+	brace on the same line as the statement or declaration
+- Avoid double negatives in conditional statements
+
+### Comments
+- Avoid deleting existing comments, when possible. If necessary, update them
+- Prioritize comments that explain *why* code exists (intent) over *what*
+	it does, unless the latter is not obvious from the code itself
+
+## Design Principles [DESIGN]
+
+### DRY, KISS, YAGNI, SOLID Principles
+- Apply these principles throughout the codebase:
+	- DRY (Don't Repeat Yourself): Avoid code duplication; extract common
+		logic into reusable methods
+	- KISS (Keep It Simple, Stupid): Keep implementation simple and
+		understandable
+		- When reworking old code with a new approach, don't keep around the old code. Only use the new approach.
+	- YAGNI (You Aren't Gonna Need It): Don't implement features or
+		complexity until they're needed.
+		- Do not add caching unless it is explicitly required
+		- Code only for current requirements. Do not speculate about future requirements
+	- SOLID Principles: Follow object-oriented design principles
+		- Single Responsibility: Each class should have one reason to change
+		- Open/Closed: Open for extension, closed for modification
+		- Liskov Substitution: Derived classes must be substitutable for
+			their base classes
+		- Interface Segregation: Clients shouldn't depend on unused interfaces
+		- Dependency Inversion: Depend on abstractions, not concretions
+- Avoid magic numbers: replace repeated hardcoded numbers or strings
+	with named constants
+
+### Design Patterns and Practices
+- Pass data, not objects: When consuming code only needs specific data rather
+	than behavior, pass the data directly
+- Prefer pure functions: When possible, write methods that return values rather
+	than mutating parameters. Pure functions are easier to test, reason about,
+	and compose. If a method must mutate state, make it obvious in the name
+	(e.g., `populate`, `update`) or prefer returning a new value and reassigning
+	at the call site
+- Encapsulation and Loose Coupling: Minimize dependencies between components
+	and hide internal implementation details
+- Locality of Behavior: Keep related behavior close to where it's used
+- Avoid Unnecessary Abstraction and Indirection: Abstraction should solve a
+	real problem, not add complexity for its own sake
+- Avoid Pure Delegation Methods: Do not create methods whose sole purpose is
+	to call a delegate component without adding validation, transformation, or
+	other logic. Call the delegate directly instead
+- When evaluating alternative solutions to a problem, favor KISS/YAGNI over
+	theoretical future needs
+
+### Parallel Collections Anti-Pattern
+- NEVER maintain parallel lists/arrays where elements at the same index are
+	related (e.g., separate `List<String>` names and `List<Int>` ids)
+- Instead, create a data class that groups related data together
+- **Why:** Parallel collections can get out of sync, relationships are not
+	type-enforced, and bugs are easy to introduce
+- Example: Use `List<NamedItem>` where `NamedItem` has both properties
+
+### Code Changes
+- Refrain from making large-scale or unnecessary changes to code formatting
+	unless they improve readability or functionality. This preserves version
+	control history (e.g., git blame) and reduces the risk of merge conflicts
+- When refactoring or changing APIs, remove old implementations completely.
+	Do NOT keep old code around for backward compatibility or maintain
+	deprecated versions
+
+### Bug Fixing Process
+- Follow TDD principles when fixing bugs: first write a failing test that
+	reproduces the bug, then fix the code, then verify the test passes
+
+### Testing Principles
+- ONLY write tests that verify actual application behavior and business logic
+- DO NOT write tests for language features or framework functionality
+	- Example: Don't test that a data class constructor works or that
+		properties can be set/retrieved
+	- Example: Don't test that Spring autowiring works
+	- Example: Don't test that a list maintains order (this is a language
+		guarantee)
+- Tests should verify YOUR code, not the language or framework
+- If a "test" only creates an object and checks its properties were set, it
+	adds no value and should be deleted
+- Ask: "What could go wrong in MY code that this test would catch?" If the
+	answer is "nothing", delete the test
+
+## Error Handling [ERROR]
+
+- Do not silently catch exceptions. Prefer fail-fast
+- Avoid empty catch blocks and overly broad catches
+- If catching is required, either handle and proceed explicitly, or rethrow
+	with context that preserves the original cause
+
+## Architecture [ARCH]
+
+### Data Patterns
+- ALWAYS use consistent patterns for transforming data between backend and
+	frontend
+	- Ensure consistent field naming conventions across layers
+	- Perform more complex or cross-field validation on the server
+	- Server-side validation is the source of truth and must be enforced
+		for all data
+	- NEVER rely solely on client-side validation for data integrity
+
+## Naming Conventions [NAME]
+
+### General Rules
+- Use descriptive, intent-revealing names that align with the domain or
+	purpose of the variable, method, or class
+
+### File and Class Alignment
+- ALWAYS maintain consistent file names, class names, and top-level element class
+	- Applies to: JavaScript, SCSS, Handlebars
+	- CSS class names should match the file name pattern
+	- Use the same base filename across technologies, with only the extension
+		differing (e.g., `widget-empty-state.ts`, `widget-empty-state.css`)
+	- Maintain parallel directory structure for all component types:
+		- TS files: `cms/web/static/scripts/scoreboard/...`
+		- CSS files: `cms/web/static/sass/components/...`
+	- Example for a "user profile" component:
+		- TypeScript file name: `user-profile.ts`
+		- CSS file name: `user-profile.css`
+		- React file name: `user-profile.tsx`
