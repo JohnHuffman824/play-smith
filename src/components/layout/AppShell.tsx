@@ -1,5 +1,6 @@
 import React from 'react'
 import { Sidebar } from './Sidebar'
+import { FieldContainer } from '../field/FieldContainer'
 
 export function AppShell() {
 	return (
@@ -14,7 +15,7 @@ export function AppShell() {
 				className='flex-1 relative overflow-hidden'
 				data-testid='playsmith-whiteboard'
 			>
-				{/* Whiteboard and field will go here */}
+				<FieldContainer />
 			</main>
 		</div>
 	)
