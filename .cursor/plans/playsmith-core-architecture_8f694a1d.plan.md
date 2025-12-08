@@ -144,13 +144,6 @@ Run: `bun test tests/frontend/layout/app-shell.test.tsx`
 
 Expected: PASS with both sidebar and whiteboard test IDs found.
 
-**Step 5: Commit**
-
-```bash
-git add src/App.tsx src/components/layout/*.tsx tests/frontend/layout/app-shell.test.tsx
-git commit -m 'feat: add Play Smith app shell layout'
-```
-
 ---
 
 ### Task 2: Integrate accurate college field as reusable component
@@ -212,13 +205,6 @@ Update `AppShell` to render `FieldContainer` inside the whiteboard `main` area.
 Run: `bun test tests/frontend/field/football-field.test.tsx`
 
 Expected: PASS with SVG present and styled.
-
-**Step 5: Commit**
-
-```bash
-git add TestFootballField.tsx src/components/field/*.tsx tests/frontend/field/football-field.test.tsx
-git commit -m 'feat: integrate reusable football field component'
-```
 
 ---
 
