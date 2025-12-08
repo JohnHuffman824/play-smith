@@ -11,7 +11,11 @@ import React from 'react'
  * - Numbers 6 feet tall, 15 feet from edge
  * - Responsive scale based on available width
  */
-export function FootballField() {
+interface FootballFieldProps {
+	className?: string
+}
+
+export function FootballField({ className }: FootballFieldProps) {
 	// College football field dimensions in feet
 	const FIELD_WIDTH = 160
 	const FIELD_LENGTH = 360
@@ -48,7 +52,9 @@ export function FootballField() {
 
 			if (yards >= 10 && yards <= 110) {
 				const fieldYard =
-					yards <= 60 ? yards - 10 : 110 - yards
+					yards <= 60
+						? Math.min(50, yards)
+						: Math.max(10, 110 - yards)
 
 				if (fieldYard >= 0 && fieldYard % 10 === 0) {
 					const leftNumberX =
@@ -166,13 +172,9 @@ export function FootballField() {
 		<svg
 			width='100%'
 			viewBox={`0 0 ${viewportWidth} ${viewportHeight}`}
-			style={{
-				backgroundColor: '#f2f2f2',
-				height: 'auto',
-				maxHeight: '100%',
-			}}
+			style={{ backgroundColor: '#f2f2f2', height: 'auto' }}
 			preserveAspectRatio='xMidYMid meet'
-			className='w-full h-auto'
+			className={`w-full h-auto ${className ?? ''}`}
 		>
 			{sidelines}
 			{fieldMarkers}
