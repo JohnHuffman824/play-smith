@@ -9,33 +9,31 @@ import React from 'react'
  * - Hash marks 60 feet from each edge (40 feet between hashes)
  * - 3 feet between hash marks (1 yard)
  * - Numbers 6 feet tall, 15 feet from edge
- * - Scale: 1 foot = 3 pixels
+ * - Responsive scale based on available width
  */
 export function FootballField() {
 	// College football field dimensions in feet
 	const FIELD_WIDTH = 160
-	const FIELD_LENGTH = 360 // 100 yards + 2 end zones = 120 yards
-	const HASH_SPACING = 3 // 3 feet apart (1 yard)
-	const LEFT_HASH_POSITION = 60 // 60 feet from left edge
-	const RIGHT_HASH_POSITION = 100 // 60 feet from right edge
-	const NUMBER_HEIGHT = 6 // 6 feet tall
-	const NUMBER_TOP_FROM_EDGE = 15 // 15 feet from edge
+	const FIELD_LENGTH = 360
+	const HASH_SPACING = 3
+	const LEFT_HASH_POSITION = 60
+	const RIGHT_HASH_POSITION = 100
+	const NUMBER_HEIGHT = 6
+	const NUMBER_TOP_FROM_EDGE = 15
 
-	// Scale for rendering (pixels per foot)
+	// Base scale (pixels per foot) for the viewBox. The SVG will scale
+	// fluidly to available width while preserving aspect ratio.
 	const SCALE = 3
 	const viewportWidth = FIELD_WIDTH * SCALE
 	const viewportHeight = FIELD_LENGTH * SCALE
 
-	// Generate hash marks and yard lines
-	const fieldMarkers = []
+	const fieldMarkers: React.ReactNode[] = []
 
-	// Loop through field creating markers every 3 feet (1 yard)
 	for (let yards = 0; yards <= 120; yards++) {
 		const yPosition = yards * HASH_SPACING * SCALE
 		const isYardLine = yards % 5 === 0
 
 		if (isYardLine) {
-			// Full width line for 5-yard increments
 			fieldMarkers.push(
 				<line
 					key={`yard-${yards}`}
@@ -49,15 +47,11 @@ export function FootballField() {
 				/>
 			)
 
-			// Add yard number labels (skip end zones)
 			if (yards >= 10 && yards <= 110) {
-				const fieldYard = yards <= 60 ? yards - 10 : 120 - yards
-				if (
-					fieldYard >= 0 &&
-					fieldYard <= 50 &&
-					fieldYard % 10 === 0
-				) {
-					// Left side number - rotated -90 degrees
+				const symmetricYard = Math.min(yards, 120 - yards)
+				const fieldYard = Math.min(symmetricYard, 50)
+
+				if (fieldYard % 10 === 0) {
 					const leftNumberX =
 						(NUMBER_TOP_FROM_EDGE + NUMBER_HEIGHT / 2) *
 						SCALE
@@ -77,7 +71,6 @@ export function FootballField() {
 						</text>
 					)
 
-					// Right side number - rotated 90 degrees
 					const rightNumberX =
 						(FIELD_WIDTH -
 							NUMBER_TOP_FROM_EDGE -
@@ -101,8 +94,6 @@ export function FootballField() {
 				}
 			}
 		} else {
-			// Hash marks only (not full width)
-			// Left hash mark
 			fieldMarkers.push(
 				<line
 					key={`left-hash-${yards}`}
@@ -116,7 +107,6 @@ export function FootballField() {
 				/>
 			)
 
-			// Right hash mark
 			fieldMarkers.push(
 				<line
 					key={`right-hash-${yards}`}
@@ -132,7 +122,6 @@ export function FootballField() {
 		}
 	}
 
-	// Sideline boundaries
 	const sidelines = (
 		<>
 			<line
@@ -177,15 +166,17 @@ export function FootballField() {
 	return (
 		<svg
 			width='100%'
-			height='100%'
 			viewBox={`0 0 ${viewportWidth} ${viewportHeight}`}
-			style={{ backgroundColor: '#f2f2f2' }}
+			style={{
+				backgroundColor: '#f2f2f2',
+				height: 'auto',
+				maxHeight: '100%',
+			}}
 			preserveAspectRatio='xMidYMid meet'
-			className='max-h-full'
+			className='w-full h-auto'
 		>
 			{sidelines}
 			{fieldMarkers}
 		</svg>
 	)
 }
-
