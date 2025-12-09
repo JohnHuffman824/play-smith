@@ -9,7 +9,8 @@
     "build": "bun run build.ts",
     "test": "bun test",
     "test:watch": "bun test --watch",
-    "test:coverage": "bun test --coverage"
+    "test:coverage": "bun test --coverage",
+    "migrate": "bun src/db/migrate.ts"
   },
   "dependencies": {
     "bun-plugin-tailwind": "^0.1.2",
