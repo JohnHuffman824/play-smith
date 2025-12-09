@@ -8,7 +8,13 @@ import { PLAYER_RADIUS_FEET } from '../../constants/field.constants'
 
 interface MultiDrawingControlPointOverlayProps {
 	drawings: Drawing[]
-	players?: Array<{ id: string; x: number; y: number; label: string; color: string }>
+	players?: Array<{
+		id: string
+		x: number
+		y: number
+		label: string
+		color: string
+	}>
 	coordSystem: FieldCoordinateSystem
 	snapThreshold: number
 	onDragPoint?: (
@@ -50,7 +56,9 @@ export function MultiDrawingControlPointOverlay({
 }: MultiDrawingControlPointOverlayProps) {
 	const [dragState, setDragState] = useState<MultiDragState | null>(null)
 	const [snapTarget, setSnapTarget] = useState<SnapTarget | null>(null)
-	const [playerSnapTarget, setPlayerSnapTarget] = useState<PlayerSnapTarget | null>(null)
+	const [playerSnapTarget, setPlayerSnapTarget] = useState<
+		PlayerSnapTarget | null
+	>(null)
 	const overlayRef = useRef<SVGGElement | null>(null)
 
 	// Use refs to avoid stale closure issues in handlePointerUp
@@ -197,7 +205,7 @@ export function MultiDrawingControlPointOverlay({
 	}
 
 	return (
-		<g ref={overlayRef} pointerEvents="visiblePainted">
+		<g ref={overlayRef} pointerEvents='visiblePainted'>
 			{/* Render control points from shared pools */}
 			{controlPoints.map((cp) => {
 				const pixel = coordSystem.feetToPixels(cp.x, cp.y)

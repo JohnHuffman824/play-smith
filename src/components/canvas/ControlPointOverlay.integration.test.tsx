@@ -1,19 +1,20 @@
 import { describe, test, expect, beforeEach } from 'bun:test'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, fireEvent } from '@testing-library/react'
 import { ControlPointOverlay } from './ControlPointOverlay'
 import { FieldCoordinateSystem } from '../../utils/coordinates'
 import type { Drawing } from '../../types/drawing.types'
 
 describe('ControlPointOverlay - Node Linking Integration', () => {
 	const mockCoordSystem = new FieldCoordinateSystem(800, 400)
-	let mergeCallArgs: any[] = []
-	let dragPointCallArgs: any[] = []
+	type MergeArgs = [string, string, string, string]
+	let mergeCallArgs: MergeArgs[] = []
+	let dragPointCallArgs: unknown[] = []
 
-	const mockOnMerge = (...args: any[]) => {
+	const mockOnMerge = (...args: MergeArgs) => {
 		mergeCallArgs.push(args)
 	}
 
-	const mockOnDragPoint = (...args: any[]) => {
+	const mockOnDragPoint = (...args: unknown[]) => {
 		dragPointCallArgs.push(args)
 	}
 
@@ -34,7 +35,12 @@ describe('ControlPointOverlay - Node Linking Integration', () => {
 				pointIds: ['p1', 'p2'],
 			},
 		],
-		style: { color: '#ff0000', strokeWidth: 2, lineStyle: 'solid', lineEnd: 'none' },
+	style: {
+		color: '#ff0000',
+		strokeWidth: 2,
+		lineStyle: 'solid',
+		lineEnd: 'none',
+	},
 		annotations: [],
 	}
 
@@ -50,7 +56,12 @@ describe('ControlPointOverlay - Node Linking Integration', () => {
 				pointIds: ['p3', 'p4'],
 			},
 		],
-		style: { color: '#00ff00', strokeWidth: 2, lineStyle: 'solid', lineEnd: 'none' },
+	style: {
+		color: '#00ff00',
+		strokeWidth: 2,
+		lineStyle: 'solid',
+		lineEnd: 'none',
+	},
 		annotations: [],
 	}
 
@@ -70,12 +81,17 @@ describe('ControlPointOverlay - Node Linking Integration', () => {
 
 		// Find the control point for p2 (end point of drawing1 at 20, 10)
 		const p2Pixel = mockCoordSystem.feetToPixels(20, 10)
-		const controlNode = container.querySelector(`circle[cx="${p2Pixel.x}"]`)
+		const controlNode = container.querySelector(
+			`circle[cx="${p2Pixel.x}"]`,
+		)
 		expect(controlNode).not.toBeNull()
 
 		// Simulate dragging p2 near p3 (start of drawing2 at 30, 10)
 		// We'll drag it to (29, 10) which is within snap threshold of (30, 10)
-		fireEvent.pointerDown(controlNode!, { clientX: p2Pixel.x, clientY: p2Pixel.y })
+		fireEvent.pointerDown(controlNode!, {
+			clientX: p2Pixel.x,
+			clientY: p2Pixel.y,
+		})
 
 		// Drag to near p3
 		const nearP3Pixel = mockCoordSystem.feetToPixels(29, 10)
@@ -89,7 +105,12 @@ describe('ControlPointOverlay - Node Linking Integration', () => {
 
 		// Should have called onMerge
 		expect(mergeCallArgs.length).toBeGreaterThan(0)
-		const [sourceDrawingId, sourcePointId, targetDrawingId, targetPointId] = mergeCallArgs[0]
+		const [
+			sourceDrawingId,
+			sourcePointId,
+			targetDrawingId,
+			targetPointId,
+		] = mergeCallArgs[0]
 		expect(sourceDrawingId).toBe('drawing-1')
 		expect(sourcePointId).toBe('p2')
 		expect(targetDrawingId).toBe('drawing-2')
@@ -110,7 +131,12 @@ describe('ControlPointOverlay - Node Linking Integration', () => {
 					pointIds: ['a', 'b'],
 				},
 			],
-			style: { color: '#ff0000', strokeWidth: 2, lineStyle: 'solid', lineEnd: 'none' },
+			style: {
+				color: '#ff0000',
+				strokeWidth: 2,
+				lineStyle: 'solid',
+				lineEnd: 'none',
+			},
 			annotations: [],
 		}
 
@@ -127,7 +153,12 @@ describe('ControlPointOverlay - Node Linking Integration', () => {
 					pointIds: ['c', 'd'],
 				},
 			],
-			style: { color: '#00ff00', strokeWidth: 2, lineStyle: 'solid', lineEnd: 'none' },
+			style: {
+				color: '#00ff00',
+				strokeWidth: 2,
+				lineStyle: 'solid',
+				lineEnd: 'none',
+			},
 			annotations: [],
 		}
 
@@ -146,10 +177,15 @@ describe('ControlPointOverlay - Node Linking Integration', () => {
 
 		// Drag node 'b' (20, 30) to node 'c' (20, 20)
 		const bPixel = mockCoordSystem.feetToPixels(20, 30)
-		const controlNode = container.querySelector(`circle[cx="${bPixel.x}"]`)
+		const controlNode = container.querySelector(
+			`circle[cx="${bPixel.x}"]`,
+		)
 		expect(controlNode).not.toBeNull()
 
-		fireEvent.pointerDown(controlNode!, { clientX: bPixel.x, clientY: bPixel.y })
+		fireEvent.pointerDown(controlNode!, {
+			clientX: bPixel.x,
+			clientY: bPixel.y,
+		})
 
 		// Drag to near 'c' (20, 20)
 		const nearCPixel = mockCoordSystem.feetToPixels(20, 21)
@@ -162,7 +198,12 @@ describe('ControlPointOverlay - Node Linking Integration', () => {
 
 		// Should trigger merge with correct parameters
 		expect(mergeCallArgs.length).toBeGreaterThan(0)
-		const [sourceDrawingId, sourcePointId, targetDrawingId, targetPointId] = mergeCallArgs[0]
+		const [
+			sourceDrawingId,
+			sourcePointId,
+			targetDrawingId,
+			targetPointId,
+		] = mergeCallArgs[0]
 
 		// Source is drawing1, point 'b' (the one being dragged)
 		expect(sourceDrawingId).toBe('d1')
@@ -188,13 +229,21 @@ describe('ControlPointOverlay - Node Linking Integration', () => {
 		)
 
 		const p2Pixel = mockCoordSystem.feetToPixels(20, 10)
-		const controlNode = container.querySelector(`circle[cx="${p2Pixel.x}"]`)
+		const controlNode = container.querySelector(
+			`circle[cx="${p2Pixel.x}"]`,
+		)
 
-		fireEvent.pointerDown(controlNode!, { clientX: p2Pixel.x, clientY: p2Pixel.y })
+		fireEvent.pointerDown(controlNode!, {
+			clientX: p2Pixel.x,
+			clientY: p2Pixel.y,
+		})
 
 		// Drag far away
 		const farPixel = mockCoordSystem.feetToPixels(50, 50)
-		fireEvent.pointerMove(window, { clientX: farPixel.x, clientY: farPixel.y })
+		fireEvent.pointerMove(window, {
+			clientX: farPixel.x,
+			clientY: farPixel.y,
+		})
 
 		fireEvent.pointerUp(window)
 
@@ -217,16 +266,26 @@ describe('ControlPointOverlay - Node Linking Integration', () => {
 		)
 
 		const p2Pixel = mockCoordSystem.feetToPixels(20, 10)
-		const controlNode = container.querySelector(`circle[cx="${p2Pixel.x}"]`)
+		const controlNode = container.querySelector(
+			`circle[cx="${p2Pixel.x}"]`,
+		)
 
-		fireEvent.pointerDown(controlNode!, { clientX: p2Pixel.x, clientY: p2Pixel.y })
+		fireEvent.pointerDown(controlNode!, {
+			clientX: p2Pixel.x,
+			clientY: p2Pixel.y,
+		})
 
 		// Drag near p3
 		const nearP3Pixel = mockCoordSystem.feetToPixels(29, 10)
-		fireEvent.pointerMove(window, { clientX: nearP3Pixel.x, clientY: nearP3Pixel.y })
+		fireEvent.pointerMove(window, {
+			clientX: nearP3Pixel.x,
+			clientY: nearP3Pixel.y,
+		})
 
 		// Should show green snap indicator circle (r=10, stroke=#22c55e)
-		const snapIndicator = container.querySelector('circle[r="10"][stroke="#22c55e"]')
+		const snapIndicator = container.querySelector(
+			'circle[r="10"][stroke="#22c55e"]',
+		)
 		expect(snapIndicator).not.toBeNull()
 	})
 })

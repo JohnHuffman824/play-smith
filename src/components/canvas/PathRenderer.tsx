@@ -12,7 +12,11 @@ import {
 import { FieldCoordinateSystem } from '../../utils/coordinates'
 import type { Drawing } from '../../types/drawing.types'
 import type { Coordinate } from '../../types/field.types'
-import { isPointNearControlPoint, getSegmentPoints, getPoint } from '../../utils/drawing.utils'
+import {
+	isPointNearControlPoint,
+	getSegmentPoints,
+	getPoint,
+} from '../../utils/drawing.utils'
 
 interface PathRendererProps {
 	drawing: Drawing
@@ -26,8 +30,8 @@ interface PathRendererProps {
 }
 
 /**
-* Renders a drawing path with selection and erase handling.
-*/
+ * Renders a drawing path with selection and erase handling.
+ */
 export function PathRenderer({
 	drawing,
 	coordSystem,

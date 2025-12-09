@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { FieldCoordinateSystem } from '../../utils/coordinates'
-import { PathStyle, Drawing } from '../../types/drawing.types'
+import type { PathStyle, Drawing } from '../../types/drawing.types'
 import { simplifyPath, straightenSegments } from '../../utils/path.utils'
-import { Coordinate } from '../../types/field.types'
+import type { Coordinate } from '../../types/field.types'
 
 interface FreehandCaptureProps {
 	coordSystem: FieldCoordinateSystem
@@ -13,8 +13,8 @@ interface FreehandCaptureProps {
 }
 
 /**
-* Captures freehand canvas strokes and converts them to drawings.
-*/
+ * Captures freehand canvas strokes and converts them to drawings.
+ */
 export function FreehandCapture({
 	coordSystem,
 	style,
@@ -151,7 +151,10 @@ export function FreehandCapture({
  * Creates points once in a shared pool, segments reference them by ID.
  */
 function buildDrawingData(coords: Coordinate[]) {
-	const points: Record<string, import('../../types/drawing.types').ControlPoint> = {}
+	const points: Record<
+		string,
+		import('../../types/drawing.types').ControlPoint
+	> = {}
 	const segments: import('../../types/drawing.types').PathSegment[] = []
 
 	// Create unique points in the shared pool (no duplicates at boundaries)

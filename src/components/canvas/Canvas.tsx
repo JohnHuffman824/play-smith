@@ -24,7 +24,11 @@ import {
 	UNLINK_DISTANCE_FEET,
 } from '../../constants/field.constants'
 import { SVGCanvas } from './SVGCanvas'
-import type { PathStyle } from '../../types/drawing.types'
+import type {
+	ControlPoint,
+	Drawing,
+	PathStyle,
+} from '../../types/drawing.types'
 import { FootballField } from '../field/FootballField'
 import { Lineman } from '../player/Lineman'
 import { Player } from '../player/Player'
@@ -51,6 +55,39 @@ function dispatchFillEvent(
 	if (eventName == EVENT_FILL_LINEMAN) {
 		eventBus.emit('lineman:fill', { id: id as number, color })
 	}
+}
+
+function findNeighborPoint(
+	linkedDrawing: Drawing,
+	linkedPointId: string,
+): ControlPoint | null {
+	for (const segment of linkedDrawing.segments) {
+		const pointIndex = segment.pointIds.indexOf(linkedPointId)
+		if (pointIndex == -1) continue
+		if (pointIndex > 0) {
+			const prevId = segment.pointIds[pointIndex - 1]
+			return linkedDrawing.points[prevId!]
+		}
+		if (pointIndex < segment.pointIds.length - 1) {
+			const nextId = segment.pointIds[pointIndex + 1]
+			return linkedDrawing.points[nextId!]
+		}
+	}
+	return null
+}
+
+function computeUnlinkTarget(
+	player: { x: number; y: number },
+	neighborPoint: ControlPoint | null,
+) {
+	if (!neighborPoint) {
+		return { x: player.x, y: player.y - UNLINK_DISTANCE_FEET }
+	}
+	return calculateUnlinkPosition(
+		{ x: player.x, y: player.y },
+		{ x: neighborPoint.x, y: neighborPoint.y },
+		UNLINK_DISTANCE_FEET,
+	)
 }
 
 export function Canvas({
@@ -511,38 +548,11 @@ export function Canvas({
 		const player = players.find((p) => p.id == playerId)
 		if (!player) return
 
-		// Find all points in the drawing to determine neighboring point
-		const allPoints = Object.values(linkedDrawing.points)
-		const linkedPoint = linkedDrawing.points[linkedDrawing.linkedPointId]
-
-		// Find a neighboring point to calculate unlink direction
-		// Look through segments to find a segment containing the linked point
-		let neighborPoint = null
-		for (const segment of linkedDrawing.segments) {
-			const pointIndex = segment.pointIds.indexOf(linkedDrawing.linkedPointId)
-			if (pointIndex !== -1) {
-				// Found the segment with our linked point
-				if (pointIndex > 0) {
-					// Get previous point in segment
-					const prevId = segment.pointIds[pointIndex - 1]
-					neighborPoint = linkedDrawing.points[prevId!]
-					break
-				} else if (pointIndex < segment.pointIds.length - 1) {
-					// Get next point in segment
-					const nextId = segment.pointIds[pointIndex + 1]
-					neighborPoint = linkedDrawing.points[nextId!]
-					break
-				}
-			}
-		}
-
-		const newPosition = neighborPoint
-			? calculateUnlinkPosition(
-					{ x: player.x, y: player.y },
-					{ x: neighborPoint.x, y: neighborPoint.y },
-					UNLINK_DISTANCE_FEET,
-				)
-			: { x: player.x, y: player.y - UNLINK_DISTANCE_FEET }
+		const neighborPoint = findNeighborPoint(
+			linkedDrawing,
+			linkedDrawing.linkedPointId,
+		)
+		const newPosition = computeUnlinkTarget(player, neighborPoint)
 
 		setDrawings(
 			drawings.map((drawing) => {

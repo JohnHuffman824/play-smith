@@ -8,6 +8,12 @@ describe('SVGCanvas - Full Link Integration', () => {
 	const mockCoordSystem = new FieldCoordinateSystem(800, 400)
 	let drawings: Drawing[] = []
 	let changeCount = 0
+const DEFAULT_STYLE = {
+	color: '#000000',
+	lineWidth: 2,
+	lineStyle: 'solid',
+	lineEnd: 'none',
+}
 
 	const handleChange = (newDrawings: Drawing[]) => {
 		drawings = newDrawings
@@ -26,7 +32,12 @@ describe('SVGCanvas - Full Link Integration', () => {
 				pointIds: ['p1', 'p2'],
 			},
 		],
-		style: { color: '#ff0000', strokeWidth: 2, lineStyle: 'solid', lineEnd: 'none' },
+	style: {
+		color: '#ff0000',
+		strokeWidth: 2,
+		lineStyle: 'solid',
+		lineEnd: 'none',
+	},
 		annotations: [],
 	}
 
@@ -42,7 +53,12 @@ describe('SVGCanvas - Full Link Integration', () => {
 				pointIds: ['p3', 'p4'],
 			},
 		],
-		style: { color: '#00ff00', strokeWidth: 2, lineStyle: 'solid', lineEnd: 'none' },
+	style: {
+		color: '#00ff00',
+		strokeWidth: 2,
+		lineStyle: 'solid',
+		lineEnd: 'none',
+	},
 		annotations: [],
 	}
 
@@ -57,9 +73,9 @@ describe('SVGCanvas - Full Link Integration', () => {
 				coordSystem={mockCoordSystem}
 				drawings={drawings}
 				onChange={handleChange}
-				activeTool="select"
+				activeTool='select'
 				autoCorrect={false}
-				defaultStyle={{ color: '#000000', lineWidth: 2, lineStyle: 'solid', lineEnd: 'none' }}
+				defaultStyle={DEFAULT_STYLE}
 				snapThreshold={10}
 				isOverCanvas={true}
 			/>
@@ -118,9 +134,9 @@ describe('SVGCanvas - Full Link Integration', () => {
 				coordSystem={mockCoordSystem}
 				drawings={drawings}
 				onChange={handleChange}
-				activeTool="select"
+				activeTool='select'
 				autoCorrect={false}
-				defaultStyle={{ color: '#000000', lineWidth: 2, lineStyle: 'solid', lineEnd: 'none' }}
+				defaultStyle={DEFAULT_STYLE}
 				snapThreshold={10}
 				isOverCanvas={true}
 			/>
@@ -182,7 +198,12 @@ describe('SVGCanvas - Full Link Integration', () => {
 					pointIds: ['a', 'b'],
 				},
 			],
-			style: { color: '#ff0000', strokeWidth: 2, lineStyle: 'solid', lineEnd: 'none' },
+	style: {
+		color: '#ff0000',
+		strokeWidth: 2,
+		lineStyle: 'solid',
+		lineEnd: 'none',
+	},
 			annotations: [],
 		}
 
@@ -199,7 +220,12 @@ describe('SVGCanvas - Full Link Integration', () => {
 					pointIds: ['c', 'd'],
 				},
 			],
-			style: { color: '#00ff00', strokeWidth: 2, lineStyle: 'solid', lineEnd: 'none' },
+	style: {
+		color: '#00ff00',
+		strokeWidth: 2,
+		lineStyle: 'solid',
+		lineEnd: 'none',
+	},
 			annotations: [],
 		}
 
@@ -213,9 +239,9 @@ describe('SVGCanvas - Full Link Integration', () => {
 				coordSystem={mockCoordSystem}
 				drawings={drawings}
 				onChange={handleChange}
-				activeTool="select"
+				activeTool='select'
 				autoCorrect={false}
-				defaultStyle={{ color: '#000000', lineWidth: 2, lineStyle: 'solid', lineEnd: 'none' }}
+				defaultStyle={DEFAULT_STYLE}
 				snapThreshold={10}
 				isOverCanvas={true}
 			/>
@@ -299,9 +325,9 @@ describe('SVGCanvas - Full Link Integration', () => {
 				coordSystem={mockCoordSystem}
 				drawings={drawings}
 				onChange={handleChange}
-				activeTool="select"
+				activeTool='select'
 				autoCorrect={false}
-				defaultStyle={{ color: '#000000', lineWidth: 2, lineStyle: 'solid', lineEnd: 'none' }}
+				defaultStyle={DEFAULT_STYLE}
 				snapThreshold={10}
 				isOverCanvas={true}
 			/>
@@ -361,7 +387,12 @@ describe('SVGCanvas - Full Link Integration', () => {
 					pointIds: ['c', 'd'],
 				},
 			],
-			style: { color: '#00ff00', strokeWidth: 2, lineStyle: 'solid', lineEnd: 'none' },
+	style: {
+		color: '#00ff00',
+		strokeWidth: 2,
+		lineStyle: 'solid',
+		lineEnd: 'none',
+	},
 			annotations: [],
 		}
 
@@ -375,9 +406,9 @@ describe('SVGCanvas - Full Link Integration', () => {
 				coordSystem={mockCoordSystem}
 				drawings={drawings}
 				onChange={handleChange}
-				activeTool="select"
+				activeTool='select'
 				autoCorrect={false}
-				defaultStyle={{ color: '#000000', lineWidth: 2, lineStyle: 'solid', lineEnd: 'none' }}
+				defaultStyle={DEFAULT_STYLE}
 				snapThreshold={10}
 				isOverCanvas={true}
 			/>

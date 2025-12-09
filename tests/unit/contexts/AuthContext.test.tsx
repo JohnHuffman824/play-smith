@@ -1,5 +1,6 @@
 import { describe, test, expect, beforeEach, mock } from 'bun:test'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, cleanup } from '@testing-library/react'
+import { act } from 'react'
 import { AuthProvider, useAuth } from '../../../src/contexts/AuthContext'
 
 // Mock fetch globally
@@ -28,6 +29,7 @@ function TestComponent() {
 
 describe('AuthContext', () => {
 	beforeEach(() => {
+		cleanup()
 		mockFetch.mockReset()
 	})
 
@@ -103,7 +105,9 @@ describe('AuthContext', () => {
 		} as Response)
 
 		const loginButton = screen.getByText('Login')
-		loginButton.click()
+		await act(async () => {
+			loginButton.click()
+		})
 
 		await waitFor(() => {
 			expect(screen.getByTestId('user').textContent).toBe('test@example.com')
@@ -138,7 +142,9 @@ describe('AuthContext', () => {
 		} as Response)
 
 		const logoutButton = screen.getByText('Logout')
-		logoutButton.click()
+		await act(async () => {
+			logoutButton.click()
+		})
 
 		await waitFor(() => {
 			expect(screen.getByTestId('user').textContent).toBe('null')
