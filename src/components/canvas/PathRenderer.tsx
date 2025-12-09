@@ -25,6 +25,9 @@ interface PathRendererProps {
 	onDragStart?: (drawingId: string, feetX: number, feetY: number) => void
 }
 
+/**
+* Renders a drawing path with selection and erase handling.
+*/
 export function PathRenderer({
 	drawing,
 	coordSystem,
@@ -60,11 +63,7 @@ export function PathRenderer({
 		activeTool,
 	)
 
-	const handleClick = () => {
-		console.log('[PathRenderer] handleClick', {
-			id: drawing.id,
-			activeTool,
-		})
+	function handleClick() {
 		if (activeTool == 'erase' && onDelete) {
 			onDelete(drawing.id)
 			return
@@ -72,11 +71,7 @@ export function PathRenderer({
 		if (onSelect) onSelect(drawing.id)
 	}
 
-	const handlePointerDown = (event: React.PointerEvent<SVGPathElement>) => {
-		console.log('[PathRenderer] handlePointerDown', {
-			id: drawing.id,
-			activeTool,
-		})
+	function handlePointerDown(event: React.PointerEvent<SVGPathElement>) {
 		if (activeTool == 'select') {
 			const svg = event.currentTarget.ownerSVGElement
 			if (!svg) return
@@ -109,6 +104,16 @@ export function PathRenderer({
 
 	const selectStyle = activeTool == 'select' ? { cursor: 'move' } : {}
 
+	// Get linked point for indicator
+	const linkedPoint = drawing.linkedPointId
+		? drawing.segments
+				.flatMap((seg) => seg.points)
+				.find((p) => p.id == drawing.linkedPointId)
+		: null
+	const linkedPixel = linkedPoint
+		? coordSystem.feetToPixels(linkedPoint.x, linkedPoint.y)
+		: null
+
 	return (
 		<g className={className} onClick={handleClick}>
 			{activeTool == 'select' && (
@@ -138,6 +143,17 @@ export function PathRenderer({
 				onPointerDown={handlePointerDown}
 			/>
 			{ending}
+			{drawing.playerId && linkedPixel && (
+				<circle
+					cx={linkedPixel.x}
+					cy={linkedPixel.y}
+					r={4}
+					fill='#3b82f6'
+					stroke='white'
+					strokeWidth={1}
+					pointerEvents='none'
+				/>
+			)}
 		</g>
 	)
 }

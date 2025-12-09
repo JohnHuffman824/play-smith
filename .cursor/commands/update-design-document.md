@@ -1,5 +1,9 @@
 # update-design-document
 
-Write your command content here.
+** CRITICAL MUST READ THOROUGHLY **
+Start by reading the /docs/PlaySmithDesignDocument.md 
+** CRITICAL MUST READ THOROUGHLY **
 
-This command will be available in chat with /update-design-document
+TASK:
+
+I want you to look at the recent conversation history and update the PlaySmithDesignDocument with information on any new features/functionality that was added. As much as possible try and avoid making major structural changes to the design document, intead just make a precis, surgical change to update it with context on was added. 

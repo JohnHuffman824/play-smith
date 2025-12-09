@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { FieldCoordinateSystem } from '../../utils/coordinates'
 import { PathRenderer } from './PathRenderer'
 import { ControlPointOverlay } from './ControlPointOverlay'
@@ -13,6 +13,13 @@ interface SVGCanvasProps {
 	height: number
 	coordSystem: FieldCoordinateSystem
 	drawings: Drawing[]
+	players?: Array<{
+		id: string
+		x: number
+		y: number
+		label: string
+		color: string
+	}>
 	onChange: (drawings: Drawing[]) => void
 	activeTool: 'draw' | 'select' | 'erase'
 	autoCorrect: boolean
@@ -20,13 +27,31 @@ interface SVGCanvasProps {
 	onDeleteDrawing?: (id: string) => void
 	eraseSize?: number
 	snapThreshold: number
+	onLinkDrawingToPlayer?: (
+		drawingId: string,
+		pointId: string,
+		playerId: string,
+	) => void
+	onMovePlayer?: (
+		playerId: string,
+		x: number,
+		y: number,
+	) => void
+	isOverCanvas?: boolean
+	cursorPosition?: { x: number; y: number } | null
 }
 
+/**
+* Interactive SVG layer for drawing and editing paths.
+*/
 export function SVGCanvas({
 	width,
 	height,
 	coordSystem,
 	drawings,
+	isOverCanvas = false,
+	cursorPosition,
+	players,
 	onChange,
 	activeTool,
 	autoCorrect,
@@ -34,6 +59,8 @@ export function SVGCanvas({
 	onDeleteDrawing,
 	eraseSize = 0,
 	snapThreshold,
+	onLinkDrawingToPlayer,
+	onMovePlayer,
 }: SVGCanvasProps) {
 	const [selectedDrawingId, setSelectedDrawingId] = useState<string | null>(
 		null,
@@ -45,37 +72,37 @@ export function SVGCanvas({
 		startFeet: Coordinate
 	} | null>(null)
 
-	const handleCommit = (drawing: Drawing) => {
+	// Auto-clear lastDrawnDrawingId after 3 seconds
+	useEffect(() => {
+		if (lastDrawnDrawingId) {
+			const timeout = setTimeout(() => {
+				setLastDrawnDrawingId(null)
+			}, 3000)
+
+			return () => clearTimeout(timeout)
+		}
+	}, [lastDrawnDrawingId])
+
+	function handleCommit(drawing: Drawing) {
 		onChange([...drawings, drawing])
-		console.log('[SVGCanvas] committed drawing', {
-			id: drawing.id,
-			segments: drawing.segments.length,
-		})
 		setSelectedDrawingId(drawing.id)
 		setLastDrawnDrawingId(drawing.id)
 	}
 
-	const handleSelect = (id: string) => {
-		console.log('[SVGCanvas] handleSelect', { id })
+	function handleSelect(id: string) {
 		setSelectedDrawingId(id)
 		setLastDrawnDrawingId(null)
 	}
 
-	const handleDragPoint = (
+	function handleDragPoint(
 		drawingId: string,
 		pointId: string,
 		x: number,
 		y: number,
-	) => {
+	) {
 		onChange(
 			drawings.map((drawing) => {
 				if (drawing.id != drawingId) return drawing
-				console.log('[SVGCanvas] drag point', {
-					drawingId,
-					pointId,
-					x,
-					y,
-				})
 				const updatedSegments = drawing.segments.map((segment) => ({
 					...segment,
 					points: segment.points.map((point) =>
@@ -87,12 +114,12 @@ export function SVGCanvas({
 		)
 	}
 
-	const handleMerge = (
+	function handleMerge(
 		sourceDrawingId: string,
 		sourcePointId: string,
 		targetDrawingId: string,
 		targetPointId: string,
-	) => {
+	) {
 		const source = drawings.find((item) => item.id == sourceDrawingId)
 		const target = drawings.find((item) => item.id == targetDrawingId)
 		if (!source || !target) return
@@ -113,16 +140,21 @@ export function SVGCanvas({
 		setLastDrawnDrawingId(null)
 	}
 
-	const handleDrawingDragStart = (
+	function handleLinkToPlayer(
+		drawingId: string,
+		pointId: string,
+		playerId: string,
+	) {
+		if (onLinkDrawingToPlayer) {
+			onLinkDrawingToPlayer(drawingId, pointId, playerId)
+		}
+	}
+
+	function handleDrawingDragStart(
 		drawingId: string,
 		feetX: number,
 		feetY: number,
-	) => {
-		console.log('[SVGCanvas] handleDrawingDragStart', {
-			drawingId,
-			feetX,
-			feetY,
-		})
+	) {
 		setDrawingDragState({
 			drawingId,
 			startFeet: { x: feetX, y: feetY },
@@ -130,17 +162,31 @@ export function SVGCanvas({
 		setSelectedDrawingId(drawingId)
 	}
 
-	const handleDrawingDragMove = (event: React.PointerEvent<SVGSVGElement>) => {
+	function handleDrawingDragMove(event: React.PointerEvent<SVGSVGElement>) {
 		if (!drawingDragState) return
-		console.log('[SVGCanvas] handleDrawingDragMove', {
-			drawingId: drawingDragState.drawingId,
-		})
 		const rect = event.currentTarget.getBoundingClientRect()
 		const pixelX = event.clientX - rect.left
 		const pixelY = event.clientY - rect.top
 		const currentFeet = coordSystem.pixelsToFeet(pixelX, pixelY)
 		const deltaX = currentFeet.x - drawingDragState.startFeet.x
 		const deltaY = currentFeet.y - drawingDragState.startFeet.y
+
+		// Find the drawing being moved
+		const movedDrawing = drawings.find(
+			(d) => d.id == drawingDragState.drawingId,
+		)
+
+		// If drawing is linked to a player, move the player too
+		if (movedDrawing?.playerId && onMovePlayer && players) {
+			const player = players.find((p) => p.id == movedDrawing.playerId)
+			if (player) {
+				onMovePlayer(
+					player.id,
+					player.x + deltaX,
+					player.y + deltaY,
+				)
+			}
+		}
 
 		onChange(
 			drawings.map((drawing) => {
@@ -163,12 +209,7 @@ export function SVGCanvas({
 		})
 	}
 
-	const handleDrawingDragEnd = () => {
-		if (drawingDragState) {
-			console.log('[SVGCanvas] handleDrawingDragEnd', {
-				drawingId: drawingDragState.drawingId,
-			})
-		}
+	function handleDrawingDragEnd() {
 		setDrawingDragState(null)
 	}
 
@@ -221,31 +262,20 @@ export function SVGCanvas({
 				/>
 			))}
 
-			{/* Show all nodes in select mode */}
-			{activeTool == 'select' &&
-				drawings.map((drawing) => (
-					<ControlPointOverlay
-						key={`overlay-${drawing.id}`}
-						drawing={drawing}
-						drawings={drawings}
-						coordSystem={coordSystem}
-						snapThreshold={snapThreshold}
-						isGlobalSelect={true}
-					/>
-				))}
-
-			{/* Show draggable nodes for selected drawing */}
-			{selectedDrawingId && (
+			{/* Show draggable nodes for selected drawing when cursor is over canvas */}
+			{selectedDrawingId && isOverCanvas && (
 				<ControlPointOverlay
 					drawing={
 						drawings.find((item) => item.id == selectedDrawingId) ??
 							null
 					}
 					drawings={drawings}
+					players={players}
 					coordSystem={coordSystem}
 					snapThreshold={snapThreshold}
 					onDragPoint={handleDragPoint}
 					onMerge={handleMerge}
+					onLinkToPlayer={handleLinkToPlayer}
 				/>
 			)}
 			</svg>
@@ -258,27 +288,29 @@ export function SVGCanvas({
 				onCommit={handleCommit}
 			/>
 
-			{activeTool == 'draw' && lastDrawnDrawingId && (
-				<div className='absolute top-0 left-0 w-full h-full pointer-events-none'>
-					<svg
-						width={width}
-						height={height}
-						className='absolute top-0 left-0 w-full h-full pointer-events-none'
-					>
-						<ControlPointOverlay
-							drawing={
-								drawings.find((item) => item.id == lastDrawnDrawingId) ??
-									null
-							}
-							drawings={drawings}
-							coordSystem={coordSystem}
-							snapThreshold={snapThreshold}
-							onDragPoint={handleDragPoint}
-							onMerge={handleMerge}
-						/>
-					</svg>
-				</div>
-			)}
+		{activeTool == 'draw' && lastDrawnDrawingId && isOverCanvas && (
+			<div className='absolute top-0 left-0 w-full h-full pointer-events-none'>
+				<svg
+					width={width}
+					height={height}
+					className='absolute top-0 left-0 w-full h-full pointer-events-none'
+				>
+					<ControlPointOverlay
+						drawing={
+							drawings.find((item) => item.id == lastDrawnDrawingId) ??
+								null
+						}
+						drawings={drawings}
+						players={players}
+						coordSystem={coordSystem}
+						snapThreshold={snapThreshold}
+						onDragPoint={handleDragPoint}
+						onMerge={handleMerge}
+						onLinkToPlayer={handleLinkToPlayer}
+					/>
+				</svg>
+			</div>
+		)}
 		</div>
 	)
 }

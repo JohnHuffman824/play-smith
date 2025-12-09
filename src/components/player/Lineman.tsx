@@ -121,8 +121,6 @@ export function Lineman({
         transform: 'translate(-50%, -50%)',
         cursor: getCursor(),
         zIndex: 10,
-        // Add smooth transition when not dragging (for play bar animation)
-        transition: isDragging ? 'none' : 'left 800ms ease-in-out, top 800ms ease-in-out, width 800ms ease-in-out, height 800ms ease-in-out',
       }}
     >
       <div

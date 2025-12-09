@@ -1,7 +1,7 @@
 /**
- * Hook to handle keyboard shortcuts for the application
- * Centralizes all keyboard shortcut logic
- */
+* Hook to handle keyboard shortcuts for the application
+* Centralizes all keyboard shortcut logic
+*/
 
 import { useEffect } from 'react'
 import { eventBus } from '../services/EventBus'
@@ -12,8 +12,8 @@ interface KeyboardShortcutHandlers {
 }
 
 /**
- * Map of keyboard shortcuts to their actions
- */
+* Map of keyboard shortcuts to their actions
+*/
 const SHORTCUTS = {
 	s: 'select',
 	a: 'addPlayer',
@@ -27,64 +27,73 @@ const SHORTCUTS = {
 } as const
 
 /**
- * Hook that sets up keyboard shortcuts for the application
- * Handles tool switching and dialog opening via keyboard
- * 
- * @param handlers - Object containing state setters for tool changes
- */
+* Hook that sets up keyboard shortcuts for the application
+* Handles tool switching and dialog opening via keyboard
+*
+* @param handlers - Object containing state setters for tool changes
+*/
 export function useKeyboardShortcuts({
 	setDrawingState,
 }: KeyboardShortcutHandlers): void {
 	useEffect(() => {
-		const handleKeyDown = (event: KeyboardEvent) => {
+		function handleKeyDown(event: KeyboardEvent) {
 			// Ignore if user is typing in an input field
-			if (event.target instanceof HTMLInputElement || 
+			if (event.target instanceof HTMLInputElement ||
 					event.target instanceof HTMLTextAreaElement) {
 				return
 			}
 
 			const key = event.key.toLowerCase()
 			
-			switch(key) {
+			switch (key) {
 				case 's':
 					event.preventDefault()
+					console.log('[shortcut] select')
 					setDrawingState(prev => ({ ...prev, tool: 'select' }))
 					eventBus.emit('dialog:closeAll')
 					break
 				case 'a':
 					event.preventDefault()
+					console.log('[shortcut] addPlayer')
 					setDrawingState(prev => ({ ...prev, tool: 'addPlayer' }))
 					eventBus.emit('player:add', {})
 					eventBus.emit('dialog:closeAll')
 					break
 				case 'd':
 					event.preventDefault()
+					console.log('[shortcut] draw')
 					eventBus.emit('dialog:openDraw')
 					break
 				case 'e':
 					event.preventDefault()
+					console.log('[shortcut] erase')
 					setDrawingState(prev => ({ ...prev, tool: 'erase' }))
 					eventBus.emit('dialog:closeAll')
 					break
 				case 'c':
 					event.preventDefault()
+					console.log('[shortcut] color')
 					eventBus.emit('dialog:openColorPicker')
 					break
 				case 'f':
 					event.preventDefault()
+					console.log('[shortcut] fill')
 					setDrawingState(prev => ({ ...prev, tool: 'fill' }))
 					eventBus.emit('dialog:closeAll')
 					break
 				case 'r':
 					event.preventDefault()
+					console.log('[shortcut] drawing')
 					eventBus.emit('dialog:openDrawing')
 					break
 				case 'h':
 					event.preventDefault()
+					console.log('[shortcut] hash')
 					eventBus.emit('dialog:openHash')
 					break
 				case 'g':
 					event.preventDefault()
+					console.log('[shortcut] addComponent')
 					setDrawingState(prev => ({ ...prev, tool: 'addComponent' }))
 					eventBus.emit('component:add')
 					eventBus.emit('dialog:closeAll')
@@ -93,23 +102,27 @@ export function useKeyboardShortcuts({
 		}
 
 		window.addEventListener('keydown', handleKeyDown)
-		return () => window.removeEventListener('keydown', handleKeyDown)
+		document.addEventListener('keydown', handleKeyDown)
+		return () => {
+			window.removeEventListener('keydown', handleKeyDown)
+			document.removeEventListener('keydown', handleKeyDown)
+		}
 	}, [setDrawingState])
 }
 
 /**
- * Get the shortcut key for a specific tool
- * Useful for displaying shortcuts in tooltips
- */
+* Get the shortcut key for a specific tool
+* Useful for displaying shortcuts in tooltips
+*/
 export function getShortcutForTool(tool: Tool): string | undefined {
-	const entry = Object.entries(SHORTCUTS).find(([_, value]) => value === tool)
+	const entry = Object.entries(SHORTCUTS).find(([_, value]) => value == tool)
 	return entry?.[0].toUpperCase()
 }
 
 /**
- * Get all keyboard shortcuts as a map
- * Useful for displaying a shortcuts reference
- */
+* Get all keyboard shortcuts as a map
+* Useful for displaying a shortcuts reference
+*/
 export function getAllShortcuts(): Record<string, string> {
 	return {
 		'S': 'Select tool',

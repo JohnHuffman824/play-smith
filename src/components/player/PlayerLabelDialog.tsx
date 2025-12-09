@@ -1,11 +1,14 @@
 import { useTheme } from '../../contexts/ThemeContext';
 import { Trash2 } from 'lucide-react';
 import { useState, useEffect, useRef, useCallback } from 'react';
+import unlinkIconPath from '../../imports/unlink-icon.svg';
 
 interface PlayerLabelDialogProps {
   position: { x: number; y: number };
   currentLabel: string;
+  hasLinkedDrawing: boolean;
   onLabelChange: (label: string) => void;
+  onUnlink: () => void;
   onDelete: () => void;
   onClose: () => void;
 }
@@ -19,7 +22,9 @@ const ALL_PREDEFINED_LABELS = [...labelsRow1, ...labelsRow2].filter(label => lab
 export function PlayerLabelDialog({
   position,
   currentLabel,
+  hasLinkedDrawing,
   onLabelChange,
+  onUnlink,
   onDelete,
   onClose,
 }: PlayerLabelDialogProps) {
@@ -185,9 +190,27 @@ export function PlayerLabelDialog({
                 ? 'bg-gray-700 text-gray-300 placeholder-gray-500 focus:bg-gray-600 border border-gray-600'
                 : 'bg-gray-100 text-gray-700 placeholder-gray-400 focus:bg-gray-200 border border-gray-200'
             }`}
-            style={{ width: '136px' }}
+            style={{ width: hasLinkedDrawing ? '96px' : '136px' }}
             maxLength={3}
           />
+          {hasLinkedDrawing && (
+            <button
+              onClick={() => {
+                onUnlink();
+                onClose();
+              }}
+              className={`w-10 h-10 rounded-lg transition-all cursor-pointer flex items-center justify-center flex-shrink-0 ${
+                theme === 'dark'
+                  ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+              title="Unlink drawing"
+            >
+              <svg width="18" height="18" viewBox="0 0 512 509.84" fill="currentColor">
+                <path d={unlinkIconPath} />
+              </svg>
+            </button>
+          )}
           <button
             onClick={() => {
               onDelete();

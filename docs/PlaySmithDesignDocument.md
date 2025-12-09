@@ -1,125 +1,331 @@
-## The Idea - Play Smith
+# Play Smith Design Document
 
-I want to build an american football play/playbook creator called "Play Smith". Note we have a registered domain from squarespace "play-smith.com". The idea is that we would have a whiteboard type system where users can create individual plays and collect them together to form playbooks. 
+## Overview
+
+Play Smith is an American football play and playbook creator. The registered domain
+is "play-smith.com" (via Squarespace). The application provides a whiteboard-style
+system where users can create individual plays and collect them into playbooks.
+
+---
 
 ## The Whiteboard
 
-The base background of the white board will be a grey/ white color, specificly #f2f2f2. I have created a mockup of this with the @TestFootballField.tsx @TestFootballFieldStyles.css  files. The background needs to be built to the exact specifications of a college football field which means it must abide by these standards. I am going to feed everything to you in feet, this how we should record it but we may need to apply some feet to pixel scaling (maybe something like 1 feet = 3 pixels)
+The whiteboard serves as the primary canvas for play creation. Its base background
+color is `#f2f2f2` (grey/white).
 
-## Field:
-- The base background color should be #f2f2f2
-- The total width of the field need to be 160 feet exactly
-- The distance from the edge of the field to the innermost part of the hash is 60 feet. This is the same on both sides. This means there is exactly 40 feet separating the two hashes.
-- The hash marks are 3 feet apart and every 5th hash mark there is a line extending the width of the field indicating 5 yard increments.
-- Every 10 yards there are numbers that stradle the width-spanning lines.
-- The numbers are exactly 6 feet tall and the top of the numbers are 15 feet from the edge of the field
-- Numbers are just represented with hashtags
-- The numbers are "on their side" meaning that the top of hte numbers are closer to the edge of the field than the bottom of the numbers. Similarly the bottom of the numbers are closer to the center of the field than the top of the numbers
-- The lines should be relatively low opacity so they don't obscure anything that is drawn over top of it
+### Field Specifications
+
+The field must match exact college football field specifications. All measurements
+are recorded in feet with a scaling factor applied for pixels (approximately
+1 foot = 3 pixels).
+
+| Property | Value |
+|----------|-------|
+| Background color | `#f2f2f2` |
+| Total field width | 160 feet |
+| Edge to innermost hash | 60 feet (both sides) |
+| Space between hashes | 40 feet |
+| Hash mark spacing | 3 feet apart |
+
+### Field Markings
+
+- Every 5th hash mark has a line extending the full width of the field
+- Every 10 yards displays numbers straddling the width-spanning lines
+- Numbers are 6 feet tall with tops positioned 15 feet from the field edge
+- Numbers are represented with hashtags (#)
+- Numbers are oriented "on their side" (tops closer to field edge, bottoms
+	closer to center)
+- Lines should have relatively low opacity so they don't obscure drawings
+
+---
 
 ## Play Editor
 
-There will be a toolbar on the left with multiple icons to click with different functionality. These will be called "Tools". These tools are used to create and edit objects we will call "Components". Here are some other detailing on the play editor
+The play editor is the main workspace for creating and editing plays.
 
-- White board in the center
-- Toolbar on the left
-- Above the whiteboard are three text input boxes; Formation, Play, Defensive Formation. The text boxes appear in that order left to right. Each of these starts empty with those text values as placeholders.
-- Below the whiteboard there is play cards. These play cards are individual components which represent saved instances of other plays. The play cards are rectangles with rounded edges and show the relevant play with a label at the bottom saying the play name. This container is scrollable left to right and if you scroll all the way to the righ there is an add button which lets you add another play
-- Individual player tags depending on system? Concepts?
-- Send to playbook button?
-- Save?
-- Color button?
-- By default on each play the 5 lineman will auto populate. These players are not removable, but are each individual player components that are connected. These players are just represented by 2ft radius circles and are spaced 1 foot separating each other. The center (middle lineman) gets automatically placed in the center of the field but can be moved to align on either hash by the hash button.
+### Layout
 
-## Tools:
+- **Center**: Whiteboard canvas
+- **Left**: Toolbar with tool icons
+- **Above whiteboard**: Four input fields (left to right)
+	1. Formation
+	2. Play
+	3. Personnel
+	4. Defensive Formation
+- **Below inputs**: Tags row
+- **Below whiteboard**: Play cards section (scrollable)
 
-### Select:
-- Icon: This will be a cursor icon
-- Function: This will enable the user to select an existing component and interact with it (move, resize, add interactions, etc...)
-- Keyboard Shortcut: S
+### Input Fields
 
-### Add Player:
-- Icon: Stick Figure Human Icon
-- Function: This adds a player to the center of the visible screen. Playes are distinct components that have indepent functionality (more info later). When you have this selected if you drag your cursor into the drawing area your cursor turns into a circle indicating where a player will be placed.
-- Keyboard Shortcut: A
+All inputs start empty with their names as placeholders.
 
-### Draw:
-- Icon: Pencil Icon (tip of pencil in bottom left corner, eraser in top right corner. Pencil sits a 45 degree angle)
-- Function: This will allow the user to freehand draw lines and other shapes with the cursor on the whiteboard. whenever a drawing is complete we save that as a component. There will also be a sub dialog that opens next to the tool where you can change things about the line (solid vs hashed, end in arrow, T shape, or none)
-- Custom Cursor: Yes (tip of the pencil indicates where you are drawing). Custom cursor only applies when over the canvas.
-- Keyboard Shortcut: D
+**Personnel Dropdown**
+- Defaults to "Any"
+- Options: 11, 10, 12, 13, 21, 22
+- Ability to create custom personnel packages
 
-### Erase:
-- Icon: Rubber Eraser Icon
-- Function: When selected this allows the user to click on elements in the canvas and erase them
-- Keyboard Shortcut: E
+### Tags System
 
-### Fill Color:
-- Icon: Paint Bucket
-- Function: Uses whatever color is set in the color wheel and dynamically set whatever is clicked to that color
-- Keyboard Shortcut: F
+Tags are color-coded labels used to group plays by similar qualities (short
+yardage, long yardage, third down, redzone, etc.).
 
-### Color:
-- Icon: Color Wheel
-- Function: Opens up a color selector with some preset options that determine the color that gets drawn.
-- Keyboard Shortcut: C
+**Behavior:**
+- Tags fill in left to right as colored rounded rectangles
+- An "Add Tag" button appears at the end with a tooltip below it
+- Clicking opens a dialog with preset default tags and custom creation option
+- Hovering over a tag reveals an X button to remove it
+- Tags are per-play and appear on play cards in the scrollable section
 
-### Route:
-- Icon: Route tree icon (tbd)
-- Function: This opens a dialog where there are a set of pre-defined routes are available to add. Some of these routes include the basic route tree (numbers linked to route) 1. Flat 2. Slant 3. Comeback 4. Curl 5. Out 6. Dig 7. Corner 8. Post 9. Go
-Keyboard Shortcut: R
+**Preset Tags:**
+| Tag | Color |
+|-----|-------|
+| Short Yardage | Green |
+| Mid Yardage | Yellow |
+| Long Yardage | Orange |
+| Redzone | Red |
 
-### Add Component:
-- Icon: Plus Icon (+)
-- Function: This will allow the user to add a copy of a saved component to the field
-- Keyboard Shortcut: G
+**Custom Tags:**
+- Dialog includes color picker and name input
+- Custom tags persist across playbooks
 
-### Ball on Hash: 
-- Icon: Hash Marker Icon (three dashed lines stacked vertically with spacing)
-- Function: This opens a small dialog with three options. Left, Middle, Right. By default middle is selected. This represents where the ball is on the field, in UI this means we shift the 5 default offensive lineman to either be centered on the left hash, the middle of the field, or the right hash.
-- Keyboard Shortcut: H (Might want to do something like this later 1 (Left), 2 (Middle), 3 (Right))
+### Play Cards Section
 
-### Hide/Show Play Bar:
-- Icon: Open eyeball or closed eyeball (depending onstate) 
-- Function: This shows and hides the play bar at the bottom below the white board on toggle. If play bar is showing the icon is an open eye, if the play bar is hidden it shows a closed eye. There should be a smooth animation where the playcards in the playbar drift off the bottom screen and another smooth animation of the whiteboard getting pulled down. We should also have animations for the reverse of this. Note that as the whiteboard gets pulled down I want the players and everything represented on it to get pulled down as well so if in theory 10 more yards of space gets pulled down the new space would look like it actually appears from the top of the whiteboard.
+- Located below the whiteboard
+- Scrollable left to right
+- Each card is a rounded rectangle showing the play with a label at the bottom
+- An "Add" button appears at the far right to create new plays
 
-### Settings Button:
-- Icon: Cog Wheel
-- Function: This opens a dialog of settings that the user can change. These are values that are saved by the user and cross over between all plays and play books. For each of the following settings there will be a text label with a control to change its value.
+### Default Elements
 
-#### List of Settings
-- Label: "Position Naming System". Values (choose 1): (X, Y, Z, A, B, Q), (X, Y, Z, F, T, Q), (Custom). Function: These represent the letters the represent the different offensive skill positions
-- Label: Competition Level. Values (choose one): High School, College, Pro. Function: This changes the distance of the hashes and other things (to be determined)
-- Label: Appearance. Values (Light Mode, Dark Mode). Function: Changes the app from light mode (light color scheme) to dark mode (dark color scheme), doesn't change any functionality just the colors.
-- Label: Move Skills on Hash Change: Values: Yes, No. Function: The lineman move by default when the hash changes, this flag tells us whether we want to move the skill position players with them (more details to be worked out)
+By default, each play auto-populates with 5 offensive linemen:
+- Represented as 2-foot radius circles
+- Spaced 1 foot apart from each other
+- Not removable, but individually movable
+- Each lineman is an individual player component
+- Center (middle lineman) is automatically placed at field center
+- Position can be adjusted via the hash button (left hash, middle, or right hash)
+
+### Placeholder Ideas
+
+- Individual player tags depending on system
+- Concepts support
+- Send to playbook button
+- Save functionality
+- Color button
+
+---
+
+## Tools
+
+Tools are accessed via the toolbar on the left side of the editor. They are used
+to create and edit components on the whiteboard.
+
+### Select
+
+| Property | Value |
+|----------|-------|
+| Icon | Cursor |
+| Shortcut | S |
+
+**Function:** Enables selection of existing components for interaction (move,
+resize, add interactions, etc.).
+
+### Add Player
+
+| Property | Value |
+|----------|-------|
+| Icon | Stick figure human |
+| Shortcut | A |
+
+**Function:** Adds a player to the center of the visible screen. Players are
+distinct components with independent functionality. When selected, dragging
+the cursor into the drawing area changes it to a circle indicating player
+placement location.
+
+### Draw
+
+| Property | Value |
+|----------|-------|
+| Icon | Pencil (tip bottom-left, eraser top-right, 45° angle) |
+| Shortcut | D |
+| Custom Cursor | Yes (pencil tip indicates drawing position, canvas only) |
+
+**Function:** Allows freehand drawing of lines and shapes on the whiteboard.
+Completed drawings are saved as components. A sub-dialog opens next to the tool
+for line customization:
+- Line style: solid or dashed
+- End style: arrow, T-shape, or none
+
+### Erase
+
+| Property | Value |
+|----------|-------|
+| Icon | Rubber eraser |
+| Shortcut | E |
+
+**Function:** Allows clicking on canvas elements to erase them.
+
+### Fill Color
+
+| Property | Value |
+|----------|-------|
+| Icon | Paint bucket |
+| Shortcut | F |
+
+**Function:** Applies the currently selected color from the color wheel to
+clicked elements.
+
+### Color
+
+| Property | Value |
+|----------|-------|
+| Icon | Color wheel |
+| Shortcut | C |
+
+**Function:** Opens a color selector with preset options to determine drawing color.
+
+### Route
+
+| Property | Value |
+|----------|-------|
+| Icon | Route tree (TBD) |
+| Shortcut | R |
+
+**Function:** Opens a dialog with pre-defined routes from the basic route tree:
+
+| Number | Route |
+|--------|-------|
+| 1 | Flat |
+| 2 | Slant |
+| 3 | Comeback |
+| 4 | Curl |
+| 5 | Out |
+| 6 | Dig |
+| 7 | Corner |
+| 8 | Post |
+| 9 | Go |
+
+### Add Component
+
+| Property | Value |
+|----------|-------|
+| Icon | Plus (+) |
+| Shortcut | G |
+
+**Function:** Adds a copy of a saved component to the field.
+
+### Ball on Hash
+
+| Property | Value |
+|----------|-------|
+| Icon | Hash marker (three dashed lines stacked vertically) |
+| Shortcut | H (future: 1=Left, 2=Middle, 3=Right) |
+
+**Function:** Opens a dialog with three options: Left, Middle, Right. Default
+is Middle. This controls ball placement, shifting the 5 offensive linemen to
+align on the left hash, field center, or right hash.
+
+### Hide/Show Play Bar
+
+| Property | Value |
+|----------|-------|
+| Icon | Open eye (visible) / Closed eye (hidden) |
+
+**Function:** Toggles the play bar visibility below the whiteboard. Includes
+smooth animations:
+- Play cards drift off/on the bottom of the screen
+- Whiteboard expands/contracts accordingly
+- All whiteboard elements (players, drawings) move with the expansion/contraction
+- New space appears from the top of the whiteboard
+
+### Settings
+
+| Property | Value |
+|----------|-------|
+| Icon | Cog wheel |
+
+**Function:** Opens a settings dialog with user preferences that persist across
+all plays and playbooks.
+
+#### Settings Options
+
+**Position Naming System**
+- Values: (X, Y, Z, A, B, Q), (X, Y, Z, F, T, Q), or Custom
+- Function: Defines letters representing different offensive skill positions
+
+**Competition Level**
+- Values: High School, College, Pro
+- Function: Changes hash distances and other field specifications
+
+**Appearance**
+- Values: Light Mode, Dark Mode
+- Function: Toggles between light and dark color schemes
+
+**Move Skills on Hash Change**
+- Values: Yes, No
+- Function: Determines whether skill position players move with linemen when
+	hash position changes
+
+---
 
 ## Playbook Management
 
-We should need a system to manage playbooks. Playbooks will essentially be collections of plays with possibly some other features (tbd). These we are oging to need export import functionality and a design for this page (maybe take inspiration from the google drive UI?).
+A system to manage playbooks is needed. Playbooks are collections of plays with
+additional features (TBD).
 
-## Login
+**Requirements:**
+- Export/import functionality
+- Page design (consider Google Drive UI for inspiration)
 
-We are going to need a login page with user authentication at some point. This can be a later stage development, probably around when we start migrating from SQLite to MySQL.
+---
 
-## Things to consider
+## Login & Authentication
 
-- We need to make sure we have a system to save all of these components and retrieve them efficiently. We want to ensure we have good modularity too
-- We should keep track in a logical and clear way the color scheme and styling conventions of the app so we can easily build and maintain.
-- I have an idea of being able to type a play call and intelligently generate a play based on that. We would probably need a mix of deterministic programming and LLM integration for this. (Idea, LLM interprets and formats to JSON which connects to our api for creating necessary components).
+A login page with user authentication is required. This is planned for a later
+development stage, likely when migrating from SQLite to MySQL.
 
-## Future ideas:
+---
 
-- Allow for free hand drawing to automatically correct to most similar shape (straighten lines, make corners sharper, smooth curves etc)
-- Have pre-set routes with terminology attached based on the offensive system
-- Play concept support (specific routes and plays that can be added together)
-- Play sheet creation?
-- Import/export to and from hudl?
-- Import/export to PDF/slides?
-- Annotations at specific points on routes, like top of the route (end) or sharp turns (UI tbd). Small icons/markers appear at key points (e.g., a dot at the break, an icon at the endpoint) that are static. Markers that show details on interaction (e.g., hover shows "12-yard break" or "45° angle"). Draggable handles at key points to adjust the route shape directly (like vector editing in Figma/Illustrator). Ability to attach coach notes or technique cues at specific points (e.g., "head fake here", "stack the DB")
+## Technical Considerations
 
+- Implement an efficient system for saving and retrieving components
+- Ensure good modularity in the architecture
+- Maintain clear documentation of color schemes and styling conventions
+- **Idea:** Type a play call to intelligently generate a play using a
+	combination of deterministic programming and LLM integration (LLM interprets
+	and formats to JSON, which connects to the API for component creation)
 
-- Outsource MySQL
-- Analysis of strengths and weaknesses of current play versus opponent formation/play? 
-- Weekly playbooks? Change their appearance of the defense based on what the opposing team plays?
-- Ability to double click things in the dialogs to set them as defaults?
-- Shouldn't just apply high z index values to fix. Should be targeted and just enough to be effective
+---
+
+## Future Ideas
+
+### Drawing Enhancements
+- Auto-correct freehand drawings to nearest shape (straighten lines, sharpen
+	corners, smooth curves)
+
+### Route Features
+- Pre-set routes with terminology based on offensive system
+- Play concept support (specific routes and plays combined together)
+- Route annotations at specific points:
+	- Small icons/markers at key points (breaks, endpoints)
+	- Markers showing details on hover (e.g., "12-yard break", "45° angle")
+	- Draggable handles at key points for vector-style editing
+	- Coach notes/technique cues at specific points (e.g., "head fake here",
+		"stack the DB")
+
+### Export & Integration
+- Play sheet creation
+- Import/export to/from Hudl
+- Import/export to PDF/slides
+
+### Analysis & Strategy
+- Analysis of strengths/weaknesses vs opponent formation/play
+- Weekly playbooks with defense appearance based on opposing team tendencies
+
+### Infrastructure
+- Outsource MySQL hosting
+
+### UX Improvements
+- Double-click items in dialogs to set as defaults
+- Use targeted z-index values (minimal, effective) rather than arbitrarily
+	high values

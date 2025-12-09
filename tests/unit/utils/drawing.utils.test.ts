@@ -3,6 +3,8 @@ import {
 	findSnapTarget,
 	mergeDrawings,
 	isPointNearControlPoint,
+	findPlayerSnapTarget,
+	calculateUnlinkPosition,
 } from '../../../src/utils/drawing.utils'
 import type { Drawing, PathSegment } from '../../../src/types/drawing.types'
 import { createCoordinateSystem } from '../../../src/utils/coordinates'
@@ -147,7 +149,8 @@ describe('drawing.utils', () => {
 		// User drags (20,30) onto (20,20)
 		// Expected: path goes [10,30] -> [20,20] -> [30,30]
 		// Bug: PathRenderer skips middle points in multi-point segments
-		// Fix: merge must create separate 2-point segments, not one multi-point segment
+		// Fix: merge must create separate 2-point segments
+		// instead of one multi-point segment
 		
 		const drawing1 = makeDrawing('d1', [
 			lineSegment('a', { x: 20, y: 20 }, 'b', { x: 30, y: 30 }),
@@ -161,7 +164,7 @@ describe('drawing.utils', () => {
 		
 		// Verify segment structure: each line segment should have exactly 2 points
 		for (const segment of merged.segments) {
-			if (segment.type === 'line') {
+			if (segment.type == 'line') {
 				expect(segment.points.length).toBe(2)
 			}
 		}
@@ -175,7 +178,7 @@ describe('drawing.utils', () => {
 		])
 		
 		// Verify moved node is gone
-		expect(coords.some(([x, y]) => x === 20 && y === 30)).toBe(false)
+		expect(coords.some(([x, y]) => x == 20 && y == 30)).toBe(false)
 	})
 
 	it('keeps the stationary node position and removes the moved node', () => {
@@ -198,14 +201,82 @@ describe('drawing.utils', () => {
 		])
 		
 		// Verify moved node coordinate is gone from path
-		expect(coords.some(([x, y]) => x === 20 && y === 20)).toBe(false)
+		expect(coords.some(([x, y]) => x == 20 && y == 20)).toBe(false)
 		
 		// Verify each segment has exactly 2 points
 		for (const segment of merged.segments) {
-			if (segment.type === 'line') {
+			if (segment.type == 'line') {
 				expect(segment.points.length).toBe(2)
 			}
 		}
 	})
+	})
+
+	describe('findPlayerSnapTarget', () => {
+		const mockPlayers = [
+			{ id: 'player-1', x: 10, y: 10, label: 'A', color: '#000' },
+			{ id: 'player-2', x: 50, y: 50, label: 'B', color: '#000' },
+		]
+
+		it('returns null when no players are within threshold', () => {
+			const position = { x: 100, y: 100 }
+			const result = findPlayerSnapTarget(position, mockPlayers, 5)
+			expect(result).toBeNull()
+		})
+
+		it('returns the closest player within threshold', () => {
+			const position = { x: 11, y: 11 }
+			const result = findPlayerSnapTarget(position, mockPlayers, 5)
+			expect(result).not.toBeNull()
+			expect(result?.playerId).toBe('player-1')
+		})
+
+		it('returns the player center point', () => {
+			const position = { x: 50, y: 51 }
+			const result = findPlayerSnapTarget(position, mockPlayers, 5)
+			expect(result?.point.x).toBe(50)
+			expect(result?.point.y).toBe(50)
+		})
+	})
+
+	describe('calculateUnlinkPosition', () => {
+		it('returns position along path direction from player', () => {
+			const playerPos = { x: 10, y: 10 }
+			const secondToLastPoint = { x: 10, y: 20 }
+			const distance = 5
+			const result = calculateUnlinkPosition(
+				playerPos,
+				secondToLastPoint,
+				distance,
+			)
+			expect(result.x).toBeCloseTo(10)
+			expect(result.y).toBeCloseTo(15)
+		})
+
+		it('handles diagonal direction', () => {
+			const playerPos = { x: 0, y: 0 }
+			const secondToLastPoint = { x: 3, y: 4 }
+			const distance = 5
+			const result = calculateUnlinkPosition(
+				playerPos,
+				secondToLastPoint,
+				distance,
+			)
+			expect(result.x).toBeCloseTo(3)
+			expect(result.y).toBeCloseTo(4)
+		})
+
+		it('falls back to below player when no direction', () => {
+			const playerPos = { x: 50, y: 50 }
+			const secondToLastPoint = { x: 50, y: 50 }
+			const distance = 5
+			const result = calculateUnlinkPosition(
+				playerPos,
+				secondToLastPoint,
+				distance,
+			)
+			expect(result.x).toBe(50)
+			expect(result.y).toBe(45)
+		})
 	})
 })

@@ -1,8 +1,8 @@
 /**
- * Play state management context
- * Provides centralized state management for the play editor
- * Eliminates props drilling through multiple component levels
- */
+* Play state management context
+* Provides centralized state management for the play editor
+* Eliminates props drilling through multiple component levels
+*/
 
 import { createContext, useContext, useReducer } from 'react'
 import type { ReactNode } from 'react'
@@ -91,170 +91,287 @@ const initialState: PlayState = {
 	drawings: [],
 }
 
+type SetToolAction = Extract<PlayAction, { type: 'SET_TOOL' }>
+type SetDrawingStateAction = Extract<PlayAction, { type: 'SET_DRAWING_STATE' }>
+type SetFormationAction = Extract<PlayAction, { type: 'SET_FORMATION' }>
+type SetPlayAction = Extract<PlayAction, { type: 'SET_PLAY' }>
+type SetDefensiveFormationAction = Extract<
+	PlayAction,
+	{ type: 'SET_DEFENSIVE_FORMATION' }
+>
+type AddPlayCardAction = Extract<PlayAction, { type: 'ADD_PLAY_CARD' }>
+type DeletePlayCardAction = Extract<PlayAction, { type: 'DELETE_PLAY_CARD' }>
+type SetHashAlignmentAction = Extract<
+	PlayAction,
+	{ type: 'SET_HASH_ALIGNMENT' }
+>
+type SetShowPlayBarAction = Extract<PlayAction, { type: 'SET_SHOW_PLAY_BAR' }>
+type AddPlayerAction = Extract<PlayAction, { type: 'ADD_PLAYER' }>
+type UpdatePlayerAction = Extract<PlayAction, { type: 'UPDATE_PLAYER' }>
+type DeletePlayerAction = Extract<PlayAction, { type: 'DELETE_PLAYER' }>
+type AddDrawingAction = Extract<PlayAction, { type: 'ADD_DRAWING' }>
+type SetDrawingsAction = Extract<PlayAction, { type: 'SET_DRAWINGS' }>
+type DeleteDrawingAction = Extract<PlayAction, { type: 'DELETE_DRAWING' }>
+type UpdateDrawingAction = Extract<PlayAction, { type: 'UPDATE_DRAWING' }>
+
+function applySetTool(
+	state: PlayState,
+	action: SetToolAction,
+): PlayState {
+	return {
+		...state,
+		drawingState: { ...state.drawingState, tool: action.tool },
+	}
+}
+
+function applySetDrawingState(
+	state: PlayState,
+	action: SetDrawingStateAction,
+): PlayState {
+	return {
+		...state,
+		drawingState: { ...state.drawingState, ...action.drawingState },
+	}
+}
+
+function applySetFormation(
+	state: PlayState,
+	action: SetFormationAction,
+): PlayState {
+	return { ...state, formation: action.formation }
+}
+
+function applySetPlay(
+	state: PlayState,
+	action: SetPlayAction,
+): PlayState {
+	return { ...state, play: action.play }
+}
+
+function applySetDefensiveFormation(
+	state: PlayState,
+	action: SetDefensiveFormationAction,
+): PlayState {
+	return { ...state, defensiveFormation: action.defensiveFormation }
+}
+
+function applyAddPlayCard(
+	state: PlayState,
+	action: AddPlayCardAction,
+): PlayState {
+	return { ...state, playCards: [...state.playCards, action.card] }
+}
+
+function applyDeletePlayCard(
+	state: PlayState,
+	action: DeletePlayCardAction,
+): PlayState {
+	return {
+		...state,
+		playCards: state.playCards.filter((card) => card.id != action.id),
+	}
+}
+
+function applySetHashAlignment(
+	state: PlayState,
+	action: SetHashAlignmentAction,
+): PlayState {
+	return { ...state, hashAlignment: action.alignment }
+}
+
+function applyTogglePlayBar(state: PlayState): PlayState {
+	return { ...state, showPlayBar: !state.showPlayBar }
+}
+
+function applySetShowPlayBar(
+	state: PlayState,
+	action: SetShowPlayBarAction,
+): PlayState {
+	return { ...state, showPlayBar: action.show }
+}
+
+function applyAddPlayer(
+	state: PlayState,
+	action: AddPlayerAction,
+): PlayState {
+	return { ...state, players: [...state.players, action.player] }
+}
+
+function applyUpdatePlayer(
+	state: PlayState,
+	action: UpdatePlayerAction,
+): PlayState {
+	return {
+		...state,
+		players: state.players.map((player) =>
+			player.id == action.id ? { ...player, ...action.updates } : player,
+		),
+	}
+}
+
+function applyDeletePlayer(
+	state: PlayState,
+	action: DeletePlayerAction,
+): PlayState {
+	return {
+		...state,
+		players: state.players.filter((player) => player.id != action.id),
+	}
+}
+
+function applyAddDrawing(
+	state: PlayState,
+	action: AddDrawingAction,
+): PlayState {
+	return { ...state, drawings: [...state.drawings, action.drawing] }
+}
+
+function applySetDrawings(
+	state: PlayState,
+	action: SetDrawingsAction,
+): PlayState {
+	return { ...state, drawings: action.drawings }
+}
+
+function applyDeleteDrawing(
+	state: PlayState,
+	action: DeleteDrawingAction,
+): PlayState {
+	return {
+		...state,
+		drawings: state.drawings.filter((drawing) => drawing.id != action.id),
+	}
+}
+
+function applyUpdateDrawing(
+	state: PlayState,
+	action: UpdateDrawingAction,
+): PlayState {
+	return {
+		...state,
+		drawings: state.drawings.map((drawing) =>
+			drawing.id == action.id
+				? { ...drawing, ...action.updates }
+				: drawing,
+		),
+	}
+}
+
+function applyClearCanvas(state: PlayState): PlayState {
+	return { ...state, drawings: [], players: [] }
+}
+
+/**
+* Reducer handling play state transitions.
+*/
 function playReducer(state: PlayState, action: PlayAction): PlayState {
 	switch (action.type) {
 		case 'SET_TOOL':
-			return {
-				...state,
-				drawingState: { ...state.drawingState, tool: action.tool },
-			}
-		
+			return applySetTool(state, action)
 		case 'SET_DRAWING_STATE':
-			return {
-				...state,
-				drawingState: { ...state.drawingState, ...action.drawingState },
-			}
-		
+			return applySetDrawingState(state, action)
 		case 'SET_FORMATION':
-			return { ...state, formation: action.formation }
-		
+			return applySetFormation(state, action)
 		case 'SET_PLAY':
-			return { ...state, play: action.play }
-		
+			return applySetPlay(state, action)
 		case 'SET_DEFENSIVE_FORMATION':
-			return { ...state, defensiveFormation: action.defensiveFormation }
-		
+			return applySetDefensiveFormation(state, action)
 		case 'ADD_PLAY_CARD':
-			return { ...state, playCards: [...state.playCards, action.card] }
-		
+			return applyAddPlayCard(state, action)
 		case 'DELETE_PLAY_CARD':
-			return {
-				...state,
-				playCards: state.playCards.filter(card => card.id !== action.id),
-			}
-		
+			return applyDeletePlayCard(state, action)
 		case 'SET_HASH_ALIGNMENT':
-			return { ...state, hashAlignment: action.alignment }
-		
+			return applySetHashAlignment(state, action)
 		case 'TOGGLE_PLAY_BAR':
-			return { ...state, showPlayBar: !state.showPlayBar }
-		
+			return applyTogglePlayBar(state)
 		case 'SET_SHOW_PLAY_BAR':
-			return { ...state, showPlayBar: action.show }
-		
+			return applySetShowPlayBar(state, action)
 		case 'ADD_PLAYER':
-			return { ...state, players: [...state.players, action.player] }
-		
+			return applyAddPlayer(state, action)
 		case 'UPDATE_PLAYER':
-			return {
-				...state,
-				players: state.players.map(p =>
-					p.id === action.id ? { ...p, ...action.updates } : p
-				),
-			}
-		
+			return applyUpdatePlayer(state, action)
 		case 'DELETE_PLAYER':
-			return {
-				...state,
-				players: state.players.filter(p => p.id !== action.id),
-			}
-		
+			return applyDeletePlayer(state, action)
 		case 'ADD_DRAWING':
-			return { ...state, drawings: [...state.drawings, action.drawing] }
-		
+			return applyAddDrawing(state, action)
 		case 'SET_DRAWINGS':
-			return { ...state, drawings: action.drawings }
-		
+			return applySetDrawings(state, action)
 		case 'DELETE_DRAWING':
-			return {
-				...state,
-				drawings: state.drawings.filter((drawing) => drawing.id !== action.id),
-			}
-		
+			return applyDeleteDrawing(state, action)
 		case 'UPDATE_DRAWING':
-			return {
-				...state,
-				drawings: state.drawings.map((drawing) =>
-					drawing.id === action.id
-						? { ...drawing, ...action.updates }
-						: drawing,
-				),
-			}
-		
+			return applyUpdateDrawing(state, action)
 		case 'CLEAR_CANVAS':
-			return { ...state, drawings: [], players: [] }
-		
+			return applyClearCanvas(state)
 		default:
 			return state
 	}
 }
 
+/**
+* Provides play context and actions to descendants.
+*/
 export function PlayProvider({ children }: { children: ReactNode }) {
 	const [state, dispatch] = useReducer(playReducer, initialState)
-
-	// Convenience methods
-	const setTool = (tool: Tool) => dispatch({ type: 'SET_TOOL', tool })
-	
-	const setDrawingState = (updates: Partial<DrawingState>) =>
-		dispatch({ type: 'SET_DRAWING_STATE', drawingState: updates })
-	
-	const setFormation = (formation: string) =>
-		dispatch({ type: 'SET_FORMATION', formation })
-	
-	const setPlay = (play: string) =>
-		dispatch({ type: 'SET_PLAY', play })
-	
-	const setDefensiveFormation = (formation: string) =>
-		dispatch({ type: 'SET_DEFENSIVE_FORMATION', defensiveFormation: formation })
-	
-	const addPlayCard = () => {
-		const newCard: PlayCard = {
-			id: Date.now().toString(),
-			name: `Play ${state.playCards.length + 1}`,
-			thumbnail: '',
-		}
-		dispatch({ type: 'ADD_PLAY_CARD', card: newCard })
-	}
-	
-	const deletePlayCard = (id: string) =>
-		dispatch({ type: 'DELETE_PLAY_CARD', id })
-	
-	const setHashAlignment = (alignment: HashAlignment) =>
-		dispatch({ type: 'SET_HASH_ALIGNMENT', alignment })
-	
-	const setShowPlayBar = (show: boolean) =>
-		dispatch({ type: 'SET_SHOW_PLAY_BAR', show })
-	
-	const setDrawings = (drawings: Drawing[]) =>
-		dispatch({ type: 'SET_DRAWINGS', drawings })
-	
-	const addDrawing = (drawing: Drawing) =>
-		dispatch({ type: 'ADD_DRAWING', drawing })
-	
-	const deleteDrawing = (id: string) =>
-		dispatch({ type: 'DELETE_DRAWING', id })
-	
-	const updateDrawing = (id: string, updates: Partial<Drawing>) =>
-		dispatch({ type: 'UPDATE_DRAWING', id, updates })
 
 	const value: PlayContextType = {
 		state,
 		dispatch,
-		setTool,
-		setDrawingState,
-		setFormation,
-		setPlay,
-		setDefensiveFormation,
-		addPlayCard,
-		deletePlayCard,
-		setHashAlignment,
-		setShowPlayBar,
-		setDrawings,
-		addDrawing,
-		deleteDrawing,
-		updateDrawing,
+		setTool(tool: Tool) {
+			dispatch({ type: 'SET_TOOL', tool })
+		},
+		setDrawingState(updates: Partial<DrawingState>) {
+			dispatch({ type: 'SET_DRAWING_STATE', drawingState: updates })
+		},
+		setFormation(formation: string) {
+			dispatch({ type: 'SET_FORMATION', formation })
+		},
+		setPlay(play: string) {
+			dispatch({ type: 'SET_PLAY', play })
+		},
+		setDefensiveFormation(formation: string) {
+			dispatch({ type: 'SET_DEFENSIVE_FORMATION', defensiveFormation: formation })
+		},
+		addPlayCard() {
+			const newCard: PlayCard = {
+				id: Date.now().toString(),
+				name: `Play ${state.playCards.length + 1}`,
+				thumbnail: '',
+			}
+			dispatch({ type: 'ADD_PLAY_CARD', card: newCard })
+		},
+		deletePlayCard(id: string) {
+			dispatch({ type: 'DELETE_PLAY_CARD', id })
+		},
+		setHashAlignment(alignment: HashAlignment) {
+			dispatch({ type: 'SET_HASH_ALIGNMENT', alignment })
+		},
+		setShowPlayBar(show: boolean) {
+			dispatch({ type: 'SET_SHOW_PLAY_BAR', show })
+		},
+		setDrawings(drawings: Drawing[]) {
+			dispatch({ type: 'SET_DRAWINGS', drawings })
+		},
+		addDrawing(drawing: Drawing) {
+			dispatch({ type: 'ADD_DRAWING', drawing })
+		},
+		deleteDrawing(id: string) {
+			dispatch({ type: 'DELETE_DRAWING', id })
+		},
+		updateDrawing(id: string, updates: Partial<Drawing>) {
+			dispatch({ type: 'UPDATE_DRAWING', id, updates })
+		},
 	}
 
 	return <PlayContext.Provider value={value}>{children}</PlayContext.Provider>
 }
 
 /**
- * Hook to access play context
- * Must be used within a PlayProvider
- */
+* Hook to access play context
+* Must be used within a PlayProvider
+*/
 export function usePlayContext() {
 	const context = useContext(PlayContext)
-	if (context === undefined) {
+	if (context == undefined) {
 		throw new Error('usePlayContext must be used within a PlayProvider')
 	}
 	return context

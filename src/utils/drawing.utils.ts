@@ -13,6 +13,20 @@ export interface SnapTarget {
 	distance: number
 }
 
+export interface PlayerForSnap {
+	id: string
+	x: number
+	y: number
+	label: string
+	color: string
+}
+
+export interface PlayerSnapTarget {
+	playerId: string
+	point: Coordinate
+	distance: number
+}
+
 export function findSnapTarget(
 	position: Coordinate,
 	drawings: Drawing[],
@@ -49,6 +63,54 @@ export function findSnapTarget(
 	}
 
 	return closest
+}
+
+export function findPlayerSnapTarget(
+	position: Coordinate,
+	players: PlayerForSnap[],
+	threshold: number,
+): PlayerSnapTarget | null {
+	let closest: PlayerSnapTarget | null = null
+
+	for (const player of players) {
+		const dx = position.x - player.x
+		const dy = position.y - player.y
+		const distance = Math.sqrt(dx * dx + dy * dy)
+
+		if (distance > threshold) continue
+
+		if (!closest || distance < closest.distance) {
+			closest = {
+				playerId: player.id,
+				point: { x: player.x, y: player.y },
+				distance,
+			}
+		}
+	}
+
+	return closest
+}
+
+export function calculateUnlinkPosition(
+	playerPos: Coordinate,
+	secondToLastPoint: Coordinate,
+	distance: number,
+): Coordinate {
+	const dx = secondToLastPoint.x - playerPos.x
+	const dy = secondToLastPoint.y - playerPos.y
+	const length = Math.sqrt(dx * dx + dy * dy)
+	
+	if (length == 0) {
+		return { x: playerPos.x, y: playerPos.y - distance }
+	}
+	
+	const unitX = dx / length
+	const unitY = dy / length
+	
+	return {
+		x: playerPos.x + unitX * distance,
+		y: playerPos.y + unitY * distance,
+	}
 }
 
 export function mergeDrawings(

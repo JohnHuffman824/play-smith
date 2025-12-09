@@ -21,6 +21,7 @@ import {
 	TOOL_ADD_PLAYER,
 	EVENT_FILL_LINEMAN,
 	EVENT_FILL_PLAYER,
+	UNLINK_DISTANCE_FEET,
 } from '../../constants/field.constants'
 import { SVGCanvas } from './SVGCanvas'
 import type { PathStyle } from '../../types/drawing.types'
@@ -29,6 +30,7 @@ import { Lineman } from '../player/Lineman'
 import { Player } from '../player/Player'
 import { PlayerLabelDialog } from '../player/PlayerLabelDialog'
 import { Pencil, PaintBucket } from 'lucide-react'
+import { calculateUnlinkPosition } from '../../utils/drawing.utils'
 
 interface CanvasProps {
 	drawingState: DrawingState
@@ -38,15 +40,17 @@ interface CanvasProps {
 
 // Helper to dispatch fill events
 function dispatchFillEvent(
-  eventName: string,
-  id: number | string,
-  color: string,
+	eventName: string,
+	id: number | string,
+	color: string,
 ) {
-  if (eventName === EVENT_FILL_PLAYER) {
-    eventBus.emit('player:fill', { id: id as string, color });
-  } else if (eventName === EVENT_FILL_LINEMAN) {
-    eventBus.emit('lineman:fill', { id: id as number, color });
-  }
+	if (eventName == EVENT_FILL_PLAYER) {
+		eventBus.emit('player:fill', { id: id as string, color })
+		return
+	}
+	if (eventName == EVENT_FILL_LINEMAN) {
+		eventBus.emit('lineman:fill', { id: id as number, color })
+	}
 }
 
 export function Canvas({
@@ -141,18 +145,12 @@ export function Canvas({
 	const [history, setHistory] = useState<HistorySnapshot[]>([])
 
 	// Helper function to save current state to history
-	const saveToHistory = () => {
+	function saveToHistory() {
 		const snapshot: HistorySnapshot = {
 			drawings: JSON.parse(JSON.stringify(drawings)),
 			players: JSON.parse(JSON.stringify(players)),
 			linemanPositions: JSON.parse(JSON.stringify(linemanPositions)),
 		}
-		console.log('[Canvas] saveToHistory', {
-			drawings: drawings.length,
-			players: players.length,
-			linemen: linemanPositions.length,
-			historySize: history.length + 1,
-		})
 
 		setHistory((prev) => {
 			const newHistory = [...prev, snapshot]
@@ -171,8 +169,8 @@ export function Canvas({
 
 	// Handle undo event
 	useEffect(() => {
-		const handleUndo = () => {
-			if (history.length === 0) return
+		function handleUndo() {
+			if (history.length == 0) return
 
 			const previousSnapshot = history[history.length - 2]
 
@@ -187,11 +185,6 @@ export function Canvas({
 			setDrawings(previousSnapshot.drawings)
 			setPlayers(previousSnapshot.players)
 			setLinemanPositions(previousSnapshot.linemanPositions)
-			console.log('[Canvas] undo applied', {
-				drawings: previousSnapshot.drawings.length,
-				players: previousSnapshot.players.length,
-				linemen: previousSnapshot.linemanPositions.length,
-			})
 
 			setHistory((prev) => prev.slice(0, -2))
 		}
@@ -200,42 +193,39 @@ export function Canvas({
 		return () => eventBus.off('canvas:undo', handleUndo)
 	}, [history, hashAlignment])
 
-  // Handle clear canvas event (drawings + players + linemen)
-  useEffect(() => {
-    function handleClear() {
-      setDrawings([]);
-      setPlayers([]);
-      setLinemanPositions(computeInitialLinemanPositions());
-      console.log('[Canvas] clear event')
-    }
+	// Handle clear canvas event (drawings + players + linemen)
+	useEffect(() => {
+		function handleClear() {
+			setDrawings([])
+			setPlayers([])
+			setLinemanPositions(computeInitialLinemanPositions())
+		}
 
-    eventBus.on('canvas:clear', handleClear);
-    return () => eventBus.off('canvas:clear', handleClear);
-  }, [setDrawings, hashAlignment]);
+		eventBus.on('canvas:clear', handleClear)
+		return () => eventBus.off('canvas:clear', handleClear)
+	}, [setDrawings, hashAlignment])
 
-  // Initialize linemen positions based on the container (stored as feet coordinates)
-  useEffect(() => {
-    function initializeLinemen() {
-      if (!whiteboardRef.current) return;
+	// Initialize linemen positions from container size
+	useEffect(() => {
+		function initializeLinemen() {
+			if (!whiteboardRef.current) return
 
-      const rect =
-        whiteboardRef.current.getBoundingClientRect();
+			const rect = whiteboardRef.current.getBoundingClientRect()
 
-      setCanvasDimensions({
-        width: rect.width,
-        height: rect.height,
-      });
+			setCanvasDimensions({
+				width: rect.width,
+				height: rect.height,
+			})
 
-      setLinemanPositions(computeInitialLinemanPositions());
-    }
+			setLinemanPositions(computeInitialLinemanPositions())
+		}
 
-    // Initialize after a short delay to ensure container is mounted
-    const timer = setTimeout(
-      initializeLinemen,
-      INITIALIZATION_DELAY_MS,
-    );
-    return () => clearTimeout(timer);
-  }, [hashAlignment]);
+		const timer = setTimeout(
+			initializeLinemen,
+			INITIALIZATION_DELAY_MS,
+		)
+		return () => clearTimeout(timer)
+	}, [hashAlignment])
 
   // Add resize handler to update dimensions and trigger re-render
   useEffect(() => {
@@ -348,41 +338,80 @@ export function Canvas({
     setCursorPosition(null);
   }
 
-  function handleCanvasClick(
-    e: React.MouseEvent<HTMLDivElement>,
-  ) {
-    if (drawingState.tool != TOOL_ADD_PLAYER) return;
-    if (!whiteboardRef.current) return;
+	function handleCanvasClick(
+		e: React.MouseEvent<HTMLDivElement>,
+	) {
+		if (drawingState.tool != TOOL_ADD_PLAYER) return
+		if (!whiteboardRef.current) return
 
-    const rect = whiteboardRef.current.getBoundingClientRect();
-    const pixelX = e.clientX - rect.left;
-    const pixelY = e.clientY - rect.top;
+		const rect = whiteboardRef.current.getBoundingClientRect()
+		const pixelX = e.clientX - rect.left
+		const pixelY = e.clientY - rect.top
 
-    const feetCoords = coordSystem.pixelsToFeet(pixelX, pixelY);
+		const feetCoords = coordSystem.pixelsToFeet(pixelX, pixelY)
 
-    const newPlayer = {
-      id: `player-${Date.now()}`,
-      x: feetCoords.x,
-      y: feetCoords.y,
-      label: "",
-      color: drawingState.color,
-    };
+		const newPlayer = {
+			id: `player-${Date.now()}`,
+			x: feetCoords.x,
+			y: feetCoords.y,
+			label: '',
+			color: drawingState.color,
+		}
 
-    setPlayers((prev) => [...prev, newPlayer]);
-    setSelectedPlayerId(newPlayer.id);
-    setLabelDialogPosition({ x: e.clientX, y: e.clientY });
-    setShowLabelDialog(true);
-    console.log('[Canvas] add player', newPlayer)
-  }
+		setPlayers((prev) => [...prev, newPlayer])
+		setSelectedPlayerId(newPlayer.id)
+		setLabelDialogPosition({ x: e.clientX, y: e.clientY })
+		setShowLabelDialog(true)
+	}
+
+	function handleMovePlayerOnly(
+		id: string,
+		x: number,
+		y: number,
+	) {
+		// Just move the player without moving linked drawings
+		// Used when drawing is being moved and player should follow
+		setPlayers((prev) =>
+			prev.map((p) => (p.id == id ? { ...p, x, y } : p)),
+		)
+	}
 
   function handlePlayerPositionChange(
     id: string,
     x: number,
     y: number,
   ) {
-    setPlayers((prev) =>
-      prev.map((p) => (p.id == id ? { ...p, x, y } : p)),
-    );
+		const player = players.find((p) => p.id == id)
+		if (!player) return
+
+		const deltaX = x - player.x
+		const deltaY = y - player.y
+
+		// Update player position
+		setPlayers((prev) =>
+			prev.map((p) => (p.id == id ? { ...p, x, y } : p)),
+		)
+
+		// Move any linked drawings by the same delta
+		const linkedDrawings = drawings.filter((d) => d.playerId == id)
+		if (linkedDrawings.length > 0) {
+			setDrawings(
+				drawings.map((drawing) => {
+					if (drawing.playerId != id) return drawing
+					return {
+						...drawing,
+						segments: drawing.segments.map((segment) => ({
+							...segment,
+							points: segment.points.map((point) => ({
+								...point,
+								x: point.x + deltaX,
+								y: point.y + deltaY,
+							})),
+						})),
+					}
+				}),
+			)
+		}
   }
 
   function handlePlayerLabelClick(
@@ -438,42 +467,143 @@ export function Canvas({
     }
   }
 
-  // Determine if linemen should be interactable based on the current tool
-  const linemanInteractable =
-    drawingState.tool == TOOL_SELECT ||
-    drawingState.tool == TOOL_FILL;
+	function handleLinkDrawingToPlayer(
+		drawingId: string,
+		pointId: string,
+		playerId: string,
+	) {
+		const existingLink = drawings.find((d) => d.playerId == playerId)
+		if (existingLink) return
 
-  // Determine if players should be interactable
-  const playerInteractable =
-    drawingState.tool == TOOL_SELECT ||
-    drawingState.tool == TOOL_FILL ||
-    drawingState.tool == TOOL_ERASE;
+		const player = players.find((p) => p.id == playerId)
+		if (!player) return
 
-  // Calculate player cursor size based on current scale (matches actual Player component size)
-  const scale = coordSystem.scale;
-  const playerCursorDiameter = PLAYER_RADIUS_FEET * 2 * scale;
+		setDrawings(
+			drawings.map((drawing) => {
+				if (drawing.id != drawingId) return drawing
 
-  return (
-    <div className="flex-1 flex items-start justify-center px-8 py-4 overflow-hidden relative">
-      {/* Whiteboard Frame with Field Background - expands/contracts downward, anchored to top */}
-      <div
-        ref={whiteboardRef}
-        className="w-full bg-white rounded-2xl shadow-lg relative border-2 border-gray-300"
-        style={{
-          cursor: getCursorStyle(),
-          height: showPlayBar
-            ? "calc(100vh - 302px)"
-            : "calc(100vh - 122px)",
-          transition: "height 800ms ease-in-out",
-          overflow: "hidden",
-        }}
-        onMouseMove={handleMouseMove}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        onClick={handleCanvasClick}
-      >
-        {/* Field background fills the whiteboard and expands with it */}
-        <FootballField />
+				const updatedSegments = drawing.segments.map((segment) => ({
+					...segment,
+					points: segment.points.map((point) => {
+						if (point.id != pointId) return point
+						return { ...point, x: player.x, y: player.y }
+					}),
+				}))
+
+				return { 
+					...drawing, 
+					playerId, 
+					linkedPointId: pointId,
+					segments: updatedSegments,
+				}
+			}),
+		)
+	}
+
+	function handleUnlinkDrawing(playerId: string) {
+		const linkedDrawing = drawings.find((d) => d.playerId == playerId)
+		if (!linkedDrawing || !linkedDrawing.linkedPointId) return
+
+		const player = players.find((p) => p.id == playerId)
+		if (!player) return
+
+		// Find all points in the drawing to determine neighboring point
+		const allPoints = linkedDrawing.segments.flatMap((seg) => seg.points)
+		const linkedPointIndex = allPoints.findIndex(
+			(p) => p.id == linkedDrawing.linkedPointId,
+		)
+		
+		// Find a neighboring point to calculate unlink direction
+		let neighborPoint = null
+		if (linkedPointIndex > 0) {
+			neighborPoint = allPoints[linkedPointIndex - 1]
+		} else if (linkedPointIndex < allPoints.length - 1) {
+			neighborPoint = allPoints[linkedPointIndex + 1]
+		}
+
+		const newPosition = neighborPoint
+			? calculateUnlinkPosition(
+					{ x: player.x, y: player.y },
+					{ x: neighborPoint.x, y: neighborPoint.y },
+					UNLINK_DISTANCE_FEET,
+				)
+			: { x: player.x, y: player.y - UNLINK_DISTANCE_FEET }
+
+		setDrawings(
+			drawings.map((drawing) => {
+				if (drawing.id != linkedDrawing.id) return drawing
+				
+				const updatedSegments = drawing.segments.map((segment) => ({
+					...segment,
+					points: segment.points.map((point) => {
+						if (point.id != linkedDrawing.linkedPointId) return point
+						return { ...point, x: newPosition.x, y: newPosition.y }
+					}),
+				}))
+				
+				return {
+					...drawing,
+					playerId: undefined,
+					linkedPointId: undefined,
+					segments: updatedSegments,
+				}
+			}),
+		)
+	}
+
+	function handleDeleteDrawing(id: string) {
+		setDrawings(drawings.filter((d) => d.id != id))
+	}
+
+	// Determine if linemen should be interactable based on the current tool
+	const linemanInteractable =
+		drawingState.tool == TOOL_SELECT ||
+		drawingState.tool == TOOL_FILL
+
+	// Determine if players should be interactable
+	const playerInteractable =
+		drawingState.tool == TOOL_SELECT ||
+		drawingState.tool == TOOL_FILL ||
+		drawingState.tool == TOOL_ERASE
+
+	// Calculate player cursor size to match Player component scale
+	const scale = coordSystem.scale
+	const playerCursorDiameter = PLAYER_RADIUS_FEET * 2 * scale
+
+	const containerClasses = [
+		'flex-1 flex items-start justify-center px-8 py-4',
+		'overflow-hidden relative',
+	].join(' ')
+
+	const whiteboardClasses = [
+		'w-full bg-white rounded-2xl shadow-lg relative',
+		'border-2 border-gray-300',
+	].join(' ')
+
+	const cursorOverlayClasses =
+		'absolute top-0 left-0 w-full h-full pointer-events-none'
+
+	return (
+		<div className={containerClasses}>
+			{/* Whiteboard frame with field background */}
+			<div
+				ref={whiteboardRef}
+				className={whiteboardClasses}
+				style={{
+					cursor: getCursorStyle(),
+					height: showPlayBar
+						? 'calc(100vh - 302px)'
+						: 'calc(100vh - 122px)',
+					transition: 'height 800ms ease-in-out',
+					overflow: 'hidden',
+				}}
+				onMouseMove={handleMouseMove}
+				onMouseEnter={handleMouseEnter}
+				onMouseLeave={handleMouseLeave}
+				onClick={handleCanvasClick}
+			>
+				{/* Field background fills the whiteboard */}
+				<FootballField />
 
 				{/* SVG layer for structured drawings */}
 				<div className='absolute top-0 left-0 w-full h-full pointer-events-auto'>
@@ -482,6 +612,7 @@ export function Canvas({
 						height={canvasDimensions.height}
 						coordSystem={coordSystem}
 						drawings={drawings}
+						players={players}
 						onChange={setDrawings}
 						activeTool={
 							drawingState.tool == TOOL_DRAW
@@ -490,26 +621,26 @@ export function Canvas({
 									? 'erase'
 									: 'select'
 						}
-						onDeleteDrawing={(id) =>
-							setDrawings(
-								drawings.filter((drawing) => drawing.id != id),
-							)
-						}
+						onDeleteDrawing={handleDeleteDrawing}
 						eraseSize={drawingState.eraseSize}
 						autoCorrect={true}
 						defaultStyle={defaultPathStyle}
 						snapThreshold={drawingState.snapThreshold}
+						onLinkDrawingToPlayer={handleLinkDrawingToPlayer}
+						onMovePlayer={handleMovePlayerOnly}
+						isOverCanvas={isOverCanvas}
+						cursorPosition={cursorPosition}
 					/>
 				</div>
 
-        {/* Canvas and all interactive elements - as children of whiteboard */}
-        <div
-          className="absolute top-0 left-0 w-full h-full"
-            style={{
-              cursor: getCursorStyle(),
-              pointerEvents: 'none', // Always none - this div only contains cursor overlays
-            }}
-          >
+				{/* Canvas and interactive overlays */}
+				<div
+					className={cursorOverlayClasses}
+					style={{
+						cursor: getCursorStyle(),
+						pointerEvents: 'none',
+					}}
+				>
           {/* Custom Pencil Cursor - only visible when draw tool is active */}
           {drawingState.tool == TOOL_DRAW &&
             isOverCanvas &&
@@ -619,13 +750,13 @@ export function Canvas({
             ))}
           </div>
 
-          <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
-            <div
-              className="absolute top-0 left-0 w-full h-full"
-              style={{
-                pointerEvents: 'none',
-              }}
-            >
+					<div className={cursorOverlayClasses}>
+						<div
+							className='absolute top-0 left-0 w-full h-full'
+							style={{
+								pointerEvents: 'none',
+							}}
+						>
               {players.map((player) => (
                 <Player
                   key={player.id}
@@ -642,12 +773,12 @@ export function Canvas({
                   onDelete={handlePlayerDeleteById}
                   currentTool={drawingState.tool}
                   interactable={playerInteractable}
-                  onHoverChange={(isHovered) => {
-                    // Only track hover state when erase tool is active
-                    if (drawingState.tool === TOOL_ERASE) {
-                      setIsHoveringDeletable(isHovered);
-                    }
-                  }}
+					onHoverChange={(isHovered) => {
+						// Only track hover state when erase tool is active
+						if (drawingState.tool == TOOL_ERASE) {
+							setIsHoveringDeletable(isHovered)
+						}
+					}}
                 />
               ))}
             </div>
@@ -661,9 +792,13 @@ export function Canvas({
           position={labelDialogPosition}
           currentLabel={
             players.find((p) => p.id == selectedPlayerId)
-              ?.label || ""
+              ?.label ?? ''
+          }
+          hasLinkedDrawing={
+            drawings.some((d) => d.playerId == selectedPlayerId)
           }
           onLabelChange={handlePlayerLabelChange}
+          onUnlink={() => handleUnlinkDrawing(selectedPlayerId)}
           onDelete={handlePlayerDelete}
           onClose={() => setShowLabelDialog(false)}
         />

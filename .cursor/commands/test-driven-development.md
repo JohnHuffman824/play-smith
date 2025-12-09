@@ -1,5 +1,3 @@
 # test-driven-development
 
-Write your command content here.
-
-This command will be available in chat with /test-driven-development
+Ensure you follow the test-driven-development.mdc rule when responding to the following prompt.

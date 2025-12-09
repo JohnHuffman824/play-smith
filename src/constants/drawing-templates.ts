@@ -71,6 +71,9 @@ export const DRAWING_TEMPLATES: DrawingTemplate[] = [
 	},
 ]
 
+/**
+ * Builds a new drawing from a template without mutating template data.
+ */
 export function instantiateTemplate(
 	templateId: string,
 	style: Drawing['style'],
@@ -78,9 +81,22 @@ export function instantiateTemplate(
 	const template = DRAWING_TEMPLATES.find((item) => item.id == templateId)
 	if (!template) return null
 
+	const segments = template.baseSegments.map((segment) => ({
+		type: segment.type,
+		points: segment.points.map((point) => ({
+			...point,
+			handleIn: point.handleIn
+				? { ...point.handleIn }
+				: undefined,
+			handleOut: point.handleOut
+				? { ...point.handleOut }
+				: undefined,
+		})),
+	}))
+
 	return {
 		id: `drawing-${templateId}-${Date.now()}`,
-		segments: template.baseSegments,
+		segments,
 		style,
 		annotations: [],
 		templateId: template.id,

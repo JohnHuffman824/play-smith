@@ -1,15 +1,15 @@
 /**
- * Type-safe event bus for application-wide event communication
- * Replaces the unsafe window.dispatchEvent/addEventListener pattern
- */
+* Type-safe event bus for application-wide event communication
+* Replaces the unsafe window.dispatchEvent/addEventListener pattern
+*/
 
 import type { Tool } from '../types/play.types'
 import type { HashAlignment } from '../types/field.types'
 import type { Drawing } from '../types/drawing.types'
 
 /**
- * Central registry of all application events with their payload types
- */
+* Central registry of all application events with their payload types
+*/
 export interface EventMap {
 	// Tool change events
 	'tool:select': void
@@ -53,8 +53,8 @@ export interface EventMap {
 type EventHandler<T> = T extends void ? () => void : (data: T) => void
 
 /**
- * Type-safe event bus implementation
- */
+* Type-safe event bus implementation
+*/
 class TypedEventBus {
 	private listeners = new Map<keyof EventMap, Set<Function>>()
 
@@ -120,7 +120,7 @@ class TypedEventBus {
 }
 
 /**
- * Singleton instance of the event bus
- * Import this to use events throughout the application
- */
+* Singleton instance of the event bus
+* Import this to use events throughout the application
+*/
 export const eventBus = new TypedEventBus()

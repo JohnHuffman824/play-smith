@@ -24,6 +24,7 @@ export const PLAYER_RADIUS_FEET = 2.0
 export const LINEMAN_RADIUS = 2.0
 export const LINEMAN_Y = 28.0
 export const SPACING_CENTER_TO_CENTER = 5.0
+export const UNLINK_DISTANCE_FEET = 5.0
 
 // Field Markings
 export const NUMBER_HEIGHT = 6

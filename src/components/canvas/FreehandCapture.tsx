@@ -12,6 +12,9 @@ interface FreehandCaptureProps {
 	onCommit: (drawing: Drawing) => void
 }
 
+/**
+* Captures freehand canvas strokes and converts them to drawings.
+*/
 export function FreehandCapture({
 	coordSystem,
 	style,
@@ -29,7 +32,7 @@ export function FreehandCapture({
 		}
 	}, [isActive])
 
-	const resetCanvas = () => {
+	function resetCanvas() {
 		const canvas = canvasRef.current
 		if (!canvas) return
 		const ctx = canvas.getContext('2d')
@@ -37,7 +40,7 @@ export function FreehandCapture({
 		ctx.clearRect(0, 0, canvas.width, canvas.height)
 	}
 
-	const startDrawing = (event: React.PointerEvent<HTMLCanvasElement>) => {
+	function startDrawing(event: React.PointerEvent<HTMLCanvasElement>) {
 		if (!isActive) return
 		const canvas = canvasRef.current
 		if (!canvas) return
@@ -58,18 +61,11 @@ export function FreehandCapture({
 		ctx.beginPath()
 		ctx.moveTo(pixel.x, pixel.y)
 
-		console.log('[FreehandCapture] start', {
-			pixel,
-			feet,
-			lineWidthPx: ctx.lineWidth,
-			isActive,
-		})
-
 		setPoints([feet])
 		setIsDrawing(true)
 	}
 
-	const draw = (event: React.PointerEvent<HTMLCanvasElement>) => {
+	function draw(event: React.PointerEvent<HTMLCanvasElement>) {
 		if (!isDrawing) return
 		const canvas = canvasRef.current
 		if (!canvas) return
@@ -86,40 +82,25 @@ export function FreehandCapture({
 		ctx.lineTo(pixel.x, pixel.y)
 		ctx.stroke()
 
-		if (points.length % 10 == 0) {
-			console.log('[FreehandCapture] draw', {
-				pointsCount: points.length,
-				pixel,
-				feet,
-			})
-		}
-
 		setPoints((prev) => [...prev, feet])
 	}
 
-	const stopDrawing = () => {
+	function stopDrawing() {
 		if (!isDrawing) return
 		setIsDrawing(false)
 		resetCanvas()
 		commitDrawing(points)
-		console.log('[FreehandCapture] stop', { pointsCount: points.length })
 		setPoints([])
 	}
 
-	const commitDrawing = (captured: Coordinate[]) => {
+	function commitDrawing(captured: Coordinate[]) {
 		if (captured.length < 2) return
 
 		let pathPoints = captured
 		if (autoCorrect) {
-			console.log('[FreehandCapture] simplify before', {
-				points: pathPoints.length,
-			})
 			const simplified = simplifyPath(pathPoints, 0.5)
 			const straightened = straightenSegments(simplified, Math.PI / 18)
 			pathPoints = straightened.points
-			console.log('[FreehandCapture] simplify after', {
-				points: pathPoints.length,
-			})
 		}
 
 		const segments = buildLineSegments(pathPoints)
@@ -130,16 +111,10 @@ export function FreehandCapture({
 			annotations: [],
 		}
 
-		console.log('[FreehandCapture] commit drawing', {
-			segments: segments.length,
-			points: pathPoints.length,
-			id: drawing.id,
-		})
-
 		onCommit(drawing)
 	}
 
-	const resizeCanvas = () => {
+	function resizeCanvas() {
 		const canvas = canvasRef.current
 		if (!canvas) return
 		const rect = canvas.getBoundingClientRect()

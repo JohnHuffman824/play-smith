@@ -1,9 +1,12 @@
 /**
- * Hook to provide field coordinate system with automatic dimension updates
- */
+* Hook to provide field coordinate system with automatic dimension updates
+*/
 
 import { useMemo } from 'react'
-import { FieldCoordinateSystem, createCoordinateSystem } from '../utils/coordinates'
+import {
+	FieldCoordinateSystem,
+	createCoordinateSystem,
+} from '../utils/coordinates'
 
 interface UseFieldCoordinatesOptions {
 	containerWidth: number
@@ -11,9 +14,9 @@ interface UseFieldCoordinatesOptions {
 }
 
 /**
- * Hook that provides a FieldCoordinateSystem instance
- * Creates a new instance when container dimensions change
- */
+* Hook that provides a FieldCoordinateSystem instance
+* Creates a new instance when container dimensions change
+*/
 export function useFieldCoordinates({
 	containerWidth,
 	containerHeight,

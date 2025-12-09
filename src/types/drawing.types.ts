@@ -34,6 +34,7 @@ export interface Annotation {
 export interface Drawing {
 	id: string
 	playerId?: string
+	linkedPointId?: string
 	segments: PathSegment[]
 	style: PathStyle
 	annotations: Annotation[]
