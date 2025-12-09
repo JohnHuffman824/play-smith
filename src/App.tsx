@@ -31,8 +31,6 @@ function AppContent() {
 		setHashAlignment,
 		setShowPlayBar,
 	} = usePlayContext()
-	const { logout, user } = useAuth()
-
 	useKeyboardShortcuts({ setDrawingState })
 
 	return (
@@ -46,22 +44,6 @@ function AppContent() {
 				setShowPlayBar={setShowPlayBar}
 			/>
 			<div className="flex-1 flex flex-col">
-				{/* User info and logout */}
-				<div
-					className="flex justify-end items-center px-4 py-2
-						border-b border-gray-200"
-				>
-					<span className="text-sm text-gray-600 mr-3">
-						{user?.name ?? user?.email}
-					</span>
-					<button
-						onClick={logout}
-						className="text-sm text-blue-600 hover:text-blue-700
-							font-medium"
-					>
-						Sign out
-					</button>
-				</div>
 				<PlayHeader
 					formation={state.formation}
 					play={state.play}
