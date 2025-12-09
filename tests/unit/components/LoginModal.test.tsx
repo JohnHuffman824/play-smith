@@ -1,5 +1,5 @@
-import { describe, test, expect, mock } from 'bun:test'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { describe, test, expect, mock, beforeEach, afterEach } from 'bun:test'
+import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react'
 import { LoginModal } from '../../../src/components/auth/LoginModal'
 import { AuthProvider } from '../../../src/contexts/AuthContext'
 
@@ -21,6 +21,13 @@ function renderLoginModal() {
 }
 
 describe('LoginModal', () => {
+	beforeEach(() => {
+		mockFetch.mockReset()
+	})
+
+	afterEach(() => {
+		cleanup()
+	})
 	test('renders login form by default', () => {
 		renderLoginModal()
 
