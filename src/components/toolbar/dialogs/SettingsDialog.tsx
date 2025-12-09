@@ -5,13 +5,19 @@ import { CustomSelect } from '../CustomSelect';
 
 interface SettingsDialogProps {
   onClose: () => void;
+  snapThreshold: number;
+  onSnapThresholdChange: (value: number) => void;
 }
 
 type PositionNaming = 'XYZABQ' | 'XYZFTQ' | 'Custom';
 type FieldLevel = 'High School' | 'College' | 'Pro';
 type ThemeMode = 'Light Mode' | 'Dark Mode';
 
-export function SettingsDialog({ onClose }: SettingsDialogProps) {
+export function SettingsDialog({
+  onClose,
+  snapThreshold,
+  onSnapThresholdChange,
+}: SettingsDialogProps) {
   const { theme, setTheme } = useTheme();
   const [positionNaming, setPositionNaming] = useState<PositionNaming>('XYZABQ');
   const [fieldLevel, setFieldLevel] = useState<FieldLevel>('College');
@@ -86,6 +92,25 @@ export function SettingsDialog({ onClose }: SettingsDialogProps) {
               { value: 'Dark Mode', label: 'Dark Mode' },
             ]}
           />
+        </div>
+
+        {/* Snap Distance */}
+        <div>
+          <label className={`text-sm mb-2 block ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+            Snap Distance (px)
+          </label>
+          <input
+            type="range"
+            min={10}
+            max={50}
+            step={1}
+            value={snapThreshold}
+            onChange={(e) => onSnapThresholdChange(Number(e.target.value))}
+            className="w-full"
+          />
+          <div className={theme === 'dark' ? 'text-gray-300 text-xs mt-1' : 'text-gray-600 text-xs mt-1'}>
+            {snapThreshold} px
+          </div>
         </div>
       </div>
     </div>

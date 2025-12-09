@@ -1,78 +1,39 @@
+import { useRef, useEffect, useState } from 'react'
+import type { DrawingState } from '../../types/play.types'
+import type { HashAlignment } from '../../types/field.types'
+import { useFieldCoordinates } from '../../hooks/useFieldCoordinates'
+import { usePlayContext } from '../../contexts/PlayContext'
+import { eventBus } from '../../services/EventBus'
 import {
-  useRef,
-  useEffect,
-  useState,
-  useLayoutEffect,
-} from "react";
-import type { DrawingState } from "../../types/play.types";
-import type { DrawingObject } from "../../types/drawing.types";
-import type { HashAlignment } from "../../types/field.types";
-import { useFieldCoordinates } from "../../hooks/useFieldCoordinates";
-import { eventBus } from "../../services/EventBus";
-import {
-  FIELD_WIDTH_FEET,
-  LINEMAN_RADIUS,
-  LINEMAN_Y,
-  SPACING_CENTER_TO_CENTER,
-  LEFT_HASH_INNER_EDGE,
-  RIGHT_HASH_INNER_EDGE,
-  CENTER_X,
-  PLAYER_RADIUS_FEET,
-  DEFAULT_ERASE_SIZE,
-  INITIALIZATION_DELAY_MS,
-  CURSOR_Z_INDEX,
-  MAX_HISTORY_SIZE,
-  TOOL_DRAW,
-  TOOL_ERASE,
-  TOOL_SELECT,
-  TOOL_FILL,
-  TOOL_ADD_PLAYER,
-  LINE_END_NONE,
-  LINE_END_ARROW,
-  LINE_END_TSHAPE,
-  EVENT_FILL_LINEMAN,
-  EVENT_FILL_PLAYER,
-  COMPOSITE_DESTINATION_OUT,
-  COMPOSITE_SOURCE_OVER,
-  DASH_PATTERN_LENGTH_MULTIPLIER,
-  DASH_PATTERN_GAP_MULTIPLIER,
-} from "../../constants/field.constants";
-import {
-  calculateAverageAngle,
-  drawArrow,
-  drawTShape,
-  drawLineEnding,
-  renderEraseStroke,
-  renderDrawStroke,
-  pointToLineDistance,
-  isPointNearDrawing as isPointNearDrawingUtil,
-} from "../../utils/canvas.utils";
-import { FootballField } from "../field/FootballField";
-import { Lineman } from "../player/Lineman";
-import { Player } from "../player/Player";
-import { PlayerLabelDialog } from "../player/PlayerLabelDialog";
-import { Pencil, PaintBucket } from "lucide-react";
+	LINEMAN_Y,
+	SPACING_CENTER_TO_CENTER,
+	LEFT_HASH_INNER_EDGE,
+	RIGHT_HASH_INNER_EDGE,
+	CENTER_X,
+	PLAYER_RADIUS_FEET,
+	INITIALIZATION_DELAY_MS,
+	CURSOR_Z_INDEX,
+	MAX_HISTORY_SIZE,
+	TOOL_DRAW,
+	TOOL_ERASE,
+	TOOL_SELECT,
+	TOOL_FILL,
+	TOOL_ADD_PLAYER,
+	EVENT_FILL_LINEMAN,
+	EVENT_FILL_PLAYER,
+} from '../../constants/field.constants'
+import { SVGCanvas } from './SVGCanvas'
+import type { PathStyle } from '../../types/drawing.types'
+import { FootballField } from '../field/FootballField'
+import { Lineman } from '../player/Lineman'
+import { Player } from '../player/Player'
+import { PlayerLabelDialog } from '../player/PlayerLabelDialog'
+import { Pencil, PaintBucket } from 'lucide-react'
 
 interface CanvasProps {
-  drawingState: DrawingState;
-  hashAlignment: HashAlignment;
-  showPlayBar: boolean;
-}
-
-// Helper to get canvas coordinates from mouse event
-function getCanvasCoordinates(
-  e: React.MouseEvent<HTMLCanvasElement>,
-  canvasRef: React.RefObject<HTMLCanvasElement>,
-  whiteboardRef: React.RefObject<HTMLDivElement>,
-) {
-  if (!canvasRef.current || !whiteboardRef.current) return null;
-  // Use whiteboard rect for consistency with rendering
-  const rect = whiteboardRef.current.getBoundingClientRect();
-  return {
-    x: e.clientX - rect.left,
-    y: e.clientY - rect.top,
-    rect,
-  };
+	drawingState: DrawingState
+	hashAlignment: HashAlignment
+	showPlayBar: boolean
 }
 
 // Helper to dispatch fill events
@@ -93,12 +54,7 @@ export function Canvas({
   hashAlignment,
   showPlayBar,
 }: CanvasProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
   const whiteboardRef = useRef<HTMLDivElement>(null);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [context, setContext] =
-    useState<CanvasRenderingContext2D | null>(null);
   const [linemanPositions, setLinemanPositions] = useState<
     { id: number; x: number; y: number }[]
   >([]);
@@ -124,109 +80,138 @@ export function Canvas({
   >(null);
   const [labelDialogPosition, setLabelDialogPosition] =
     useState({ x: 0, y: 0 });
-  const [drawingPath, setDrawingPath] = useState<
-    Array<{ x: number; y: number }>
-  >([]);
-  const [drawings, setDrawings] = useState<DrawingObject[]>([]);
-  const [currentDrawing, setCurrentDrawing] =
-    useState<DrawingObject | null>(null);
-  const [canvasDimensions, setCanvasDimensions] = useState({
-    width: 0,
-    height: 0,
-  });
+	const { state, setDrawings } = usePlayContext()
+	const { drawings } = state
+	const [canvasDimensions, setCanvasDimensions] = useState({
+		width: 0,
+		height: 0,
+	})
 
   // Coordinate system for converting between feet and pixels
-  const coordSystem = useFieldCoordinates({
-    containerWidth: canvasDimensions.width,
-    containerHeight: canvasDimensions.height,
-  });
+	const coordSystem = useFieldCoordinates({
+		containerWidth: canvasDimensions.width,
+		containerHeight: canvasDimensions.height,
+	})
 
-  // History state for undo functionality
-  interface HistorySnapshot {
-    drawings: DrawingObject[];
-    players: Array<{
-      id: string;
-      x: number;
-      y: number;
-      label: string;
-      color: string;
-    }>;
-    linemanPositions: { id: number; x: number; y: number }[];
-  }
+	const strokeFeet =
+		coordSystem.scale > 0
+			? drawingState.brushSize / coordSystem.scale
+			: drawingState.brushSize
 
-  const [history, setHistory] = useState<HistorySnapshot[]>([]);
+	const defaultPathStyle: PathStyle = {
+		color: drawingState.color,
+		strokeWidth: strokeFeet,
+		lineStyle: drawingState.lineStyle,
+		lineEnd: drawingState.lineEnd,
+	}
 
-  // Helper function to save current state to history
-  const saveToHistory = () => {
-    const snapshot: HistorySnapshot = {
-      drawings: JSON.parse(JSON.stringify(drawings)),
-      players: JSON.parse(JSON.stringify(players)),
-      linemanPositions: JSON.parse(JSON.stringify(linemanPositions)),
-    };
+	function computeInitialLinemanPositions() {
+		let centerLinemanX = CENTER_X
+		if (hashAlignment == 'left') {
+			centerLinemanX = LEFT_HASH_INNER_EDGE
+		} else if (hashAlignment == 'right') {
+			centerLinemanX = RIGHT_HASH_INNER_EDGE
+		}
 
-    setHistory((prev) => {
-      const newHistory = [...prev, snapshot];
-      // Keep only last MAX_HISTORY_SIZE snapshots
-      if (newHistory.length > MAX_HISTORY_SIZE) {
-        return newHistory.slice(-MAX_HISTORY_SIZE);
-      }
-      return newHistory;
-    });
-  };
+		const positions = []
+		for (let i = 0; i < 5; i++) {
+			const offsetFromCenter = (i - 2) * SPACING_CENTER_TO_CENTER
+			positions.push({
+				id: i,
+				x: centerLinemanX + offsetFromCenter,
+				y: LINEMAN_Y,
+			})
+		}
+		return positions
+	}
 
-  // Track changes and save snapshots for undo
+	// History state for undo functionality
+	interface HistorySnapshot {
+		drawings: typeof drawings
+		players: Array<{
+			id: string
+			x: number
+			y: number
+			label: string
+			color: string
+		}>
+		linemanPositions: { id: number; x: number; y: number }[]
+	}
+
+	const [history, setHistory] = useState<HistorySnapshot[]>([])
+
+	// Helper function to save current state to history
+	const saveToHistory = () => {
+		const snapshot: HistorySnapshot = {
+			drawings: JSON.parse(JSON.stringify(drawings)),
+			players: JSON.parse(JSON.stringify(players)),
+			linemanPositions: JSON.parse(JSON.stringify(linemanPositions)),
+		}
+		console.log('[Canvas] saveToHistory', {
+			drawings: drawings.length,
+			players: players.length,
+			linemen: linemanPositions.length,
+			historySize: history.length + 1,
+		})
+
+		setHistory((prev) => {
+			const newHistory = [...prev, snapshot]
+			if (newHistory.length > MAX_HISTORY_SIZE) {
+				return newHistory.slice(-MAX_HISTORY_SIZE)
+			}
+			return newHistory
+		})
+	}
+
+	// Track changes and save snapshots for undo
+	useEffect(() => {
+		if (drawings.length == 0 && players.length == 0) return
+		saveToHistory()
+	}, [drawings, players])
+
+	// Handle undo event
+	useEffect(() => {
+		const handleUndo = () => {
+			if (history.length === 0) return
+
+			const previousSnapshot = history[history.length - 2]
+
+			if (!previousSnapshot) {
+				setDrawings([])
+				setPlayers([])
+				setLinemanPositions(computeInitialLinemanPositions())
+				setHistory([])
+				return
+			}
+
+			setDrawings(previousSnapshot.drawings)
+			setPlayers(previousSnapshot.players)
+			setLinemanPositions(previousSnapshot.linemanPositions)
+			console.log('[Canvas] undo applied', {
+				drawings: previousSnapshot.drawings.length,
+				players: previousSnapshot.players.length,
+				linemen: previousSnapshot.linemanPositions.length,
+			})
+
+			setHistory((prev) => prev.slice(0, -2))
+		}
+
+		eventBus.on('canvas:undo', handleUndo)
+		return () => eventBus.off('canvas:undo', handleUndo)
+	}, [history, hashAlignment])
+
+  // Handle clear canvas event (drawings + players + linemen)
   useEffect(() => {
-    // Don't save empty initial state
-    if (drawings.length === 0 && players.length === 0) return;
-    
-    saveToHistory();
-  }, [drawings.length, players.length]);
+    function handleClear() {
+      setDrawings([]);
+      setPlayers([]);
+      setLinemanPositions(computeInitialLinemanPositions());
+      console.log('[Canvas] clear event')
+    }
 
-  // Handle undo event
-  useEffect(() => {
-    const handleUndo = () => {
-      if (history.length === 0) return;
-
-      // Get the previous snapshot (second to last, as last is current state)
-      const previousSnapshot = history[history.length - 2];
-      
-      if (!previousSnapshot) {
-        // If only one snapshot, clear everything
-        setDrawings([]);
-        setPlayers([]);
-        // Reset linemen to initial positions based on hash alignment
-        let centerLinemanX = CENTER_X;
-        if (hashAlignment == "left") {
-          centerLinemanX = LEFT_HASH_INNER_EDGE;
-        } else if (hashAlignment == "right") {
-          centerLinemanX = RIGHT_HASH_INNER_EDGE;
-        }
-        const positions = [];
-        for (let i = 0; i < 5; i++) {
-          const offsetFromCenter = (i - 2) * SPACING_CENTER_TO_CENTER;
-          positions.push({
-            id: i,
-            x: centerLinemanX + offsetFromCenter,
-            y: LINEMAN_Y,
-          });
-        }
-        setLinemanPositions(positions);
-        setHistory([]);
-        return;
-      }
-
-      // Restore previous state
-      setDrawings(previousSnapshot.drawings);
-      setPlayers(previousSnapshot.players);
-      setLinemanPositions(previousSnapshot.linemanPositions);
-      
-      // Remove last two entries from history (current and restoring to previous)
-      setHistory((prev) => prev.slice(0, -2));
-    };
-
-    eventBus.on("canvas:undo", handleUndo);
-    return () => eventBus.off("canvas:undo", handleUndo);
-  }, [history, hashAlignment]);
+    eventBus.on('canvas:clear', handleClear);
+    return () => eventBus.off('canvas:clear', handleClear);
+  }, [setDrawings, hashAlignment]);
 
   // Initialize linemen positions based on the container (stored as feet coordinates)
   useEffect(() => {
@@ -241,28 +226,7 @@ export function Canvas({
         height: rect.height,
       });
 
-      // Determine starting X position based on current hash alignment
-      let centerLinemanX = CENTER_X;
-      if (hashAlignment == "left") {
-        centerLinemanX = LEFT_HASH_INNER_EDGE;
-      } else if (hashAlignment == "right") {
-        centerLinemanX = RIGHT_HASH_INNER_EDGE;
-      }
-
-      // Calculate all positions in feet coordinates
-      // Center lineman (id=2) is at centerLinemanX
-      // Positions: id=0 (far left), id=1 (left), id=2 (center), id=3 (right), id=4 (far right)
-      const positions = [];
-      for (let i = 0; i < 5; i++) {
-        const offsetFromCenter =
-          (i - 2) * SPACING_CENTER_TO_CENTER; // -10, -5, 0, 5, 10 feet
-        positions.push({
-          id: i,
-          x: centerLinemanX + offsetFromCenter,
-          y: LINEMAN_Y,
-        });
-      }
-      setLinemanPositions(positions);
+      setLinemanPositions(computeInitialLinemanPositions());
     }
 
     // Initialize after a short delay to ensure container is mounted
@@ -290,57 +254,31 @@ export function Canvas({
   }, []);
 
   // Update dimensions when showPlayBar changes - synced with CSS transitions
-  useLayoutEffect(() => {
-    if (!whiteboardRef.current || !canvasRef.current) return;
+  useEffect(() => {
+    if (!whiteboardRef.current) return;
 
     const whiteboard = whiteboardRef.current;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
 
-    // Function to update canvas size and redraw
-    function updateCanvasAndRedraw() {
-      if (!whiteboard || !canvas || !ctx) return;
-
+    function updateDimensions() {
+      if (!whiteboard) return;
       const rect = whiteboard.getBoundingClientRect();
-
-      // Resize the canvas element itself
-      canvas.width = rect.width * window.devicePixelRatio;
-      canvas.height = rect.height * window.devicePixelRatio;
-      ctx.scale(
-        window.devicePixelRatio,
-        window.devicePixelRatio,
-      );
-
-      // Update dimensions state
       setCanvasDimensions({
         width: rect.width,
         height: rect.height,
       });
-
-      // Clear the canvas
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Render all drawings with current dimensions
-      drawings.forEach((drawing) => {
-        renderDrawing(ctx, drawing, rect.width, rect.height);
-      });
     }
 
-    // Use ResizeObserver to watch whiteboard size changes during CSS transition
     const resizeObserver = new ResizeObserver(() => {
-      updateCanvasAndRedraw();
+      updateDimensions();
     });
 
     resizeObserver.observe(whiteboard);
-
-    // Also do an immediate update
-    updateCanvasAndRedraw();
+    updateDimensions();
 
     return () => {
       resizeObserver.disconnect();
     };
-  }, [showPlayBar, drawings]);
+  }, [showPlayBar]);
 
   function handleLinemanPositionChange(
     id: number,
@@ -369,287 +307,6 @@ export function Canvas({
     });
   }
 
-  // Initialize canvas context
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    function updateCanvasSize() {
-      if (!canvas || !ctx) return;
-      const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width * window.devicePixelRatio;
-      canvas.height = rect.height * window.devicePixelRatio;
-      ctx.scale(
-        window.devicePixelRatio,
-        window.devicePixelRatio,
-      );
-
-      // Make canvas transparent so the field shows through
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-    }
-
-    updateCanvasSize();
-    setContext(ctx);
-
-    eventBus.on('system:resize', updateCanvasSize);
-    return () => eventBus.off('system:resize', updateCanvasSize);
-  }, []);
-
-  // Handle clear canvas event
-  useEffect(() => {
-    function handleClear() {
-      if (!context || !canvasRef.current) return;
-      const canvas = canvasRef.current;
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      setDrawings([]);
-    }
-
-    eventBus.on('canvas:clear', handleClear);
-    return () => eventBus.off('canvas:clear', handleClear);
-  }, [context]);
-
-  // Function to render a single drawing object
-  function renderDrawing(
-    ctx: CanvasRenderingContext2D,
-    drawing: DrawingObject,
-    canvasWidth: number,
-    canvasHeight: number,
-  ) {
-    if (drawing.points.length == 0) return;
-
-    ctx.save();
-
-    // Convert feet coordinates to pixel coordinates for rendering
-    const pixelPoints = drawing.points.map((p) =>
-      coordSystem.feetToPixels(p.x, p.y),
-    );
-
-    if (drawing.type == TOOL_ERASE) {
-      renderEraseStroke(ctx, pixelPoints, drawing.eraseSize);
-    } else {
-      renderDrawStroke(ctx, drawing, pixelPoints);
-    }
-
-    ctx.restore();
-  }
-
-  // Redraw all drawings whenever the drawings array changes
-  useEffect(() => {
-    if (
-      !context ||
-      !canvasRef.current ||
-      !whiteboardRef.current
-    )
-      return;
-
-    const canvas = canvasRef.current;
-    const whiteboard = whiteboardRef.current;
-    const rect = whiteboard.getBoundingClientRect();
-
-    // Clear the canvas
-    context.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Render all drawings in order (both draw and erase strokes)
-    // This ensures erase operations are applied in the correct sequence
-    drawings.forEach((drawing) => {
-      renderDrawing(context, drawing, rect.width, rect.height);
-    });
-  }, [drawings, context]);
-
-  function startDrawing(
-    e: React.MouseEvent<HTMLCanvasElement>,
-  ) {
-    if (!context) return;
-
-    // Only allow drawing when draw or erase tool is selected
-    if (
-      drawingState.tool != TOOL_DRAW &&
-      drawingState.tool != TOOL_ERASE
-    )
-      return;
-
-    const coords = getCanvasCoordinates(
-      e,
-      canvasRef as React.RefObject<HTMLCanvasElement>,
-      whiteboardRef as React.RefObject<HTMLDivElement>,
-    );
-    if (!coords) return;
-
-    setIsDrawing(true);
-    setDrawingPath([{ x: coords.x, y: coords.y }]);
-
-    // Convert to feet coordinates for storage
-    const feetPoint = coordSystem.pixelsToFeet(coords.x, coords.y);
-
-    // Create a new drawing object with feet coordinates
-    const newDrawing: DrawingObject = {
-      id: `drawing-${Date.now()}`,
-      type:
-        drawingState.tool == TOOL_ERASE ? TOOL_ERASE : TOOL_DRAW,
-      points: [feetPoint],
-      color: drawingState.color,
-      brushSize: drawingState.brushSize,
-      lineStyle: drawingState.lineStyle,
-      lineEnd: drawingState.lineEnd,
-      eraseSize: drawingState.eraseSize,
-    };
-
-    setCurrentDrawing(newDrawing);
-
-    // Still draw in real-time for preview
-    if (drawingState.tool == TOOL_ERASE) {
-      // Start erasing immediately
-      context.save();
-      context.globalCompositeOperation = COMPOSITE_DESTINATION_OUT;
-      context.beginPath();
-      context.arc(
-        coords.x,
-        coords.y,
-        drawingState.eraseSize / 2,
-        0,
-        Math.PI * 2,
-      );
-      context.fill();
-      context.restore();
-    } else {
-      // Start drawing
-      context.globalCompositeOperation = COMPOSITE_SOURCE_OVER;
-
-      if (drawingState.lineStyle == "dashed") {
-        context.setLineDash([
-          drawingState.brushSize *
-            DASH_PATTERN_LENGTH_MULTIPLIER,
-          drawingState.brushSize * DASH_PATTERN_GAP_MULTIPLIER,
-        ]);
-      } else {
-        context.setLineDash([]);
-      }
-
-      context.beginPath();
-      context.moveTo(coords.x, coords.y);
-    }
-  }
-
-  function draw(e: React.MouseEvent<HTMLCanvasElement>) {
-    if (!isDrawing || !context || !currentDrawing) return;
-    if (
-      drawingState.tool != TOOL_DRAW &&
-      drawingState.tool != TOOL_ERASE
-    )
-      return;
-
-    const coords = getCanvasCoordinates(
-      e,
-      canvasRef as React.RefObject<HTMLCanvasElement>,
-      whiteboardRef as React.RefObject<HTMLDivElement>,
-    );
-    if (!coords) return;
-
-    // Convert to feet coordinates for storage
-    const feetPoint = coordSystem.pixelsToFeet(coords.x, coords.y);
-
-    // Update the current drawing's points with feet coordinates
-    setCurrentDrawing((prev) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        points: [...prev.points, feetPoint],
-      };
-    });
-
-    if (drawingState.tool == TOOL_ERASE) {
-      // Use circular eraser
-      context.save();
-      context.globalCompositeOperation =
-        COMPOSITE_DESTINATION_OUT;
-      context.beginPath();
-      context.arc(
-        coords.x,
-        coords.y,
-        drawingState.eraseSize / 2,
-        0,
-        Math.PI * 2,
-      );
-      context.fill();
-      context.restore();
-    } else {
-      // Normal drawing
-      context.lineTo(coords.x, coords.y);
-      context.strokeStyle = drawingState.color;
-      context.lineWidth = drawingState.brushSize;
-      context.lineCap = "round";
-      context.lineJoin = "round";
-      context.stroke();
-      setDrawingPath((prev) => [
-        ...prev,
-        { x: coords.x, y: coords.y },
-      ]);
-    }
-  }
-
-  function stopDrawing() {
-    if (!context) return;
-
-    // Draw line ending if applicable (arrow or T-shape)
-    if (
-      drawingState.tool == TOOL_DRAW &&
-      drawingState.lineEnd != LINE_END_NONE &&
-      drawingPath.length >= 2
-    ) {
-      const endPoint = drawingPath[drawingPath.length - 1];
-      if (!endPoint) return;
-      
-      const angle = calculateAverageAngle(drawingPath);
-
-      // Save context state
-      context.save();
-
-      // Clear any line dash for the endings (endings should always be solid)
-      context.setLineDash([]);
-
-      // Set style to match the line
-      context.strokeStyle = drawingState.color;
-      context.fillStyle = drawingState.color;
-      context.lineWidth = drawingState.brushSize;
-      context.lineCap = "round";
-      context.lineJoin = "round";
-
-      if (drawingState.lineEnd == LINE_END_ARROW) {
-        drawArrow(
-          context,
-          endPoint,
-          angle,
-          drawingState.brushSize,
-        );
-      } else if (drawingState.lineEnd == LINE_END_TSHAPE) {
-        drawTShape(
-          context,
-          endPoint,
-          angle,
-          drawingState.brushSize,
-        );
-      }
-
-      // Restore context state
-      context.restore();
-    }
-
-    setIsDrawing(false);
-    context.closePath();
-    // Reset to normal composite mode
-    context.globalCompositeOperation = COMPOSITE_SOURCE_OVER;
-    setDrawingPath([]);
-
-    // Add both draw and erase strokes to the drawings array
-    // Erase strokes need to be stored so they persist when the canvas is redrawn
-    if (currentDrawing) {
-      setDrawings((prev) => [...prev, currentDrawing]);
-    }
-    setCurrentDrawing(null);
-  }
 
   function getCursorStyle() {
     switch (drawingState.tool) {
@@ -673,18 +330,13 @@ export function Canvas({
     }
   }
 
-  function handleMouseMove(
-    e: React.MouseEvent<HTMLCanvasElement>,
-  ) {
-    const coords = getCanvasCoordinates(
-      e,
-      canvasRef as React.RefObject<HTMLCanvasElement>,
-      whiteboardRef as React.RefObject<HTMLDivElement>,
-    );
-    if (!coords) return;
-
-    setCursorPosition({ x: coords.x, y: coords.y });
-    draw(e);
+  function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+    if (!whiteboardRef.current) return;
+    const rect = whiteboardRef.current.getBoundingClientRect();
+    setCursorPosition({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    });
   }
 
   function handleMouseEnter() {
@@ -694,23 +346,19 @@ export function Canvas({
   function handleMouseLeave() {
     setIsOverCanvas(false);
     setCursorPosition(null);
-    stopDrawing();
   }
 
   function handleCanvasClick(
-    e: React.MouseEvent<HTMLCanvasElement>,
+    e: React.MouseEvent<HTMLDivElement>,
   ) {
     if (drawingState.tool != TOOL_ADD_PLAYER) return;
+    if (!whiteboardRef.current) return;
 
-    const coords = getCanvasCoordinates(
-      e,
-      canvasRef as React.RefObject<HTMLCanvasElement>,
-      whiteboardRef as React.RefObject<HTMLDivElement>,
-    );
-    if (!coords) return;
+    const rect = whiteboardRef.current.getBoundingClientRect();
+    const pixelX = e.clientX - rect.left;
+    const pixelY = e.clientY - rect.top;
 
-    // Convert to feet coordinates for storage
-    const feetCoords = coordSystem.pixelsToFeet(coords.x, coords.y);
+    const feetCoords = coordSystem.pixelsToFeet(pixelX, pixelY);
 
     const newPlayer = {
       id: `player-${Date.now()}`,
@@ -722,9 +370,9 @@ export function Canvas({
 
     setPlayers((prev) => [...prev, newPlayer]);
     setSelectedPlayerId(newPlayer.id);
-    // Pass viewport coordinates for the fixed-position dialog
     setLabelDialogPosition({ x: e.clientX, y: e.clientY });
     setShowLabelDialog(true);
+    console.log('[Canvas] add player', newPlayer)
   }
 
   function handlePlayerPositionChange(
@@ -812,47 +460,56 @@ export function Canvas({
         ref={whiteboardRef}
         className="w-full bg-white rounded-2xl shadow-lg relative border-2 border-gray-300"
         style={{
+          cursor: getCursorStyle(),
           height: showPlayBar
             ? "calc(100vh - 302px)"
             : "calc(100vh - 122px)",
           transition: "height 800ms ease-in-out",
           overflow: "hidden",
         }}
+        onMouseMove={handleMouseMove}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onClick={handleCanvasClick}
       >
         {/* Field background fills the whiteboard and expands with it */}
         <FootballField />
 
+				{/* SVG layer for structured drawings */}
+				<div className='absolute top-0 left-0 w-full h-full pointer-events-auto'>
+					<SVGCanvas
+						width={canvasDimensions.width}
+						height={canvasDimensions.height}
+						coordSystem={coordSystem}
+						drawings={drawings}
+						onChange={setDrawings}
+						activeTool={
+							drawingState.tool == TOOL_DRAW
+								? 'draw'
+								: drawingState.tool == TOOL_ERASE
+									? 'erase'
+									: 'select'
+						}
+						onDeleteDrawing={(id) =>
+							setDrawings(
+								drawings.filter((drawing) => drawing.id != id),
+							)
+						}
+						eraseSize={drawingState.eraseSize}
+						autoCorrect={true}
+						defaultStyle={defaultPathStyle}
+						snapThreshold={drawingState.snapThreshold}
+					/>
+				</div>
+
         {/* Canvas and all interactive elements - as children of whiteboard */}
         <div
           className="absolute top-0 left-0 w-full h-full"
-          style={{ cursor: getCursorStyle() }}
-          onMouseMove={(e) => {
-            // Track cursor position at container level so it updates even when over players
-            const rect =
-              whiteboardRef.current?.getBoundingClientRect();
-            if (rect) {
-              setCursorPosition({
-                x: e.clientX - rect.left,
-                y: e.clientY - rect.top,
-              });
-            }
-          }}
-          onMouseEnter={() => setIsOverCanvas(true)}
-          onMouseLeave={() => {
-            setIsOverCanvas(false);
-            setCursorPosition(null);
-          }}
-        >
-          <canvas
-            ref={canvasRef}
-            onMouseDown={startDrawing}
-            onMouseMove={handleMouseMove}
-            onMouseUp={stopDrawing}
-            onClick={handleCanvasClick}
-            className="w-full h-full absolute top-0 left-0 pointer-events-auto"
-            style={{ cursor: getCursorStyle() }}
-          />
-
+            style={{
+              cursor: getCursorStyle(),
+              pointerEvents: 'none', // Always none - this div only contains cursor overlays
+            }}
+          >
           {/* Custom Pencil Cursor - only visible when draw tool is active */}
           {drawingState.tool == TOOL_DRAW &&
             isOverCanvas &&
@@ -942,42 +599,31 @@ export function Canvas({
             )}
 
           <div
-            ref={containerRef}
-            className="absolute top-0 left-0 w-full h-full pointer-events-none"
+            className="absolute top-0 left-0 w-full h-full"
+            style={{ pointerEvents: 'none' }}
           >
-            <div
-              className="absolute top-0 left-0 w-full h-full"
-              style={{
-                pointerEvents: linemanInteractable
-                  ? "auto"
-                  : "none",
-              }}
-            >
-              {linemanPositions.map((pos) => (
-                <Lineman
-                  key={pos.id}
-                  id={pos.id}
-                  initialX={pos.x}
-                  initialY={pos.y}
-                  containerWidth={canvasDimensions.width}
-                  containerHeight={canvasDimensions.height}
-                  isCenter={pos.id == 2}
-                  onPositionChange={handleLinemanPositionChange}
-                  onFill={handleFillLineman}
-                  interactable={linemanInteractable}
-                  currentTool={drawingState.tool}
-                />
-              ))}
-            </div>
+            {linemanPositions.map((pos) => (
+              <Lineman
+                key={pos.id}
+                id={pos.id}
+                initialX={pos.x}
+                initialY={pos.y}
+                containerWidth={canvasDimensions.width}
+                containerHeight={canvasDimensions.height}
+                isCenter={pos.id == 2}
+                onPositionChange={handleLinemanPositionChange}
+                onFill={handleFillLineman}
+                interactable={linemanInteractable}
+                currentTool={drawingState.tool}
+              />
+            ))}
           </div>
 
           <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
             <div
               className="absolute top-0 left-0 w-full h-full"
               style={{
-                pointerEvents: playerInteractable
-                  ? "auto"
-                  : "none",
+                pointerEvents: 'none',
               }}
             >
               {players.map((player) => (

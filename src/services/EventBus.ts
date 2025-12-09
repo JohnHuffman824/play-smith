@@ -5,6 +5,7 @@
 
 import type { Tool } from '../types/play.types'
 import type { HashAlignment } from '../types/field.types'
+import type { Drawing } from '../types/drawing.types'
 
 /**
  * Central registry of all application events with their payload types
@@ -22,7 +23,7 @@ export interface EventMap {
 	'dialog:closeAll': void
 	'dialog:openColorPicker': void
 	'dialog:openDraw': void
-	'dialog:openRoute': void
+	'dialog:openDrawing': void
 	'dialog:openHash': void
 	
 	// Canvas operations
@@ -40,8 +41,10 @@ export interface EventMap {
 	// Component operations
 	'component:add': void
 	
-	// Route operations
-	'route:add': { route: unknown }
+	// Drawing operations
+	'drawing:add': { drawing: unknown }
+	'drawing:delete': { id: string }
+	'drawing:update': { id: string; drawing: Partial<Drawing> }
 	
 	// System events
 	'system:resize': void

@@ -21,7 +21,7 @@ const SHORTCUTS = {
 	e: 'erase',
 	c: 'color',
 	f: 'fill',
-	r: 'route',
+	r: 'drawing',
 	h: 'hash',
 	g: 'addComponent',
 } as const
@@ -77,7 +77,7 @@ export function useKeyboardShortcuts({
 					break
 				case 'r':
 					event.preventDefault()
-					eventBus.emit('dialog:openRoute')
+					eventBus.emit('dialog:openDrawing')
 					break
 				case 'h':
 					event.preventDefault()
@@ -118,7 +118,7 @@ export function getAllShortcuts(): Record<string, string> {
 		'E': 'Erase tool',
 		'C': 'Color picker',
 		'F': 'Fill tool',
-		'R': 'Route tool',
+		'R': 'Drawing tool',
 		'H': 'Hash alignment',
 		'G': 'Add component',
 		'⌘Z': 'Undo',

@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { Trash2 } from 'lucide-react';
 import { useFieldCoordinates } from '../../hooks/useFieldCoordinates';
 import { usePlayerDrag } from '../../hooks/usePlayerDrag';
@@ -160,6 +160,7 @@ export function Player({
       }}
       style={{
         position: 'absolute',
+        pointerEvents: interactable ? 'auto' : 'none',
         left: `${pixelPos.x}px`,
         top: `${pixelPos.y}px`,
         width: `${radiusInPixels * 2}px`,
@@ -184,7 +185,7 @@ export function Player({
           justifyContent: 'center',
           color: 'white',
           fontWeight: 'bold',
-          fontSize: '14px',
+          fontSize: '16px',
           fontFamily: 'SF Compact Rounded, system-ui, sans-serif',
         }}
       >

@@ -49,8 +49,9 @@ describe('useKeyboardShortcuts', () => {
 		})
 
 		it('should return undefined for unmapped tool', () => {
-			expect(getShortcutForTool('color')).toBe('C')
-			expect(getShortcutForTool('route')).toBe('R')
+			expect(
+				getShortcutForTool('route' as unknown as DrawingState['tool']),
+			).toBeUndefined()
 		})
 
 		it('should return all shortcuts as map', () => {

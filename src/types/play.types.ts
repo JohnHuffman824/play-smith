@@ -2,7 +2,15 @@
  * Play and tool-related types
  */
 
-export type Tool = 'select' | 'addPlayer' | 'draw' | 'erase' | 'color' | 'fill' | 'route' | 'addComponent'
+export type Tool =
+	| 'select'
+	| 'addPlayer'
+	| 'draw'
+	| 'erase'
+	| 'color'
+	| 'fill'
+	| 'drawing'
+	| 'addComponent'
 
 export interface DrawingState {
 	tool: Tool
@@ -11,6 +19,7 @@ export interface DrawingState {
 	lineStyle: 'solid' | 'dashed'
 	lineEnd: 'none' | 'arrow' | 'tShape'
 	eraseSize: number
+	snapThreshold: number
 }
 
 export interface PlayCard {

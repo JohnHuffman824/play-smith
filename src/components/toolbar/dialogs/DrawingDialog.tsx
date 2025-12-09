@@ -2,11 +2,11 @@ import { X } from 'lucide-react';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { eventBus } from '../../../services/EventBus';
 
-interface RouteDialogProps {
+interface DrawingDialogProps {
   onClose: () => void;
 }
 
-const routes = [
+const drawings = [
   { number: 1, name: 'Flat', description: 'Quick horizontal route' },
   { number: 2, name: 'Slant', description: 'Diagonal inside cut' },
   { number: 3, name: 'Comeback', description: 'Out and back towards QB' },
@@ -18,11 +18,11 @@ const routes = [
   { number: 9, name: 'Go', description: 'Straight vertical route' },
 ];
 
-export function RouteDialog({ onClose }: RouteDialogProps) {
+export function DrawingDialog({ onClose }: DrawingDialogProps) {
   const { theme } = useTheme();
   
-  const handleRouteSelect = (route: typeof routes[0]) => {
-    eventBus.emit('drawing:add', { drawing: route });
+  const handleDrawingSelect = (drawing: typeof drawings[0]) => {
+    eventBus.emit('drawing:add', { drawing });
     onClose();
   };
 
@@ -47,10 +47,10 @@ export function RouteDialog({ onClose }: RouteDialogProps) {
       </div>
 
       <div className="space-y-2">
-        {routes.map((route) => (
+        {drawings.map((route) => (
           <button
             key={route.number}
-            onClick={() => handleRouteSelect(route)}
+            onClick={() => handleDrawingSelect(route)}
             className={`w-full p-3 rounded-xl border transition-all text-left group cursor-pointer ${
               theme === 'dark'
                 ? 'bg-gray-700 hover:bg-gray-600 border-gray-600 hover:border-blue-500'

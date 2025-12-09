@@ -21,7 +21,7 @@ import { useDialogAutoClose } from "../../hooks/useDialogAutoClose";
 import { ColorPickerDialog } from "./dialogs/ColorPickerDialog";
 import { DrawOptionsDialog } from "./dialogs/DrawOptionsDialog";
 import { EraseDialog } from "./dialogs/EraseDialog";
-import { RouteDialog } from "./dialogs/RouteDialog";
+import { DrawingDialog } from "./dialogs/DrawingDialog";
 import { ConfirmDialog } from "./dialogs/ConfirmDialog";
 import { HashDialog } from "./dialogs/HashDialog";
 import { SettingsDialog } from "./dialogs/SettingsDialog";
@@ -50,13 +50,16 @@ export function Toolbar({
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showDrawOptions, setShowDrawOptions] = useState(false);
   const [showEraseDialog, setShowEraseDialog] = useState(false);
-  const [showRouteDialog, setShowRouteDialog] = useState(false);
+  const [showDrawingDialog, setShowDrawingDialog] = useState(false);
   const [showClearConfirm, setShowClearConfirm] =
     useState(false);
   const [showHashDialog, setShowHashDialog] = useState(false);
   const [showSettingsDialog, setShowSettingsDialog] =
     useState(false);
   const drawDialogRef = useRef<HTMLDivElement>(null);
+  const handleSnapThresholdChange = (value: number) => {
+    setDrawingState({ ...drawingState, snapThreshold: value });
+  };
 
   // Auto-close dialogs when cursor moves away
   useDialogAutoClose({
@@ -84,9 +87,9 @@ export function Toolbar({
   });
 
   useDialogAutoClose({
-    isOpen: showRouteDialog,
-    onClose: () => setShowRouteDialog(false),
-    dataAttribute: 'data-route-dialog',
+    isOpen: showDrawingDialog,
+    onClose: () => setShowDrawingDialog(false),
+    dataAttribute: 'data-drawing-dialog',
   });
 
   useDialogAutoClose({
@@ -110,7 +113,7 @@ export function Toolbar({
     const handleColorPickerTrigger = () => {
       // Close all other dialogs first
       setShowDrawOptions(false);
-      setShowRouteDialog(false);
+      setShowDrawingDialog(false);
       setShowHashDialog(false);
       
       // Toggle color picker
@@ -121,20 +124,20 @@ export function Toolbar({
     return () => eventBus.off('dialog:openColorPicker', handleColorPickerTrigger);
   }, []);
 
-  // Listen for route tool keyboard shortcut
+  // Listen for drawing tool keyboard shortcut
   useEffect(() => {
     const handleRouteToolTrigger = () => {
       // Close all other dialogs first
-      setShowColorPicker(false);
-      setShowDrawOptions(false);
-      setShowHashDialog(false);
+    setShowColorPicker(false);
+    setShowDrawOptions(false);
+    setShowHashDialog(false);
       
-      // Toggle route dialog
-      setShowRouteDialog(prev => !prev);
+      // Toggle drawing dialog
+      setShowDrawingDialog(prev => !prev);
     };
 
-    eventBus.on('dialog:openRoute', handleRouteToolTrigger);
-    return () => eventBus.off('dialog:openRoute', handleRouteToolTrigger);
+    eventBus.on('dialog:openDrawing', handleRouteToolTrigger);
+    return () => eventBus.off('dialog:openDrawing', handleRouteToolTrigger);
   }, []);
 
   // Listen for hash dialog keyboard shortcut
@@ -143,7 +146,7 @@ export function Toolbar({
       // Close all other dialogs first
       setShowColorPicker(false);
       setShowDrawOptions(false);
-      setShowRouteDialog(false);
+      setShowDrawingDialog(false);
       
       // Toggle hash dialog
       setShowHashDialog(prev => !prev);
@@ -158,7 +161,7 @@ export function Toolbar({
     const handleCloseAllDialogs = () => {
       setShowColorPicker(false);
       setShowDrawOptions(false);
-      setShowRouteDialog(false);
+      setShowDrawingDialog(false);
       setShowHashDialog(false);
     };
 
@@ -170,7 +173,7 @@ export function Toolbar({
     // Close all dialogs when switching tools
     setShowColorPicker(false);
     setShowDrawOptions(false);
-    setShowRouteDialog(false);
+    setShowDrawingDialog(false);
 
     if (tool === "color") {
       setShowColorPicker(true);
@@ -188,8 +191,8 @@ export function Toolbar({
       return;
     }
 
-    if (tool === "route") {
-      setShowRouteDialog(true);
+    if (tool === "drawing") {
+      setShowDrawingDialog(true);
       return;
     }
 
@@ -377,11 +380,11 @@ export function Toolbar({
           </button>
         </Tooltip>
 
-        {/* Route Tool - COMMENTED OUT */}
-        {/* <Tooltip content="Add Route (R)">
+        {/* Drawing Tool - COMMENTED OUT */}
+        {/* <Tooltip content="Add Drawing (R)">
           <button
-            onClick={() => handleToolChange("route")}
-            className={toolButtonClass(showRouteDialog)}
+            onClick={() => handleToolChange("drawing")}
+            className={toolButtonClass(showDrawingDialog)}
           >
             <ArrowDown
               size={24}
@@ -537,9 +540,9 @@ export function Toolbar({
         />
       )}
 
-      {showRouteDialog && (
-        <RouteDialog
-          onClose={() => setShowRouteDialog(false)}
+      {showDrawingDialog && (
+        <DrawingDialog
+          onClose={() => setShowDrawingDialog(false)}
         />
       )}
 
@@ -565,6 +568,8 @@ export function Toolbar({
 
       {showSettingsDialog && (
         <SettingsDialog
+          snapThreshold={drawingState.snapThreshold}
+          onSnapThresholdChange={handleSnapThresholdChange}
           onClose={() => setShowSettingsDialog(false)}
         />
       )}

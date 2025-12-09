@@ -109,12 +109,15 @@ We are going to need a login page with user authentication at some point. This c
 
 ## Future ideas:
 
-- Allow for free hand drawing to automatically correct to most similar shape (straighten lines, make corners sharper etc)
+- Allow for free hand drawing to automatically correct to most similar shape (straighten lines, make corners sharper, smooth curves etc)
 - Have pre-set routes with terminology attached based on the offensive system
 - Play concept support (specific routes and plays that can be added together)
-- Play sheet creation
+- Play sheet creation?
 - Import/export to and from hudl?
-- Annotations at specific points on routes (UI tbd)
+- Import/export to PDF/slides?
+- Annotations at specific points on routes, like top of the route (end) or sharp turns (UI tbd). Small icons/markers appear at key points (e.g., a dot at the break, an icon at the endpoint) that are static. Markers that show details on interaction (e.g., hover shows "12-yard break" or "45° angle"). Draggable handles at key points to adjust the route shape directly (like vector editing in Figma/Illustrator). Ability to attach coach notes or technique cues at specific points (e.g., "head fake here", "stack the DB")
+
+
 - Outsource MySQL
 - Analysis of strengths and weaknesses of current play versus opponent formation/play? 
 - Weekly playbooks? Change their appearance of the defense based on what the opposing team plays?

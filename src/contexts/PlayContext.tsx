@@ -4,10 +4,11 @@
  * Eliminates props drilling through multiple component levels
  */
 
-import { createContext, useContext, useReducer, ReactNode } from 'react'
+import { createContext, useContext, useReducer } from 'react'
+import type { ReactNode } from 'react'
 import type { DrawingState, PlayCard, Tool } from '../types/play.types'
 import type { HashAlignment } from '../types/field.types'
-import type { DrawingObject } from '../types/drawing.types'
+import type { Drawing } from '../types/drawing.types'
 
 interface Player {
 	id: string
@@ -26,7 +27,7 @@ interface PlayState {
 	hashAlignment: HashAlignment
 	showPlayBar: boolean
 	players: Player[]
-	drawings: DrawingObject[]
+	drawings: Drawing[]
 }
 
 type PlayAction =
@@ -43,8 +44,10 @@ type PlayAction =
 	| { type: 'ADD_PLAYER'; player: Player }
 	| { type: 'UPDATE_PLAYER'; id: string; updates: Partial<Player> }
 	| { type: 'DELETE_PLAYER'; id: string }
-	| { type: 'ADD_DRAWING'; drawing: DrawingObject }
-	| { type: 'SET_DRAWINGS'; drawings: DrawingObject[] }
+	| { type: 'ADD_DRAWING'; drawing: Drawing }
+	| { type: 'SET_DRAWINGS'; drawings: Drawing[] }
+	| { type: 'DELETE_DRAWING'; id: string }
+	| { type: 'UPDATE_DRAWING'; id: string; updates: Partial<Drawing> }
 	| { type: 'CLEAR_CANVAS' }
 
 interface PlayContextType {
@@ -60,6 +63,10 @@ interface PlayContextType {
 	deletePlayCard: (id: string) => void
 	setHashAlignment: (alignment: HashAlignment) => void
 	setShowPlayBar: (show: boolean) => void
+	setDrawings: (drawings: Drawing[]) => void
+	addDrawing: (drawing: Drawing) => void
+	deleteDrawing: (id: string) => void
+	updateDrawing: (id: string, updates: Partial<Drawing>) => void
 }
 
 const PlayContext = createContext<PlayContextType | undefined>(undefined)
@@ -72,6 +79,7 @@ const initialState: PlayState = {
 		lineStyle: 'solid',
 		lineEnd: 'none',
 		eraseSize: 40,
+		snapThreshold: 20,
 	},
 	formation: '',
 	play: '',
@@ -147,6 +155,22 @@ function playReducer(state: PlayState, action: PlayAction): PlayState {
 		case 'SET_DRAWINGS':
 			return { ...state, drawings: action.drawings }
 		
+		case 'DELETE_DRAWING':
+			return {
+				...state,
+				drawings: state.drawings.filter((drawing) => drawing.id !== action.id),
+			}
+		
+		case 'UPDATE_DRAWING':
+			return {
+				...state,
+				drawings: state.drawings.map((drawing) =>
+					drawing.id === action.id
+						? { ...drawing, ...action.updates }
+						: drawing,
+				),
+			}
+		
 		case 'CLEAR_CANVAS':
 			return { ...state, drawings: [], players: [] }
 		
@@ -190,6 +214,18 @@ export function PlayProvider({ children }: { children: ReactNode }) {
 	
 	const setShowPlayBar = (show: boolean) =>
 		dispatch({ type: 'SET_SHOW_PLAY_BAR', show })
+	
+	const setDrawings = (drawings: Drawing[]) =>
+		dispatch({ type: 'SET_DRAWINGS', drawings })
+	
+	const addDrawing = (drawing: Drawing) =>
+		dispatch({ type: 'ADD_DRAWING', drawing })
+	
+	const deleteDrawing = (id: string) =>
+		dispatch({ type: 'DELETE_DRAWING', id })
+	
+	const updateDrawing = (id: string, updates: Partial<Drawing>) =>
+		dispatch({ type: 'UPDATE_DRAWING', id, updates })
 
 	const value: PlayContextType = {
 		state,
@@ -203,6 +239,10 @@ export function PlayProvider({ children }: { children: ReactNode }) {
 		deletePlayCard,
 		setHashAlignment,
 		setShowPlayBar,
+		setDrawings,
+		addDrawing,
+		deleteDrawing,
+		updateDrawing,
 	}
 
 	return <PlayContext.Provider value={value}>{children}</PlayContext.Provider>
