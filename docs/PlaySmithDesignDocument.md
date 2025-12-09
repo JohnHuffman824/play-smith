@@ -105,6 +105,14 @@ By default, each play auto-populates with 5 offensive linemen:
 - Center (middle lineman) is automatically placed at field center
 - Position can be adjusted via the hash button (left hash, middle, or right hash)
 
+### Drawing–Player Linking
+
+- Link by dragging a drawing node inside a player’s radius (glow indicates snap); one drawing per player
+- The linked control point hides (drawn behind the player) and moves in lockstep with the player
+- Dragging a linked drawing moves its player; dragging the player moves the drawing (bidirectional lock)
+- Unlink via the player label dialog (unlink button beside custom text/delete); the node reappears ~5 ft along the prior segment direction from the player
+- If no link exists, the player dialog’s custom text input spans the full row
+
 ### Placeholder Ideas
 
 - Individual player tags depending on system
