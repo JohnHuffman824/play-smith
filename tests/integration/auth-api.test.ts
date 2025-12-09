@@ -92,4 +92,61 @@ describe('Auth API', () => {
 			expect(response.status).toBe(400)
 		})
 	})
+
+	describe('POST /api/auth/register', () => {
+		test('successful registration creates user and returns session', async () => {
+			const response = await fetch('http://localhost:3000/api/auth/register', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					email: 'newuser@example.com',
+					name: 'New User',
+					password: 'newpassword123',
+				}),
+			})
+
+			expect(response.status).toBe(201)
+
+			const data = await response.json()
+			expect(data.user).toBeDefined()
+			expect(data.user.email).toBe('newuser@example.com')
+			expect(data.user.name).toBe('New User')
+
+			const setCookie = response.headers.get('Set-Cookie')
+			expect(setCookie).toContain('session_token=')
+
+			// Cleanup
+			const user = await userRepo.findByEmail('newuser@example.com')
+			if (user) {
+				await db`DELETE FROM sessions WHERE user_id = ${user.id}`
+				await db`DELETE FROM users WHERE id = ${user.id}`
+			}
+		})
+
+		test('register with existing email returns 409', async () => {
+			const response = await fetch('http://localhost:3000/api/auth/register', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					email: testEmail, // Already exists from beforeAll
+					name: 'Duplicate User',
+					password: 'password123',
+				}),
+			})
+
+			expect(response.status).toBe(409)
+			const data = await response.json()
+			expect(data.error).toBe('Email already registered')
+		})
+
+		test('register without required fields returns 400', async () => {
+			const response = await fetch('http://localhost:3000/api/auth/register', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ email: 'test@example.com' }),
+			})
+
+			expect(response.status).toBe(400)
+		})
+	})
 })

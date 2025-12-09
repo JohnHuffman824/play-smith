@@ -78,7 +78,45 @@ export const authAPI = {
 
 	// POST /api/auth/register - Create new user account
 	async register(req: Request): Promise<Response> {
-		return Response.json({ error: 'Not implemented' }, { status: 501 })
+		const body = await req.json()
+		const { email, name, password } = body
+
+		if (!email || !name || !password) {
+			return Response.json(
+				{ error: 'Email, name, and password are required' },
+				{ status: 400 }
+			)
+		}
+
+		const existing = await userRepo.findByEmail(email)
+		if (existing) {
+			return Response.json(
+				{ error: EMAIL_EXISTS },
+				{ status: 409 }
+			)
+		}
+
+		const passwordHash = await authService.hashPassword(password)
+		const user = await userRepo.create({
+			email,
+			name,
+			password_hash: passwordHash,
+		})
+
+		const token = authService.generateSessionToken()
+		await sessionRepo.create(user.id, token)
+
+		const sevenDaysInSeconds = 7 * 24 * 60 * 60
+
+		return Response.json(
+			{ user: { id: user.id, email: user.email, name: user.name } },
+			{
+				status: 201,
+				headers: {
+					'Set-Cookie': createSessionCookie(token, sevenDaysInSeconds),
+				},
+			}
+		)
 	},
 
 	// POST /api/auth/logout - Destroy session
