@@ -17,6 +17,7 @@ describe('UserRepository', () => {
 		const user = await repo.create({
 			email: 'test@example.com',
 			name: 'Test User',
+			password_hash: '$2a$10$test.hash.placeholder',
 		});
 
 		expect(user.id).toBeGreaterThan(0);
