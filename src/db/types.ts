@@ -31,6 +31,15 @@ export interface Playbook {
 	updated_at: Date;
 }
 
+export interface PlaybookShare {
+	id: number;
+	playbook_id: number;
+	shared_with_team_id: number;
+	permission: 'view' | 'edit';
+	shared_by: number;
+	shared_at: Date;
+}
+
 export interface Play {
 	id: number;
 	playbook_id: number;
