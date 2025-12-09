@@ -10,7 +10,8 @@
     "test": "bun test",
     "test:watch": "bun test --watch",
     "test:coverage": "bun test --coverage",
-    "migrate": "bun src/db/migrate.ts"
+    "migrate": "bun src/db/migrate.ts",
+    "seed:dev": "bun src/db/seed-dev.ts"
   },
   "dependencies": {
     "bun-plugin-tailwind": "^0.1.2",
