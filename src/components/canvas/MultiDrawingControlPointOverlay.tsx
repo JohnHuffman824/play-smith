@@ -168,7 +168,8 @@ export function MultiDrawingControlPointOverlay({
 		}
 	}
 
-	// Collect all control points and deduplicate by position to avoid phantom nodes
+	// Collect all control points from shared point pools
+	// No deduplication needed - each drawing's point pool already has unique points!
 	const controlPoints: Array<{
 		drawingId: string
 		pointId: string
@@ -178,34 +179,26 @@ export function MultiDrawingControlPointOverlay({
 	}> = []
 
 	for (const drawing of drawings) {
-		for (const segment of drawing.segments) {
-			for (const point of segment.points) {
-				// Skip points linked to players
-				if (drawing.playerId && drawing.linkedPointId == point.id) {
-					continue
-				}
-
-				// Check if we already have a point at this position
-				const alreadyExists = controlPoints.some(
-					(cp) => Math.abs(cp.x - point.x) < 0.01 && Math.abs(cp.y - point.y) < 0.01,
-				)
-
-				if (!alreadyExists) {
-					controlPoints.push({
-						drawingId: drawing.id,
-						pointId: point.id,
-						x: point.x,
-						y: point.y,
-						color: drawing.style.color,
-					})
-				}
+		// Iterate over the point pool directly
+		for (const [pointId, point] of Object.entries(drawing.points)) {
+			// Skip points linked to players
+			if (drawing.playerId && drawing.linkedPointId == pointId) {
+				continue
 			}
+
+			controlPoints.push({
+				drawingId: drawing.id,
+				pointId: point.id,
+				x: point.x,
+				y: point.y,
+				color: drawing.style.color,
+			})
 		}
 	}
 
 	return (
 		<g ref={overlayRef} pointerEvents="visiblePainted">
-			{/* Render deduplicated control points */}
+			{/* Render control points from shared pools */}
 			{controlPoints.map((cp) => {
 				const pixel = coordSystem.feetToPixels(cp.x, cp.y)
 				return (

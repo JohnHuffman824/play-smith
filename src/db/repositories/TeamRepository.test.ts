@@ -15,6 +15,7 @@ describe('TeamRepository', () => {
 		const user = await userRepo.create({
 			email: 'team-test@example.com',
 			name: 'Team Test User',
+			password_hash: '$2a$10$test.hash.placeholder',
 		});
 		testUserId = user.id;
 	});

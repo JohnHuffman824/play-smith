@@ -398,16 +398,18 @@ export function Canvas({
 			setDrawings(
 				drawings.map((drawing) => {
 					if (drawing.playerId != id) return drawing
+					// Update all points in the shared pool
+					const updatedPoints: Record<string, import('../../types/drawing.types').ControlPoint> = {}
+					for (const [pointId, point] of Object.entries(drawing.points)) {
+						updatedPoints[pointId] = {
+							...point,
+							x: point.x + deltaX,
+							y: point.y + deltaY,
+						}
+					}
 					return {
 						...drawing,
-						segments: drawing.segments.map((segment) => ({
-							...segment,
-							points: segment.points.map((point) => ({
-								...point,
-								x: point.x + deltaX,
-								y: point.y + deltaY,
-							})),
-						})),
+						points: updatedPoints,
 					}
 				}),
 			)
@@ -482,19 +484,21 @@ export function Canvas({
 			drawings.map((drawing) => {
 				if (drawing.id != drawingId) return drawing
 
-				const updatedSegments = drawing.segments.map((segment) => ({
-					...segment,
-					points: segment.points.map((point) => {
-						if (point.id != pointId) return point
-						return { ...point, x: player.x, y: player.y }
-					}),
-				}))
+				// Update the linked point in the shared pool
+				const updatedPoints = {
+					...drawing.points,
+					[pointId]: {
+						...drawing.points[pointId]!,
+						x: player.x,
+						y: player.y,
+					},
+				}
 
-				return { 
-					...drawing, 
-					playerId, 
+				return {
+					...drawing,
+					playerId,
 					linkedPointId: pointId,
-					segments: updatedSegments,
+					points: updatedPoints,
 				}
 			}),
 		)
@@ -508,17 +512,28 @@ export function Canvas({
 		if (!player) return
 
 		// Find all points in the drawing to determine neighboring point
-		const allPoints = linkedDrawing.segments.flatMap((seg) => seg.points)
-		const linkedPointIndex = allPoints.findIndex(
-			(p) => p.id == linkedDrawing.linkedPointId,
-		)
-		
+		const allPoints = Object.values(linkedDrawing.points)
+		const linkedPoint = linkedDrawing.points[linkedDrawing.linkedPointId]
+
 		// Find a neighboring point to calculate unlink direction
+		// Look through segments to find a segment containing the linked point
 		let neighborPoint = null
-		if (linkedPointIndex > 0) {
-			neighborPoint = allPoints[linkedPointIndex - 1]
-		} else if (linkedPointIndex < allPoints.length - 1) {
-			neighborPoint = allPoints[linkedPointIndex + 1]
+		for (const segment of linkedDrawing.segments) {
+			const pointIndex = segment.pointIds.indexOf(linkedDrawing.linkedPointId)
+			if (pointIndex !== -1) {
+				// Found the segment with our linked point
+				if (pointIndex > 0) {
+					// Get previous point in segment
+					const prevId = segment.pointIds[pointIndex - 1]
+					neighborPoint = linkedDrawing.points[prevId!]
+					break
+				} else if (pointIndex < segment.pointIds.length - 1) {
+					// Get next point in segment
+					const nextId = segment.pointIds[pointIndex + 1]
+					neighborPoint = linkedDrawing.points[nextId!]
+					break
+				}
+			}
 		}
 
 		const newPosition = neighborPoint
@@ -532,20 +547,22 @@ export function Canvas({
 		setDrawings(
 			drawings.map((drawing) => {
 				if (drawing.id != linkedDrawing.id) return drawing
-				
-				const updatedSegments = drawing.segments.map((segment) => ({
-					...segment,
-					points: segment.points.map((point) => {
-						if (point.id != linkedDrawing.linkedPointId) return point
-						return { ...point, x: newPosition.x, y: newPosition.y }
-					}),
-				}))
-				
+
+				// Update the unlinked point in the shared pool
+				const updatedPoints = {
+					...drawing.points,
+					[linkedDrawing.linkedPointId]: {
+						...drawing.points[linkedDrawing.linkedPointId]!,
+						x: newPosition.x,
+						y: newPosition.y,
+					},
+				}
+
 				return {
 					...drawing,
 					playerId: undefined,
 					linkedPointId: undefined,
-					segments: updatedSegments,
+					points: updatedPoints,
 				}
 			}),
 		)

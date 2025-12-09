@@ -119,57 +119,59 @@ export function mergeDrawings(
 	sourcePointId: string,
 	targetPointId: string,
 ): Drawing {
-	const sourceSegments = cloneSegments(
-		ensurePointIsEnd(sourceDrawing, sourcePointId),
-	)
-	const targetSegments = cloneSegments(
-		ensurePointIsStart(targetDrawing, targetPointId),
-	)
+	// Determine if we need to reverse segments to make junction points meet
+	const sourceIsEnd = isEndPoint(sourceDrawing, sourcePointId)
+	const sourceIsStart = isStartPoint(sourceDrawing, sourcePointId)
+	const targetIsStart = isStartPoint(targetDrawing, targetPointId)
+	const targetIsEnd = isEndPoint(targetDrawing, targetPointId)
 
-	const sourceLastSegment = sourceSegments[sourceSegments.length - 1]
-	const targetFirstSegment = targetSegments[0]
-	const targetFirstPoint = targetFirstSegment?.points[0]
+	// Get segments in correct order (source ends with sourcePoint, target starts with targetPoint)
+	const sourceSegments = sourceIsEnd
+		? sourceDrawing.segments
+		: sourceIsStart
+			? reverseSegments(sourceDrawing.segments)
+			: sourceDrawing.segments
 
-	let mergedSegments: PathSegment[]
+	const targetSegments = targetIsStart
+		? targetDrawing.segments
+		: targetIsEnd
+			? reverseSegments(targetDrawing.segments)
+			: targetDrawing.segments
 
-	if (
-		sourceLastSegment &&
-		targetFirstSegment &&
-		targetFirstSegment.points.length > 0
-	) {
-		const fusedPoint = { ...targetFirstPoint! }
-		const combinedPoints = [
-			...sourceLastSegment.points.slice(
-				0,
-				sourceLastSegment.points.length - 1,
-			),
-			fusedPoint,
-			...targetFirstSegment.points.slice(1),
-		]
+	// Merge point pools - target junction point gets replaced by source junction point
+	const mergedPoints: Record<string, ControlPoint> = { ...sourceDrawing.points }
 
-		// Create separate 2-point line segments so PathRenderer renders correctly
-		const bridgeSegments: PathSegment[] = []
-		for (let i = 1; i < combinedPoints.length; i++) {
-			bridgeSegments.push({
-				type: 'line',
-				points: [combinedPoints[i - 1]!, combinedPoints[i]!],
-			})
+	// Map target point IDs to new IDs (avoid collisions with source)
+	let counter = Object.keys(mergedPoints).length
+	const targetIdMap: Record<string, string> = {}
+
+	for (const [oldId, point] of Object.entries(targetDrawing.points)) {
+		if (oldId === targetPointId) {
+			// Junction point - map to source point ID (target position is stationary)
+			targetIdMap[oldId] = sourcePointId
+			// Update the source junction point to target's position (stationary node wins)
+			mergedPoints[sourcePointId] = { ...point, id: sourcePointId }
+		} else {
+			// Non-junction point - create new ID to avoid collision
+			const newId = `p-${counter++}`
+			targetIdMap[oldId] = newId
+			mergedPoints[newId] = { ...point, id: newId }
 		}
-
-		mergedSegments = [
-			...sourceSegments.slice(0, sourceSegments.length - 1),
-			...bridgeSegments,
-			...targetSegments.slice(1),
-		]
-	} else {
-		mergedSegments = [...sourceSegments, ...targetSegments]
 	}
 
-	const merged = reindexSegments(mergedSegments)
+	// Merge segments, remapping target point IDs
+	const mergedSegments: PathSegment[] = [
+		...sourceSegments,
+		...targetSegments.map((seg) => ({
+			...seg,
+			pointIds: seg.pointIds.map((id) => targetIdMap[id] || id),
+		})),
+	]
 
 	return {
 		id: `drawing-${Date.now()}`,
-		segments: merged,
+		points: mergedPoints,
+		segments: mergedSegments,
 		style: sourceDrawing.style,
 		annotations: [
 			...sourceDrawing.annotations,
@@ -186,9 +188,10 @@ export function isPointNearDrawing(
 ): boolean {
 	const segments = drawing.segments
 	for (const segment of segments) {
-		for (let i = 0; i < segment.points.length - 1; i++) {
-			const p1Feet = segment.points[i]!
-			const p2Feet = segment.points[i + 1]!
+		const points = getSegmentPoints(drawing, segment)
+		for (let i = 0; i < points.length - 1; i++) {
+			const p1Feet = points[i]!
+			const p2Feet = points[i + 1]!
 			const p1 = coordSystem.feetToPixels(p1Feet.x, p1Feet.y)
 			const p2 = coordSystem.feetToPixels(p2Feet.x, p2Feet.y)
 			const dist = pointToLineDistance(pixelPoint, p1, p2)
@@ -204,14 +207,13 @@ export function isPointNearControlPoint(
 	pixelPoint: Coordinate,
 	paddingPx: number,
 ): boolean {
-	for (const segment of drawing.segments) {
-		for (const point of segment.points) {
-			const pixel = coordSystem.feetToPixels(point.x, point.y)
-			const dx = pixelPoint.x - pixel.x
-			const dy = pixelPoint.y - pixel.y
-			const dist = Math.sqrt(dx * dx + dy * dy)
-			if (dist <= paddingPx) return true
-		}
+	// Check all points in the shared pool
+	for (const point of Object.values(drawing.points)) {
+		const pixel = coordSystem.feetToPixels(point.x, point.y)
+		const dx = pixelPoint.x - pixel.x
+		const dy = pixelPoint.y - pixel.y
+		const dist = Math.sqrt(dx * dx + dy * dy)
+		if (dist <= paddingPx) return true
 	}
 	return false
 }
@@ -219,15 +221,15 @@ export function isPointNearControlPoint(
 function isEndPoint(drawing: Drawing, pointId: string): boolean {
 	const lastSegment = drawing.segments[drawing.segments.length - 1]
 	if (!lastSegment) return false
-	const lastPoint = lastSegment.points[lastSegment.points.length - 1]
-	return lastPoint?.id == pointId
+	const lastPointId = lastSegment.pointIds[lastSegment.pointIds.length - 1]
+	return lastPointId == pointId
 }
 
 function isStartPoint(drawing: Drawing, pointId: string): boolean {
 	const firstSegment = drawing.segments[0]
 	if (!firstSegment) return false
-	const firstPoint = firstSegment.points[0]
-	return firstPoint?.id == pointId
+	const firstPointId = firstSegment.pointIds[0]
+	return firstPointId == pointId
 }
 
 function reindexSegments(segments: PathSegment[]): PathSegment[] {
@@ -244,7 +246,7 @@ function reindexSegments(segments: PathSegment[]): PathSegment[] {
 function reverseSegments(segments: PathSegment[]): PathSegment[] {
 	const reversedSegments = [...segments].reverse().map((segment) => ({
 		...segment,
-		points: [...segment.points].reverse(),
+		pointIds: [...segment.pointIds].reverse(),
 	}))
 	return reversedSegments
 }
@@ -271,13 +273,17 @@ function ensurePointIsEnd(drawing: Drawing, pointId: string): PathSegment[] {
 function getStartPoint(drawing: Drawing): ControlPoint | null {
 	const firstSegment = drawing.segments[0]
 	if (!firstSegment) return null
-	return firstSegment.points[0] ?? null
+	const firstPointId = firstSegment.pointIds[0]
+	if (!firstPointId) return null
+	return drawing.points[firstPointId] ?? null
 }
 
 function getEndPoint(drawing: Drawing): ControlPoint | null {
 	const lastSegment = drawing.segments[drawing.segments.length - 1]
 	if (!lastSegment) return null
-	return lastSegment.points[lastSegment.points.length - 1] ?? null
+	const lastPointId = lastSegment.pointIds[lastSegment.pointIds.length - 1]
+	if (!lastPointId) return null
+	return drawing.points[lastPointId] ?? null
 }
 
 function cloneSegments(segments: PathSegment[]): PathSegment[] {
@@ -285,5 +291,47 @@ function cloneSegments(segments: PathSegment[]): PathSegment[] {
 		...segment,
 		points: segment.points.map((point) => ({ ...point })),
 	}))
+}
+
+// NEW HELPER FUNCTIONS FOR SHARED POINT REFERENCES ARCHITECTURE
+
+/**
+ * Get a point from a drawing by ID.
+ * Returns the point from the shared point pool.
+ */
+export function getPoint(drawing: Drawing, pointId: string): ControlPoint | undefined {
+	return drawing.points[pointId]
+}
+
+/**
+ * Get all points for a segment (resolved from IDs).
+ * Filters out undefined points if a referenced ID doesn't exist in the pool.
+ */
+export function getSegmentPoints(drawing: Drawing, segment: PathSegment): ControlPoint[] {
+	return segment.pointIds
+		.map((id) => drawing.points[id])
+		.filter((point): point is ControlPoint => point !== undefined)
+}
+
+/**
+ * Get the start point of a drawing (first point of first segment).
+ */
+export function getDrawingStartPoint(drawing: Drawing): ControlPoint | null {
+	const firstSegment = drawing.segments[0]
+	if (!firstSegment) return null
+	const firstPointId = firstSegment.pointIds[0]
+	if (!firstPointId) return null
+	return drawing.points[firstPointId] ?? null
+}
+
+/**
+ * Get the end point of a drawing (last point of last segment).
+ */
+export function getDrawingEndPoint(drawing: Drawing): ControlPoint | null {
+	const lastSegment = drawing.segments[drawing.segments.length - 1]
+	if (!lastSegment) return null
+	const lastPointId = lastSegment.pointIds[lastSegment.pointIds.length - 1]
+	if (!lastPointId) return null
+	return drawing.points[lastPointId] ?? null
 }
 

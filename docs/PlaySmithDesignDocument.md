@@ -357,6 +357,13 @@ development stage, likely when migrating from SQLite to MySQL.
 - Double-click items in dialogs to set as defaults
 - Use targeted z-index values (minimal, effective) rather than arbitrarily
 	high values
+- Landing page idea: I have some idea for things I want try and include in this 
+landing page. Have play cards that get displayed in the play book manager. I 
+imagine on the landing page we will have a roledex type display where users will 
+see play cards display and they will be rotating along the roledex. Additionally, 
+we would have a animation which animates play cards getting transformed from play 
+cards to getting shrunk down to the grid view of the playbook and then being 
+grouped up and placed on a book.
 
 ### Information Resources
 - Potential for a walkthrough of the features on the first time opening the software

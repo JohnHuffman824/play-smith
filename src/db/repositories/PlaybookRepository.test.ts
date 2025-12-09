@@ -17,6 +17,7 @@ describe('PlaybookRepository', () => {
 		const user = await userRepo.create({
 			email: 'playbook-test@example.com',
 			name: 'Playbook Test User',
+			password_hash: '$2a$10$test.hash.placeholder',
 		});
 		testUserId = user.id;
 

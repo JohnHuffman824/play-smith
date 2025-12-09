@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { FieldCoordinateSystem } from '../../utils/coordinates'
 import { PathRenderer } from './PathRenderer'
 import { ControlPointOverlay } from './ControlPointOverlay'
+import { MultiDrawingControlPointOverlay } from './MultiDrawingControlPointOverlay'
 import { FreehandCapture } from './FreehandCapture'
 import type { PathStyle, Drawing } from '../../types/drawing.types'
 import { pointToLineDistance } from '../../utils/canvas.utils'
@@ -100,16 +101,18 @@ export function SVGCanvas({
 		x: number,
 		y: number,
 	) {
+		// With shared point pool: just update the single point!
+		// All segments referencing it will automatically use the new position
 		onChange(
 			drawings.map((drawing) => {
 				if (drawing.id != drawingId) return drawing
-				const updatedSegments = drawing.segments.map((segment) => ({
-					...segment,
-					points: segment.points.map((point) =>
-						point.id == pointId ? { ...point, x, y } : point,
-					),
-				}))
-				return { ...drawing, segments: updatedSegments }
+				return {
+					...drawing,
+					points: {
+						...drawing.points,
+						[pointId]: { ...drawing.points[pointId]!, x, y },
+					},
+				}
 			}),
 		)
 	}
@@ -122,22 +125,29 @@ export function SVGCanvas({
 	) {
 		const source = drawings.find((item) => item.id == sourceDrawingId)
 		const target = drawings.find((item) => item.id == targetDrawingId)
-		if (!source || !target) return
 
-		const merged = mergeDrawings(
-			source,
-			target,
-			sourcePointId,
-			targetPointId,
-		)
+		if (!source || !target) {
+			return
+		}
 
-		const remaining = drawings.filter(
-			(item) => item.id != sourceDrawingId && item.id != targetDrawingId,
-		)
+		try {
+			const merged = mergeDrawings(
+				source,
+				target,
+				sourcePointId,
+				targetPointId,
+			)
 
-		onChange([...remaining, merged])
-		setSelectedDrawingId(merged.id)
-		setLastDrawnDrawingId(null)
+			const remaining = drawings.filter(
+				(item) => item.id != sourceDrawingId && item.id != targetDrawingId,
+			)
+
+			onChange([...remaining, merged])
+			setSelectedDrawingId(merged.id)
+			setLastDrawnDrawingId(null)
+		} catch (error) {
+			console.error('Error during merge:', error)
+		}
 	}
 
 	function handleLinkToPlayer(
@@ -191,15 +201,16 @@ export function SVGCanvas({
 		onChange(
 			drawings.map((drawing) => {
 				if (drawing.id != drawingDragState.drawingId) return drawing
-				const updatedSegments = drawing.segments.map((segment) => ({
-					...segment,
-					points: segment.points.map((point) => ({
+				// Update all points in the shared pool
+				const updatedPoints: Record<string, import('../../types/drawing.types').ControlPoint> = {}
+				for (const [id, point] of Object.entries(drawing.points)) {
+					updatedPoints[id] = {
 						...point,
 						x: point.x + deltaX,
 						y: point.y + deltaY,
-					})),
-				}))
-				return { ...drawing, segments: updatedSegments }
+					}
+				}
+				return { ...drawing, points: updatedPoints }
 			}),
 		)
 
@@ -229,8 +240,12 @@ export function SVGCanvas({
 						y: e.clientY - rect.top,
 					}
 					const hit = drawings.find((drawing) => {
+						// Flatten all points from segments into pixels
 						const pixels = drawing.segments.flatMap((segment) =>
-							segment.points.map((p) => coordSystem.feetToPixels(p.x, p.y)),
+							segment.pointIds.map((pointId) => {
+								const point = drawing.points[pointId]
+								return point ? coordSystem.feetToPixels(point.x, point.y) : null
+							}).filter((p): p is Coordinate => p !== null)
 						)
 						for (let i = 0; i < pixels.length - 1; i++) {
 							const p1 = pixels[i]!
@@ -262,8 +277,21 @@ export function SVGCanvas({
 				/>
 			))}
 
-			{/* Show draggable nodes for selected drawing when cursor is over canvas */}
-			{selectedDrawingId && isOverCanvas && (
+			{/* Show draggable nodes for all drawings when SELECT tool is active */}
+			{activeTool === 'select' && isOverCanvas && (
+				<MultiDrawingControlPointOverlay
+					drawings={drawings}
+					players={players}
+					coordSystem={coordSystem}
+					snapThreshold={snapThreshold}
+					onDragPoint={handleDragPoint}
+					onMerge={handleMerge}
+					onLinkToPlayer={handleLinkToPlayer}
+				/>
+			)}
+
+			{/* Show draggable nodes for selected drawing when cursor is over canvas (non-SELECT tools) */}
+			{activeTool !== 'select' && selectedDrawingId && isOverCanvas && (
 				<ControlPointOverlay
 					drawing={
 						drawings.find((item) => item.id == selectedDrawingId) ??

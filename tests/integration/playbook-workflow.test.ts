@@ -31,6 +31,7 @@ describe('Playbook Workflow Integration', () => {
 		const user = await userRepo.create({
 			email: 'workflow@test.com',
 			name: 'Workflow Test',
+			password_hash: '$2a$10$test.hash.placeholder',
 		});
 		userId = user.id;
 		expect(user.id).toBeGreaterThan(0);

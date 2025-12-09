@@ -57,25 +57,43 @@ export function ControlPointOverlay({
 	const [playerSnapTarget, setPlayerSnapTarget] = useState<PlayerSnapTarget | null>(null)
 	const overlayRef = useRef<SVGGElement | null>(null)
 
+	// Use refs to avoid stale closure issues in handlePointerUp
+	const snapTargetRef = useRef<SnapTarget | null>(null)
+	const playerSnapTargetRef = useRef<PlayerSnapTarget | null>(null)
+	const dragStateRef = useRef<DragState | null>(null)
+
 	const handlePointerUp = useCallback(function handlePointerUp() {
-		if (playerSnapTarget && dragState && onLinkToPlayer) {
+		// Use refs to get current values instead of closure values
+		const currentDragState = dragStateRef.current
+		const currentSnapTarget = snapTargetRef.current
+		const currentPlayerSnapTarget = playerSnapTargetRef.current
+
+		if (!currentDragState) {
+			return
+		}
+
+		if (currentPlayerSnapTarget && currentDragState && onLinkToPlayer) {
 			onLinkToPlayer(
 				drawing.id,
-				dragState.pointId,
-				playerSnapTarget.playerId,
+				currentDragState.pointId,
+				currentPlayerSnapTarget.playerId,
 			)
-		} else if (snapTarget && dragState && onMerge) {
+		} else if (currentSnapTarget && currentDragState && onMerge) {
 			onMerge(
 				drawing.id,
-				dragState.pointId,
-				snapTarget.drawingId,
-				snapTarget.pointId,
+				currentDragState.pointId,
+				currentSnapTarget.drawingId,
+				currentSnapTarget.pointId,
 			)
 		}
+
 		setDragState(null)
 		setSnapTarget(null)
 		setPlayerSnapTarget(null)
-	}, [dragState, snapTarget, playerSnapTarget, onLinkToPlayer, onMerge, drawing.id])
+		dragStateRef.current = null
+		snapTargetRef.current = null
+		playerSnapTargetRef.current = null
+	}, [onLinkToPlayer, onMerge, drawing.id])
 
 	useEffect(() => {
 		window.addEventListener('pointerup', handlePointerUp)
@@ -105,12 +123,15 @@ export function ControlPointOverlay({
 				)
 				if (playerTarget) {
 					setPlayerSnapTarget(playerTarget)
+					playerSnapTargetRef.current = playerTarget
 					setSnapTarget(null)
+					snapTargetRef.current = null
 					return
 				}
 			}
 
 			setPlayerSnapTarget(null)
+			playerSnapTargetRef.current = null
 			const thresholdFeet = snapThreshold / coordSystem.scale
 			const target = findSnapTarget(
 				feet,
@@ -119,6 +140,7 @@ export function ControlPointOverlay({
 				thresholdFeet,
 			)
 			setSnapTarget(target)
+			snapTargetRef.current = target
 		},
 		[
 			dragState,
@@ -140,7 +162,9 @@ export function ControlPointOverlay({
 	function startDrag(pointId: string) {
 		return (event: React.PointerEvent) => {
 			event.stopPropagation()
-			setDragState({ pointId })
+			const newDragState = { pointId }
+			setDragState(newDragState)
+			dragStateRef.current = newDragState
 		}
 	}
 
@@ -150,6 +174,9 @@ export function ControlPointOverlay({
 		setDragState(null)
 		setSnapTarget(null)
 		setPlayerSnapTarget(null)
+		dragStateRef.current = null
+		snapTargetRef.current = null
+		playerSnapTargetRef.current = null
 	}
 
 	return (
@@ -158,34 +185,33 @@ export function ControlPointOverlay({
 			pointerEvents={isGlobalSelect ? 'none' : 'visiblePainted'}
 			onPointerUp={handlePointerUpLocal}
 		>
-		{drawing.segments.map((segment, segIdx) =>
-			segment.points.map((point, ptIdx) => {
-				// Hide the specific point that's linked to player
-				if (drawing.playerId && drawing.linkedPointId == point.id) {
-					return null
-				}
-				
-				const pixel = coordSystem.feetToPixels(point.x, point.y)
-				return (
-					<circle
-						key={point.id}
-						cx={pixel.x}
-						cy={pixel.y}
-						r={6}
-						fill='white'
-						stroke={drawing.style.color}
-						strokeWidth={2}
-						pointerEvents={isGlobalSelect ? 'none' : 'all'}
-						style={
-							isGlobalSelect
-								? undefined
-								: { cursor: dragState ? 'grabbing' : 'grab' }
-						}
-						onPointerDown={isGlobalSelect ? undefined : startDrag(point.id)}
-					/>
-				)
-			}),
-		)}
+		{/* Iterate over point pool instead of nested segments */}
+		{Object.values(drawing.points).map((point) => {
+			// Hide the specific point that's linked to player
+			if (drawing.playerId && drawing.linkedPointId == point.id) {
+				return null
+			}
+
+			const pixel = coordSystem.feetToPixels(point.x, point.y)
+			return (
+				<circle
+					key={point.id}
+					cx={pixel.x}
+					cy={pixel.y}
+					r={6}
+					fill='white'
+					stroke={drawing.style.color}
+					strokeWidth={2}
+					pointerEvents={isGlobalSelect ? 'none' : 'all'}
+					style={
+						isGlobalSelect
+							? undefined
+							: { cursor: dragState ? 'grabbing' : 'grab' }
+					}
+					onPointerDown={isGlobalSelect ? undefined : startDrag(point.id)}
+				/>
+			)
+		})}
 			{!isGlobalSelect && snapTarget && (
 				<circle
 					cx={coordSystem.feetToPixels(

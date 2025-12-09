@@ -1,4 +1,4 @@
-import { PathSegment, Drawing } from '../types/drawing.types'
+import { PathSegment, Drawing, ControlPoint } from '../types/drawing.types'
 
 export interface DrawingTemplateParam {
 	name: string
@@ -11,6 +11,7 @@ export interface DrawingTemplateParam {
 export interface DrawingTemplate {
 	id: string
 	name: string
+	basePoints: Record<string, ControlPoint>
 	baseSegments: PathSegment[]
 	params: DrawingTemplateParam[]
 }
@@ -19,13 +20,14 @@ export const DRAWING_TEMPLATES: DrawingTemplate[] = [
 	{
 		id: 'slant',
 		name: 'Slant',
+		basePoints: {
+			's0': { id: 's0', x: 0, y: 0, type: 'start' },
+			's1': { id: 's1', x: 3, y: 5, type: 'corner' },
+		},
 		baseSegments: [
 			{
 				type: 'line',
-				points: [
-					{ id: 's0', x: 0, y: 0, type: 'start' },
-					{ id: 's1', x: 3, y: 5, type: 'corner' },
-				],
+				pointIds: ['s0', 's1'],
 			},
 		],
 		params: [
@@ -42,14 +44,15 @@ export const DRAWING_TEMPLATES: DrawingTemplate[] = [
 	{
 		id: 'post',
 		name: 'Post',
+		basePoints: {
+			'p0': { id: 'p0', x: 0, y: 0, type: 'start' },
+			'p1': { id: 'p1', x: 5, y: 12, type: 'corner' },
+			'p2': { id: 'p2', x: 15, y: 25, type: 'end' },
+		},
 		baseSegments: [
 			{
 				type: 'line',
-				points: [
-					{ id: 'p0', x: 0, y: 0, type: 'start' },
-					{ id: 'p1', x: 5, y: 12, type: 'corner' },
-					{ id: 'p2', x: 15, y: 25, type: 'end' },
-				],
+				pointIds: ['p0', 'p1', 'p2'],
 			},
 		],
 		params: [
@@ -81,21 +84,25 @@ export function instantiateTemplate(
 	const template = DRAWING_TEMPLATES.find((item) => item.id == templateId)
 	if (!template) return null
 
+	// Deep clone the point pool
+	const points: Record<string, ControlPoint> = {}
+	for (const [id, point] of Object.entries(template.basePoints)) {
+		points[id] = {
+			...point,
+			handleIn: point.handleIn ? { ...point.handleIn } : undefined,
+			handleOut: point.handleOut ? { ...point.handleOut } : undefined,
+		}
+	}
+
+	// Clone segments (pointIds are just strings, no deep clone needed)
 	const segments = template.baseSegments.map((segment) => ({
 		type: segment.type,
-		points: segment.points.map((point) => ({
-			...point,
-			handleIn: point.handleIn
-				? { ...point.handleIn }
-				: undefined,
-			handleOut: point.handleOut
-				? { ...point.handleOut }
-				: undefined,
-		})),
+		pointIds: [...segment.pointIds],
 	}))
 
 	return {
 		id: `drawing-${templateId}-${Date.now()}`,
+		points,
 		segments,
 		style,
 		annotations: [],

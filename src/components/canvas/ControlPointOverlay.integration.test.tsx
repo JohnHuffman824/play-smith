@@ -24,31 +24,33 @@ describe('ControlPointOverlay - Node Linking Integration', () => {
 
 	const drawing1: Drawing = {
 		id: 'drawing-1',
+		points: {
+			'p1': { id: 'p1', x: 10, y: 10, type: 'corner' },
+			'p2': { id: 'p2', x: 20, y: 10, type: 'corner' },
+		},
 		segments: [
 			{
 				type: 'line',
-				points: [
-					{ id: 'p1', x: 10, y: 10, type: 'corner' },
-					{ id: 'p2', x: 20, y: 10, type: 'corner' },
-				],
+				pointIds: ['p1', 'p2'],
 			},
 		],
-		style: { color: '#ff0000', lineWidth: 2, lineStyle: 'solid', lineEnd: 'none' },
+		style: { color: '#ff0000', strokeWidth: 2, lineStyle: 'solid', lineEnd: 'none' },
 		annotations: [],
 	}
 
 	const drawing2: Drawing = {
 		id: 'drawing-2',
+		points: {
+			'p3': { id: 'p3', x: 30, y: 10, type: 'corner' },
+			'p4': { id: 'p4', x: 40, y: 10, type: 'corner' },
+		},
 		segments: [
 			{
 				type: 'line',
-				points: [
-					{ id: 'p3', x: 30, y: 10, type: 'corner' },
-					{ id: 'p4', x: 40, y: 10, type: 'corner' },
-				],
+				pointIds: ['p3', 'p4'],
 			},
 		],
-		style: { color: '#00ff00', lineWidth: 2, lineStyle: 'solid', lineEnd: 'none' },
+		style: { color: '#00ff00', strokeWidth: 2, lineStyle: 'solid', lineEnd: 'none' },
 		annotations: [],
 	}
 
@@ -98,32 +100,34 @@ describe('ControlPointOverlay - Node Linking Integration', () => {
 		// Drawing 1: (10, 30) -> (20, 30)
 		const userDrawing1: Drawing = {
 			id: 'd1',
+			points: {
+				'a': { id: 'a', x: 10, y: 30, type: 'corner' },
+				'b': { id: 'b', x: 20, y: 30, type: 'corner' },
+			},
 			segments: [
 				{
 					type: 'line',
-					points: [
-						{ id: 'a', x: 10, y: 30, type: 'corner' },
-						{ id: 'b', x: 20, y: 30, type: 'corner' },
-					],
+					pointIds: ['a', 'b'],
 				},
 			],
-			style: { color: '#ff0000', lineWidth: 2, lineStyle: 'solid', lineEnd: 'none' },
+			style: { color: '#ff0000', strokeWidth: 2, lineStyle: 'solid', lineEnd: 'none' },
 			annotations: [],
 		}
 
 		// Drawing 2: (20, 20) -> (30, 30)
 		const userDrawing2: Drawing = {
 			id: 'd2',
+			points: {
+				'c': { id: 'c', x: 20, y: 20, type: 'corner' },
+				'd': { id: 'd', x: 30, y: 30, type: 'corner' },
+			},
 			segments: [
 				{
 					type: 'line',
-					points: [
-						{ id: 'c', x: 20, y: 20, type: 'corner' },
-						{ id: 'd', x: 30, y: 30, type: 'corner' },
-					],
+					pointIds: ['c', 'd'],
 				},
 			],
-			style: { color: '#00ff00', lineWidth: 2, lineStyle: 'solid', lineEnd: 'none' },
+			style: { color: '#00ff00', strokeWidth: 2, lineStyle: 'solid', lineEnd: 'none' },
 			annotations: [],
 		}
 
@@ -221,8 +225,8 @@ describe('ControlPointOverlay - Node Linking Integration', () => {
 		const nearP3Pixel = mockCoordSystem.feetToPixels(29, 10)
 		fireEvent.pointerMove(window, { clientX: nearP3Pixel.x, clientY: nearP3Pixel.y })
 
-		// Should show green snap indicator circle
-		const snapIndicator = container.querySelector('circle[fill="rgba(0,255,0,0.3)"]')
+		// Should show green snap indicator circle (r=10, stroke=#22c55e)
+		const snapIndicator = container.querySelector('circle[r="10"][stroke="#22c55e"]')
 		expect(snapIndicator).not.toBeNull()
 	})
 })

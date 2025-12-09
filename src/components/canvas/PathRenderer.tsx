@@ -12,7 +12,7 @@ import {
 import { FieldCoordinateSystem } from '../../utils/coordinates'
 import type { Drawing } from '../../types/drawing.types'
 import type { Coordinate } from '../../types/field.types'
-import { isPointNearControlPoint } from '../../utils/drawing.utils'
+import { isPointNearControlPoint, getSegmentPoints, getPoint } from '../../utils/drawing.utils'
 
 interface PathRendererProps {
 	drawing: Drawing
@@ -106,9 +106,7 @@ export function PathRenderer({
 
 	// Get linked point for indicator
 	const linkedPoint = drawing.linkedPointId
-		? drawing.segments
-				.flatMap((seg) => seg.points)
-				.find((p) => p.id == drawing.linkedPointId)
+		? getPoint(drawing, drawing.linkedPointId)
 		: null
 	const linkedPixel = linkedPoint
 		? coordSystem.feetToPixels(linkedPoint.x, linkedPoint.y)
@@ -169,29 +167,33 @@ function buildPath(
 
 	for (let i = 0; i < drawing.segments.length; i++) {
 		const segment = drawing.segments[i]
-		if (!segment || segment.points.length == 0) continue
+		if (!segment) continue
+
+		// Resolve point IDs to actual points
+		const points = getSegmentPoints(drawing, segment)
+		if (points.length == 0) continue
 
 		if (i == 0) {
-			const first = toPixels(segment.points[0]!, coordSystem)
+			const first = toPixels(points[0]!, coordSystem)
 			commands.push(`M ${first.x} ${first.y}`)
 		}
 
 		if (segment.type == 'line') {
-			const last = segment.points[segment.points.length - 1]!
+			const last = points[points.length - 1]!
 			const target = toPixels(last, coordSystem)
 			commands.push(`L ${target.x} ${target.y}`)
 			endPoints.push(target)
 		} else if (segment.type == 'quadratic') {
-			if (segment.points.length < 2) continue
-			const control = toPixels(segment.points[0]!, coordSystem)
-			const end = toPixels(segment.points[1]!, coordSystem)
+			if (points.length < 2) continue
+			const control = toPixels(points[0]!, coordSystem)
+			const end = toPixels(points[1]!, coordSystem)
 			commands.push(`Q ${control.x} ${control.y} ${end.x} ${end.y}`)
 			endPoints.push(end)
 		} else if (segment.type == 'cubic') {
-			if (segment.points.length < 3) continue
-			const c1 = toPixels(segment.points[0]!, coordSystem)
-			const c2 = toPixels(segment.points[1]!, coordSystem)
-			const end = toPixels(segment.points[2]!, coordSystem)
+			if (points.length < 3) continue
+			const c1 = toPixels(points[0]!, coordSystem)
+			const c2 = toPixels(points[1]!, coordSystem)
+			const end = toPixels(points[2]!, coordSystem)
 			commands.push(
 				`C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${end.x} ${end.y}`,
 			)
@@ -215,9 +217,9 @@ function renderLineEnding(
 	const lastSegment = drawing.segments[drawing.segments.length - 1]
 	if (!lastSegment) return null
 
-	const pixelPoints = lastSegment.points.map((p) =>
-		toPixels(p, coordSystem),
-	)
+	// Resolve point IDs to actual points
+	const points = getSegmentPoints(drawing, lastSegment)
+	const pixelPoints = points.map((p) => toPixels(p, coordSystem))
 	if (pixelPoints.length < 2) return null
 
 	const endPoint = pixelPoints[pixelPoints.length - 1]!

@@ -10,28 +10,34 @@ describe('SVGCanvas - Control Node Visibility', () => {
 
 	const drawing1: Drawing = {
 		id: 'drawing-1',
+		points: {
+			'p1': { id: 'p1', x: 10, y: 10, type: 'corner' },
+			'p2': { id: 'p2', x: 20, y: 20, type: 'corner' },
+		},
 		segments: [
 			{
-				points: [
-					{ id: 'p1', x: 10, y: 10 },
-					{ id: 'p2', x: 20, y: 20 },
-				],
+				type: 'line',
+				pointIds: ['p1', 'p2'],
 			},
 		],
-		style: { color: '#ff0000', lineWidth: 2 },
+		style: { color: '#ff0000', strokeWidth: 2, lineStyle: 'solid', lineEnd: 'none' },
+		annotations: [],
 	}
 
 	const drawing2: Drawing = {
 		id: 'drawing-2',
+		points: {
+			'p3': { id: 'p3', x: 30, y: 30, type: 'corner' },
+			'p4': { id: 'p4', x: 40, y: 40, type: 'corner' },
+		},
 		segments: [
 			{
-				points: [
-					{ id: 'p3', x: 30, y: 30 },
-					{ id: 'p4', x: 40, y: 40 },
-				],
+				type: 'line',
+				pointIds: ['p3', 'p4'],
 			},
 		],
-		style: { color: '#00ff00', lineWidth: 2 },
+		style: { color: '#00ff00', strokeWidth: 2, lineStyle: 'solid', lineEnd: 'none' },
+		annotations: [],
 	}
 
 	test('shows control nodes for all drawings when SELECT tool is active and hovering', () => {

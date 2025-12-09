@@ -103,9 +103,10 @@ export function FreehandCapture({
 			pathPoints = straightened.points
 		}
 
-		const segments = buildLineSegments(pathPoints)
+		const { points, segments } = buildDrawingData(pathPoints)
 		const drawing: Drawing = {
 			id: `drawing-${Date.now()}`,
+			points,
 			segments,
 			style,
 			annotations: [],
@@ -145,29 +146,34 @@ export function FreehandCapture({
 	)
 }
 
-function buildLineSegments(points: Coordinate[]) {
-	const segments = []
-	for (let i = 1; i < points.length; i++) {
-		const start = points[i - 1]!
-		const end = points[i]!
+/**
+ * Build drawing data with shared point pool architecture.
+ * Creates points once in a shared pool, segments reference them by ID.
+ */
+function buildDrawingData(coords: Coordinate[]) {
+	const points: Record<string, import('../../types/drawing.types').ControlPoint> = {}
+	const segments: import('../../types/drawing.types').PathSegment[] = []
+
+	// Create unique points in the shared pool (no duplicates at boundaries)
+	for (let i = 0; i < coords.length; i++) {
+		const id = `p-${i}`
+		const coord = coords[i]!
+		points[id] = {
+			id,
+			x: coord.x,
+			y: coord.y,
+			type: 'corner',
+		}
+	}
+
+	// Create segments referencing shared points by ID
+	for (let i = 1; i < coords.length; i++) {
 		segments.push({
-			type: 'line' as const,
-			points: [
-				{
-					id: `${i - 1}`,
-					x: start.x,
-					y: start.y,
-					type: 'corner' as const,
-				},
-				{
-					id: `${i}`,
-					x: end.x,
-					y: end.y,
-					type: 'corner' as const,
-				},
-			],
+			type: 'line',
+			pointIds: [`p-${i - 1}`, `p-${i}`], // References, not copies
 		})
 	}
-	return segments
+
+	return { points, segments }
 }
 

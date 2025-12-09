@@ -13,7 +13,7 @@ export interface ControlPoint extends Coordinate {
 
 export interface PathSegment {
 	type: 'line' | 'quadratic' | 'cubic'
-	points: ControlPoint[]
+	pointIds: string[] // CHANGED: References to shared points instead of embedded points
 }
 
 export interface PathStyle {
@@ -33,6 +33,7 @@ export interface Annotation {
 
 export interface Drawing {
 	id: string
+	points: Record<string, ControlPoint> // NEW: Shared point pool
 	playerId?: string
 	linkedPointId?: string
 	segments: PathSegment[]
