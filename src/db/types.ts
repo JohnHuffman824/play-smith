@@ -2,6 +2,7 @@ export interface User {
 	id: number;
 	email: string;
 	name: string;
+	password_hash: string;
 	created_at: Date;
 	updated_at: Date;
 }
@@ -53,4 +54,12 @@ export interface Play {
 	created_by: number;
 	created_at: Date;
 	updated_at: Date;
+}
+
+export interface Session {
+	id: number;
+	user_id: number;
+	token: string;
+	expires_at: Date;
+	created_at: Date;
 }
