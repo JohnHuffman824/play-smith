@@ -11,7 +11,7 @@ interface Migration {
 async function createMigrationsTable(): Promise<void> {
 	await db`
 		CREATE TABLE IF NOT EXISTS schema_migrations (
-			id INT PRIMARY KEY,
+			id INTEGER PRIMARY KEY,
 			name VARCHAR(255) NOT NULL,
 			applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 		)

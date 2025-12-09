@@ -3,13 +3,10 @@ import type { User } from '../types';
 
 export class UserRepository {
 	async create(data: { email: string; name: string }): Promise<User> {
-		const [result] = await db<any[]>`
+		const [user] = await db<User[]>`
 			INSERT INTO users (email, name)
 			VALUES (${data.email}, ${data.name})
-		`;
-
-		const [user] = await db<User[]>`
-			SELECT * FROM users WHERE id = ${result.insertId}
+			RETURNING *
 		`;
 
 		return user;

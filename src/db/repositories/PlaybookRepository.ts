@@ -8,13 +8,10 @@ export class PlaybookRepository {
 		description?: string;
 		created_by: number;
 	}): Promise<Playbook> {
-		const [result] = await db<any[]>`
+		const [playbook] = await db<Playbook[]>`
 			INSERT INTO playbooks (team_id, name, description, created_by)
 			VALUES (${data.team_id}, ${data.name}, ${data.description || null}, ${data.created_by})
-		`;
-
-		const [playbook] = await db<Playbook[]>`
-			SELECT * FROM playbooks WHERE id = ${result.insertId}
+			RETURNING *
 		`;
 
 		return playbook;
@@ -40,27 +37,36 @@ export class PlaybookRepository {
 		id: number,
 		data: Partial<{ name: string; description: string }>
 	): Promise<Playbook | null> {
-		const updates: string[] = [];
-		const values: any[] = [];
-
-		if (data.name !== undefined) {
-			updates.push('name = ?');
-			values.push(data.name);
-		}
-		if (data.description !== undefined) {
-			updates.push('description = ?');
-			values.push(data.description);
-		}
-
-		if (updates.length === 0) {
+		if (Object.keys(data).length === 0) {
 			return this.findById(id);
 		}
 
-		values.push(id);
-		await db.unsafe(
-			`UPDATE playbooks SET ${updates.join(', ')} WHERE id = ?`,
-			values
-		);
+		// Handle updates based on which fields are provided
+		if (data.name !== undefined && data.description !== undefined) {
+			const [playbook] = await db<Playbook[]>`
+				UPDATE playbooks
+				SET name = ${data.name}, description = ${data.description}
+				WHERE id = ${id}
+				RETURNING *
+			`;
+			return playbook || null;
+		} else if (data.name !== undefined) {
+			const [playbook] = await db<Playbook[]>`
+				UPDATE playbooks
+				SET name = ${data.name}
+				WHERE id = ${id}
+				RETURNING *
+			`;
+			return playbook || null;
+		} else if (data.description !== undefined) {
+			const [playbook] = await db<Playbook[]>`
+				UPDATE playbooks
+				SET description = ${data.description}
+				WHERE id = ${id}
+				RETURNING *
+			`;
+			return playbook || null;
+		}
 
 		return this.findById(id);
 	}

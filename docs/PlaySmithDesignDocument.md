@@ -328,9 +328,8 @@ development stage, likely when migrating from SQLite to MySQL.
 
 ## Future Ideas
 
-### Drawing Enhancements
-- Auto-correct freehand drawings to nearest shape (straighten lines, sharpen
-	corners, smooth curves)
+### Play Sheet Creation
+- Ability to curate and create custom playsheets that can be printed and used in game
 
 ### Route Features
 - Pre-set routes with terminology based on offensive system
@@ -358,3 +357,8 @@ development stage, likely when migrating from SQLite to MySQL.
 - Double-click items in dialogs to set as defaults
 - Use targeted z-index values (minimal, effective) rather than arbitrarily
 	high values
+
+### Information Resources
+- Potential for a walkthrough of the features on the first time opening the software
+- Keep tutorials modular so if someone doesn't understand how to use something we 
+could add a ? icon/button to the feature which will play the tutorial for that one

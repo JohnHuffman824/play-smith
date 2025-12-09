@@ -3,13 +3,10 @@ import type { Team, TeamMember } from '../types';
 
 export class TeamRepository {
 	async create(data: { name: string }): Promise<Team> {
-		const [result] = await db<any[]>`
+		const [team] = await db<Team[]>`
 			INSERT INTO teams (name)
 			VALUES (${data.name})
-		`;
-
-		const [team] = await db<Team[]>`
-			SELECT * FROM teams WHERE id = ${result.insertId}
+			RETURNING *
 		`;
 
 		return team;
@@ -28,13 +25,10 @@ export class TeamRepository {
 		user_id: number;
 		role: 'owner' | 'editor' | 'viewer';
 	}): Promise<TeamMember> {
-		const [result] = await db<any[]>`
+		const [member] = await db<TeamMember[]>`
 			INSERT INTO team_members (team_id, user_id, role)
 			VALUES (${data.team_id}, ${data.user_id}, ${data.role})
-		`;
-
-		const [member] = await db<TeamMember[]>`
-			SELECT * FROM team_members WHERE id = ${result.insertId}
+			RETURNING *
 		`;
 
 		return member;

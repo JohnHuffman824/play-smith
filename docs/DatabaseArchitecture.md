@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the MySQL database architecture for PlaySmith, an American football play and playbook creator.
+This document describes the PostgreSQL database architecture for PlaySmith, an American football play and playbook creator.
 
 ### Key Design Decisions
 
@@ -14,6 +14,38 @@ This document describes the MySQL database architecture for PlaySmith, an Americ
 6. **Basic audit logging**: Track who changed what and when (without full version snapshots)
 7. **One-to-one player-drawing links**: Players and drawings can be linked bidirectionally; merging is prevented if both drawings have player links
 
+### PostgreSQL-Specific Features
+
+**Why PostgreSQL:**
+- **PostGIS Extension**: Advanced geometric/spatial queries for drawing control points and player positions
+- **JSONB with GIN Indexes**: Efficient querying of audit log changes
+- **Rich Type System**: Custom ENUMs, INET for IP addresses, native geometric types
+- **MVCC**: Superior concurrency control for collaborative editing
+- **Triggers & Functions**: Automatic `updated_at` management and spatial data sync
+
+**Key PostgreSQL Capabilities Used:**
+1. **Spatial Data (PostGIS)**:
+   - `GEOMETRY(POINT, 4326)` columns for player and control point locations
+   - GIST indexes for spatial queries (merge detection, proximity searches)
+   - Automatic sync between `x,y` columns and `location` geometry via triggers
+
+2. **JSONB**:
+   - Audit log `changes` field uses JSONB for efficient queries
+   - GIN indexes enable fast "show me all changes to field X" queries
+   - Binary storage format for better performance than JSON
+
+3. **Custom Types**:
+   - Strong typing via ENUMs (team_role, player_side, player_type, etc.)
+   - Type safety enforced at database level
+
+4. **Auto-incrementing IDs**:
+   - `BIGSERIAL` instead of MySQL's `BIGINT UNSIGNED AUTO_INCREMENT`
+   - Sequence-based, cleaner syntax
+
+5. **Triggers**:
+   - Automatic `updated_at` timestamp updates
+   - Spatial data synchronization (x,y ↔ location)
+
 ---
 
 ## Section 1: Core Entities (Users, Teams, Permissions)
@@ -22,32 +54,52 @@ This document describes the MySQL database architecture for PlaySmith, an Americ
 
 ```sql
 CREATE TABLE users (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
     name VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_email (email)
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE INDEX idx_users_email ON users(email);
+
+-- Trigger for updated_at
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TABLE teams (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TRIGGER update_teams_updated_at BEFORE UPDATE ON teams
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TYPE team_role AS ENUM ('owner', 'editor', 'viewer');
+
 CREATE TABLE team_members (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    team_id BIGINT UNSIGNED NOT NULL,
-    user_id BIGINT UNSIGNED NOT NULL,
-    role ENUM('owner', 'editor', 'viewer') NOT NULL DEFAULT 'viewer',
+    id BIGSERIAL PRIMARY KEY,
+    team_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    role team_role NOT NULL DEFAULT 'viewer',
     joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY unique_team_user (team_id, user_id),
+    UNIQUE (team_id, user_id),
     FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    INDEX idx_user (user_id)
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+CREATE INDEX idx_team_members_user ON team_members(user_id);
+CREATE INDEX idx_team_members_team ON team_members(team_id);
 ```
 
 **Permission model:**
@@ -58,33 +110,41 @@ CREATE TABLE team_members (
 ### Playbook Ownership & Sharing
 
 ```sql
+CREATE TYPE share_permission AS ENUM ('view', 'edit');
+
 CREATE TABLE playbooks (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    team_id BIGINT UNSIGNED NOT NULL,
+    id BIGSERIAL PRIMARY KEY,
+    team_id BIGINT NOT NULL,
     name VARCHAR(255) NOT NULL,
     description TEXT,
-    created_by BIGINT UNSIGNED NOT NULL,
+    created_by BIGINT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE,
-    FOREIGN KEY (created_by) REFERENCES users(id),
-    INDEX idx_team (team_id),
-    INDEX idx_created_by (created_by)
+    FOREIGN KEY (created_by) REFERENCES users(id)
 );
 
+CREATE INDEX idx_playbooks_team ON playbooks(team_id);
+CREATE INDEX idx_playbooks_created_by ON playbooks(created_by);
+
+CREATE TRIGGER update_playbooks_updated_at BEFORE UPDATE ON playbooks
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
 CREATE TABLE playbook_shares (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    playbook_id BIGINT UNSIGNED NOT NULL,
-    shared_with_team_id BIGINT UNSIGNED NOT NULL,
-    permission ENUM('view', 'edit') NOT NULL DEFAULT 'view',
-    shared_by BIGINT UNSIGNED NOT NULL,
+    id BIGSERIAL PRIMARY KEY,
+    playbook_id BIGINT NOT NULL,
+    shared_with_team_id BIGINT NOT NULL,
+    permission share_permission NOT NULL DEFAULT 'view',
+    shared_by BIGINT NOT NULL,
     shared_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY unique_playbook_team (playbook_id, shared_with_team_id),
+    UNIQUE (playbook_id, shared_with_team_id),
     FOREIGN KEY (playbook_id) REFERENCES playbooks(id) ON DELETE CASCADE,
     FOREIGN KEY (shared_with_team_id) REFERENCES teams(id) ON DELETE CASCADE,
-    FOREIGN KEY (shared_by) REFERENCES users(id),
-    INDEX idx_shared_team (shared_with_team_id)
+    FOREIGN KEY (shared_by) REFERENCES users(id)
 );
+
+CREATE INDEX idx_playbook_shares_shared_team ON playbook_shares(shared_with_team_id);
+CREATE INDEX idx_playbook_shares_playbook ON playbook_shares(playbook_id);
 ```
 
 **Sharing model:**
@@ -100,28 +160,34 @@ CREATE TABLE playbook_shares (
 ### Plays
 
 ```sql
+CREATE TYPE hash_position AS ENUM ('left', 'middle', 'right');
+
 CREATE TABLE plays (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    playbook_id BIGINT UNSIGNED NOT NULL,
+    id BIGSERIAL PRIMARY KEY,
+    playbook_id BIGINT NOT NULL,
     name VARCHAR(255), -- "Play" field (e.g., "Power Left")
-    formation_id BIGINT UNSIGNED, -- References team's formation library
-    personnel_id BIGINT UNSIGNED, -- References team's personnel library
-    defensive_formation_id BIGINT UNSIGNED, -- References team's formation library
-    hash_position ENUM('left', 'middle', 'right') NOT NULL DEFAULT 'middle',
+    formation_id BIGINT, -- References team's formation library
+    personnel_id BIGINT, -- References team's personnel library
+    defensive_formation_id BIGINT, -- References team's formation library
+    hash_position hash_position NOT NULL DEFAULT 'middle',
     notes TEXT, -- Optional coach notes
     display_order INT NOT NULL DEFAULT 0, -- For ordering within playbook
-    created_by BIGINT UNSIGNED NOT NULL,
+    created_by BIGINT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (playbook_id) REFERENCES playbooks(id) ON DELETE CASCADE,
     FOREIGN KEY (formation_id) REFERENCES formations(id) ON DELETE SET NULL,
     FOREIGN KEY (personnel_id) REFERENCES personnel_packages(id) ON DELETE SET NULL,
     FOREIGN KEY (defensive_formation_id) REFERENCES formations(id) ON DELETE SET NULL,
-    FOREIGN KEY (created_by) REFERENCES users(id),
-    INDEX idx_playbook (playbook_id),
-    INDEX idx_formation (formation_id),
-    INDEX idx_personnel (personnel_id)
+    FOREIGN KEY (created_by) REFERENCES users(id)
 );
+
+CREATE INDEX idx_plays_playbook ON plays(playbook_id);
+CREATE INDEX idx_plays_formation ON plays(formation_id);
+CREATE INDEX idx_plays_personnel ON plays(personnel_id);
+
+CREATE TRIGGER update_plays_updated_at BEFORE UPDATE ON plays
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 ```
 
 **Play structure:**
@@ -135,14 +201,16 @@ CREATE TABLE plays (
 
 ```sql
 CREATE TABLE play_tags (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    play_id BIGINT UNSIGNED NOT NULL,
-    tag_id BIGINT UNSIGNED NOT NULL,
-    UNIQUE KEY unique_play_tag (play_id, tag_id),
+    id BIGSERIAL PRIMARY KEY,
+    play_id BIGINT NOT NULL,
+    tag_id BIGINT NOT NULL,
+    UNIQUE (play_id, tag_id),
     FOREIGN KEY (play_id) REFERENCES plays(id) ON DELETE CASCADE,
-    FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE,
-    INDEX idx_tag (tag_id)
+    FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
 );
+
+CREATE INDEX idx_play_tags_tag ON play_tags(tag_id);
+CREATE INDEX idx_play_tags_play ON play_tags(play_id);
 ```
 
 **Tag relationships:**
@@ -158,17 +226,20 @@ CREATE TABLE play_tags (
 Each team configures their own position labels (e.g., "X/Y/Z" vs "F/A/B" systems):
 
 ```sql
+CREATE TYPE player_side AS ENUM ('offense', 'defense');
+
 CREATE TABLE team_position_labels (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    team_id BIGINT UNSIGNED NOT NULL,
-    side ENUM('offense', 'defense') NOT NULL,
+    id BIGSERIAL PRIMARY KEY,
+    team_id BIGINT NOT NULL,
+    side player_side NOT NULL,
     label VARCHAR(2) NOT NULL, -- 1-2 character designation (e.g., 'X', 'F', 'DE', 'CB')
     description VARCHAR(100), -- Optional description (e.g., "Split End", "Fullback")
     display_order INT NOT NULL DEFAULT 0, -- Order for UI display
     FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE,
-    UNIQUE KEY unique_team_side_label (team_id, side, label),
-    INDEX idx_team_side (team_id, side)
+    UNIQUE (team_id, side, label)
 );
+
+CREATE INDEX idx_team_position_labels_team_side ON team_position_labels(team_id, side);
 ```
 
 **Position label system:**
@@ -182,26 +253,54 @@ CREATE TABLE team_position_labels (
 All players (linemen, skill, offensive, defensive) stored in a single table:
 
 ```sql
+-- Enable PostGIS extension for geometric types
+CREATE EXTENSION IF NOT EXISTS postgis;
+
+CREATE TYPE player_type AS ENUM ('lineman', 'skill');
+
 CREATE TABLE players (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    play_id BIGINT UNSIGNED NOT NULL,
-    side ENUM('offense', 'defense') NOT NULL DEFAULT 'offense',
-    type ENUM('lineman', 'skill') NOT NULL,
+    id BIGSERIAL PRIMARY KEY,
+    play_id BIGINT NOT NULL,
+    side player_side NOT NULL DEFAULT 'offense',
+    type player_type NOT NULL,
     position VARCHAR(50), -- Physical position: 'C', 'LG', 'RG', 'LT', 'RT' for linemen
     label VARCHAR(2), -- Team's terminology (1-2 chars): 'F', 'X', 'Y', 'DE', 'CB', etc.
+    -- Geometric position (PostGIS POINT type for advanced spatial queries)
+    location GEOMETRY(POINT, 4326), -- SRID 4326 (WGS 84) for standard coordinate system
+    -- Also store as separate columns for backward compatibility and simple queries
     x DECIMAL(10, 2) NOT NULL, -- Position in feet
     y DECIMAL(10, 2) NOT NULL, -- Position in feet
     color VARCHAR(7) NOT NULL DEFAULT '#000000', -- Hex color
-    linked_drawing_id BIGINT UNSIGNED, -- If player is linked to a drawing
+    linked_drawing_id BIGINT, -- If player is linked to a drawing
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (play_id) REFERENCES plays(id) ON DELETE CASCADE,
-    FOREIGN KEY (linked_drawing_id) REFERENCES drawings(id) ON DELETE SET NULL,
-    INDEX idx_play (play_id),
-    INDEX idx_side (side),
-    INDEX idx_type (type),
-    INDEX idx_position (x, y) -- For spatial queries
+    FOREIGN KEY (linked_drawing_id) REFERENCES drawings(id) ON DELETE SET NULL
 );
+
+CREATE INDEX idx_players_play ON players(play_id);
+CREATE INDEX idx_players_side ON players(side);
+CREATE INDEX idx_players_type ON players(type);
+-- Spatial index using PostGIS
+CREATE INDEX idx_players_location ON players USING GIST(location);
+-- B-tree index for simple coordinate queries
+CREATE INDEX idx_players_coordinates ON players(x, y);
+
+CREATE TRIGGER update_players_updated_at BEFORE UPDATE ON players
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Trigger to keep location in sync with x, y columns
+CREATE OR REPLACE FUNCTION sync_player_location()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.location = ST_SetSRID(ST_MakePoint(NEW.x, NEW.y), 4326);
+    RETURN NEW;
+END;
+$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER sync_player_location_trigger
+    BEFORE INSERT OR UPDATE ON players
+    FOR EACH ROW EXECUTE FUNCTION sync_player_location();
 ```
 
 **Player details:**
@@ -214,26 +313,33 @@ CREATE TABLE players (
 ### Drawings
 
 ```sql
+CREATE TYPE line_style AS ENUM ('solid', 'dashed');
+CREATE TYPE line_end AS ENUM ('none', 'arrow', 'tShape');
+
 CREATE TABLE drawings (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    play_id BIGINT UNSIGNED NOT NULL,
-    linked_player_id BIGINT UNSIGNED, -- If drawing is linked to a player
-    linked_point_id BIGINT UNSIGNED, -- Which control point is anchored to the player
-    template_id BIGINT UNSIGNED, -- If created from a route template
+    id BIGSERIAL PRIMARY KEY,
+    play_id BIGINT NOT NULL,
+    linked_player_id BIGINT, -- If drawing is linked to a player
+    linked_point_id BIGINT, -- Which control point is anchored to the player
+    template_id BIGINT, -- If created from a route template
     -- Style properties (drawing-level)
     style_color VARCHAR(7) NOT NULL DEFAULT '#000000',
     style_stroke_width DECIMAL(5, 2) NOT NULL DEFAULT 2.0,
-    style_line_style ENUM('solid', 'dashed') NOT NULL DEFAULT 'solid',
-    style_line_end ENUM('none', 'arrow', 'tShape') NOT NULL DEFAULT 'none',
+    style_line_style line_style NOT NULL DEFAULT 'solid',
+    style_line_end line_end NOT NULL DEFAULT 'none',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (play_id) REFERENCES plays(id) ON DELETE CASCADE,
     FOREIGN KEY (linked_player_id) REFERENCES players(id) ON DELETE SET NULL,
     FOREIGN KEY (linked_point_id) REFERENCES control_points(id) ON DELETE SET NULL,
-    FOREIGN KEY (template_id) REFERENCES route_templates(id) ON DELETE SET NULL,
-    INDEX idx_play (play_id),
-    INDEX idx_linked_player (linked_player_id)
+    FOREIGN KEY (template_id) REFERENCES route_templates(id) ON DELETE SET NULL
 );
+
+CREATE INDEX idx_drawings_play ON drawings(play_id);
+CREATE INDEX idx_drawings_linked_player ON drawings(linked_player_id);
+
+CREATE TRIGGER update_drawings_updated_at BEFORE UPDATE ON drawings
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 ```
 
 **Drawing details:**
@@ -245,15 +351,18 @@ CREATE TABLE drawings (
 ### Segments
 
 ```sql
+CREATE TYPE segment_type AS ENUM ('line', 'quadratic', 'cubic');
+
 CREATE TABLE segments (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    drawing_id BIGINT UNSIGNED NOT NULL,
+    id BIGSERIAL PRIMARY KEY,
+    drawing_id BIGINT NOT NULL,
     segment_index INT NOT NULL, -- Order within the drawing (0, 1, 2...)
-    type ENUM('line', 'quadratic', 'cubic') NOT NULL DEFAULT 'line',
+    type segment_type NOT NULL DEFAULT 'line',
     FOREIGN KEY (drawing_id) REFERENCES drawings(id) ON DELETE CASCADE,
-    INDEX idx_drawing (drawing_id),
-    UNIQUE KEY unique_drawing_segment (drawing_id, segment_index)
+    UNIQUE (drawing_id, segment_index)
 );
+
+CREATE INDEX idx_segments_drawing ON segments(drawing_id);
 ```
 
 **Segment details:**
@@ -267,11 +376,16 @@ CREATE TABLE segments (
 ### Control Points
 
 ```sql
+CREATE TYPE point_type AS ENUM ('start', 'end', 'corner', 'curve');
+
 CREATE TABLE control_points (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    segment_id BIGINT UNSIGNED NOT NULL,
+    id BIGSERIAL PRIMARY KEY,
+    segment_id BIGINT NOT NULL,
     point_index INT NOT NULL, -- Order within the segment (0, 1, 2...)
-    type ENUM('start', 'end', 'corner', 'curve') NOT NULL,
+    type point_type NOT NULL,
+    -- Geometric position (PostGIS POINT for spatial queries)
+    location GEOMETRY(POINT, 4326),
+    -- Also store as separate columns for simple queries
     x DECIMAL(10, 2) NOT NULL, -- Position in feet
     y DECIMAL(10, 2) NOT NULL, -- Position in feet
     -- Bezier curve handles (nullable, only used for quadratic/cubic segments)
@@ -280,10 +394,19 @@ CREATE TABLE control_points (
     handle_out_x DECIMAL(10, 2),
     handle_out_y DECIMAL(10, 2),
     FOREIGN KEY (segment_id) REFERENCES segments(id) ON DELETE CASCADE,
-    INDEX idx_segment (segment_id),
-    INDEX idx_position (x, y), -- For spatial queries (merge detection, snapping)
-    UNIQUE KEY unique_segment_point (segment_id, point_index)
+    UNIQUE (segment_id, point_index)
 );
+
+CREATE INDEX idx_control_points_segment ON control_points(segment_id);
+-- PostGIS spatial index for merge detection and snapping
+CREATE INDEX idx_control_points_location ON control_points USING GIST(location);
+-- B-tree index for simple coordinate queries
+CREATE INDEX idx_control_points_coordinates ON control_points(x, y);
+
+-- Trigger to keep location in sync with x, y columns
+CREATE TRIGGER sync_control_point_location_trigger
+    BEFORE INSERT OR UPDATE ON control_points
+    FOR EACH ROW EXECUTE FUNCTION sync_player_location();
 ```
 
 **Control point details:**
@@ -295,19 +418,25 @@ CREATE TABLE control_points (
 ### Drawing Annotations
 
 ```sql
+CREATE TYPE annotation_type AS ENUM ('marker', 'text', 'icon');
+
 CREATE TABLE drawing_annotations (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    drawing_id BIGINT UNSIGNED NOT NULL,
+    id BIGSERIAL PRIMARY KEY,
+    drawing_id BIGINT NOT NULL,
     point_index INT NOT NULL, -- Which point along the route this annotation is at
-    type ENUM('marker', 'text', 'icon') NOT NULL,
+    type annotation_type NOT NULL,
     content TEXT NOT NULL, -- Annotation content (e.g., "12-yard break", "head fake here")
     offset_x DECIMAL(10, 2) NOT NULL DEFAULT 0, -- Offset from point position
     offset_y DECIMAL(10, 2) NOT NULL DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (drawing_id) REFERENCES drawings(id) ON DELETE CASCADE,
-    INDEX idx_drawing (drawing_id)
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (drawing_id) REFERENCES drawings(id) ON DELETE CASCADE
 );
+
+CREATE INDEX idx_drawing_annotations_drawing ON drawing_annotations(drawing_id);
+
+CREATE TRIGGER update_drawing_annotations_updated_at BEFORE UPDATE ON drawing_annotations
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 ```
 
 **Annotation support:**
@@ -325,18 +454,22 @@ Tags are used to categorize plays (e.g., "Short Yardage", "Red Zone", "Third Dow
 
 ```sql
 CREATE TABLE tags (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    team_id BIGINT UNSIGNED, -- NULL for preset tags, set for custom team tags
+    id BIGSERIAL PRIMARY KEY,
+    team_id BIGINT, -- NULL for preset tags, set for custom team tags
     name VARCHAR(50) NOT NULL,
     color VARCHAR(7) NOT NULL, -- Hex color code
     is_preset BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE,
-    INDEX idx_team (team_id),
-    INDEX idx_preset (is_preset),
-    UNIQUE KEY unique_tag_name (team_id, name) -- Prevents duplicates within team scope
+    UNIQUE (team_id, name) -- Prevents duplicates within team scope
 );
+
+CREATE INDEX idx_tags_team ON tags(team_id);
+CREATE INDEX idx_tags_preset ON tags(is_preset);
+
+CREATE TRIGGER update_tags_updated_at BEFORE UPDATE ON tags
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 ```
 
 **Tag scoping:**
@@ -361,17 +494,21 @@ Teams build their own libraries of formations, personnel packages, and route tem
 
 ```sql
 CREATE TABLE formations (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    team_id BIGINT UNSIGNED NOT NULL,
+    id BIGSERIAL PRIMARY KEY,
+    team_id BIGINT NOT NULL,
     name VARCHAR(100) NOT NULL, -- e.g., "I-Formation", "Spread", "Trips Right"
     description TEXT,
     is_template BOOLEAN NOT NULL DEFAULT FALSE, -- Has player positioning data?
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE,
-    INDEX idx_team (team_id),
-    UNIQUE KEY unique_team_formation (team_id, name)
+    UNIQUE (team_id, name)
 );
+
+CREATE INDEX idx_formations_team ON formations(team_id);
+
+CREATE TRIGGER update_formations_updated_at BEFORE UPDATE ON formations
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 ```
 
 **Formation usage:**
@@ -383,16 +520,17 @@ CREATE TABLE formations (
 
 ```sql
 CREATE TABLE formation_template_players (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    formation_id BIGINT UNSIGNED NOT NULL,
-    side ENUM('offense', 'defense') NOT NULL,
+    id BIGSERIAL PRIMARY KEY,
+    formation_id BIGINT NOT NULL,
+    side player_side NOT NULL,
     position_label VARCHAR(2), -- References team's position labels (e.g., 'X', 'F', 'RB')
     x DECIMAL(10, 2) NOT NULL, -- Position in feet (relative to hash_position)
     y DECIMAL(10, 2) NOT NULL,
     color VARCHAR(7) NOT NULL DEFAULT '#000000',
-    FOREIGN KEY (formation_id) REFERENCES formations(id) ON DELETE CASCADE,
-    INDEX idx_formation (formation_id)
+    FOREIGN KEY (formation_id) REFERENCES formations(id) ON DELETE CASCADE
 );
+
+CREATE INDEX idx_formation_template_players_formation ON formation_template_players(formation_id);
 ```
 
 **Template behavior:**
@@ -404,17 +542,21 @@ CREATE TABLE formation_template_players (
 
 ```sql
 CREATE TABLE personnel_packages (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    team_id BIGINT UNSIGNED NOT NULL,
+    id BIGSERIAL PRIMARY KEY,
+    team_id BIGINT NOT NULL,
     name VARCHAR(50) NOT NULL, -- e.g., "11 Personnel", "12 Personnel", "Trips Heavy"
     code VARCHAR(10), -- Optional shorthand (e.g., "11", "12", "21")
     description TEXT, -- e.g., "1 RB, 1 TE, 3 WR"
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE,
-    INDEX idx_team (team_id),
-    UNIQUE KEY unique_team_personnel (team_id, name)
+    UNIQUE (team_id, name)
 );
+
+CREATE INDEX idx_personnel_packages_team ON personnel_packages(team_id);
+
+CREATE TRIGGER update_personnel_packages_updated_at BEFORE UPDATE ON personnel_packages
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 ```
 
 **Personnel usage:**
@@ -426,21 +568,25 @@ CREATE TABLE personnel_packages (
 
 ```sql
 CREATE TABLE route_templates (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    team_id BIGINT UNSIGNED NOT NULL,
+    id BIGSERIAL PRIMARY KEY,
+    team_id BIGINT NOT NULL,
     name VARCHAR(100) NOT NULL, -- e.g., "Go Route", "Slant", "Corner", "Stick Concept"
     description TEXT,
     -- Style defaults for instantiated routes
     default_color VARCHAR(7) NOT NULL DEFAULT '#000000',
     default_stroke_width DECIMAL(5, 2) NOT NULL DEFAULT 2.0,
-    default_line_style ENUM('solid', 'dashed') NOT NULL DEFAULT 'solid',
-    default_line_end ENUM('none', 'arrow', 'tShape') NOT NULL DEFAULT 'arrow',
+    default_line_style line_style NOT NULL DEFAULT 'solid',
+    default_line_end line_end NOT NULL DEFAULT 'arrow',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE,
-    INDEX idx_team (team_id),
-    UNIQUE KEY unique_team_route (team_id, name)
+    UNIQUE (team_id, name)
 );
+
+CREATE INDEX idx_route_templates_team ON route_templates(team_id);
+
+CREATE TRIGGER update_route_templates_updated_at BEFORE UPDATE ON route_templates
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 ```
 
 **Route template structure:**
@@ -449,20 +595,21 @@ Templates store the path geometry (segments and control points) that can be inst
 
 ```sql
 CREATE TABLE route_template_segments (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    route_template_id BIGINT UNSIGNED NOT NULL,
+    id BIGSERIAL PRIMARY KEY,
+    route_template_id BIGINT NOT NULL,
     segment_index INT NOT NULL,
-    type ENUM('line', 'quadratic', 'cubic') NOT NULL DEFAULT 'line',
+    type segment_type NOT NULL DEFAULT 'line',
     FOREIGN KEY (route_template_id) REFERENCES route_templates(id) ON DELETE CASCADE,
-    INDEX idx_template (route_template_id),
-    UNIQUE KEY unique_template_segment (route_template_id, segment_index)
+    UNIQUE (route_template_id, segment_index)
 );
 
+CREATE INDEX idx_route_template_segments_template ON route_template_segments(route_template_id);
+
 CREATE TABLE route_template_control_points (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    template_segment_id BIGINT UNSIGNED NOT NULL,
+    id BIGSERIAL PRIMARY KEY,
+    template_segment_id BIGINT NOT NULL,
     point_index INT NOT NULL,
-    type ENUM('start', 'end', 'corner', 'curve') NOT NULL,
+    type point_type NOT NULL,
     x DECIMAL(10, 2) NOT NULL, -- Relative position
     y DECIMAL(10, 2) NOT NULL,
     handle_in_x DECIMAL(10, 2),
@@ -470,9 +617,10 @@ CREATE TABLE route_template_control_points (
     handle_out_x DECIMAL(10, 2),
     handle_out_y DECIMAL(10, 2),
     FOREIGN KEY (template_segment_id) REFERENCES route_template_segments(id) ON DELETE CASCADE,
-    INDEX idx_template_segment (template_segment_id),
-    UNIQUE KEY unique_template_point (template_segment_id, point_index)
+    UNIQUE (template_segment_id, point_index)
 );
+
+CREATE INDEX idx_route_template_control_points_segment ON route_template_control_points(template_segment_id);
 ```
 
 **Template instantiation:**
@@ -488,25 +636,30 @@ CREATE TABLE route_template_control_points (
 Basic audit trail to track who changed what and when. Supports collaborative editing accountability without full version history.
 
 ```sql
+CREATE TYPE audit_action AS ENUM ('create', 'update', 'delete', 'share', 'unshare');
+
 CREATE TABLE audit_log (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    user_id BIGINT UNSIGNED NOT NULL,
-    playbook_id BIGINT UNSIGNED, -- Optional: associate with playbook for filtering
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    playbook_id BIGINT, -- Optional: associate with playbook for filtering
     entity_type VARCHAR(50) NOT NULL, -- 'play', 'drawing', 'player', 'playbook', 'tag', etc.
-    entity_id BIGINT UNSIGNED NOT NULL, -- ID of the changed entity
-    action ENUM('create', 'update', 'delete', 'share', 'unshare') NOT NULL,
-    changes JSON, -- What changed: {"field": {"old": "value", "new": "value"}}
-    ip_address VARCHAR(45), -- For security tracking
+    entity_id BIGINT NOT NULL, -- ID of the changed entity
+    action audit_action NOT NULL,
+    changes JSONB, -- What changed: {"field": {"old": "value", "new": "value"}}
+    ip_address INET, -- PostgreSQL INET type for IP addresses
     user_agent TEXT, -- Browser/client information
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (playbook_id) REFERENCES playbooks(id) ON DELETE SET NULL,
-    INDEX idx_entity (entity_type, entity_id),
-    INDEX idx_user (user_id),
-    INDEX idx_playbook (playbook_id),
-    INDEX idx_created_at (created_at),
-    INDEX idx_action (action)
+    FOREIGN KEY (playbook_id) REFERENCES playbooks(id) ON DELETE SET NULL
 );
+
+CREATE INDEX idx_audit_log_entity ON audit_log(entity_type, entity_id);
+CREATE INDEX idx_audit_log_user ON audit_log(user_id);
+CREATE INDEX idx_audit_log_playbook ON audit_log(playbook_id);
+CREATE INDEX idx_audit_log_created_at ON audit_log(created_at);
+CREATE INDEX idx_audit_log_action ON audit_log(action);
+-- GIN index for efficient JSONB queries
+CREATE INDEX idx_audit_log_changes ON audit_log USING GIN(changes);
 ```
 
 **Audit log usage:**
