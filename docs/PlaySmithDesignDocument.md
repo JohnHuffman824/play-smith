@@ -5,6 +5,8 @@
 Play Smith is an American football play and playbook creator. The registered domain
 is "play-smith.com" (via Squarespace). The application provides a whiteboard-style
 system where users can create individual plays and collect them into playbooks.
+Playbooks are team-owned, with owner/editor/viewer roles and optional
+	cross-team sharing for collaborative editing or read-only access.
 
 ---
 
@@ -86,7 +88,8 @@ yardage, long yardage, third down, redzone, etc.).
 
 **Custom Tags:**
 - Dialog includes color picker and name input
-- Custom tags persist across playbooks
+- Preset tags are global; custom tags are team-specific and persist across that
+	team’s playbooks
 
 ### Play Cards Section
 
@@ -112,6 +115,7 @@ By default, each play auto-populates with 5 offensive linemen:
 - Dragging a linked drawing moves its player; dragging the player moves the drawing (bidirectional lock)
 - Unlink via the player label dialog (unlink button beside custom text/delete); the node reappears ~5 ft along the prior segment direction from the player
 - If no link exists, the player dialog’s custom text input spans the full row
+- Prevent merging two drawings when both drawings already have player links
 
 ### Placeholder Ideas
 
@@ -284,6 +288,22 @@ additional features (TBD).
 **Requirements:**
 - Export/import functionality
 - Page design (consider Google Drive UI for inspiration)
+- Playbooks belong to a team; members inherit permissions from their role
+	(owner > editor > viewer)
+- Playbooks can be shared with other teams with view or edit access; a user’s
+	effective permission is the highest between team role and share
+- Basic audit logging for create/update/delete/share events
+
+### Team Libraries & Templates
+
+- Each team maintains libraries for formations, personnel packages, and route
+	templates
+- Formation templates can auto-populate player positions relative to the chosen
+	hash position
+- Route templates instantiate full drawing geometry (segments and control
+	points) with default styling
+- Team position labels live in team settings so position naming aligns with the
+	team’s chosen terminology
 
 ---
 
@@ -299,6 +319,7 @@ development stage, likely when migrating from SQLite to MySQL.
 - Implement an efficient system for saving and retrieving components
 - Ensure good modularity in the architecture
 - Maintain clear documentation of color schemes and styling conventions
+- Add audit logging that records who changed what and when
 - **Idea:** Type a play call to intelligently generate a play using a
 	combination of deterministic programming and LLM integration (LLM interprets
 	and formats to JSON, which connects to the API for component creation)
