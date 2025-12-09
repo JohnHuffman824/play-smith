@@ -149,4 +149,40 @@ describe('Auth API', () => {
 			expect(response.status).toBe(400)
 		})
 	})
+
+	describe('POST /api/auth/logout', () => {
+		test('logout clears session', async () => {
+			// First login to get a session
+			const loginResponse = await fetch('http://localhost:3000/api/auth/login', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					email: testEmail,
+					password: testPassword,
+				}),
+			})
+
+			const cookies = loginResponse.headers.get('Set-Cookie')
+			expect(cookies).toBeTruthy()
+
+			// Now logout
+			const logoutResponse = await fetch('http://localhost:3000/api/auth/logout', {
+				method: 'POST',
+				headers: { Cookie: cookies! },
+			})
+
+			expect(logoutResponse.status).toBe(200)
+
+			const setCookie = logoutResponse.headers.get('Set-Cookie')
+			expect(setCookie).toContain('Max-Age=0')
+		})
+
+		test('logout without session succeeds', async () => {
+			const response = await fetch('http://localhost:3000/api/auth/logout', {
+				method: 'POST',
+			})
+
+			expect(response.status).toBe(200)
+		})
+	})
 })

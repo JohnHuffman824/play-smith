@@ -121,7 +121,18 @@ export const authAPI = {
 
 	// POST /api/auth/logout - Destroy session
 	async logout(req: Request): Promise<Response> {
-		return Response.json({ error: 'Not implemented' }, { status: 501 })
+		const token = getSessionToken(req)
+		if (token) {
+			await sessionRepo.deleteByToken(token)
+		}
+
+		return Response.json(
+			{ success: true },
+			{
+				status: 200,
+				headers: { 'Set-Cookie': createExpiredCookie() },
+			}
+		)
 	},
 
 	// GET /api/auth/me - Get current user from session
