@@ -309,8 +309,40 @@ additional features (TBD).
 
 ## Login & Authentication
 
-A login page with user authentication is required. This is planned for a later
-development stage, likely when migrating from SQLite to MySQL.
+**Status:** ✅ Implemented (December 2024)
+
+The application now includes a production-ready session-based authentication system that gates the entire application behind a login modal.
+
+### Authentication Features
+
+- **Session-based authentication** with PostgreSQL-backed storage
+- **HTTP-only cookies** with SameSite=Strict for security (XSS and CSRF protection)
+- **Bcrypt password hashing** (cost factor: 10) via Bun's built-in password API
+- **7-day session expiration** with automatic cleanup
+- **Self-registration** with client-side validation (email format, password strength)
+- **Modal login UI** with smooth animations and dual login/register modes
+
+### API Endpoints
+
+- `POST /api/auth/register` - Create new user account
+- `POST /api/auth/login` - Authenticate and create session
+- `POST /api/auth/logout` - Destroy session
+- `GET /api/auth/me` - Get current authenticated user
+
+### Development Setup
+
+For local development, an admin user can be seeded with:
+```bash
+bun run seed:dev  # Creates admin/admin user
+```
+
+### Technical Implementation
+
+- **Backend:** AuthService, SessionRepository, auth API endpoints
+- **Database:** Sessions table with indexes on token, user_id, and expires_at
+- **Frontend:** React Context (AuthContext) for global auth state, LoginModal component with validation
+- **Security:** Passwords never stored in plain text, sessions validated on every request
+- **Testing:** Comprehensive test coverage including unit, integration, and end-to-end tests
 
 ---
 
