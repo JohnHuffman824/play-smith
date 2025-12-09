@@ -185,4 +185,61 @@ describe('Auth API', () => {
 			expect(response.status).toBe(200)
 		})
 	})
+
+	describe('GET /api/auth/me', () => {
+		test('returns user when authenticated', async () => {
+			// Login first
+			const loginResponse = await fetch('http://localhost:3000/api/auth/login', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					email: testEmail,
+					password: testPassword,
+				}),
+			})
+
+			const cookies = loginResponse.headers.get('Set-Cookie')!
+
+			// Call /me with session cookie
+			const response = await fetch('http://localhost:3000/api/auth/me', {
+				headers: { Cookie: cookies },
+			})
+
+			expect(response.status).toBe(200)
+
+			const data = await response.json()
+			expect(data.user).toBeDefined()
+			expect(data.user.email).toBe(testEmail)
+		})
+
+		test('returns null user when not authenticated', async () => {
+			const response = await fetch('http://localhost:3000/api/auth/me')
+
+			expect(response.status).toBe(200)
+
+			const data = await response.json()
+			expect(data.user).toBeNull()
+		})
+
+		test('returns null and clears cookie for expired session', async () => {
+			// Create an expired session manually
+			const token = authService.generateSessionToken()
+			await db`
+				INSERT INTO sessions (user_id, token, expires_at)
+				VALUES (${testUserId}, ${token}, NOW() - INTERVAL '1 day')
+			`
+
+			const response = await fetch('http://localhost:3000/api/auth/me', {
+				headers: { Cookie: `session_token=${token}` },
+			})
+
+			expect(response.status).toBe(200)
+
+			const data = await response.json()
+			expect(data.user).toBeNull()
+
+			const setCookie = response.headers.get('Set-Cookie')
+			expect(setCookie).toContain('Max-Age=0')
+		})
+	})
 })

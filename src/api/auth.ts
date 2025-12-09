@@ -137,6 +137,29 @@ export const authAPI = {
 
 	// GET /api/auth/me - Get current user from session
 	async me(req: Request): Promise<Response> {
-		return Response.json({ error: 'Not implemented' }, { status: 501 })
+		const token = getSessionToken(req)
+		if (!token) {
+			return Response.json({ user: null }, { status: 200 })
+		}
+
+		const session = await sessionRepo.findValidByToken(token)
+		if (!session) {
+			return Response.json(
+				{ user: null },
+				{
+					status: 200,
+					headers: { 'Set-Cookie': createExpiredCookie() },
+				}
+			)
+		}
+
+		const user = await userRepo.findById(session.user_id)
+		if (!user) {
+			return Response.json({ user: null }, { status: 200 })
+		}
+
+		return Response.json({
+			user: { id: user.id, email: user.email, name: user.name },
+		})
 	},
 }
