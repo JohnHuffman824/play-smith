@@ -91,6 +91,64 @@ bun --hot src/index.ts
 
 The application will be available at `http://localhost:3000`
 
+## Authentication
+
+### Development Setup
+
+Play Smith uses session-based authentication with PostgreSQL-backed sessions.
+
+1. **Run migrations:**
+   ```bash
+   bun run migrate
+   ```
+
+2. **Seed admin user for development:**
+   ```bash
+   bun run seed:dev
+   ```
+
+3. **Start the dev server:**
+   ```bash
+   bun run dev
+   ```
+
+4. **Login with default admin credentials:**
+   - Username: `admin`
+   - Password: `admin`
+
+### Authentication Features
+
+- ✅ Session-based authentication with HTTP-only cookies
+- ✅ Password hashing with bcrypt (via Bun.password)
+- ✅ Self-registration with email validation
+- ✅ Client-side form validation
+- ✅ 7-day session expiration
+- ✅ Complete test coverage (unit + integration)
+
+### Production
+
+- Set `NODE_ENV=production` for production mode
+- Configure `DATABASE_URL` environment variable
+- Users can self-register or be created via admin tools
+- Sessions are automatically cleaned up on expiration
+- No admin user is seeded by default in production
+
+### API Endpoints
+
+- `POST /api/auth/register` - Create new account
+- `POST /api/auth/login` - Authenticate and create session
+- `POST /api/auth/logout` - Destroy session
+- `GET /api/auth/me` - Get current user from session
+
+### Security
+
+- Passwords are hashed with bcrypt (cost factor: 10)
+- Sessions stored server-side with cryptographically secure tokens
+- HTTP-only cookies prevent XSS attacks
+- SameSite=Strict prevents CSRF attacks
+- Password minimum length: 6 characters
+- Email format validation on client and server
+
 ### Development Workflow
 
 **Daily development:**
