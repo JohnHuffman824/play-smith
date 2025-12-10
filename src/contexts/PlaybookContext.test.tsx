@@ -145,15 +145,17 @@ function TestComponent() {
 
 describe('PlaybookContext', () => {
 	test('fetches and provides playbooks', async () => {
-		render(
-			<AuthProvider>
-				<TeamProvider>
-					<PlaybookProvider>
-						<TestComponent />
-					</PlaybookProvider>
-				</TeamProvider>
-			</AuthProvider>
-		)
+		await act(async () => {
+			render(
+				<AuthProvider>
+					<TeamProvider>
+						<PlaybookProvider>
+							<TestComponent />
+						</PlaybookProvider>
+					</TeamProvider>
+				</AuthProvider>
+			)
+		})
 
 		await waitFor(() => {
 			expect(screen.getByTestId('playbook-count').textContent).toBe('1')
@@ -161,15 +163,17 @@ describe('PlaybookContext', () => {
 	})
 
 	test('allows creating playbooks', async () => {
-		render(
-			<AuthProvider>
-				<TeamProvider>
-					<PlaybookProvider>
-						<TestComponent />
-					</PlaybookProvider>
-				</TeamProvider>
-			</AuthProvider>
-		)
+		await act(async () => {
+			render(
+				<AuthProvider>
+					<TeamProvider>
+						<PlaybookProvider>
+							<TestComponent />
+						</PlaybookProvider>
+					</TeamProvider>
+				</AuthProvider>
+			)
+		})
 
 		await waitFor(() => {
 			expect(screen.getByText('Create')).toBeDefined()
@@ -185,15 +189,17 @@ describe('PlaybookContext', () => {
 	})
 
 	test('allows updating playbooks', async () => {
-		render(
-			<AuthProvider>
-				<TeamProvider>
-					<PlaybookProvider>
-						<TestComponent />
-					</PlaybookProvider>
-				</TeamProvider>
-			</AuthProvider>
-		)
+		await act(async () => {
+			render(
+				<AuthProvider>
+					<TeamProvider>
+						<PlaybookProvider>
+							<TestComponent />
+						</PlaybookProvider>
+					</TeamProvider>
+				</AuthProvider>
+			)
+		})
 
 		await waitFor(() => {
 			expect(screen.getByText('Playbook 1')).toBeDefined()
@@ -209,15 +215,17 @@ describe('PlaybookContext', () => {
 	})
 
 	test('allows deleting playbooks', async () => {
-		render(
-			<AuthProvider>
-				<TeamProvider>
-					<PlaybookProvider>
-						<TestComponent />
-					</PlaybookProvider>
-				</TeamProvider>
-			</AuthProvider>
-		)
+		await act(async () => {
+			render(
+				<AuthProvider>
+					<TeamProvider>
+						<PlaybookProvider>
+							<TestComponent />
+						</PlaybookProvider>
+					</TeamProvider>
+				</AuthProvider>
+			)
+		})
 
 		await waitFor(() => {
 			expect(screen.getByTestId('playbook-count').textContent).toBe('1')

@@ -11,6 +11,7 @@ export interface Formation {
 	team_id: number
 	name: string
 	description: string | null
+	thumbnail: string | null
 	created_by: number
 	created_at: Date
 	updated_at: Date
@@ -33,6 +34,7 @@ export interface BaseConcept {
 	playbook_id: number | null
 	name: string
 	description: string | null
+	thumbnail: string | null
 	targeting_mode: TargetingMode
 	ball_position: BallPosition
 	play_direction: PlayDirection
@@ -61,6 +63,7 @@ export interface ConceptGroup {
 	playbook_id: number | null
 	name: string
 	description: string | null
+	thumbnail: string | null
 	formation_id: number | null
 	created_by: number
 	created_at: Date

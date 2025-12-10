@@ -1,7 +1,7 @@
 # Play Animation Engine Design Document
 
 **Created:** 2025-12-10
-**Status:** Planning
+**Status:** Ready for Implementation
 **GitHub Issue:** #6
 
 ---
@@ -12,15 +12,56 @@ This document outlines the design for Play Smith's animation engine - the #1 com
 
 ---
 
-## 2. Current Infrastructure Analysis
+## 2. Confirmed Design Decisions
 
-### 2.1 Existing Data Models
+### 2.1 UX Decisions
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| **View Location** | Modal overlay on playbook page | Click play card → full-screen modal. Close returns to grid. |
+| **Navigation** | Slideshow arrows + keyboard | Previous/next arrows, arrow keys, swipe for mobile |
+| **Viewer Behavior** | Opens animation viewer directly | One click to view/animate - simple for players |
+| **Collaboration** | View-only initially | Focus on solid animation first, add comments later |
+
+### 2.2 Technical Decisions
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| **Default Timing** | Auto-generate from route length | 15 ft/s default speed, no manual config required |
+| **Rendering** | SVG-based (match current editor) | Reuse PathRenderer, optimize to Canvas later if needed |
+| **Ball Movement** | Phase 2 feature | Get player movement solid first |
+| **Offline Support** | Not initial priority | Focus on online experience first |
+
+---
+
+## 3. Current Infrastructure Analysis
+
+### 3.1 Existing Data Models
 
 **Drawing Structure** (`src/types/drawing.types.ts`):
-- Uses shared point pool architecture: `points: Record<string, ControlPoint>`
-- Segments reference points by ID: `PathSegment { type, pointIds }`
-- Segment types: `'line' | 'quadratic' | 'cubic'`
-- Player linking via `playerId` and `linkedPointId`
+```typescript
+interface Drawing {
+  id: string
+  points: Record<string, ControlPoint>  // Shared point pool
+  playerId?: string                      // Link to player
+  linkedPointId?: string
+  segments: PathSegment[]               // References points by ID
+  style: PathStyle
+  annotations: Annotation[]
+}
+
+interface PathSegment {
+  type: 'line' | 'quadratic' | 'cubic'
+  pointIds: string[]
+}
+
+interface ControlPoint extends Coordinate {
+  id: string
+  type: 'start' | 'end' | 'corner' | 'curve'
+  handleIn?: Coordinate
+  handleOut?: Coordinate
+}
+```
 
 **Coordinate System** (`src/utils/coordinates.ts`):
 - Storage: Feet (origin bottom-left, Y increases upward)
@@ -28,87 +69,170 @@ This document outlines the design for Play Smith's animation engine - the #1 com
 - Field: 160 ft width, 360 ft height
 - Scale: `containerWidth / FIELD_WIDTH_FEET`
 
-**Player Structure** (from PlayContext):
-```typescript
-interface Player {
-  id: string
-  x: number  // Feet
-  y: number  // Feet
-  label: string
-  color: string
-}
-```
-
-### 2.2 Existing Rendering Stack
+### 3.2 Existing Rendering Stack
 
 1. **Canvas.tsx** - Main container, manages players/drawings state
 2. **SVGCanvas.tsx** - Renders drawings as SVG paths
 3. **PathRenderer.tsx** - Builds SVG path commands from segments
 4. **Player.tsx** - Renders players as positioned circles
 
-### 2.3 Event System
+### 3.3 Event System
 
 Type-safe EventBus for cross-component communication:
-- `eventBus.emit('canvas:clear')`
-- `eventBus.on('player:fill', handler)`
+```typescript
+eventBus.emit('canvas:clear')
+eventBus.on('player:fill', handler)
+```
 
 ---
 
-## 3. Animation Architecture Considerations
+## 4. Animation Architecture
 
-### 3.1 Key Questions to Resolve
+### 4.1 Component Structure
 
-1. **Viewing UX Separation**
-   - Should animation viewing be separate from the play editor?
-   - What triggers entering animation mode?
-   - How do users navigate back to editing?
+```
+src/
+├── components/
+│   └── animation/
+│       ├── PlayViewerModal.tsx      # Full-screen modal container
+│       ├── AnimationCanvas.tsx      # SVG canvas for animation
+│       ├── AnimationControls.tsx    # Playback controls bar
+│       ├── AnimatedPlayer.tsx       # Moving player marker
+│       ├── AnimatedRoute.tsx        # Route with progress indicator
+│       └── GhostTrail.tsx           # Optional ghost trail overlay
+├── contexts/
+│   └── AnimationContext.tsx         # Animation state management
+├── hooks/
+│   ├── useAnimationEngine.ts        # Core RAF loop logic
+│   ├── useAnimationTiming.ts        # Route length calculation
+│   └── useSwipeNavigation.ts        # Mobile swipe gestures
+├── utils/
+│   ├── animation.utils.ts           # Path interpolation math
+│   └── bezier.utils.ts              # Bezier curve calculations
+└── types/
+    └── animation.types.ts           # Animation type definitions
+```
 
-2. **Playbook Integration**
-   - Where does animation viewing live in the playbook workflow?
-   - Slideshow/presentation mode for cycling through plays?
-   - Grid view for browsing, expanded view for animation?
+### 4.2 Animation State (AnimationContext)
 
-3. **Permission-Based Navigation**
-   - Viewers: Can browse grid, view animations, but no edit access
-   - Editors: Same as viewers + can open play editor
-   - How do we handle the transition between viewing and editing?
+```typescript
+type AnimationPhase = 'ready' | 'snapCount' | 'execution' | 'complete'
 
-4. **Animation Data Storage**
-   - Do we extend existing Drawing/Player types with timing metadata?
-   - Where do ball events get stored?
-   - How do we handle plays with no animation data yet?
+interface AnimationState {
+  // Playback
+  phase: AnimationPhase
+  isPlaying: boolean
+  currentTime: number        // ms since execution start
+  totalDuration: number      // ms for full animation
+  playbackSpeed: number      // 0.25, 0.5, 1, 1.5, 2
+
+  // Data
+  playId: string | null
+  players: PlayerAnimationState[]
+  routes: AnimatedRoute[]
+
+  // Options
+  showGhostTrail: boolean
+  loopMode: boolean
+  routeTimings: Map<string, RouteTiming>
+}
+
+interface RouteTiming {
+  drawingId: string
+  playerId: string | null
+  totalLength: number        // feet
+  duration: number           // ms at 15 ft/s
+  segments: SegmentTiming[]
+}
+```
+
+### 4.3 Path Interpolation Functions
+
+```typescript
+// Line: Linear interpolation
+function interpolateLine(p0: Coordinate, p1: Coordinate, t: number): Coordinate
+
+// Quadratic Bezier: Q(t) = (1-t)² P0 + 2(1-t)t P1 + t² P2
+function interpolateQuadratic(p0, p1, p2, t: number): Coordinate
+
+// Cubic Bezier: C(t) = (1-t)³ P0 + 3(1-t)²t P1 + 3(1-t)t² P2 + t³ P3
+function interpolateCubic(p0, p1, p2, p3, t: number): Coordinate
+
+// Get position along entire route at progress (0-1)
+function getPositionAlongRoute(drawing, routeTiming, progress): Coordinate
+```
+
+### 4.4 Animation Engine (RAF Loop)
+
+```typescript
+function useAnimationEngine(state, dispatch) {
+  useEffect(() => {
+    if (!state.isPlaying) return
+
+    function animate(timestamp: number) {
+      const deltaTime = (timestamp - lastTime) * state.playbackSpeed
+      dispatch({ type: 'TICK', deltaTime })
+
+      if (state.currentTime < state.totalDuration) {
+        requestAnimationFrame(animate)
+      } else if (state.loopMode) {
+        dispatch({ type: 'RESET' })
+      } else {
+        dispatch({ type: 'SET_PHASE', phase: 'complete' })
+      }
+    }
+
+    requestAnimationFrame(animate)
+  }, [state.isPlaying, state.playbackSpeed])
+}
+```
 
 ---
 
-## 4. Proposed UX Architecture
+## 5. Integration Points
 
-### 4.1 Two-Mode Approach
+### 5.1 PlaybookEditor Integration
 
-**View Mode** (for all users with playbook access):
-- Grid view of play cards in playbook
-- Click card → enlarged play view with animation controls
-- Slideshow navigation (previous/next play)
-- Animation playback controls (play, pause, speed, scrub)
+Modify `PlaybookEditor.tsx` to open modal on card click:
 
-**Edit Mode** (for users with edit permissions):
-- Same as current PlayEditorPage
-- Additional "Preview Animation" button
-- Animation settings configuration
+```typescript
+// Add state
+const [showPlayViewer, setShowPlayViewer] = useState(false)
+const [viewingPlayId, setViewingPlayId] = useState<string | null>(null)
 
-### 4.2 Playbook Page Enhancements
+// Handler for animation
+function handleAnimatePlay(playId: string) {
+  setViewingPlayId(playId)
+  setShowPlayViewer(true)
+}
 
-Current route: `/playbooks/:playbookId` → PlaybookEditor
+// Render modal
+{showPlayViewer && viewingPlayId && (
+  <PlayViewerModal
+    isOpen={showPlayViewer}
+    onClose={() => setShowPlayViewer(false)}
+    playbookId={playbookId}
+    initialPlayId={viewingPlayId}
+    plays={allPlays}
+  />
+)}
+```
 
-Proposed additions:
-- Play card click → opens **PlayViewerModal** (full-screen overlay)
-- PlayViewerModal contains:
-  - Enlarged play canvas (read-only)
-  - Animation controls below
-  - Navigation arrows for slideshow
-  - Edit button (permission-gated)
-  - Close button
+### 5.2 PlayCard Modification
 
-### 4.3 Permission Flow
+Add animation trigger to `PlayCard.tsx`:
+
+```typescript
+interface PlayCardProps {
+  // ... existing props
+  onAnimate?: (id: string) => void  // NEW
+}
+
+// In thumbnail click handler, trigger animation instead of edit
+onClick={() => onAnimate?.(id) ?? onOpen(id)}
+```
+
+### 5.3 Permission Flow
 
 ```
 User clicks play card
@@ -124,196 +248,51 @@ User clicks play card
 
 ---
 
-## 5. Animation Engine Technical Design
-
-### 5.1 Core Components
-
-```
-src/
-├── components/
-│   └── animation/
-│       ├── AnimationEngine.ts       # Core animation loop
-│       ├── AnimationContext.tsx     # Animation state management
-│       ├── AnimationControls.tsx    # Playback UI
-│       ├── PlayViewer.tsx           # Read-only canvas with animation
-│       └── PlayViewerModal.tsx      # Full-screen overlay
-├── types/
-│   └── animation.types.ts           # Animation-specific types
-└── utils/
-    └── animation.utils.ts           # Interpolation, timing utilities
-```
-
-### 5.2 Animation Types (from GitHub Issue)
-
-```typescript
-interface DrawingSegment {
-  points: Point[]
-  duration_ms: number
-  start_delay_ms: number
-  style: LineStyle
-}
-
-interface PlayAnimation {
-  play_id: string
-  snap_count_duration: number
-  ball_start_player_id: string
-  ball_events: BallEvent[]
-}
-
-interface BallEvent {
-  type: 'handoff' | 'pitch' | 'pass'
-  from_player_id: string
-  to_player_id: string
-  start_time_ms: number
-}
-
-interface AnimationState {
-  status: 'ready' | 'snap_count' | 'execution' | 'complete'
-  currentTime: number
-  playbackSpeed: number  // 0.25, 0.5, 1, 1.5, 2
-  isPlaying: boolean
-  loopMode: boolean
-}
-```
-
-### 5.3 Animation Loop
-
-```typescript
-class AnimationEngine {
-  private animationFrameId: number | null = null
-  private startTime: number = 0
-  private state: AnimationState
-
-  start() {
-    this.state.status = 'snap_count'
-    this.startTime = performance.now()
-    this.tick()
-  }
-
-  private tick = () => {
-    const elapsed = (performance.now() - this.startTime) * this.state.playbackSpeed
-
-    // Update player positions along their paths
-    this.updatePlayerPositions(elapsed)
-
-    // Update ball position
-    this.updateBallPosition(elapsed)
-
-    // Check for state transitions
-    this.checkStateTransitions(elapsed)
-
-    if (this.state.isPlaying) {
-      this.animationFrameId = requestAnimationFrame(this.tick)
-    }
-  }
-}
-```
-
-### 5.4 Path Interpolation
-
-Leverage existing segment types:
-- **Line segments**: Linear interpolation between points
-- **Quadratic curves**: De Casteljau's algorithm or parametric formula
-- **Cubic curves**: Same, for smoother route breaks
-
-```typescript
-function getPositionAlongPath(
-  drawing: Drawing,
-  progress: number  // 0 to 1
-): { x: number, y: number } {
-  // Calculate total path length
-  // Find which segment contains the target progress
-  // Interpolate within that segment
-}
-```
-
----
-
 ## 6. Implementation Phases
 
-### Phase 1: Core Animation Engine
-- [ ] RequestAnimationFrame loop
-- [ ] Path interpolation utilities (line, quadratic, cubic)
-- [ ] AnimationContext for state management
-- [ ] Basic AnimationControls UI (play/pause, speed)
+### Phase 1: Foundation (2-3 days)
+**Deliverables:**
+- `src/types/animation.types.ts` - Type definitions
+- `src/utils/animation.utils.ts` - Path interpolation functions
+- `src/utils/bezier.utils.ts` - Bezier math utilities
+- Unit tests for interpolation accuracy
 
-### Phase 2: Play Viewer Component
-- [ ] PlayViewer (read-only canvas)
-- [ ] PlayViewerModal (full-screen overlay)
-- [ ] Integration with PlaybookEditor (click card → open viewer)
-- [ ] Permission-gated edit button
+### Phase 2: Context and Engine (2-3 days)
+**Deliverables:**
+- `src/contexts/AnimationContext.tsx` - Full context implementation
+- `src/hooks/useAnimationEngine.ts` - RAF loop
+- `src/hooks/useAnimationTiming.ts` - Route timing calculation
 
-### Phase 3: Ball Movement
-- [ ] Ball component
-- [ ] Handoff detection (player intersection)
-- [ ] Pitch arc calculation
-- [ ] Pass projection at 60 ft/s
-- [ ] Catch detection
+### Phase 3: Animation Components (3-4 days)
+**Deliverables:**
+- `src/components/animation/AnimatedPlayer.tsx`
+- `src/components/animation/AnimatedRoute.tsx`
+- `src/components/animation/AnimationCanvas.tsx`
+- `src/components/animation/GhostTrail.tsx`
 
-### Phase 4: Advanced Playback
-- [ ] Progress scrubber
-- [ ] Step-through mode (frame-by-frame)
-- [ ] Loop mode
-- [ ] Ghost trail option
-- [ ] Key moment markers
-
-### Phase 5: Slideshow Navigation
-- [ ] Previous/next play navigation
-- [ ] Keyboard shortcuts (arrows)
-- [ ] Touch swipe support
-- [ ] Auto-play option for presentations
-
-### Phase 6: Animation Data Persistence
-- [ ] Extend database schema for animation metadata
-- [ ] API endpoints for animation data
-- [ ] Default animation generation for plays without explicit timing
-
----
-
-## 7. Open Questions for Discussion
-
-1. **Default Animation Behavior**
-   - Should plays without explicit timing data auto-animate using defaults?
-   - Default speed: 15 ft/s (configurable per player)?
-   - Auto-detect snap count from play complexity?
-
-2. **Entry Points**
-   - Click play card → animation view?
-   - Dedicated "Present" mode for team meetings?
-   - Embed animations in exported materials?
-
-3. **Mobile Experience**
-   - Touch gestures for scrubbing?
-   - Simplified controls for small screens?
-   - Battery-saving 30 FPS mode?
-
-4. **Collaborative Features**
-   - Can viewers add comments/annotations during playback?
-   - Share specific timestamps with team?
-
----
-
-## 8. Files to Modify/Create
-
-### New Files
-- `src/types/animation.types.ts`
-- `src/utils/animation.utils.ts`
-- `src/components/animation/AnimationEngine.ts`
-- `src/components/animation/AnimationContext.tsx`
+### Phase 4: Controls and UI (2-3 days)
+**Deliverables:**
 - `src/components/animation/AnimationControls.tsx`
-- `src/components/animation/PlayViewer.tsx`
-- `src/components/animation/PlayViewerModal.tsx`
+- Speed selector, scrubber, step buttons
+- Keyboard shortcuts (Space, arrows)
 
-### Modified Files
-- `src/types/drawing.types.ts` - Add timing metadata to segments
-- `src/components/playbook-editor/PlayCard.tsx` - Add click handler for viewer
-- `src/components/playbook-editor/PlaybookEditor.tsx` - Integrate modal
-- `src/db/types.ts` - Animation database schema
-- `src/api/` - Animation data endpoints
+### Phase 5: Modal Integration (2-3 days)
+**Deliverables:**
+- `src/components/animation/PlayViewerModal.tsx`
+- `src/hooks/useSwipeNavigation.ts` - Mobile swipe
+- PlaybookEditor integration
+- PlayCard modification
+
+### Phase 6: Polish and Testing (2-3 days)
+**Deliverables:**
+- Performance optimization
+- 22-player stress test
+- Accessibility (ARIA labels, focus management)
+- Integration tests
 
 ---
 
-## 9. Performance Targets (from GitHub Issue)
+## 7. Performance Targets
 
 - 60 FPS animation rendering
 - <50ms to start from button press
@@ -321,17 +300,47 @@ function getPositionAlongPath(
 - Minimal battery drain on mobile
 
 ### Optimization Strategies
-- Canvas rendering with layer caching
+- SVG-based rendering (Canvas later if needed)
 - Reuse player sprite instances
 - Pre-calculate interpolation points
 - Pause rendering when tab not visible
 
 ---
 
-## 10. Next Steps
+## 8. Files Summary
 
-1. [ ] Review this document and clarify open questions
-2. [ ] Finalize UX flow (viewer modal vs separate page)
-3. [ ] Design animation data schema
-4. [ ] Implement Phase 1 (core engine)
-5. [ ] Iterate based on feedback
+### New Files (15)
+```
+src/types/animation.types.ts
+src/utils/animation.utils.ts
+src/utils/bezier.utils.ts
+src/contexts/AnimationContext.tsx
+src/hooks/useAnimationEngine.ts
+src/hooks/useAnimationTiming.ts
+src/hooks/useSwipeNavigation.ts
+src/components/animation/PlayViewerModal.tsx
+src/components/animation/AnimationCanvas.tsx
+src/components/animation/AnimationControls.tsx
+src/components/animation/AnimatedPlayer.tsx
+src/components/animation/AnimatedRoute.tsx
+src/components/animation/GhostTrail.tsx
+src/utils/animation.utils.test.ts
+src/contexts/AnimationContext.test.tsx
+```
+
+### Modified Files (3)
+```
+src/components/playbook-editor/PlayCard.tsx - Add onAnimate prop
+src/components/playbook-editor/PlaybookEditor.tsx - Add modal state & render
+src/services/EventBus.ts - Add animation events
+```
+
+---
+
+## 9. Future Enhancements (Phase 2+)
+
+- **Ball Movement**: Handoffs, pitches, passes with collision detection
+- **Collaborative Features**: Timestamped comments, share links
+- **Offline Support**: Cache viewed plays for game day
+- **Mobile Optimization**: Battery-saving 30 FPS mode
+- **Export**: Animated GIFs, video export

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { X, FlipHorizontal } from 'lucide-react'
 import type {
 	BaseConcept,
@@ -11,6 +11,7 @@ import { ConceptToolbar } from './ConceptToolbar'
 import { TargetingTooltip } from './TargetingTooltip'
 import { PlayProvider } from '../../contexts/PlayContext'
 import type { Tool } from '../../types/play.types'
+import { generateThumbnail } from '../../utils/thumbnail'
 
 interface ConceptDialogProps {
 	isOpen: boolean
@@ -42,6 +43,7 @@ export function ConceptDialog({
 	const [isSaving, setIsSaving] = useState(false)
 	const [nameError, setNameError] = useState('')
 	const [touched, setTouched] = useState(false)
+	const canvasContainerRef = useRef<HTMLDivElement>(null)
 
 	useEffect(() => {
 		if (isOpen && concept && mode === 'edit') {
@@ -98,9 +100,21 @@ export function ConceptDialog({
 
 		setIsSaving(true)
 		try {
+			// Generate thumbnail from canvas
+			let thumbnail: string | null = null
+			if (canvasContainerRef.current) {
+				try {
+					thumbnail = await generateThumbnail(canvasContainerRef.current)
+				} catch (error) {
+					console.warn('Failed to generate thumbnail:', error)
+					// Continue without thumbnail
+				}
+			}
+
 			const conceptData: Partial<BaseConcept> = {
 				name: trimmedName,
 				description: description.trim() || null,
+				thumbnail,
 				targeting_mode: targetingMode,
 				ball_position: ballPosition,
 				play_direction: playDirection,
@@ -225,7 +239,7 @@ export function ConceptDialog({
 					/>
 
 					{/* Canvas */}
-					<div className="flex-1 overflow-hidden">
+					<div ref={canvasContainerRef} className="flex-1 overflow-hidden">
 						<PlayProvider>
 							<Canvas
 								drawingState={{

@@ -1,5 +1,5 @@
-import { describe, test, expect, beforeEach, beforeAll, afterAll } from 'bun:test'
-import { render, screen, waitFor } from '@testing-library/react'
+import { describe, test, expect, beforeEach, afterEach, beforeAll, afterAll } from 'bun:test'
+import { render, screen, waitFor, cleanup } from '@testing-library/react'
 import { TeamProvider, useTeam } from './TeamContext'
 import { AuthProvider } from './AuthContext'
 import { act } from 'react'
@@ -39,6 +39,10 @@ afterAll(() => {
 	global.fetch = originalFetch
 })
 
+afterEach(() => {
+	cleanup()
+})
+
 function TestComponent() {
 	const { teams, currentTeamId, isLoading, switchTeam } = useTeam()
 
@@ -59,13 +63,15 @@ function TestComponent() {
 
 describe('TeamContext', () => {
 	test('fetches and provides teams', async () => {
-		render(
-			<AuthProvider>
-				<TeamProvider>
-					<TestComponent />
-				</TeamProvider>
-			</AuthProvider>
-		)
+		await act(async () => {
+			render(
+				<AuthProvider>
+					<TeamProvider>
+						<TestComponent />
+					</TeamProvider>
+				</AuthProvider>
+			)
+		})
 
 		await waitFor(() => {
 			expect(screen.getByTestId('team-count').textContent).toBe('2')
@@ -73,13 +79,15 @@ describe('TeamContext', () => {
 	})
 
 	test('allows switching teams', async () => {
-		render(
-			<AuthProvider>
-				<TeamProvider>
-					<TestComponent />
-				</TeamProvider>
-			</AuthProvider>
-		)
+		await act(async () => {
+			render(
+				<AuthProvider>
+					<TeamProvider>
+						<TestComponent />
+					</TeamProvider>
+				</AuthProvider>
+			)
+		})
 
 		await waitFor(() => {
 			expect(screen.getByText('Team 1')).toBeDefined()

@@ -7,6 +7,9 @@ global.window = window as any
 global.document = document as any
 global.navigator = window.navigator as any
 
+// Configure React Testing Library environment to suppress act() warnings
+;(global as any).IS_REACT_ACT_ENVIRONMENT = true
+
 // Polyfill ResizeObserver for tests
 global.ResizeObserver = class ResizeObserver {
 	observe() {}
