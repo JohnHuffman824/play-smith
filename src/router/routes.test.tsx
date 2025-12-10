@@ -57,7 +57,7 @@ describe('routes', () => {
 			</AuthProvider>
 		)
 
-		expect(screen.getByText('Login')).toBeDefined()
+		expect(screen.getByText('Sign in to access your playbooks')).toBeDefined()
 	})
 
 	test('404 page route works', () => {

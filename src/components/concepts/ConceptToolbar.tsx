@@ -1,4 +1,11 @@
-import { MousePointer, UserPlus, Pencil, Eraser, Palette, PaintBucket } from 'lucide-react'
+import {
+	MousePointer,
+	UserPlus,
+	Pencil,
+	Eraser,
+	Palette,
+	PaintBucket
+} from 'lucide-react'
 import type { Tool } from '../../types/play.types'
 
 interface ConceptToolbarProps {

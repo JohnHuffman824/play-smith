@@ -1,6 +1,10 @@
 import { useState } from 'react'
 import { Search, Plus } from 'lucide-react'
-import type { Formation, BaseConcept, ConceptGroup } from '../../types/concept.types'
+import type {
+	Formation,
+	BaseConcept,
+	ConceptGroup
+} from '../../types/concept.types'
 
 interface AddConceptSubDialogProps {
 	isOpen: boolean

@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react'
 import { X, FlipHorizontal } from 'lucide-react'
-import type { BaseConcept, TargetingMode, BallPosition, PlayDirection } from '../../types/concept.types'
+import type {
+	BaseConcept,
+	TargetingMode,
+	BallPosition,
+	PlayDirection
+} from '../../types/concept.types'
 import { Canvas } from '../canvas/Canvas'
 import { ConceptToolbar } from './ConceptToolbar'
 import { TargetingTooltip } from './TargetingTooltip'
@@ -35,6 +40,8 @@ export function ConceptDialog({
 	const [selectedTool, setSelectedTool] = useState<Tool>('select')
 	const [color, setColor] = useState('#000000')
 	const [isSaving, setIsSaving] = useState(false)
+	const [nameError, setNameError] = useState('')
+	const [touched, setTouched] = useState(false)
 
 	useEffect(() => {
 		if (isOpen && concept && mode === 'edit') {
@@ -44,6 +51,8 @@ export function ConceptDialog({
 			setTargetingMode(concept.targeting_mode)
 			setBallPosition(concept.ball_position)
 			setPlayDirection(concept.play_direction)
+			setNameError('')
+			setTouched(false)
 		} else if (isOpen && mode === 'create') {
 			setName('')
 			setDescription('')
@@ -51,18 +60,46 @@ export function ConceptDialog({
 			setTargetingMode('absolute_role')
 			setBallPosition('center')
 			setPlayDirection('na')
+			setNameError('')
+			setTouched(false)
 		}
 	}, [isOpen, concept, mode])
+
+	// Validate name whenever it changes
+	useEffect(() => {
+		if (!touched) return
+
+		const trimmedName = name.trim()
+		if (trimmedName.length === 0) {
+			setNameError('Concept name is required')
+		} else if (trimmedName.length > 100) {
+			setNameError('Name must be 100 characters or less')
+		} else {
+			setNameError('')
+		}
+	}, [name, touched])
 
 	if (!isOpen) return null
 
 	async function handleSave() {
-		if (!name.trim()) return
+		const trimmedName = name.trim()
+
+		// Validate before save
+		if (!trimmedName) {
+			setNameError('Concept name is required')
+			setTouched(true)
+			return
+		}
+		if (trimmedName.length > 100) {
+			setNameError('Name must be 100 characters or less')
+			setTouched(true)
+			return
+		}
 
 		setIsSaving(true)
 		try {
 			const conceptData: Partial<BaseConcept> = {
-				name: name.trim(),
+				name: trimmedName,
 				description: description.trim() || null,
 				targeting_mode: targetingMode,
 				ball_position: ballPosition,
@@ -78,6 +115,15 @@ export function ConceptDialog({
 			setIsSaving(false)
 		}
 	}
+
+	function handleNameChange(value: string) {
+		setName(value)
+		if (!touched) {
+			setTouched(true)
+		}
+	}
+
+	const isFormValid = name.trim().length > 0 && name.trim().length <= 100
 
 	function handleFlip() {
 		// TODO: Implement flip logic - mirror all drawings horizontally
@@ -112,10 +158,26 @@ export function ConceptDialog({
 						<input
 							type="text"
 							value={name}
-							onChange={e => setName(e.target.value)}
+							onChange={e => handleNameChange(e.target.value)}
 							placeholder="e.g., Mesh, Spacing, Y-Cross"
-							className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 focus:ring-2 focus:ring-blue-500"
+							maxLength={100}
+							className={`
+								w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-900
+								focus:ring-2 focus:ring-blue-500
+								${nameError && touched
+									? 'border-red-500 dark:border-red-500'
+									: 'border-gray-300 dark:border-gray-600'
+								}
+							`}
 						/>
+						{nameError && touched && (
+							<p className="mt-1 text-sm text-red-600 dark:text-red-400">
+								{nameError}
+							</p>
+						)}
+						<p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+							{name.length}/100 characters
+						</p>
 					</div>
 
 					<div>
@@ -259,7 +321,7 @@ export function ConceptDialog({
 						</button>
 						<button
 							onClick={handleSave}
-							disabled={!name.trim() || isSaving}
+							disabled={!isFormValid || isSaving}
 							className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							{isSaving ? 'Saving...' : mode === 'edit' ? 'Update' : 'Create'}
