@@ -452,8 +452,8 @@ export function Toolbar({
 					</button>
 				</Tooltip>
 
-				{/* Add Component Tool */}
-				<Tooltip content='Add Component (G)'>
+				{/* Add Concept Tool */}
+				<Tooltip content='Add Concept (G)'>
 					<button
 						onClick={() => {
 							handleToolChange('addComponent')
