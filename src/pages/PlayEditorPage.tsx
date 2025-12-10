@@ -60,6 +60,23 @@ function PlayEditorContent() {
 		return () => eventBus.off('component:add', handleAddComponent)
 	}, [])
 
+	// Listen for save event from toolbar
+	useEffect(() => {
+		function handleSave() {
+			// TODO: Implement actual save to API when ready
+			// For now, just emit save-complete immediately
+			console.log('Canvas save triggered')
+
+			// Simulate async save operation
+			setTimeout(() => {
+				eventBus.emit('canvas:save-complete')
+			}, 500)
+		}
+
+		eventBus.on('canvas:save', handleSave)
+		return () => eventBus.off('canvas:save', handleSave)
+	}, [])
+
 	// Apply selected concepts to canvas
 	useEffect(() => {
 		conceptState.appliedConcepts.forEach(chip => {

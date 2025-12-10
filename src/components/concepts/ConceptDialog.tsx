@@ -173,6 +173,7 @@ export function ConceptDialog({
 									brushSize: 3,
 									lineStyle: 'solid',
 									lineEnd: 'arrow',
+									pathMode: 'sharp',
 									eraseSize: 40,
 									snapThreshold: 20
 								}}

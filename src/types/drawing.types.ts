@@ -21,6 +21,7 @@ export interface PathStyle {
 	strokeWidth: number
 	lineStyle: 'solid' | 'dashed'
 	lineEnd: 'none' | 'arrow' | 'tShape'
+	pathMode: 'sharp' | 'curve'
 }
 
 export interface Annotation {

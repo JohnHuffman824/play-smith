@@ -34,13 +34,30 @@ export function PlaybookManagerPage() {
 	}, [playbooks, searchQuery])
 
 	const handleCreatePlaybook = async () => {
-		if (newPlaybookName.trim() && currentTeamId) {
-			const newPlaybook = await createPlaybook(newPlaybookName, currentTeamId)
-			setNewPlaybookName('')
-			setShowNewPlaybookModal(false)
-			// Navigate to the newly created playbook
-			navigate(`/playbooks/${newPlaybook.id}`)
+		console.log('[DEBUG] handleCreatePlaybook called', {
+			newPlaybookName: newPlaybookName.trim(),
+			currentTeamId,
+			teams,
+			hasName: !!newPlaybookName.trim(),
+			hasTeamId: !!currentTeamId
+		})
+
+		if (!currentTeamId) {
+			console.error('[ERROR] Cannot create playbook: No team selected (currentTeamId is null)')
+			alert('Please select a team before creating a playbook')
+			return
 		}
+
+		if (!newPlaybookName.trim()) {
+			console.error('[ERROR] Cannot create playbook: No name provided')
+			return
+		}
+
+		const newPlaybook = await createPlaybook(newPlaybookName, currentTeamId)
+		setNewPlaybookName('')
+		setShowNewPlaybookModal(false)
+		// Navigate to the newly created playbook
+		navigate(`/playbooks/${newPlaybook.id}`)
 	}
 
 	const handleRename = async (id: number, newName: string) => {

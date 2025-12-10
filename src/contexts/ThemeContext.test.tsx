@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach, vi } from 'bun:test'
-import { render, screen } from '@testing-library/react'
+import { render, screen, cleanup } from '@testing-library/react'
 import { ThemeProvider, useTheme } from './ThemeContext'
 import { act } from 'react'
 
@@ -36,6 +36,9 @@ function TestComponent() {
 
 describe('ThemeContext', () => {
 	beforeEach(() => {
+		// Clean up rendered components from previous tests
+		cleanup()
+
 		// Clean up document state between tests
 		document.documentElement.classList.remove('dark')
 

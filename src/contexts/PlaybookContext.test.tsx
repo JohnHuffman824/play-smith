@@ -2,6 +2,7 @@ import { describe, test, expect, beforeEach, afterEach } from 'bun:test'
 import { render, screen, waitFor, cleanup } from '@testing-library/react'
 import { PlaybookProvider, usePlaybook } from './PlaybookContext'
 import { TeamProvider } from './TeamContext'
+import { AuthProvider } from './AuthContext'
 import { act } from 'react'
 
 // Mock fetch
@@ -27,6 +28,15 @@ afterEach(() => {
 })
 
 global.fetch = async (url: string, options?: any) => {
+	if (url.includes('/api/auth/me')) {
+		return {
+			ok: true,
+			json: async () => ({
+				user: { id: 1, email: 'test@example.com', name: 'Test User' }
+			})
+		} as Response
+	}
+
 	if (url.includes('/api/teams')) {
 		return {
 			ok: true,
@@ -128,11 +138,13 @@ function TestComponent() {
 describe('PlaybookContext', () => {
 	test('fetches and provides playbooks', async () => {
 		render(
-			<TeamProvider>
-				<PlaybookProvider>
-					<TestComponent />
-				</PlaybookProvider>
-			</TeamProvider>
+			<AuthProvider>
+				<TeamProvider>
+					<PlaybookProvider>
+						<TestComponent />
+					</PlaybookProvider>
+				</TeamProvider>
+			</AuthProvider>
 		)
 
 		await waitFor(() => {
@@ -142,11 +154,13 @@ describe('PlaybookContext', () => {
 
 	test('allows creating playbooks', async () => {
 		render(
-			<TeamProvider>
-				<PlaybookProvider>
-					<TestComponent />
-				</PlaybookProvider>
-			</TeamProvider>
+			<AuthProvider>
+				<TeamProvider>
+					<PlaybookProvider>
+						<TestComponent />
+					</PlaybookProvider>
+				</TeamProvider>
+			</AuthProvider>
 		)
 
 		await waitFor(() => {
@@ -164,11 +178,13 @@ describe('PlaybookContext', () => {
 
 	test('allows updating playbooks', async () => {
 		render(
-			<TeamProvider>
-				<PlaybookProvider>
-					<TestComponent />
-				</PlaybookProvider>
-			</TeamProvider>
+			<AuthProvider>
+				<TeamProvider>
+					<PlaybookProvider>
+						<TestComponent />
+					</PlaybookProvider>
+				</TeamProvider>
+			</AuthProvider>
 		)
 
 		await waitFor(() => {
@@ -186,11 +202,13 @@ describe('PlaybookContext', () => {
 
 	test('allows deleting playbooks', async () => {
 		render(
-			<TeamProvider>
-				<PlaybookProvider>
-					<TestComponent />
-				</PlaybookProvider>
-			</TeamProvider>
+			<AuthProvider>
+				<TeamProvider>
+					<PlaybookProvider>
+						<TestComponent />
+					</PlaybookProvider>
+				</TeamProvider>
+			</AuthProvider>
 		)
 
 		await waitFor(() => {
