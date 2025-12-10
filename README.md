@@ -19,6 +19,18 @@ An American football play and playbook creator built with Bun, React, and TypeSc
 - **Database**: PostgreSQL (local or AWS RDS) with PostGIS extension
 - **Testing**: Bun test runner with Happy DOM
 
+## Routing
+
+The application uses React Router for client-side routing with the following structure:
+
+- `/` - Landing page (public)
+- `/login` - Login page (public)
+- `/playbooks` - Playbook manager (protected)
+- `/playbooks/:playbookId` - Playbook editor (protected)
+- `/playbooks/:playbookId/plays/:playId` - Play editor (protected)
+
+Protected routes require authentication and will redirect to `/login` with a return URL.
+
 ## Getting Started
 
 ### Prerequisites
@@ -90,6 +102,11 @@ bun --hot src/index.ts
 ```
 
 The application will be available at `http://localhost:3000`
+
+Navigate to:
+- `http://localhost:3000/` - Landing page
+- `http://localhost:3000/login` - Login page
+- `http://localhost:3000/playbooks` - Playbook manager (requires auth)
 
 ## Authentication
 
@@ -233,6 +250,7 @@ bun start
 
 **Implementation Plans:**
 - [PostgreSQL Migration Plan](docs/plans/2024-12-09-postgresql-migration-plan.md) - MySQL to PostgreSQL migration
+- [Routing Infrastructure Design](docs/plans/2025-12-09-routing-infrastructure-design.md) - Routing architecture and design decisions
 
 **Design:**
 - [PlaySmith Design Document](docs/PlaySmithDesignDocument.md) - Feature specifications
@@ -256,12 +274,13 @@ play-smith/
 **Current Phase:** Database Architecture Phase 1
 - ✅ PostgreSQL database architecture designed
 - ✅ AWS RDS setup guide completed
-- 🔄 Migration from MySQL to PostgreSQL in progress
-- 📋 Core tables: users, teams, playbooks, plays
+- ✅ Migration from MySQL to PostgreSQL completed
+- ✅ Core tables: users, teams, playbooks, plays
+- ✅ Authentication system implemented
+- ✅ Routing infrastructure implemented
 - 📋 Next: Players, drawings, and spatial geometry tables
 
 **Upcoming:**
-- Authentication system
 - Frontend whiteboard implementation
 - Team collaboration features
 
@@ -271,8 +290,8 @@ Please report issues via [GitHub Issues](https://github.com/jackhuffman/play-smi
 
 ## Author & Contact
 
-**Jack Huffman**  
-Email: jackhuffman4242@gmail.com  
+**Jack Huffman**
+Email: jackhuffman4242@gmail.com
 Domain: [play-smith.com](https://play-smith.com)
 
 ## License

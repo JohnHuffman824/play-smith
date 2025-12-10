@@ -5,8 +5,10 @@ import { authAPI } from "./api/auth";
 
 const server = serve({
   routes: {
-    "/*": index,
+    // API routes (must be defined BEFORE catch-all)
+    // These routes handle server-side requests and return JSON
 
+    // Auth API endpoints
     "/api/auth/login": {
       POST: authAPI.login,
     },
@@ -20,9 +22,11 @@ const server = serve({
       GET: authAPI.me,
     },
 
+    // User API endpoints
     "/api/users": usersAPI,
     "/api/users/:id": getUserById,
 
+    // Example API endpoints
     "/api/hello": {
       async GET(req) {
         return Response.json({
@@ -44,6 +48,16 @@ const server = serve({
         message: `Hello, ${name}!`,
       });
     },
+
+    // Catch-all route (must be LAST)
+    // Serves the React app for all non-API routes
+    // This allows React Router to handle client-side routing for paths like:
+    // - / (landing page)
+    // - /login (login page)
+    // - /playbooks (playbook manager)
+    // - /playbooks/:playbookId (playbook editor)
+    // - /playbooks/:playbookId/plays/:playId (play editor)
+    "/*": index,
   },
 
   development: process.env.NODE_ENV !== "production" && {
