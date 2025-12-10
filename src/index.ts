@@ -3,6 +3,7 @@ import index from "./index.html";
 import { usersAPI, getUserById } from "./api/users";
 import { authAPI } from "./api/auth";
 import { playbooksAPI } from "./api/playbooks";
+import { teamsAPI } from "./api/teams";
 
 const server = serve({
   routes: {
@@ -36,6 +37,11 @@ const server = serve({
       GET: playbooksAPI.get,
       PUT: playbooksAPI.update,
       DELETE: playbooksAPI.delete
+    },
+
+    // Team API endpoints
+    "/api/teams": {
+      GET: teamsAPI.list
     },
 
     // Example API endpoints
