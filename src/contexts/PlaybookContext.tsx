@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react'
 import type { Playbook } from '../db/types'
 import { useTeam } from './TeamContext'
+import { useAuth } from './AuthContext'
 
 interface PlaybookContextType {
 	playbooks: Playbook[]
@@ -15,9 +16,10 @@ interface PlaybookContextType {
 const PlaybookContext = createContext<PlaybookContextType | undefined>(undefined)
 
 export function PlaybookProvider({ children }: { children: ReactNode }) {
+	const { user } = useAuth()
 	const { currentTeamId } = useTeam()
 	const [playbooks, setPlaybooks] = useState<Playbook[]>([])
-	const [isLoading, setIsLoading] = useState(true)
+	const [isLoading, setIsLoading] = useState(false)
 	const [error, setError] = useState<string | null>(null)
 
 	const fetchPlaybooks = useCallback(async () => {
@@ -167,10 +169,10 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
 	}
 
 	useEffect(() => {
-		if (currentTeamId) {
+		if (user && currentTeamId) {
 			fetchPlaybooks()
 		}
-	}, [currentTeamId, fetchPlaybooks])
+	}, [user, currentTeamId, fetchPlaybooks])
 
 	return (
 		<PlaybookContext.Provider

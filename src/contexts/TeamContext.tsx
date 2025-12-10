@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react'
 import type { Team } from '../db/types'
+import { useAuth } from './AuthContext'
 
 interface TeamContextType {
 	teams: Team[]
@@ -13,9 +14,10 @@ interface TeamContextType {
 const TeamContext = createContext<TeamContextType | undefined>(undefined)
 
 export function TeamProvider({ children }: { children: ReactNode }) {
+	const { user } = useAuth()
 	const [teams, setTeams] = useState<Team[]>([])
 	const [currentTeamId, setCurrentTeamId] = useState<number | null>(null)
-	const [isLoading, setIsLoading] = useState(true)
+	const [isLoading, setIsLoading] = useState(false)
 	const [error, setError] = useState<string | null>(null)
 
 	const fetchTeams = async () => {
@@ -48,8 +50,10 @@ export function TeamProvider({ children }: { children: ReactNode }) {
 	}
 
 	useEffect(() => {
-		fetchTeams()
-	}, [])
+		if (user) {
+			fetchTeams()
+		}
+	}, [user])
 
 	return (
 		<TeamContext.Provider
