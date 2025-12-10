@@ -1,10 +1,11 @@
 import { describe, test, expect, beforeAll, afterAll } from 'bun:test'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { ThemeProvider } from '../contexts/ThemeContext'
 import { AuthProvider } from '../contexts/AuthContext'
 import { TeamProvider } from '../contexts/TeamContext'
 import { PlayEditorPage } from './PlayEditorPage'
+import { act } from 'react'
 
 describe('PlayEditorPage', () => {
 	const originalFetch = global.fetch
@@ -36,23 +37,27 @@ describe('PlayEditorPage', () => {
 		// Restore original fetch
 		global.fetch = originalFetch
 	})
-	test('renders play editor with toolbar', () => {
-		render(
-			<AuthProvider>
-				<ThemeProvider>
-					<TeamProvider>
-						<MemoryRouter initialEntries={['/teams/1/playbooks/1/plays/1']}>
-							<Routes>
-								<Route path="/teams/:teamId/playbooks/:playbookId/plays/:playId" element={<PlayEditorPage />} />
-							</Routes>
-						</MemoryRouter>
-					</TeamProvider>
-				</ThemeProvider>
-			</AuthProvider>
-		)
+	test('renders play editor with toolbar', async () => {
+		await act(async () => {
+			render(
+				<AuthProvider>
+					<ThemeProvider>
+						<TeamProvider>
+							<MemoryRouter initialEntries={['/teams/1/playbooks/1/plays/1']}>
+								<Routes>
+									<Route path="/teams/:teamId/playbooks/:playbookId/plays/:playId" element={<PlayEditorPage />} />
+								</Routes>
+							</MemoryRouter>
+						</TeamProvider>
+					</ThemeProvider>
+				</AuthProvider>
+			)
+		})
 
 		// Should render the play editor UI
 		// Note: This is a basic test - existing canvas tests cover detailed functionality
-		expect(screen.getByRole('main')).toBeDefined()
+		await waitFor(() => {
+			expect(screen.getByRole('main')).toBeDefined()
+		})
 	})
 })

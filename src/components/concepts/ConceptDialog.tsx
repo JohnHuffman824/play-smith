@@ -127,7 +127,6 @@ export function ConceptDialog({
 
 	function handleFlip() {
 		// TODO: Implement flip logic - mirror all drawings horizontally
-		console.log('Flip concept')
 	}
 
 	return (

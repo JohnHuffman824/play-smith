@@ -72,7 +72,6 @@ function PlayEditorContent() {
 		function handleSave() {
 			// TODO: Implement actual save to API when ready
 			// For now, just emit save-complete immediately
-			console.log('Canvas save triggered')
 
 			// Simulate async save operation
 			setTimeout(() => {

@@ -63,17 +63,14 @@ export function PlaybookManagerPage() {
 
 	const handleNewFolder = () => {
 		// TODO: Implement folder creation
-		console.log('Create new folder')
 	}
 
 	const handleImport = () => {
 		// TODO: Implement import functionality
-		console.log('Import playbooks')
 	}
 
 	const handleExport = () => {
 		// TODO: Implement export functionality
-		console.log('Export playbooks')
 	}
 
 	const handleSettings = () => {
@@ -82,17 +79,14 @@ export function PlaybookManagerPage() {
 
 	const handleManageTeams = () => {
 		// TODO: Implement team management
-		console.log('Manage teams')
 	}
 
 	const handleShare = (id: number) => {
 		// TODO: Implement share functionality
-		console.log('Share playbook:', id)
 	}
 
 	const handleExportPlaybook = (id: number) => {
 		// TODO: Implement single playbook export
-		console.log('Export playbook:', id)
 	}
 
 	if (isLoading) {

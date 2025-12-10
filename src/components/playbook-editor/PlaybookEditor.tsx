@@ -258,7 +258,6 @@ function PlaybookEditorContent({
   function handleShare(
     recipients: Array<{ email: string; role: 'viewer' | 'collaborator' }>
   ) {
-    console.log('Sharing playbook with:', recipients)
   }
 
   function togglePlaySelection(playId: string) {

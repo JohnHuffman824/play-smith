@@ -65,10 +65,8 @@ export function PlaybookEditorPage() {
 	const handleOpenPlay = (playId: string) =>
 		navigate(`/playbooks/${playbookId}/plays/${playId}`)
 	const handleImport = () => {
-		console.log('Import not yet implemented')
 	}
 	const handleExport = () => {
-		console.log('Export not yet implemented')
 	}
 
 	// Loading state
