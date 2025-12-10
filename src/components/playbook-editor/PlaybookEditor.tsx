@@ -6,6 +6,7 @@ import { Modal } from '@/components/shared/Modal'
 import { SettingsDialog } from '@/components/shared/SettingsDialog'
 import { ShareDialog } from '@/components/shared/ShareDialog'
 import { ThemeProvider, useTheme } from '@/contexts/ThemeContext'
+import { usePlaybookData } from '@/hooks/usePlaybookData'
 import {
   ArrowLeft,
   Search,
@@ -80,106 +81,18 @@ function PlaybookEditorContent({
   const [selectedPlays, setSelectedPlays] = useState<Set<string>>(new Set())
   const [activeSectionFilter, setActiveSectionFilter] = useState<string | null>(null)
 
-  const [sections, setSections] = useState<Section[]>([
-    {
-      id: 'opening-drive',
-      name: 'Opening Drive',
-      plays: [
-        {
-          id: 'play-1',
-          name: 'Power I Right',
-          formation: 'I Formation',
-          personnel: '21',
-          playType: 'Run',
-          defensiveFormation: '4-3',
-          tags: ['Short Yardage', 'Power'],
-          lastModified: formatDate(new Date('2024-12-05')),
-        },
-        {
-          id: 'play-2',
-          name: 'PA Bootleg',
-          formation: 'I Formation',
-          personnel: '12',
-          playType: PLAY_TYPE_PASS,
-          defensiveFormation: '4-3',
-          tags: ['Play Action', 'Bootleg'],
-          lastModified: formatDate(new Date('2024-12-05')),
-        },
-        {
-          id: 'play-3',
-          name: 'Quick Slant',
-          formation: 'Shotgun Spread',
-          personnel: '11',
-          playType: PLAY_TYPE_PASS,
-          defensiveFormation: 'Cover 2',
-          tags: ['Quick Game', '3rd Down'],
-          lastModified: formatDate(new Date('2024-12-04')),
-        },
-      ],
-    },
-    {
-      id: 'red-zone',
-      name: 'Red Zone',
-      plays: [
-        {
-          id: 'play-4',
-          name: 'Goalline ISO',
-          formation: 'Heavy',
-          personnel: '22',
-          playType: 'Run',
-          defensiveFormation: 'Goal Line',
-          tags: ['Goal Line', 'Power'],
-          lastModified: formatDate(new Date('2024-12-03')),
-        },
-        {
-          id: 'play-5',
-          name: 'Fade Route',
-          formation: 'Trips Right',
-          personnel: '11',
-          playType: PLAY_TYPE_PASS,
-          defensiveFormation: 'Cover 1',
-          tags: ['Red Zone', 'Fade'],
-          lastModified: formatDate(new Date('2024-12-03')),
-        },
-      ],
-    },
-    {
-      id: 'third-down',
-      name: 'Third Down Package',
-      plays: [
-        {
-          id: 'play-6',
-          name: 'Double Slant',
-          formation: 'Empty Set',
-          personnel: '10',
-          playType: PLAY_TYPE_PASS,
-          defensiveFormation: 'Nickel',
-          tags: ['3rd Down', 'Quick Game'],
-          lastModified: formatDate(new Date('2024-12-02')),
-        },
-        {
-          id: 'play-7',
-          name: 'Draw Play',
-          formation: 'Shotgun',
-          personnel: '11',
-          playType: 'Run',
-          defensiveFormation: 'Nickel',
-          tags: ['3rd Down', 'Draw'],
-          lastModified: formatDate(new Date('2024-12-02')),
-        },
-        {
-          id: 'play-8',
-          name: 'Mesh Concept',
-          formation: 'Shotgun Spread',
-          personnel: '11',
-          playType: PLAY_TYPE_PASS,
-          defensiveFormation: 'Cover 3',
-          tags: ['3rd Down', 'Mesh'],
-          lastModified: formatDate(new Date('2024-12-01')),
-        },
-      ],
-    },
-  ])
+  const {
+    sections,
+    isLoading: isLoadingData,
+    error: dataError,
+    createPlay,
+    updatePlay,
+    deletePlay,
+    duplicatePlay,
+    createSection,
+    updateSection,
+    deleteSection
+  } = usePlaybookData(playbookId)
 
   useEffect(() => {
     if (theme == DARK_MODE_CLASS) {
@@ -188,6 +101,36 @@ function PlaybookEditorContent({
       document.documentElement.classList.remove(DARK_MODE_CLASS)
     }
   }, [theme])
+
+  // Show loading state
+  if (isLoadingData) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading playbook...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show error state
+  if (dataError) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">Error</h1>
+          <p className="text-gray-600 mb-6">{dataError}</p>
+          <button
+            onClick={onBack}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer"
+          >
+            Back to Playbooks
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   const allPlays = sections.flatMap((section) =>
     section.plays.map((play) => ({ ...play, sectionId: section.id }))
@@ -209,48 +152,36 @@ function PlaybookEditorContent({
     ? filteredSections.filter((section) => section.id == activeSectionFilter)
     : filteredSections
 
-  function handleNewPlay() {
+  async function handleNewPlay() {
     if (!newItemName.trim()) return
 
-    const newPlay: Play = {
-      id: `play-${Date.now()}`,
-      name: newItemName,
-      formation: '',
-      playType: PLAY_TYPE_PASS,
-      defensiveFormation: '',
-      tags: [],
-      lastModified: formatDate(new Date()),
-    }
+    try {
+      const sectionId = sections.length > 0 ? sections[0].id : null
+      const newPlay = await createPlay(newItemName, sectionId)
 
-    if (sections.length > 0) {
-      setSections(
-        sections.map((section, index) =>
-          index == 0
-            ? { ...section, plays: [newPlay, ...section.plays] }
-            : section
-        )
-      )
-    }
+      setNewItemName('')
+      setShowNewPlayModal(false)
 
-    setNewItemName('')
-    setShowNewPlayModal(false)
-
-    if (onOpenPlay) {
-      onOpenPlay(newPlay.id)
+      if (onOpenPlay) {
+        onOpenPlay(newPlay.id)
+      }
+    } catch (err) {
+      console.error('Failed to create play:', err)
+      alert(err instanceof Error ? err.message : 'Failed to create play')
     }
   }
 
-  function handleNewSection() {
+  async function handleNewSection() {
     if (!newItemName.trim()) return
 
-    const newSection: Section = {
-      id: `section-${Date.now()}`,
-      name: newItemName,
-      plays: [],
+    try {
+      await createSection(newItemName)
+      setNewItemName('')
+      setShowNewSectionModal(false)
+    } catch (err) {
+      console.error('Failed to create section:', err)
+      alert(err instanceof Error ? err.message : 'Failed to create section')
     }
-    setSections([...sections, newSection])
-    setNewItemName('')
-    setShowNewSectionModal(false)
   }
 
   function handleOpenPlay(playId: string) {
@@ -268,23 +199,18 @@ function PlaybookEditorContent({
     setShowRenameModal(true)
   }
 
-  function confirmRename() {
+  async function confirmRename() {
     if (!renamePlayId || !renamePlayName.trim()) return
 
-    setSections(
-      sections.map((section) => ({
-        ...section,
-        plays: section.plays.map((p) =>
-          p.id == renamePlayId
-            ? { ...p, name: renamePlayName, lastModified: formatDate(new Date()) }
-            : p
-        ),
-      }))
-    )
-
-    setShowRenameModal(false)
-    setRenamePlayId(null)
-    setRenamePlayName('')
+    try {
+      await updatePlay(renamePlayId, { name: renamePlayName })
+      setShowRenameModal(false)
+      setRenamePlayId(null)
+      setRenamePlayName('')
+    } catch (err) {
+      console.error('Failed to rename play:', err)
+      alert(err instanceof Error ? err.message : 'Failed to rename play')
+    }
   }
 
   function handleDeletePlay(playId: string) {
@@ -292,38 +218,26 @@ function PlaybookEditorContent({
     setShowDeleteConfirmModal(true)
   }
 
-  function confirmDelete() {
+  async function confirmDelete() {
     if (!deletePlayId) return
 
-    setSections(
-      sections.map((section) => ({
-        ...section,
-        plays: section.plays.filter((p) => p.id != deletePlayId),
-      }))
-    )
-
-    setShowDeleteConfirmModal(false)
-    setDeletePlayId(null)
+    try {
+      await deletePlay(deletePlayId)
+      setShowDeleteConfirmModal(false)
+      setDeletePlayId(null)
+    } catch (err) {
+      console.error('Failed to delete play:', err)
+      alert(err instanceof Error ? err.message : 'Failed to delete play')
+    }
   }
 
-  function handleDuplicatePlay(playId: string) {
-    const play = allPlays.find((p) => p.id == playId)
-    if (!play) return
-
-    const duplicate: Play = {
-      ...play,
-      id: `play-${Date.now()}`,
-      name: `${play.name} (Copy)`,
-      lastModified: formatDate(new Date()),
+  async function handleDuplicatePlay(playId: string) {
+    try {
+      await duplicatePlay(playId)
+    } catch (err) {
+      console.error('Failed to duplicate play:', err)
+      alert(err instanceof Error ? err.message : 'Failed to duplicate play')
     }
-    
-    setSections(
-      sections.map((section) =>
-        section.id == play.sectionId
-          ? { ...section, plays: [...section.plays, duplicate] }
-          : section
-      )
-    )
   }
 
   function handleImport() {
