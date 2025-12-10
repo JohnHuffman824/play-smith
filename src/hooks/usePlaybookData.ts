@@ -114,6 +114,12 @@ export function usePlaybookData(playbookId: string | undefined): UsePlaybookData
 			body: JSON.stringify({ name, section_id: sectionId })
 		})
 
+		if (response.status === 403) {
+			throw new Error('You do not have permission to create plays in this playbook')
+		}
+		if (response.status === 404) {
+			throw new Error('Playbook not found')
+		}
 		if (!response.ok) {
 			const data = await response.json()
 			throw new Error(data.error || 'Failed to create play')
@@ -132,6 +138,12 @@ export function usePlaybookData(playbookId: string | undefined): UsePlaybookData
 			body: JSON.stringify(updates)
 		})
 
+		if (response.status === 403) {
+			throw new Error('You do not have permission to edit this play')
+		}
+		if (response.status === 404) {
+			throw new Error('Play not found')
+		}
 		if (!response.ok) {
 			const data = await response.json()
 			throw new Error(data.error || 'Failed to update play')
@@ -146,6 +158,12 @@ export function usePlaybookData(playbookId: string | undefined): UsePlaybookData
 			method: 'DELETE'
 		})
 
+		if (response.status === 403) {
+			throw new Error('You do not have permission to delete this play')
+		}
+		if (response.status === 404) {
+			throw new Error('Play not found')
+		}
 		if (!response.ok) {
 			const data = await response.json()
 			throw new Error(data.error || 'Failed to delete play')
@@ -160,6 +178,12 @@ export function usePlaybookData(playbookId: string | undefined): UsePlaybookData
 			method: 'POST'
 		})
 
+		if (response.status === 403) {
+			throw new Error('You do not have permission to duplicate this play')
+		}
+		if (response.status === 404) {
+			throw new Error('Play not found')
+		}
 		if (!response.ok) {
 			const data = await response.json()
 			throw new Error(data.error || 'Failed to duplicate play')
@@ -180,6 +204,12 @@ export function usePlaybookData(playbookId: string | undefined): UsePlaybookData
 			body: JSON.stringify({ name })
 		})
 
+		if (response.status === 403) {
+			throw new Error('You do not have permission to create sections in this playbook')
+		}
+		if (response.status === 404) {
+			throw new Error('Playbook not found')
+		}
 		if (!response.ok) {
 			const data = await response.json()
 			throw new Error(data.error || 'Failed to create section')
@@ -198,6 +228,12 @@ export function usePlaybookData(playbookId: string | undefined): UsePlaybookData
 			body: JSON.stringify(updates)
 		})
 
+		if (response.status === 403) {
+			throw new Error('You do not have permission to edit this section')
+		}
+		if (response.status === 404) {
+			throw new Error('Section not found')
+		}
 		if (!response.ok) {
 			const data = await response.json()
 			throw new Error(data.error || 'Failed to update section')
@@ -212,6 +248,12 @@ export function usePlaybookData(playbookId: string | undefined): UsePlaybookData
 			method: 'DELETE'
 		})
 
+		if (response.status === 403) {
+			throw new Error('You do not have permission to delete this section')
+		}
+		if (response.status === 404) {
+			throw new Error('Section not found')
+		}
 		if (!response.ok) {
 			const data = await response.json()
 			throw new Error(data.error || 'Failed to delete section')
