@@ -4,6 +4,7 @@ import { usersAPI, getUserById } from '../../src/api/users'
 import { authAPI } from '../../src/api/auth'
 import { teamsAPI } from '../../src/api/teams'
 import { playbooksAPI } from '../../src/api/playbooks'
+import { sectionsAPI } from '../../src/api/sections'
 
 let testServer: Server | null = null
 
@@ -52,6 +53,15 @@ export async function startTestServer(): Promise<{
 				GET: playbooksAPI.get,
 				PUT: playbooksAPI.update,
 				DELETE: playbooksAPI.delete,
+			},
+
+			'/api/playbooks/:playbookId/sections': {
+				GET: sectionsAPI.list,
+				POST: sectionsAPI.create,
+			},
+			'/api/sections/:sectionId': {
+				PUT: sectionsAPI.update,
+				DELETE: sectionsAPI.delete,
 			},
 
 			'/api/hello': {

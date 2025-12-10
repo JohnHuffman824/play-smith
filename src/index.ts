@@ -1,9 +1,10 @@
-import { serve } from "bun";
-import index from "./index.html";
-import { usersAPI, getUserById } from "./api/users";
-import { authAPI } from "./api/auth";
-import { playbooksAPI } from "./api/playbooks";
-import { teamsAPI } from "./api/teams";
+import { serve } from "bun"
+import index from "./index.html"
+import { usersAPI, getUserById } from "./api/users"
+import { authAPI } from "./api/auth"
+import { playbooksAPI } from "./api/playbooks"
+import { teamsAPI } from "./api/teams"
+import { sectionsAPI } from "./api/sections"
 
 const server = serve({
   routes: {
@@ -39,6 +40,16 @@ const server = serve({
       DELETE: playbooksAPI.delete
     },
 
+    // Section API endpoints
+    "/api/playbooks/:playbookId/sections": {
+      GET: sectionsAPI.list,
+      POST: sectionsAPI.create
+    },
+    "/api/sections/:sectionId": {
+      PUT: sectionsAPI.update,
+      DELETE: sectionsAPI.delete
+    },
+
     // Team API endpoints
     "/api/teams": {
       GET: teamsAPI.list
@@ -50,21 +61,21 @@ const server = serve({
         return Response.json({
           message: "Hello, world!",
           method: "GET",
-        });
+        })
       },
       async PUT(req) {
         return Response.json({
           message: "Hello, world!",
           method: "PUT",
-        });
+        })
       },
     },
 
     "/api/hello/:name": async req => {
-      const name = req.params.name;
+      const name = req.params.name
       return Response.json({
         message: `Hello, ${name}!`,
-      });
+      })
     },
 
     // Catch-all route (must be LAST)
@@ -85,6 +96,6 @@ const server = serve({
     // Echo console logs from the browser to the server
     console: true,
   },
-});
+})
 
-console.log(`🚀 Server running at ${server.url}`);
+console.log(`🚀 Server running at ${server.url}`)
