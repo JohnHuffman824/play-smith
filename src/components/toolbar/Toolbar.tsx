@@ -59,6 +59,7 @@ export function Toolbar({
 	const [showHashDialog, setShowHashDialog] = useState(false)
 	const [showSettingsDialog, setShowSettingsDialog] =
 		useState(false)
+	const [isSaving, setIsSaving] = useState(false)
 	const drawDialogRef = useRef<HTMLDivElement>(null)
 	const baseButtonClass = [
 		'w-14 h-14 rounded-xl flex items-center justify-center',
@@ -252,8 +253,19 @@ export function Toolbar({
 	}
 
 	function handleSavePlay() {
+		setIsSaving(true)
 		eventBus.emit('canvas:save')
 	}
+
+	// Listen for save completion
+	useEffect(() => {
+		const handleSaveComplete = () => {
+			setIsSaving(false)
+		}
+
+		eventBus.on('canvas:save-complete', handleSaveComplete)
+		return () => eventBus.off('canvas:save-complete', handleSaveComplete)
+	}, [])
 
 	function handleClearPlay() {
 		setShowClearConfirm(true)

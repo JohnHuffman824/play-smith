@@ -10,7 +10,38 @@ type FormationUpdate = {
 	description?: string | null
 }
 
+/**
+ * Repository for managing formation data and player positions
+ *
+ * Formations define predefined player alignments with specific roles and coordinates.
+ * Each formation includes multiple player positions with optional hash-relative positioning.
+ */
 export class FormationRepository {
+	/**
+	 * Creates a new formation with player positions
+	 *
+	 * @param data - Formation data including team_id, name, and positions array
+	 * @param data.team_id - Team ID this formation belongs to
+	 * @param data.name - Name of the formation (e.g., "Trips Right", "I-Formation")
+	 * @param data.description - Optional description of the formation
+	 * @param data.created_by - User ID who created the formation
+	 * @param data.positions - Array of player positions with role and coordinates
+	 * @returns The created formation with all positions included
+	 * @throws {Error} If formation creation fails or positions cannot be inserted
+	 *
+	 * @example
+	 * ```typescript
+	 * const formation = await repo.create({
+	 *   team_id: 1,
+	 *   name: "Trips Right",
+	 *   created_by: userId,
+	 *   positions: [
+	 *     { role: 'x', position_x: -20, position_y: 10, hash_relative: false },
+	 *     { role: 'y', position_x: 0, position_y: 10, hash_relative: false }
+	 *   ]
+	 * })
+	 * ```
+	 */
 	async create(data: {
 		team_id: number
 		name: string

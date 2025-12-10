@@ -9,6 +9,11 @@ interface DrawingPropertiesDialogProps {
 	onClose: () => void
 }
 
+const DIALOG_WIDTH = 280
+const DIALOG_MAX_HEIGHT = 550
+const BACKDROP_Z_INDEX = 40
+const DIALOG_Z_INDEX = 50
+
 const brushSizes = [
 	{ size: 2, label: 'Thin' },
 	{ size: 3, label: 'Medium' },
@@ -39,8 +44,8 @@ export function DrawingPropertiesDialog({
 	// Position dialog near click, but keep on screen
 	const dialogStyle = {
 		position: 'fixed' as const,
-		left: Math.min(position.x, window.innerWidth - 280),
-		top: Math.min(position.y, window.innerHeight - 550),
+		left: Math.min(position.x, window.innerWidth - DIALOG_WIDTH),
+		top: Math.min(position.y, window.innerHeight - DIALOG_MAX_HEIGHT),
 	}
 
 	return (

@@ -19,6 +19,34 @@ interface ParsedQuery {
 
 const DEBOUNCE_DELAY = 300
 
+/**
+ * Custom hook for unified search across formations, concepts, and concept groups
+ *
+ * Provides debounced search functionality with smart parsing for role + concept patterns
+ * (e.g., "X Post" parses to role=X, concept=Post). Results are ranked by frecency
+ * (frequency + recency) to show most relevant items first.
+ *
+ * @param teamId - The team ID to search within (required)
+ * @param playbookId - Optional playbook ID to scope search results
+ * @returns Object containing query state, search results, loading state, and parse function
+ *
+ * @example
+ * ```typescript
+ * const { query, setQuery, results, isSearching, parseQuery } = useUnifiedSearch(teamId)
+ *
+ * // User types "X Post"
+ * setQuery("X Post")
+ * // After 300ms debounce, search executes
+ * // parseQuery returns: { role: 'x', concept: 'Post' }
+ * ```
+ *
+ * Features:
+ * - 300ms debounce to reduce API calls
+ * - Smart parsing: "X Post" → { role: 'x', concept: 'Post' }
+ * - Frecency-based ranking (usage_count / days_since_use)
+ * - Categorized results (formations, concepts, groups)
+ * - Automatic auth handling (redirects on 401)
+ */
 export function useUnifiedSearch(
 	teamId: string | undefined,
 	playbookId?: string

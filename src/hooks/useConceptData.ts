@@ -51,6 +51,35 @@ interface UseConceptDataReturn {
 	refetch: () => Promise<void>
 }
 
+/**
+ * Custom hook for managing concept architecture data (formations, concepts, groups)
+ *
+ * Fetches and manages all concept-related data for a team, including formations,
+ * base concepts, concept groups, preset routes, and role terminology. Provides
+ * CRUD operations for each entity type with automatic refetching and error handling.
+ *
+ * @param teamId - The team ID to fetch data for (required)
+ * @param playbookId - Optional playbook ID for scoped data
+ * @returns Object containing data arrays, loading state, error state, and CRUD functions
+ *
+ * @example
+ * ```typescript
+ * const {
+ *   formations,
+ *   concepts,
+ *   isLoading,
+ *   createConcept,
+ *   updateConcept
+ * } = useConceptData(teamId, playbookId)
+ * ```
+ *
+ * Features:
+ * - Parallel data fetching on mount for optimal performance
+ * - Automatic auth handling (redirects to /login on 401)
+ * - Error handling with user-friendly messages
+ * - Automatic refetch after mutations
+ * - Usage tracking for frecency algorithm
+ */
 export function useConceptData(
 	teamId: string | undefined,
 	playbookId?: string
