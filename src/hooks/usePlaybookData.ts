@@ -40,6 +40,21 @@ export function usePlaybookData(playbookId: string | undefined): UsePlaybookData
 	const [isLoading, setIsLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
 
+	// Transform API play to component format
+	const transformPlay = useCallback((apiPlay: any): Play => {
+		return {
+			id: String(apiPlay.id),
+			name: apiPlay.name || '',
+			section_id: apiPlay.section_id ? String(apiPlay.section_id) : null,
+			formation: apiPlay.formation_id ? String(apiPlay.formation_id) : '',
+			personnel: apiPlay.personnel_id ? String(apiPlay.personnel_id) : undefined,
+			playType: apiPlay.play_type || '',
+			defensiveFormation: apiPlay.defensive_formation_id ? String(apiPlay.defensive_formation_id) : '',
+			tags: [], // Tags not yet implemented in API
+			lastModified: apiPlay.updated_at || new Date().toISOString()
+		}
+	}, [])
+
 	// Helper to group plays by section
 	const groupPlaysBySections = useCallback((allPlays: Play[], allSections: Array<{ id: string; name: string }>) => {
 		return allSections.map(section => ({
@@ -73,14 +88,17 @@ export function usePlaybookData(playbookId: string | undefined): UsePlaybookData
 			const playsData = await playsRes.json()
 			const sectionsData = await sectionsRes.json()
 
-			setPlays(playsData.plays || [])
-			setSections(groupPlaysBySections(playsData.plays || [], sectionsData.sections || []))
+			// Transform API plays to component format
+			const transformedPlays = (playsData.plays || []).map(transformPlay)
+
+			setPlays(transformedPlays)
+			setSections(groupPlaysBySections(transformedPlays, sectionsData.sections || []))
 		} catch (err) {
 			setError(err instanceof Error ? err.message : 'An error occurred')
 		} finally {
 			setIsLoading(false)
 		}
-	}, [playbookId, navigate, groupPlaysBySections])
+	}, [playbookId, navigate, groupPlaysBySections, transformPlay])
 
 	useEffect(() => {
 		fetchData()
@@ -103,8 +121,8 @@ export function usePlaybookData(playbookId: string | undefined): UsePlaybookData
 
 		const data = await response.json()
 		await fetchData() // Refetch to get updated list
-		return data.play
-	}, [playbookId, fetchData])
+		return transformPlay(data.play)
+	}, [playbookId, fetchData, transformPlay])
 
 	// Update play
 	const updatePlay = useCallback(async (playId: string, updates: Partial<Play>): Promise<void> => {
@@ -149,8 +167,8 @@ export function usePlaybookData(playbookId: string | undefined): UsePlaybookData
 
 		const data = await response.json()
 		await fetchData()
-		return data.play
-	}, [fetchData])
+		return transformPlay(data.play)
+	}, [fetchData, transformPlay])
 
 	// Create section
 	const createSection = useCallback(async (name: string): Promise<Section> => {
