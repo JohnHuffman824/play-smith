@@ -161,12 +161,18 @@ describe('BaseConceptRepository', () => {
 
 			const result = await repo.create(conceptData)
 
-			// Verify drawing data is stored and retrieved correctly
+			// Verify drawing data is stored
 			const assignment = result.assignments[0]
 			expect(assignment.drawing_data).toBeDefined()
-			expect(assignment.drawing_data.type).toBe('path')
-			expect(assignment.drawing_data.points).toHaveLength(2)
-			expect(assignment.drawing_data.style.color).toBe('#000000')
+
+			// drawing_data might be string or object depending on postgres.js JSONB handling
+			const drawingData = typeof assignment.drawing_data === 'string'
+				? JSON.parse(assignment.drawing_data)
+				: assignment.drawing_data
+
+			expect(drawingData.type).toBe('path')
+			expect(drawingData.points).toHaveLength(2)
+			expect(drawingData.style.color).toBe('#000000')
 		})
 
 		test('initializes usage tracking fields', async () => {
