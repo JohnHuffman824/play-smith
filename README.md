@@ -168,15 +168,27 @@ bun dev
 
 **Testing changes:**
 ```bash
-# Run all tests
-bun test
+# Run all tests (includes integration tests with in-process server)
+bun test --allow-network
+
+# Or use the helper script
+bun run test:all
 
 # Run tests in watch mode
-bun test --watch
+bun test --watch --allow-network
 
 # Run specific test
-bun test path/to/test.test.ts
+bun test path/to/test.test.ts --allow-network
+
+# Run only unit tests (no network needed)
+bun test tests/unit
 ```
+
+**Note on integration tests:**
+- Integration tests start their own test server in-process (no manual server needed)
+- Tests require `--allow-network` flag to bind to a local port
+- The test server uses a random available port to avoid conflicts
+- Test server automatically starts/stops per test suite
 
 ### Production
 
@@ -202,7 +214,9 @@ bun start
 **"Tests failing"**
 - Ensure database migrations are up to date: `bun run migrate`
 - Check test database connection in test files
-- Run tests individually to isolate issues: `bun test path/to/test.test.ts`
+- Make sure to use `--allow-network` flag for integration tests: `bun test --allow-network`
+- Run tests individually to isolate issues: `bun test path/to/test.test.ts --allow-network`
+- Unit tests can run without network flag: `bun test tests/unit`
 
 **Need help?**
 - See [AWS RDS Setup Guide](docs/AWS-RDS-Setup.md) for detailed database setup

@@ -8,8 +8,11 @@
     "start": "NODE_ENV=production bun src/index.ts",
     "build": "bun run build.ts",
     "test": "bun test",
-    "test:watch": "bun test --watch",
-    "test:coverage": "bun test --coverage",
+    "test:all": "bun test --allow-network",
+    "test:unit": "bun test tests/unit",
+    "test:integration": "bun test tests/integration --allow-network",
+    "test:watch": "bun test --watch --allow-network",
+    "test:coverage": "bun test --coverage --allow-network",
     "migrate": "bun src/db/migrate.ts",
     "seed:dev": "bun src/db/seed-dev.ts"
   },

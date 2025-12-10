@@ -2,6 +2,7 @@ import { describe, test, expect, beforeAll, afterAll } from 'bun:test'
 import { UserRepository } from '../../src/db/repositories/UserRepository'
 import { AuthService } from '../../src/services/AuthService'
 import { db } from '../../src/db/connection'
+import { startTestServer, stopTestServer, getTestServerUrl } from '../helpers/test-server'
 
 describe('Auth API', () => {
 	const userRepo = new UserRepository()
@@ -10,8 +11,13 @@ describe('Auth API', () => {
 	let testUserId: number
 	const testEmail = 'api-test@example.com'
 	const testPassword = 'testpassword123'
+	let baseUrl: string
 
 	beforeAll(async () => {
+		// Start test server
+		const { url } = await startTestServer()
+		baseUrl = url
+
 		// Create a test user
 		const passwordHash = await authService.hashPassword(testPassword)
 		const user = await userRepo.create({
@@ -26,11 +32,14 @@ describe('Auth API', () => {
 		// Cleanup
 		await db`DELETE FROM sessions WHERE user_id = ${testUserId}`
 		await db`DELETE FROM users WHERE id = ${testUserId}`
+
+		// Stop test server
+		await stopTestServer()
 	})
 
 	describe('POST /api/auth/login', () => {
 		test('successful login returns user and sets cookie', async () => {
-			const response = await fetch('http://localhost:3000/api/auth/login', {
+			const response = await fetch(`${baseUrl}/api/auth/login`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
@@ -52,7 +61,7 @@ describe('Auth API', () => {
 		})
 
 		test('login with wrong password returns 401', async () => {
-			const response = await fetch('http://localhost:3000/api/auth/login', {
+			const response = await fetch(`${baseUrl}/api/auth/login`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
@@ -68,7 +77,7 @@ describe('Auth API', () => {
 		})
 
 		test('login with non-existent email returns 401', async () => {
-			const response = await fetch('http://localhost:3000/api/auth/login', {
+			const response = await fetch(`${baseUrl}/api/auth/login`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
@@ -83,7 +92,7 @@ describe('Auth API', () => {
 		})
 
 		test('login without email returns 400', async () => {
-			const response = await fetch('http://localhost:3000/api/auth/login', {
+			const response = await fetch(`${baseUrl}/api/auth/login`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ password: testPassword }),
@@ -95,7 +104,7 @@ describe('Auth API', () => {
 
 	describe('POST /api/auth/register', () => {
 		test('successful registration creates user and returns session', async () => {
-			const response = await fetch('http://localhost:3000/api/auth/register', {
+			const response = await fetch(`${baseUrl}/api/auth/register`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
@@ -124,7 +133,7 @@ describe('Auth API', () => {
 		})
 
 		test('register with existing email returns 409', async () => {
-			const response = await fetch('http://localhost:3000/api/auth/register', {
+			const response = await fetch(`${baseUrl}/api/auth/register`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
@@ -140,7 +149,7 @@ describe('Auth API', () => {
 		})
 
 		test('register without required fields returns 400', async () => {
-			const response = await fetch('http://localhost:3000/api/auth/register', {
+			const response = await fetch(`${baseUrl}/api/auth/register`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ email: 'test@example.com' }),
@@ -153,7 +162,7 @@ describe('Auth API', () => {
 	describe('POST /api/auth/logout', () => {
 		test('logout clears session', async () => {
 			// First login to get a session
-			const loginResponse = await fetch('http://localhost:3000/api/auth/login', {
+			const loginResponse = await fetch(`${baseUrl}/api/auth/login`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
@@ -166,7 +175,7 @@ describe('Auth API', () => {
 			expect(cookies).toBeTruthy()
 
 			// Now logout
-			const logoutResponse = await fetch('http://localhost:3000/api/auth/logout', {
+			const logoutResponse = await fetch(`${baseUrl}/api/auth/logout`, {
 				method: 'POST',
 				headers: { Cookie: cookies! },
 			})
@@ -178,7 +187,7 @@ describe('Auth API', () => {
 		})
 
 		test('logout without session succeeds', async () => {
-			const response = await fetch('http://localhost:3000/api/auth/logout', {
+			const response = await fetch(`${baseUrl}/api/auth/logout`, {
 				method: 'POST',
 			})
 
@@ -189,7 +198,7 @@ describe('Auth API', () => {
 	describe('GET /api/auth/me', () => {
 		test('returns user when authenticated', async () => {
 			// Login first
-			const loginResponse = await fetch('http://localhost:3000/api/auth/login', {
+			const loginResponse = await fetch(`${baseUrl}/api/auth/login`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
@@ -201,7 +210,7 @@ describe('Auth API', () => {
 			const cookies = loginResponse.headers.get('Set-Cookie')!
 
 			// Call /me with session cookie
-			const response = await fetch('http://localhost:3000/api/auth/me', {
+			const response = await fetch(`${baseUrl}/api/auth/me`, {
 				headers: { Cookie: cookies },
 			})
 
@@ -213,7 +222,7 @@ describe('Auth API', () => {
 		})
 
 		test('returns null user when not authenticated', async () => {
-			const response = await fetch('http://localhost:3000/api/auth/me')
+			const response = await fetch(`${baseUrl}/api/auth/me`)
 
 			expect(response.status).toBe(200)
 
@@ -229,7 +238,7 @@ describe('Auth API', () => {
 				VALUES (${testUserId}, ${token}, NOW() - INTERVAL '1 day')
 			`
 
-			const response = await fetch('http://localhost:3000/api/auth/me', {
+			const response = await fetch(`${baseUrl}/api/auth/me`, {
 				headers: { Cookie: `session_token=${token}` },
 			})
 

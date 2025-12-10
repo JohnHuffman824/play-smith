@@ -3,6 +3,7 @@ import { AuthService } from '../../src/services/AuthService'
 import { UserRepository } from '../../src/db/repositories/UserRepository'
 import { SessionRepository } from '../../src/db/repositories/SessionRepository'
 import { db } from '../../src/db/connection'
+import { startTestServer, stopTestServer } from '../helpers/test-server'
 
 describe('Complete Auth Flow Integration', () => {
 	const authService = new AuthService()
@@ -10,6 +11,13 @@ describe('Complete Auth Flow Integration', () => {
 	const sessionRepo = new SessionRepository()
 
 	let createdUserId: number
+	let baseUrl: string
+
+	beforeAll(async () => {
+		// Start test server
+		const { url } = await startTestServer()
+		baseUrl = url
+	})
 
 	afterAll(async () => {
 		// Cleanup
@@ -17,6 +25,9 @@ describe('Complete Auth Flow Integration', () => {
 			await db`DELETE FROM sessions WHERE user_id = ${createdUserId}`
 			await db`DELETE FROM users WHERE id = ${createdUserId}`
 		}
+
+		// Stop test server
+		await stopTestServer()
 	})
 
 	test('complete registration, login, session check, logout flow', async () => {
@@ -25,7 +36,7 @@ describe('Complete Auth Flow Integration', () => {
 		const testName = 'Integration Test'
 
 		// Step 1: Register
-		const registerResponse = await fetch('http://localhost:3000/api/auth/register', {
+		const registerResponse = await fetch(`${baseUrl}/api/auth/register`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
@@ -46,7 +57,7 @@ describe('Complete Auth Flow Integration', () => {
 		createdUserId = registerData.user.id
 
 		// Step 2: Verify session works with /me
-		const meResponse = await fetch('http://localhost:3000/api/auth/me', {
+		const meResponse = await fetch(`${baseUrl}/api/auth/me`, {
 			headers: { Cookie: cookies },
 		})
 
@@ -55,7 +66,7 @@ describe('Complete Auth Flow Integration', () => {
 		expect(meData.user.email).toBe(testEmail)
 
 		// Step 3: Logout
-		const logoutResponse = await fetch('http://localhost:3000/api/auth/logout', {
+		const logoutResponse = await fetch(`${baseUrl}/api/auth/logout`, {
 			method: 'POST',
 			headers: { Cookie: cookies },
 		})
@@ -63,7 +74,7 @@ describe('Complete Auth Flow Integration', () => {
 		expect(logoutResponse.status).toBe(200)
 
 		// Step 4: Verify session is invalid after logout
-		const meAfterLogout = await fetch('http://localhost:3000/api/auth/me', {
+		const meAfterLogout = await fetch(`${baseUrl}/api/auth/me`, {
 			headers: { Cookie: cookies },
 		})
 
@@ -71,7 +82,7 @@ describe('Complete Auth Flow Integration', () => {
 		expect(meAfterLogoutData.user).toBeNull()
 
 		// Step 5: Login with same credentials
-		const loginResponse = await fetch('http://localhost:3000/api/auth/login', {
+		const loginResponse = await fetch(`${baseUrl}/api/auth/login`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
@@ -88,7 +99,7 @@ describe('Complete Auth Flow Integration', () => {
 		expect(newCookies).toContain('session_token=')
 
 		// Step 6: Verify new session works
-		const meWithNewSession = await fetch('http://localhost:3000/api/auth/me', {
+		const meWithNewSession = await fetch(`${baseUrl}/api/auth/me`, {
 			headers: { Cookie: newCookies },
 		})
 
@@ -113,7 +124,7 @@ describe('Complete Auth Flow Integration', () => {
 		`
 
 		// Try to use expired session
-		const response = await fetch('http://localhost:3000/api/auth/me', {
+		const response = await fetch(`${baseUrl}/api/auth/me`, {
 			headers: { Cookie: `session_token=${expiredToken}` },
 		})
 
