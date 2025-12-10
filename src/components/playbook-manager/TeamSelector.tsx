@@ -1,4 +1,4 @@
-import { Users, ChevronDown, Settings } from 'lucide-react'
+import { Users, ChevronDown, Settings, Check } from 'lucide-react'
 import { useState } from 'react'
 
 interface Team {
@@ -56,7 +56,7 @@ export function TeamSelector({ teams, currentTeamId, onSwitchTeam, onManageTeams
 									<span>{team.name}</span>
 								</div>
 								{team.id === currentTeamId && (
-									<span className="text-primary">✓</span>
+									<Check className="w-4 h-4 text-primary" />
 								)}
 							</button>
 						))}
