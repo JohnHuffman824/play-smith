@@ -1,6 +1,5 @@
 import { describe, test, expect, mock, beforeEach } from 'bun:test'
 import { renderHook, waitFor } from '@testing-library/react'
-import { act } from 'react'
 import { useAuth } from './useAuth'
 
 describe('useAuth', () => {
@@ -14,10 +13,7 @@ describe('useAuth', () => {
 			Promise.resolve(new Response(JSON.stringify({ id: 1, email: 'test@example.com' })))
 		)
 
-		let result: any
-		act(() => {
-			result = renderHook(() => useAuth()).result
-		})
+		const { result } = renderHook(() => useAuth())
 
 		expect(result.current.loading).toBe(true)
 		expect(result.current.user).toBe(null)
@@ -29,10 +25,7 @@ describe('useAuth', () => {
 			Promise.resolve(new Response(JSON.stringify(mockUser)))
 		)
 
-		let result: any
-		await act(async () => {
-			result = renderHook(() => useAuth()).result
-		})
+		const { result } = renderHook(() => useAuth())
 
 		await waitFor(() => {
 			expect(result.current.loading).toBe(false)
@@ -46,10 +39,7 @@ describe('useAuth', () => {
 			Promise.resolve(new Response(null, { status: 401 }))
 		)
 
-		let result: any
-		await act(async () => {
-			result = renderHook(() => useAuth()).result
-		})
+		const { result } = renderHook(() => useAuth())
 
 		await waitFor(() => {
 			expect(result.current.loading).toBe(false)
@@ -64,10 +54,7 @@ describe('useAuth', () => {
 			Promise.resolve(new Response(JSON.stringify(mockUser)))
 		)
 
-		let result: any
-		await act(async () => {
-			result = renderHook(() => useAuth()).result
-		})
+		const { result } = renderHook(() => useAuth())
 
 		await waitFor(() => {
 			expect(result.current.user).toEqual(mockUser)
@@ -78,9 +65,7 @@ describe('useAuth', () => {
 			Promise.resolve(new Response(null, { status: 200 }))
 		)
 
-		await act(async () => {
-			result.current.logout()
-		})
+		result.current.logout()
 
 		await waitFor(() => {
 			expect(result.current.user).toBe(null)

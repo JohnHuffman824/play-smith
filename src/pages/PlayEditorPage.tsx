@@ -23,11 +23,8 @@ import {
 
 function PlayEditorContent() {
 	const { theme } = useTheme()
-	const { playId, playbookId } = useParams<{ playId: string; playbookId: string }>()
+	const { teamId, playbookId } = useParams<{ teamId: string; playbookId?: string }>()
 	const navigate = useNavigate()
-	const [teamId, setTeamId] = useState<string | undefined>(undefined)
-	const [isLoadingPlaybook, setIsLoadingPlaybook] = useState(true)
-	const [playbookError, setPlaybookError] = useState<string | null>(null)
 
 	const {
 		state: playState,
@@ -56,37 +53,6 @@ function PlayEditorContent() {
 
 	const [showAddConceptDialog, setShowAddConceptDialog] = useState(false)
 	const [selectedObjectIds, setSelectedObjectIds] = useState<string[]>([])
-
-	// Fetch playbook data to determine team_id
-	useEffect(() => {
-		if (!playbookId) return
-
-		async function fetchPlaybookData() {
-			try {
-				setIsLoadingPlaybook(true)
-				const response = await fetch(`/api/playbooks/${playbookId}`)
-
-				if (response.status === 401) {
-					navigate('/login')
-					return
-				}
-
-				if (!response.ok) {
-					throw new Error('Failed to fetch playbook')
-				}
-
-				const data = await response.json()
-				// team_id can be null for personal playbooks
-				setTeamId(data.playbook.team_id?.toString() || undefined)
-			} catch (err) {
-				setPlaybookError(err instanceof Error ? err.message : 'Failed to load playbook')
-			} finally {
-				setIsLoadingPlaybook(false)
-			}
-		}
-
-		fetchPlaybookData()
-	}, [playbookId, navigate])
 
 	// Set up keyboard shortcuts
 	useKeyboardShortcuts({ setDrawingState })
@@ -182,21 +148,10 @@ function PlayEditorContent() {
 		// TODO: Duplicate selected objects
 	}
 
-	if (isLoadingPlaybook) {
+	if (!teamId) {
 		return (
 			<div className="flex items-center justify-center h-screen">
-				<div className="text-center">
-					<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
-					<p className="text-gray-600">Loading playbook...</p>
-				</div>
-			</div>
-		)
-	}
-
-	if (playbookError) {
-		return (
-			<div className="flex items-center justify-center h-screen">
-				<p className="text-red-500">{playbookError}</p>
+				<p className="text-red-500">Team ID is required</p>
 			</div>
 		)
 	}
