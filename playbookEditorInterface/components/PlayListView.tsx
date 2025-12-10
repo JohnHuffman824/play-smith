@@ -1,10 +1,10 @@
-import { 
-  MoreVertical, 
-  Edit, 
-  Trash2, 
-  Copy, 
-  CheckCircle2, 
-  Circle 
+import {
+  MoreVertical,
+  Edit,
+  Trash2,
+  Copy,
+  CheckCircle2,
+  Circle
 } from 'lucide-react'
 import { useState } from 'react'
 import {
@@ -13,16 +13,7 @@ import {
   PLAY_TYPE_LIST_RUN,
   MENU_ITEM_BASE,
 } from '../constants/playbook'
-
-interface Play {
-  id: string
-  name: string
-  formation: string
-  playType: string
-  defensiveFormation: string
-  tags: string[]
-  lastModified: string
-}
+import type { Play } from '../types'
 
 interface PlayListViewProps {
   plays: Play[]

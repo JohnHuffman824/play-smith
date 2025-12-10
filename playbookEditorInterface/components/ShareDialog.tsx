@@ -67,7 +67,9 @@ export function ShareDialog({
   }
 
   function handleCopyLink() {
-    const shareLink = `https://playsmith.app/shared/${playbookName.toLowerCase().replace(/\s+/g, '-')}`
+    const origin = window.location.origin
+    const slug = playbookName.toLowerCase().replace(/\s+/g, '-')
+    const shareLink = `${origin}/shared/${slug}`
     navigator.clipboard.writeText(shareLink)
     setLinkCopied(true)
     setTimeout(() => setLinkCopied(false), 2000)

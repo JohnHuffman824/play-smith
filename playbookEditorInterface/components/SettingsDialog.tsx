@@ -135,7 +135,7 @@ export function SettingsDialog({
                 <button
                   key={level}
                   onClick={() => onFieldLevelChange(level)}
-                  className={`w-full px-4 py-3 rounded-lg border-2 
+                  className={`w-full px-4 py-3 rounded-lg border-2
                     text-left transition-all duration-200 ${
                       fieldLevel == level
                         ? 'border-primary bg-primary/5'
@@ -145,27 +145,6 @@ export function SettingsDialog({
                   {level}
                 </button>
               ))}
-            </div>
-          </div>
-
-          <div>
-            <label className="block mb-3">Move Skills on Hash Change</label>
-            <div className="flex gap-3">
-              <button
-                onClick={() => {}}
-                className="flex-1 px-4 py-3 rounded-lg border-2 
-                  border-border hover:border-primary/50 
-                  transition-all duration-200"
-              >
-                Yes
-              </button>
-              <button
-                onClick={() => {}}
-                className="flex-1 px-4 py-3 rounded-lg border-2 
-                  border-primary bg-primary/5 transition-all duration-200"
-              >
-                No
-              </button>
             </div>
           </div>
         </div>

@@ -26,29 +26,15 @@ import {
   MODAL_BUTTON_BASE,
   PRIMARY_BUTTON_BASE,
 } from './constants/playbook'
-
-interface Play {
-  id: string
-  name: string
-  formation: string
-  playType: string
-  defensiveFormation: string
-  tags: string[]
-  lastModified: string
-  thumbnail?: string
-  personnel?: string
-}
-
-interface Section {
-  id: string
-  name: string
-  plays: Play[]
-}
+import type { Play, Section } from './types'
 
 interface PlaybookEditorProps {
   playbookId?: string
   playbookName?: string
   onBack?: () => void
+  onOpenPlay?: (playId: string) => void
+  onImport?: () => void
+  onExport?: (selectedPlayIds?: string[]) => void
 }
 
 const DARK_MODE_CLASS = 'dark'
@@ -62,10 +48,13 @@ function formatDate(date: Date): string {
   return date.toLocaleDateString('en-US', LOCALE_OPTIONS)
 }
 
-function PlaybookEditorContent({ 
-  playbookId, 
-  playbookName = DEFAULT_PLAYBOOK_NAME, 
-  onBack 
+function PlaybookEditorContent({
+  playbookId,
+  playbookName = DEFAULT_PLAYBOOK_NAME,
+  onBack,
+  onOpenPlay,
+  onImport,
+  onExport
 }: PlaybookEditorProps) {
   const { 
     theme, 
@@ -82,7 +71,12 @@ function PlaybookEditorContent({
   const [showNewSectionModal, setShowNewSectionModal] = useState(false)
   const [showSettingsDialog, setShowSettingsDialog] = useState(false)
   const [showShareDialog, setShowShareDialog] = useState(false)
+  const [showRenameModal, setShowRenameModal] = useState(false)
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false)
   const [newItemName, setNewItemName] = useState('')
+  const [renamePlayId, setRenamePlayId] = useState<string | null>(null)
+  const [renamePlayName, setRenamePlayName] = useState('')
+  const [deletePlayId, setDeletePlayId] = useState<string | null>(null)
   const [selectedPlays, setSelectedPlays] = useState<Set<string>>(new Set())
   const [activeSectionFilter, setActiveSectionFilter] = useState<string | null>(null)
 
@@ -227,7 +221,7 @@ function PlaybookEditorContent({
       tags: [],
       lastModified: formatDate(new Date()),
     }
-    
+
     if (sections.length > 0) {
       setSections(
         sections.map((section, index) =>
@@ -237,11 +231,13 @@ function PlaybookEditorContent({
         )
       )
     }
-    
+
     setNewItemName('')
     setShowNewPlayModal(false)
-    
-    alert(`Opening play editor for: ${newPlay.name}`)
+
+    if (onOpenPlay) {
+      onOpenPlay(newPlay.id)
+    }
   }
 
   function handleNewSection() {
@@ -258,9 +254,8 @@ function PlaybookEditorContent({
   }
 
   function handleOpenPlay(playId: string) {
-    const play = allPlays.find((p) => p.id == playId)
-    if (play) {
-      alert(`Opening play editor for: ${play.name}`)
+    if (onOpenPlay) {
+      onOpenPlay(playId)
     }
   }
 
@@ -268,31 +263,47 @@ function PlaybookEditorContent({
     const play = allPlays.find((p) => p.id == playId)
     if (!play) return
 
-    const newName = prompt('Rename play:', play.name)
-    if (newName?.trim()) {
-      setSections(
-        sections.map((section) => ({
-          ...section,
-          plays: section.plays.map((p) =>
-            p.id == playId
-              ? { ...p, name: newName, lastModified: formatDate(new Date()) }
-              : p
-          ),
-        }))
-      )
-    }
+    setRenamePlayId(playId)
+    setRenamePlayName(play.name)
+    setShowRenameModal(true)
+  }
+
+  function confirmRename() {
+    if (!renamePlayId || !renamePlayName.trim()) return
+
+    setSections(
+      sections.map((section) => ({
+        ...section,
+        plays: section.plays.map((p) =>
+          p.id == renamePlayId
+            ? { ...p, name: renamePlayName, lastModified: formatDate(new Date()) }
+            : p
+        ),
+      }))
+    )
+
+    setShowRenameModal(false)
+    setRenamePlayId(null)
+    setRenamePlayName('')
   }
 
   function handleDeletePlay(playId: string) {
-    const play = allPlays.find((p) => p.id == playId)
-    if (play && confirm(`Delete play "${play.name}"?`)) {
-      setSections(
-        sections.map((section) => ({
-          ...section,
-          plays: section.plays.filter((p) => p.id != playId),
-        }))
-      )
-    }
+    setDeletePlayId(playId)
+    setShowDeleteConfirmModal(true)
+  }
+
+  function confirmDelete() {
+    if (!deletePlayId) return
+
+    setSections(
+      sections.map((section) => ({
+        ...section,
+        plays: section.plays.filter((p) => p.id != deletePlayId),
+      }))
+    )
+
+    setShowDeleteConfirmModal(false)
+    setDeletePlayId(null)
   }
 
   function handleDuplicatePlay(playId: string) {
@@ -316,14 +327,17 @@ function PlaybookEditorContent({
   }
 
   function handleImport() {
-    alert('Import plays functionality - would open file picker')
+    if (onImport) {
+      onImport()
+    }
   }
 
   function handleExport() {
-    if (selectedPlays.size > 0) {
-      alert(`Exporting ${selectedPlays.size} selected play(s)`)
-    } else {
-      alert('Export entire playbook')
+    if (onExport) {
+      const playIds = selectedPlays.size > 0
+        ? Array.from(selectedPlays)
+        : undefined
+      onExport(playIds)
     }
   }
 
@@ -331,10 +345,6 @@ function PlaybookEditorContent({
     recipients: Array<{ email: string; role: 'viewer' | 'collaborator' }>
   ) {
     console.log('Sharing playbook with:', recipients)
-    alert(
-      `Playbook "${playbookName}" shared with:\n` +
-      recipients.map(r => `${r.email} (${r.role})`).join('\n')
-    )
   }
 
   function togglePlaySelection(playId: string) {
@@ -355,6 +365,17 @@ function PlaybookEditorContent({
   function closeNewSectionModal() {
     setShowNewSectionModal(false)
     setNewItemName('')
+  }
+
+  function closeRenameModal() {
+    setShowRenameModal(false)
+    setRenamePlayId(null)
+    setRenamePlayName('')
+  }
+
+  function closeDeleteConfirmModal() {
+    setShowDeleteConfirmModal(false)
+    setDeletePlayId(null)
   }
 
   const totalPlays = allPlays.length
@@ -649,6 +670,71 @@ function PlaybookEditorContent({
         playbookName={playbookName}
         onShare={handleShare}
       />
+
+      <Modal
+        isOpen={showRenameModal}
+        onClose={closeRenameModal}
+        title="Rename Play"
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block mb-2">Play Name</label>
+            <input
+              type="text"
+              value={renamePlayName}
+              onChange={(e) => setRenamePlayName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key == 'Enter') {
+                  confirmRename()
+                }
+              }}
+              placeholder="Enter play name..."
+              className={INPUT_BASE}
+              autoFocus
+            />
+          </div>
+          <div className="flex justify-end gap-2 pt-2">
+            <button onClick={closeRenameModal} className={MODAL_BUTTON_BASE}>
+              Cancel
+            </button>
+            <button
+              onClick={confirmRename}
+              disabled={!renamePlayName.trim()}
+              className={`${PRIMARY_BUTTON_BASE}
+                disabled:opacity-50 disabled:cursor-not-allowed`}
+            >
+              Rename
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={showDeleteConfirmModal}
+        onClose={closeDeleteConfirmModal}
+        title="Delete Play"
+      >
+        <div className="space-y-4">
+          <p>
+            Are you sure you want to delete this play? This action cannot be undone.
+          </p>
+          <div className="flex justify-end gap-2 pt-2">
+            <button
+              onClick={closeDeleteConfirmModal}
+              className={MODAL_BUTTON_BASE}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={confirmDelete}
+              className={`${PRIMARY_BUTTON_BASE} bg-destructive
+                hover:bg-destructive/90`}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   )
 }
