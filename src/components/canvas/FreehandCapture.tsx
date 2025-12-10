@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { FieldCoordinateSystem } from '../../utils/coordinates'
 import type { PathStyle, Drawing } from '../../types/drawing.types'
 import { simplifyPath, straightenSegments } from '../../utils/path.utils'
+import { smoothPathToCurves } from '../../utils/curve.utils'
 import type { Coordinate } from '../../types/field.types'
 
 interface FreehandCaptureProps {
@@ -103,7 +104,11 @@ export function FreehandCapture({
 			pathPoints = straightened.points
 		}
 
-		const { points, segments } = buildDrawingData(pathPoints)
+		// Apply curve smoothing if pathMode is 'curve'
+		const { points, segments } = style.pathMode === 'curve'
+			? smoothPathToCurves(pathPoints)
+			: buildDrawingData(pathPoints)
+
 		const drawing: Drawing = {
 			id: `drawing-${Date.now()}`,
 			points,
