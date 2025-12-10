@@ -153,4 +153,66 @@ describe('Playbooks API', () => {
 		await db`DELETE FROM teams WHERE id = ${otherTeam.id}`
 		await db`DELETE FROM users WHERE id = ${otherUser.id}`
 	})
+
+	test('POST /api/playbooks creates new playbook', async () => {
+		const response = await fetch('http://localhost:3000/api/playbooks', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				Cookie: `session=${testSession}`
+			},
+			body: JSON.stringify({
+				team_id: testTeamId,
+				name: 'New Playbook',
+				description: 'New description'
+			})
+		})
+
+		expect(response.status).toBe(201)
+		const data = await response.json()
+		expect(data.playbook.name).toBe('New Playbook')
+		expect(data.playbook.description).toBe('New description')
+		expect(data.playbook.team_id).toBe(testTeamId)
+		expect(data.playbook.created_by).toBe(testUserId)
+	})
+
+	test('POST /api/playbooks validates required fields', async () => {
+		const response = await fetch('http://localhost:3000/api/playbooks', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				Cookie: `session=${testSession}`
+			},
+			body: JSON.stringify({
+				team_id: testTeamId
+				// Missing name
+			})
+		})
+
+		expect(response.status).toBe(400)
+		const data = await response.json()
+		expect(data.error).toContain('name')
+	})
+
+	test('POST /api/playbooks requires team membership', async () => {
+		const otherTeam = await teamRepo.create({ name: 'Other Team' })
+
+		const response = await fetch('http://localhost:3000/api/playbooks', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				Cookie: `session=${testSession}`
+			},
+			body: JSON.stringify({
+				team_id: otherTeam.id,
+				name: 'Unauthorized Playbook'
+			})
+		})
+
+		expect(response.status).toBe(403)
+		const data = await response.json()
+		expect(data.error).toBe('Not a member of this team')
+
+		await db`DELETE FROM teams WHERE id = ${otherTeam.id}`
+	})
 })

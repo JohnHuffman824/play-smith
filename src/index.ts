@@ -29,7 +29,8 @@ const server = serve({
 
     // Playbook API endpoints
     "/api/playbooks": {
-      GET: playbooksAPI.list
+      GET: playbooksAPI.list,
+      POST: playbooksAPI.create
     },
     "/api/playbooks/:id": {
       GET: playbooksAPI.get

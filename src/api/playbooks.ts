@@ -64,5 +64,44 @@ export const playbooksAPI = {
 		}
 
 		return Response.json({ playbook })
+	},
+
+	create: async (req: Request) => {
+		const userId = await getSessionUser(req)
+		if (!userId) {
+			return Response.json({ error: 'Unauthorized' }, { status: 401 })
+		}
+
+		const body = await req.json()
+		const { team_id, name, description } = body
+
+		// Validate required fields
+		if (!team_id || !name) {
+			return Response.json(
+				{ error: 'team_id and name are required' },
+				{ status: 400 }
+			)
+		}
+
+		// Check user is member of team
+		const teams = await teamRepo.getUserTeams(userId)
+		const isMember = teams.some(team => team.id === team_id)
+
+		if (!isMember) {
+			return Response.json(
+				{ error: 'Not a member of this team' },
+				{ status: 403 }
+			)
+		}
+
+		// Create playbook
+		const playbook = await playbookRepo.create({
+			team_id,
+			name,
+			description: description || null,
+			created_by: userId
+		})
+
+		return Response.json({ playbook }, { status: 201 })
 	}
 }
