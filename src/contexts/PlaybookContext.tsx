@@ -172,7 +172,7 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
 		if (user) {
 			fetchPlaybooks()
 		}
-	}, [user, currentTeamId, fetchPlaybooks])
+	}, [user, fetchPlaybooks])
 
 	return (
 		<PlaybookContext.Provider
