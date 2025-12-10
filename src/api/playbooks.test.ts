@@ -22,7 +22,7 @@ describe('Playbooks API', () => {
 
 		// Create test user
 		const user = await userRepo.create({
-			email: 'test@example.com',
+			email: `test-${Date.now()}@example.com`,
 			name: 'Test User',
 			password_hash: 'hash'
 		})
@@ -118,7 +118,7 @@ describe('Playbooks API', () => {
 	test('GET /api/playbooks/:id returns 403 for unauthorized access', async () => {
 		// Create another user and team
 		const otherUser = await userRepo.create({
-			email: 'other@example.com',
+			email: `other-${Date.now()}@example.com`,
 			name: 'Other User',
 			password_hash: 'hash'
 		})
