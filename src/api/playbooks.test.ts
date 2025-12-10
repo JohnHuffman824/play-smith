@@ -215,4 +215,68 @@ describe('Playbooks API', () => {
 
 		await db`DELETE FROM teams WHERE id = ${otherTeam.id}`
 	})
+
+	test('PUT /api/playbooks/:id updates playbook', async () => {
+		const pb = await playbookRepo.create({
+			team_id: testTeamId,
+			name: 'Original Name',
+			created_by: testUserId
+		})
+
+		const response = await fetch(`http://localhost:3000/api/playbooks/${pb.id}`, {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+				Cookie: `session=${testSession}`
+			},
+			body: JSON.stringify({
+				name: 'Updated Name',
+				description: 'Updated description'
+			})
+		})
+
+		expect(response.status).toBe(200)
+		const data = await response.json()
+		expect(data.playbook.name).toBe('Updated Name')
+		expect(data.playbook.description).toBe('Updated description')
+	})
+
+	test('PUT /api/playbooks/:id requires team membership', async () => {
+		const otherUser = await userRepo.create({
+			email: `other-update-${Date.now()}@example.com`,
+			name: 'Other',
+			password_hash: 'hash'
+		})
+		const otherTeam = await teamRepo.create({ name: 'Other Team' })
+		await teamRepo.addMember({
+			team_id: otherTeam.id,
+			user_id: otherUser.id,
+			role: 'owner'
+		})
+
+		const pb = await playbookRepo.create({
+			team_id: otherTeam.id,
+			name: 'Other Playbook',
+			created_by: otherUser.id
+		})
+
+		const response = await fetch(`http://localhost:3000/api/playbooks/${pb.id}`, {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+				Cookie: `session=${testSession}`
+			},
+			body: JSON.stringify({
+				name: 'Hacked Name'
+			})
+		})
+
+		expect(response.status).toBe(403)
+
+		// Cleanup
+		await db`DELETE FROM playbooks WHERE id = ${pb.id}`
+		await db`DELETE FROM team_members WHERE team_id = ${otherTeam.id}`
+		await db`DELETE FROM teams WHERE id = ${otherTeam.id}`
+		await db`DELETE FROM users WHERE id = ${otherUser.id}`
+	})
 })
