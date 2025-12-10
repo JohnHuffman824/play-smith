@@ -17,6 +17,8 @@
     "seed:dev": "bun src/db/seed-dev.ts"
   },
   "dependencies": {
+    "@radix-ui/react-select": "^2.2.6",
+    "@radix-ui/react-separator": "^1.1.8",
     "bun-plugin-tailwind": "^0.1.2",
     "lucide-react": "^0.556.0",
     "postgres": "^3.4.7",
