@@ -9,6 +9,7 @@ import type { ReactNode } from 'react'
 import type { DrawingState, PlayCard, Tool } from '../types/play.types'
 import type { HashAlignment } from '../types/field.types'
 import type { Drawing } from '../types/drawing.types'
+import type { Formation, BaseConcept, ConceptGroup } from '../types/concept.types'
 
 interface Player {
 	id: string
@@ -49,6 +50,9 @@ type PlayAction =
 	| { type: 'DELETE_DRAWING'; id: string }
 	| { type: 'UPDATE_DRAWING'; id: string; updates: Partial<Drawing> }
 	| { type: 'CLEAR_CANVAS' }
+	| { type: 'APPLY_FORMATION'; formation: Formation }
+	| { type: 'APPLY_CONCEPT'; concept: BaseConcept }
+	| { type: 'APPLY_CONCEPT_GROUP'; conceptGroup: ConceptGroup }
 
 interface PlayContextType {
 	state: PlayState
@@ -67,6 +71,9 @@ interface PlayContextType {
 	addDrawing: (drawing: Drawing) => void
 	deleteDrawing: (id: string) => void
 	updateDrawing: (id: string, updates: Partial<Drawing>) => void
+	applyFormation: (formation: Formation) => void
+	applyConcept: (concept: BaseConcept) => void
+	applyConceptGroup: (conceptGroup: ConceptGroup) => void
 }
 
 const PlayContext = createContext<PlayContextType | undefined>(undefined)
@@ -113,6 +120,9 @@ type AddDrawingAction = Extract<PlayAction, { type: 'ADD_DRAWING' }>
 type SetDrawingsAction = Extract<PlayAction, { type: 'SET_DRAWINGS' }>
 type DeleteDrawingAction = Extract<PlayAction, { type: 'DELETE_DRAWING' }>
 type UpdateDrawingAction = Extract<PlayAction, { type: 'UPDATE_DRAWING' }>
+type ApplyFormationAction = Extract<PlayAction, { type: 'APPLY_FORMATION' }>
+type ApplyConceptAction = Extract<PlayAction, { type: 'APPLY_CONCEPT' }>
+type ApplyConceptGroupAction = Extract<PlayAction, { type: 'APPLY_CONCEPT_GROUP' }>
 
 function applySetTool(
 	state: PlayState,
@@ -261,6 +271,63 @@ function applyClearCanvas(state: PlayState): PlayState {
 	return { ...state, drawings: [], players: [] }
 }
 
+function applyApplyFormation(
+	state: PlayState,
+	action: ApplyFormationAction
+): PlayState {
+	const newPlayers: Player[] = action.formation.positions?.map(pos => ({
+		id: `player-${pos.role}-${Date.now()}-${Math.random()}`,
+		x: pos.position_x,
+		y: pos.position_y,
+		label: pos.role,
+		color: '#000000'
+	})) ?? []
+
+	return {
+		...state,
+		players: [...state.players, ...newPlayers]
+	}
+}
+
+function applyApplyConcept(
+	state: PlayState,
+	action: ApplyConceptAction
+): PlayState {
+	const newDrawings: Drawing[] = action.concept.assignments?.map(assignment =>
+		assignment.drawing_data
+	) ?? []
+
+	return {
+		...state,
+		drawings: [...state.drawings, ...newDrawings]
+	}
+}
+
+function applyApplyConceptGroup(
+	state: PlayState,
+	action: ApplyConceptGroupAction
+): PlayState {
+	let newState = state
+
+	if (action.conceptGroup.formation) {
+		newState = applyApplyFormation(newState, {
+			type: 'APPLY_FORMATION',
+			formation: action.conceptGroup.formation
+		})
+	}
+
+	if (action.conceptGroup.concepts) {
+		for (const concept of action.conceptGroup.concepts) {
+			newState = applyApplyConcept(newState, {
+				type: 'APPLY_CONCEPT',
+				concept
+			})
+		}
+	}
+
+	return newState
+}
+
 /**
 * Reducer handling play state transitions.
 */
@@ -302,6 +369,12 @@ function playReducer(state: PlayState, action: PlayAction): PlayState {
 			return applyUpdateDrawing(state, action)
 		case 'CLEAR_CANVAS':
 			return applyClearCanvas(state)
+		case 'APPLY_FORMATION':
+			return applyApplyFormation(state, action)
+		case 'APPLY_CONCEPT':
+			return applyApplyConcept(state, action)
+		case 'APPLY_CONCEPT_GROUP':
+			return applyApplyConceptGroup(state, action)
 		default:
 			return state
 	}
@@ -359,6 +432,15 @@ export function PlayProvider({ children }: { children: ReactNode }) {
 		},
 		updateDrawing(id: string, updates: Partial<Drawing>) {
 			dispatch({ type: 'UPDATE_DRAWING', id, updates })
+		},
+		applyFormation(formation: Formation) {
+			dispatch({ type: 'APPLY_FORMATION', formation })
+		},
+		applyConcept(concept: BaseConcept) {
+			dispatch({ type: 'APPLY_CONCEPT', concept })
+		},
+		applyConceptGroup(conceptGroup: ConceptGroup) {
+			dispatch({ type: 'APPLY_CONCEPT_GROUP', conceptGroup })
 		},
 	}
 

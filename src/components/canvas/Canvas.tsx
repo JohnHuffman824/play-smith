@@ -37,9 +37,16 @@ import { Pencil, PaintBucket } from 'lucide-react'
 import { calculateUnlinkPosition } from '../../utils/drawing.utils'
 
 interface CanvasProps {
-	drawingState: DrawingState
-	hashAlignment: HashAlignment
-	showPlayBar: boolean
+	drawingState?: DrawingState
+	hashAlignment?: HashAlignment
+	showPlayBar?: boolean
+	width?: number | string
+	height?: number | string
+	readonly?: boolean
+	showFieldMarkings?: boolean
+	onSelectionChange?: (ids: string[]) => void
+	initialPlayers?: Array<{ x: number; y: number; label: string; color: string }>
+	initialDrawings?: Drawing[]
 }
 
 // Helper to dispatch fill events
@@ -92,9 +99,18 @@ function computeUnlinkTarget(
 
 export function Canvas({
   drawingState,
-  hashAlignment,
-  showPlayBar,
+  hashAlignment = 'center',
+  showPlayBar = true,
+  width = '100%',
+  height,
+  readonly = false,
+  showFieldMarkings = true,
+  onSelectionChange,
+  initialPlayers,
+  initialDrawings,
 }: CanvasProps) {
+	// NOTE: Canvas currently requires PlayContext for full functionality
+	// Future refactoring needed for true standalone mode with initialPlayers/initialDrawings
   const whiteboardRef = useRef<HTMLDivElement>(null)
   const [linemanPositions, setLinemanPositions] = useState<
     { id: number; x: number; y: number }[]
@@ -114,7 +130,7 @@ export function Canvas({
       label: string
       color: string
     }>
-  >([])
+  >(initialPlayers ?? [])
   const [showLabelDialog, setShowLabelDialog] = useState(false)
   const [selectedPlayerId, setSelectedPlayerId] = useState<
     string | null
