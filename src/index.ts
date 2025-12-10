@@ -4,8 +4,8 @@ import { usersAPI, getUserById } from "./api/users";
 
 const server = serve({
   routes: {
-    "/*": index,
-
+    // API routes (must be defined BEFORE catch-all)
+    // These routes handle server-side requests and return JSON
     "/api/users": usersAPI,
     "/api/users/:id": getUserById,
 
@@ -30,6 +30,16 @@ const server = serve({
         message: `Hello, ${name}!`,
       });
     },
+
+    // Catch-all route (must be LAST)
+    // Serves the React app for all non-API routes
+    // This allows React Router to handle client-side routing for paths like:
+    // - / (landing page)
+    // - /login (login page)
+    // - /playbooks (playbook manager)
+    // - /playbooks/:playbookId (playbook editor)
+    // - /playbooks/:playbookId/plays/:playId (play editor)
+    "/*": index,
   },
 
   development: process.env.NODE_ENV !== "production" && {
