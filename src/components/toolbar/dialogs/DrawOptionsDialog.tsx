@@ -5,9 +5,11 @@ interface DrawOptionsDialogProps {
   lineStyle: 'solid' | 'dashed'
   lineEnd: 'none' | 'arrow' | 'tShape'
   brushSize: number
+  pathMode: 'sharp' | 'curve'
   onLineStyleChange: (style: 'solid' | 'dashed') => void
   onLineEndChange: (end: 'none' | 'arrow' | 'tShape') => void
   onBrushSizeChange: (size: number) => void
+  onPathModeChange: (mode: 'sharp' | 'curve') => void
   onClose: () => void
 }
 
@@ -22,9 +24,11 @@ export function DrawOptionsDialog({
   lineStyle,
   lineEnd,
   brushSize,
+  pathMode,
   onLineStyleChange,
   onLineEndChange,
   onBrushSizeChange,
+  onPathModeChange,
   onClose,
 }: DrawOptionsDialogProps) {
   const { theme } = useTheme()
@@ -45,6 +49,56 @@ export function DrawOptionsDialog({
         >
           <X size={16} />
         </button>
+      </div>
+
+      {/* Path Mode */}
+      <div className="mb-4">
+        <label className={`block text-xs mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+          Path Mode
+        </label>
+        <div className="flex gap-2">
+          <button
+            onClick={() => onPathModeChange('sharp')}
+            className={`flex-1 py-2 px-3 rounded-lg transition-all cursor-pointer ${
+              pathMode === 'sharp'
+                ? 'bg-blue-500 text-white'
+                : theme === 'dark'
+                  ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            <svg viewBox="0 0 48 16" className="h-4 w-full">
+              <polyline
+                points="4,12 16,4 32,12 44,4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="miter"
+              />
+            </svg>
+          </button>
+          <button
+            onClick={() => onPathModeChange('curve')}
+            className={`flex-1 py-2 px-3 rounded-lg transition-all cursor-pointer ${
+              pathMode === 'curve'
+                ? 'bg-blue-500 text-white'
+                : theme === 'dark'
+                  ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            <svg viewBox="0 0 48 16" className="h-4 w-full">
+              <path
+                d="M 4,12 C 10,4 22,4 24,8 C 26,12 38,12 44,4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
+          </button>
+        </div>
       </div>
 
       {/* Line Style */}

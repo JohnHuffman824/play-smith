@@ -501,12 +501,21 @@ export function Toolbar({
 				<Tooltip content='Save'>
 					<button
 						onClick={handleSavePlay}
-						className={coloredButtonClass(
+						disabled={isSaving}
+						className={`${coloredButtonClass(
 							'bg-green-50 text-green-600 hover:bg-green-100',
 							'bg-green-900 text-green-400 hover:bg-green-800',
-						)}
+						)} transition-transform duration-200 ease-out ${
+							showSuccess ? 'scale-[1.2]' : 'scale-100'
+						} ${isSaving ? 'opacity-70 cursor-not-allowed' : ''}`}
 					>
-						<ArrowDown size={22} />
+						{isSaving ? (
+							<Loader2 size={22} className="animate-spin" />
+						) : showSuccess ? (
+							<Check size={22} />
+						) : (
+							<Save size={22} />
+						)}
 					</button>
 				</Tooltip>
 
@@ -540,6 +549,7 @@ export function Toolbar({
 					lineStyle={drawingState.lineStyle}
 					lineEnd={drawingState.lineEnd}
 					brushSize={drawingState.brushSize}
+					pathMode={drawingState.pathMode}
 					onLineStyleChange={(lineStyle) =>
 						setDrawingState({ ...drawingState, lineStyle })
 					}
@@ -548,6 +558,9 @@ export function Toolbar({
 					}
 					onBrushSizeChange={(brushSize) =>
 						setDrawingState({ ...drawingState, brushSize })
+					}
+					onPathModeChange={(pathMode) =>
+						setDrawingState({ ...drawingState, pathMode })
 					}
 					onClose={() => setShowDrawOptions(false)}
 				/>
