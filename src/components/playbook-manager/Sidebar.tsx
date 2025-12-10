@@ -36,9 +36,9 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
 							<li key={section.id}>
 								<button
 									onClick={() => onSectionChange(section.id)}
-									className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
+									className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 cursor-pointer ${
 										isActive
-											? 'bg-sidebar-accent text-sidebar-accent-foreground'
+											? 'bg-primary/10 text-primary font-medium border border-primary/20'
 											: 'text-sidebar-foreground hover:bg-sidebar-accent/50'
 									}`}
 								>

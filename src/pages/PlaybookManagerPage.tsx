@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { usePlaybook } from '../contexts/PlaybookContext'
 import { useTeam } from '../contexts/TeamContext'
 import { Sidebar } from '../components/playbook-manager/Sidebar'
@@ -8,6 +9,7 @@ import { Modal } from '../components/playbook-manager/Modal'
 import { SettingsDialog } from '../components/playbook-manager/SettingsDialog'
 
 export function PlaybookManagerPage() {
+	const navigate = useNavigate()
 	const {
 		playbooks,
 		isLoading,
@@ -33,9 +35,11 @@ export function PlaybookManagerPage() {
 
 	const handleCreatePlaybook = async () => {
 		if (newPlaybookName.trim() && currentTeamId) {
-			await createPlaybook(newPlaybookName, currentTeamId)
+			const newPlaybook = await createPlaybook(newPlaybookName, currentTeamId)
 			setNewPlaybookName('')
 			setShowNewPlaybookModal(false)
+			// Navigate to the newly created playbook
+			navigate(`/playbooks/${newPlaybook.id}`)
 		}
 	}
 
@@ -167,7 +171,7 @@ export function PlaybookManagerPage() {
 							<p className="text-muted-foreground mb-4">No playbooks found</p>
 							<button
 								onClick={() => setShowNewPlaybookModal(true)}
-								className="px-6 py-2.5 bg-primary text-primary-foreground rounded-lg"
+								className="px-6 py-2.5 bg-primary text-primary-foreground rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
 							>
 								Create Your First Playbook
 							</button>
@@ -208,14 +212,14 @@ export function PlaybookManagerPage() {
 								setShowNewPlaybookModal(false)
 								setNewPlaybookName('')
 							}}
-							className="px-4 py-2 hover:bg-accent rounded-lg"
+							className="px-4 py-2 hover:bg-accent rounded-lg cursor-pointer transition-colors"
 						>
 							Cancel
 						</button>
 						<button
 							onClick={handleCreatePlaybook}
 							disabled={!newPlaybookName.trim()}
-							className="px-4 py-2 bg-primary text-primary-foreground rounded-lg disabled:opacity-50"
+							className="px-4 py-2 bg-primary text-primary-foreground rounded-lg disabled:opacity-50 cursor-pointer hover:opacity-90 transition-opacity disabled:cursor-not-allowed"
 						>
 							Create
 						</button>
