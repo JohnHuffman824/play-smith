@@ -9,7 +9,7 @@ type PlaybookUpdate = {
 export class PlaybookRepository {
 	// Inserts a playbook and returns DB defaults in one call
 	async create(data: {
-		team_id: number
+		team_id: number | null
 		name: string
 		description?: string
 		created_by: number
@@ -42,6 +42,14 @@ export class PlaybookRepository {
 		return await db<Playbook[]>`
 			SELECT * FROM playbooks
 			WHERE team_id = ${teamId}
+			ORDER BY updated_at DESC
+		`
+	}
+
+	async getUserPersonalPlaybooks(userId: number): Promise<Playbook[]> {
+		return await db<Playbook[]>`
+			SELECT * FROM playbooks
+			WHERE team_id IS NULL AND created_by = ${userId}
 			ORDER BY updated_at DESC
 		`
 	}
