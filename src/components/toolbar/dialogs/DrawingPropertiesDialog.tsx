@@ -44,14 +44,20 @@ export function DrawingPropertiesDialog({
 	}
 
 	return (
-		<div
-			style={dialogStyle}
-			className={`w-64 rounded-2xl shadow-2xl border p-4 z-50 ${
-				theme === 'dark'
-					? 'bg-gray-800 border-gray-700'
-					: 'bg-white border-gray-200'
-			}`}
-		>
+		<>
+			{/* Transparent backdrop to handle click-away */}
+			<div
+				className='fixed inset-0 z-40'
+				onClick={onClose}
+			/>
+			<div
+				style={dialogStyle}
+				className={`w-64 rounded-2xl shadow-2xl border p-4 z-50 ${
+					theme === 'dark'
+						? 'bg-gray-800 border-gray-700'
+						: 'bg-white border-gray-200'
+				}`}
+			>
 			{/* Header */}
 			<div className='flex items-center justify-between mb-4'>
 				<span
@@ -288,5 +294,6 @@ export function DrawingPropertiesDialog({
 				</div>
 			</div>
 		</div>
+		</>
 	)
 }
