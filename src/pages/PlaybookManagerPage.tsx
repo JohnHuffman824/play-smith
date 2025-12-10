@@ -6,7 +6,14 @@ import { PlaybookCard } from '../components/playbook-manager/PlaybookCard'
 import { Modal } from '../components/playbook-manager/Modal'
 
 export function PlaybookManagerPage() {
-	const { playbooks, isLoading, error, createPlaybook, updatePlaybook, deletePlaybook } = usePlaybook()
+	const {
+		playbooks,
+		isLoading,
+		error,
+		createPlaybook,
+		updatePlaybook,
+		deletePlaybook
+	} = usePlaybook()
 	const { currentTeamId } = useTeam()
 
 	const [activeSection, setActiveSection] = useState('all')

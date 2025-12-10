@@ -38,17 +38,7 @@ export function PlaybookCard({
 			className="p-4 bg-card rounded-lg border border-border hover:border-accent transition-colors cursor-pointer"
 			onClick={handleOpen}
 		>
-			<div className="flex items-start justify-between mb-2">
-				<h3 className="font-semibold truncate">{playbook.name}</h3>
-				<button
-					onClick={e => {
-						e.stopPropagation()
-					}}
-					className="text-muted-foreground hover:text-foreground"
-				>
-					⋮
-				</button>
-			</div>
+			<h3 className="font-semibold truncate mb-2">{playbook.name}</h3>
 
 			{playbook.description && (
 				<p className="text-sm text-muted-foreground mb-2 truncate">
@@ -58,13 +48,6 @@ export function PlaybookCard({
 
 			<div className="text-xs text-muted-foreground">
 				Updated {new Date(playbook.updated_at).toLocaleDateString()}
-			</div>
-
-			{/* Context menu - simplified for now */}
-			<div className="hidden group-hover:block">
-				<button onClick={handleRenameClick}>Rename</button>
-				<button onClick={() => onDuplicate(playbook.id)}>Duplicate</button>
-				<button onClick={handleDeleteClick}>Delete</button>
 			</div>
 		</div>
 	)
