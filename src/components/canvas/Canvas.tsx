@@ -200,7 +200,8 @@ export function Canvas({
 
 	// Track changes and save snapshots for undo
 	useEffect(() => {
-		if (drawings.length == 0 && players.length == 0) return
+		// Save history for all state changes, including when canvas becomes empty
+		// This allows undo to work after erasing the last player or drawing
 		saveToHistory()
 	}, [drawings, players])
 

@@ -131,7 +131,7 @@ Play Smith uses session-based authentication with PostgreSQL-backed sessions.
 
 4. **Login with default admin credentials:**
    - Username: `admin`
-   - Password: `admin`
+   - Password: `ALtt98xzH!`
 
 ### Authentication Features
 
