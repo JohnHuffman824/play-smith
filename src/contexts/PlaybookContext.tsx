@@ -8,7 +8,7 @@ interface PlaybookContextType {
 	isLoading: boolean
 	error: string | null
 	fetchPlaybooks: () => Promise<void>
-	createPlaybook: (name: string, teamId: number, description?: string) => Promise<Playbook>
+	createPlaybook: (name: string, teamId: number | null, description?: string) => Promise<Playbook>
 	updatePlaybook: (id: number, updates: { name?: string; description?: string }) => Promise<void>
 	deletePlaybook: (id: number) => Promise<void>
 }
@@ -44,7 +44,7 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
 
 	const createPlaybook = async (
 		name: string,
-		teamId: number,
+		teamId: number | null,
 		description?: string
 	): Promise<Playbook> => {
 		// Create temporary playbook with negative ID for optimistic update
@@ -169,7 +169,7 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
 	}
 
 	useEffect(() => {
-		if (user && currentTeamId) {
+		if (user) {
 			fetchPlaybooks()
 		}
 	}, [user, currentTeamId, fetchPlaybooks])
