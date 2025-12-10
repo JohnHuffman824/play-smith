@@ -1,5 +1,8 @@
 import { X } from 'lucide-react'
 import { useTheme } from '../../contexts/ThemeContext'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
+import { Separator } from '../ui/separator'
+import { useState } from 'react'
 
 interface SettingsDialogProps {
 	isOpen: boolean
@@ -8,6 +11,11 @@ interface SettingsDialogProps {
 
 export function SettingsDialog({ isOpen, onClose }: SettingsDialogProps) {
 	const { theme, setTheme } = useTheme()
+	const [viewMode, setViewMode] = useState('grid')
+	const [cardsPerRow, setCardsPerRow] = useState('4')
+	const [autoSaveInterval, setAutoSaveInterval] = useState('30')
+	const [showPlayCount, setShowPlayCount] = useState(true)
+	const [confirmBeforeDelete, setConfirmBeforeDelete] = useState(true)
 
 	if (!isOpen) return null
 
@@ -44,18 +52,21 @@ export function SettingsDialog({ isOpen, onClose }: SettingsDialogProps) {
 										Choose your preferred color theme
 									</p>
 								</div>
-								<select
-									value={theme}
-									onChange={(e) => setTheme(e.target.value as 'light' | 'dark' | 'system')}
-									className="px-4 py-2 bg-input rounded-lg border-0 outline-none focus:ring-2 focus:ring-ring/20"
-								>
-									<option value="light">Light</option>
-									<option value="dark">Dark</option>
-									<option value="system">System</option>
-								</select>
+								<Select value={theme} onValueChange={(value) => setTheme(value as 'light' | 'dark' | 'system')}>
+									<SelectTrigger className="w-[180px]">
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="light">Light</SelectItem>
+										<SelectItem value="dark">Dark</SelectItem>
+										<SelectItem value="system">System</SelectItem>
+									</SelectContent>
+								</Select>
 							</div>
 						</div>
 					</section>
+
+					<Separator />
 
 					{/* Display Settings */}
 					<section>
@@ -68,13 +79,15 @@ export function SettingsDialog({ isOpen, onClose }: SettingsDialogProps) {
 										Choose how playbooks are displayed by default
 									</p>
 								</div>
-								<select
-									className="px-4 py-2 bg-input rounded-lg border-0 outline-none focus:ring-2 focus:ring-ring/20"
-									defaultValue="grid"
-								>
-									<option value="grid">Grid</option>
-									<option value="list">List</option>
-								</select>
+								<Select value={viewMode} onValueChange={setViewMode}>
+									<SelectTrigger className="w-[180px]">
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="grid">Grid</SelectItem>
+										<SelectItem value="list">List</SelectItem>
+									</SelectContent>
+								</Select>
 							</div>
 
 							<div className="flex items-center justify-between">
@@ -84,19 +97,23 @@ export function SettingsDialog({ isOpen, onClose }: SettingsDialogProps) {
 										Number of playbook cards to show per row
 									</p>
 								</div>
-								<select
-									className="px-4 py-2 bg-input rounded-lg border-0 outline-none focus:ring-2 focus:ring-ring/20"
-									defaultValue="4"
-								>
-									<option value="2">2</option>
-									<option value="3">3</option>
-									<option value="4">4</option>
-									<option value="5">5</option>
-									<option value="6">6</option>
-								</select>
+								<Select value={cardsPerRow} onValueChange={setCardsPerRow}>
+									<SelectTrigger className="w-[180px]">
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="2">2</SelectItem>
+										<SelectItem value="3">3</SelectItem>
+										<SelectItem value="4">4</SelectItem>
+										<SelectItem value="5">5</SelectItem>
+										<SelectItem value="6">6</SelectItem>
+									</SelectContent>
+								</Select>
 							</div>
 						</div>
 					</section>
+
+					<Separator />
 
 					{/* Playbook Settings */}
 					<section>
@@ -109,16 +126,18 @@ export function SettingsDialog({ isOpen, onClose }: SettingsDialogProps) {
 										How often to automatically save your changes
 									</p>
 								</div>
-								<select
-									className="px-4 py-2 bg-input rounded-lg border-0 outline-none focus:ring-2 focus:ring-ring/20"
-									defaultValue="30"
-								>
-									<option value="10">10 seconds</option>
-									<option value="30">30 seconds</option>
-									<option value="60">1 minute</option>
-									<option value="300">5 minutes</option>
-									<option value="0">Manual only</option>
-								</select>
+								<Select value={autoSaveInterval} onValueChange={setAutoSaveInterval}>
+									<SelectTrigger className="w-[180px]">
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="10">10 seconds</SelectItem>
+										<SelectItem value="30">30 seconds</SelectItem>
+										<SelectItem value="60">1 minute</SelectItem>
+										<SelectItem value="300">5 minutes</SelectItem>
+										<SelectItem value="0">Manual only</SelectItem>
+									</SelectContent>
+								</Select>
 							</div>
 
 							<div className="flex items-center justify-between">
@@ -130,7 +149,8 @@ export function SettingsDialog({ isOpen, onClose }: SettingsDialogProps) {
 								</div>
 								<input
 									type="checkbox"
-									defaultChecked
+									checked={showPlayCount}
+									onChange={(e) => setShowPlayCount(e.target.checked)}
 									className="w-5 h-5 rounded border-input"
 								/>
 							</div>
@@ -144,7 +164,8 @@ export function SettingsDialog({ isOpen, onClose }: SettingsDialogProps) {
 								</div>
 								<input
 									type="checkbox"
-									defaultChecked
+									checked={confirmBeforeDelete}
+									onChange={(e) => setConfirmBeforeDelete(e.target.checked)}
 									className="w-5 h-5 rounded border-input"
 								/>
 							</div>

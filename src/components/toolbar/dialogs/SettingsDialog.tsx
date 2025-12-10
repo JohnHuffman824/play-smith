@@ -1,7 +1,7 @@
 import { X } from 'lucide-react'
 import { useState } from 'react'
 import { useTheme } from '../../../contexts/ThemeContext'
-import { CustomSelect } from '../CustomSelect'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select'
 
 interface SettingsDialogProps {
 	onClose: () => void
@@ -66,15 +66,16 @@ export function SettingsDialog({
 					<label className={`text-sm mb-2 block ${labelClass}`}>
 						Position Naming System
 					</label>
-					<CustomSelect
-						value={positionNaming}
-						onChange={(value) => setPositionNaming(value as PositionNaming)}
-						options={[
-							{ value: 'XYZABQ', label: 'X, Y, Z, A, B, Q' },
-							{ value: 'XYZFTQ', label: 'X, Y, Z, F, T, Q' },
-							{ value: 'Custom', label: 'Custom' },
-						]}
-					/>
+					<Select value={positionNaming} onValueChange={(value) => setPositionNaming(value as PositionNaming)}>
+						<SelectTrigger className="w-full">
+							<SelectValue />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="XYZABQ">X, Y, Z, A, B, Q</SelectItem>
+							<SelectItem value="XYZFTQ">X, Y, Z, F, T, Q</SelectItem>
+							<SelectItem value="Custom">Custom</SelectItem>
+						</SelectContent>
+					</Select>
 				</div>
 
 				{/* Competition Level */}
@@ -82,15 +83,16 @@ export function SettingsDialog({
 					<label className={`text-sm mb-2 block ${labelClass}`}>
 						Competition Level
 					</label>
-					<CustomSelect
-						value={fieldLevel}
-						onChange={(value) => setFieldLevel(value as FieldLevel)}
-						options={[
-							{ value: 'High School', label: 'High School' },
-							{ value: 'College', label: 'College' },
-							{ value: 'Pro', label: 'Pro' },
-						]}
-					/>
+					<Select value={fieldLevel} onValueChange={(value) => setFieldLevel(value as FieldLevel)}>
+						<SelectTrigger className="w-full">
+							<SelectValue />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="High School">High School</SelectItem>
+							<SelectItem value="College">College</SelectItem>
+							<SelectItem value="Pro">Pro</SelectItem>
+						</SelectContent>
+					</Select>
 				</div>
 
 				{/* Appearance */}
@@ -98,14 +100,15 @@ export function SettingsDialog({
 					<label className={`text-sm mb-2 block ${labelClass}`}>
 						Appearance
 					</label>
-					<CustomSelect
-						value={themeMode}
-						onChange={(value) => handleThemeChange(value as ThemeMode)}
-						options={[
-							{ value: 'Light Mode', label: 'Light Mode' },
-							{ value: 'Dark Mode', label: 'Dark Mode' },
-						]}
-					/>
+					<Select value={themeMode} onValueChange={(value) => handleThemeChange(value as ThemeMode)}>
+						<SelectTrigger className="w-full">
+							<SelectValue />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="Light Mode">Light Mode</SelectItem>
+							<SelectItem value="Dark Mode">Dark Mode</SelectItem>
+						</SelectContent>
+					</Select>
 				</div>
 
 				{/* Snap Distance */}
