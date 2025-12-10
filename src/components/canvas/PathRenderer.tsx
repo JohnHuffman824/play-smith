@@ -118,6 +118,24 @@ export function PathRenderer({
 
 	return (
 		<g className={className} onClick={handleClick}>
+			{/* SVG filter for selection glow */}
+			{isSelected && (
+				<defs>
+					<filter
+						id={`glow-${drawing.id}`}
+						x='-50%'
+						y='-50%'
+						width='200%'
+						height='200%'
+					>
+						<feGaussianBlur stdDeviation='3' result='coloredBlur' />
+						<feMerge>
+							<feMergeNode in='coloredBlur' />
+							<feMergeNode in='SourceGraphic' />
+						</feMerge>
+					</filter>
+				</defs>
+			)}
 			{activeTool == 'select' && (
 				<path
 					d={d}
@@ -140,6 +158,7 @@ export function PathRenderer({
 				strokeLinejoin='round'
 				strokeDasharray={lineDash.join(' ')}
 				opacity={isSelected ? 0.9 : 1}
+				filter={isSelected ? `url(#glow-${drawing.id})` : undefined}
 				style={{ ...eraseHover, ...selectStyle }}
 				pointerEvents='stroke'
 				onPointerDown={handlePointerDown}
