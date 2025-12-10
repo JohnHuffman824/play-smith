@@ -8,17 +8,19 @@ describe('FormationRepository', () => {
 	let testUserId: number
 
 	beforeEach(async () => {
-		// Create test team
+		// Create test team with unique name
+		const teamName = `Test Team ${Date.now()}-${Math.random()}`
 		const [team] = await db`
-			INSERT INTO teams (name) VALUES ('Test Team')
+			INSERT INTO teams (name) VALUES (${teamName})
 			RETURNING id
 		`
 		testTeamId = team.id
 
-		// Create test user (password_hash required)
+		// Create test user with unique email (password_hash required)
+		const userEmail = `test-${Date.now()}-${Math.random()}@example.com`
 		const [user] = await db`
 			INSERT INTO users (email, name, password_hash)
-			VALUES ('test@example.com', 'Test User', 'dummy_hash_for_testing')
+			VALUES (${userEmail}, 'Test User', 'dummy_hash_for_testing')
 			RETURNING id
 		`
 		testUserId = user.id
@@ -49,8 +51,8 @@ describe('FormationRepository', () => {
 			// Verify positions created
 			expect(result.positions).toHaveLength(3)
 			expect(result.positions[0].role).toBe('x')
-			expect(result.positions[0].position_x).toBe(-20)
-			expect(result.positions[0].position_y).toBe(10)
+			expect(Number(result.positions[0].position_x)).toBe(-20)
+			expect(Number(result.positions[0].position_y)).toBe(10)
 			expect(result.positions[0].hash_relative).toBe(false)
 		})
 
@@ -86,14 +88,15 @@ describe('FormationRepository', () => {
 			expect(result.positions[0].hash_relative).toBe(true)
 		})
 
-		test('throws error when formation creation fails', async () => {
+		test('throws error when team_id is invalid (foreign key constraint)', async () => {
 			const invalidData = {
 				team_id: 99999, // Non-existent team
 				name: 'Invalid',
 				created_by: testUserId,
-				positions: []
+				positions: [{ role: 'x', position_x: 0, position_y: 0, hash_relative: false }]
 			}
 
+			// PostgreSQL will throw foreign key constraint error
 			await expect(repo.create(invalidData)).rejects.toThrow()
 		})
 	})
@@ -239,24 +242,23 @@ describe('FormationRepository', () => {
 				]
 			})
 
-			await repo.update(created.id, {
-				name: 'Updated',
-				positions: [
-					{ role: 'z', position_x: 10, position_y: 5, hash_relative: true }
-				]
-			})
+			await repo.update(
+				created.id,
+				{ name: 'Updated' },
+				[{ role: 'z', position_x: 10, position_y: 5, hash_relative: true }]
+			)
 
 			const updated = await repo.findById(created.id)
 			expect(updated!.positions).toHaveLength(1)
 			expect(updated!.positions[0].role).toBe('z')
-			expect(updated!.positions[0].position_x).toBe(10)
+			expect(Number(updated!.positions[0].position_x)).toBe(10)
 			expect(updated!.positions[0].hash_relative).toBe(true)
 		})
 
-		test('throws error for invalid formation ID', async () => {
-			await expect(
-				repo.update(99999, { name: 'Test' })
-			).rejects.toThrow()
+		test('returns null for invalid formation ID', async () => {
+			const result = await repo.update(99999, { name: 'Test' })
+
+			expect(result).toBeNull()
 		})
 	})
 
@@ -285,12 +287,14 @@ describe('FormationRepository', () => {
 			expect(positions).toHaveLength(0)
 		})
 
-		test('throws error for non-existent formation', async () => {
-			await expect(repo.delete(99999)).rejects.toThrow()
+		test('succeeds silently for non-existent formation', async () => {
+			// Delete is idempotent - doesn't throw for non-existent IDs
+			await expect(repo.delete(99999)).resolves.toBeUndefined()
 		})
 
-		test('throws error for invalid ID', async () => {
-			await expect(repo.delete(-1)).rejects.toThrow()
+		test('succeeds silently for invalid ID', async () => {
+			// Delete is idempotent - doesn't throw for invalid IDs
+			await expect(repo.delete(-1)).resolves.toBeUndefined()
 		})
 	})
 })
