@@ -36,6 +36,38 @@ global.fetch = async (url: string, options?: any) => {
 		} as Response
 	}
 
+	if (url.includes('/api/playbooks/') && options?.method === 'PUT') {
+		const id = parseInt(url.split('/').pop()!)
+		const body = await options.body
+		const updates = JSON.parse(body)
+		const playbookIndex = mockPlaybooks.findIndex(pb => pb.id === id)
+		if (playbookIndex !== -1) {
+			mockPlaybooks[playbookIndex] = {
+				...mockPlaybooks[playbookIndex],
+				...updates,
+				updated_at: new Date()
+			}
+			return {
+				ok: true,
+				json: async () => ({ playbook: mockPlaybooks[playbookIndex] })
+			} as Response
+		}
+		return { ok: false, status: 404 } as Response
+	}
+
+	if (url.includes('/api/playbooks/') && options?.method === 'DELETE') {
+		const id = parseInt(url.split('/').pop()!)
+		const playbookIndex = mockPlaybooks.findIndex(pb => pb.id === id)
+		if (playbookIndex !== -1) {
+			mockPlaybooks.splice(playbookIndex, 1)
+			return {
+				ok: true,
+				json: async () => ({ success: true })
+			} as Response
+		}
+		return { ok: false, status: 404 } as Response
+	}
+
 	if (url.includes('/api/playbooks') && options?.method === 'POST') {
 		const body = await options.body
 		const data = JSON.parse(body)
@@ -65,15 +97,29 @@ global.fetch = async (url: string, options?: any) => {
 }
 
 function TestComponent() {
-	const { playbooks, isLoading, createPlaybook } = usePlaybook()
+	const { playbooks, isLoading, createPlaybook, updatePlaybook, deletePlaybook } =
+		usePlaybook()
 
 	if (isLoading) return <div>Loading...</div>
 
 	return (
 		<div>
 			<div data-testid="playbook-count">{playbooks.length}</div>
-			<button onClick={() => createPlaybook('New Playbook', 1)}>
-				Create
+			{playbooks.map(pb => (
+				<div key={pb.id} data-testid={`playbook-${pb.id}`}>
+					{pb.name}
+				</div>
+			))}
+			<button onClick={() => createPlaybook('New Playbook', 1)}>Create</button>
+			<button
+				onClick={() =>
+					playbooks[0] && updatePlaybook(playbooks[0].id, { name: 'Updated' })
+				}
+			>
+				Update
+			</button>
+			<button onClick={() => playbooks[0] && deletePlaybook(playbooks[0].id)}>
+				Delete
 			</button>
 		</div>
 	)
@@ -113,6 +159,50 @@ describe('PlaybookContext', () => {
 
 		await waitFor(() => {
 			expect(screen.getByTestId('playbook-count').textContent).toBe('2')
+		})
+	})
+
+	test('allows updating playbooks', async () => {
+		render(
+			<TeamProvider>
+				<PlaybookProvider>
+					<TestComponent />
+				</PlaybookProvider>
+			</TeamProvider>
+		)
+
+		await waitFor(() => {
+			expect(screen.getByText('Playbook 1')).toBeDefined()
+		})
+
+		await act(async () => {
+			screen.getByText('Update').click()
+		})
+
+		await waitFor(() => {
+			expect(screen.getByText('Updated')).toBeDefined()
+		})
+	})
+
+	test('allows deleting playbooks', async () => {
+		render(
+			<TeamProvider>
+				<PlaybookProvider>
+					<TestComponent />
+				</PlaybookProvider>
+			</TeamProvider>
+		)
+
+		await waitFor(() => {
+			expect(screen.getByTestId('playbook-count').textContent).toBe('1')
+		})
+
+		await act(async () => {
+			screen.getByText('Delete').click()
+		})
+
+		await waitFor(() => {
+			expect(screen.getByTestId('playbook-count').textContent).toBe('0')
 		})
 	})
 })

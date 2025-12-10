@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react'
+import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react'
 import type { Playbook } from '../db/types'
 import { useTeam } from './TeamContext'
 
@@ -20,7 +20,7 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
 	const [isLoading, setIsLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
 
-	const fetchPlaybooks = async () => {
+	const fetchPlaybooks = useCallback(async () => {
 		setIsLoading(true)
 		setError(null)
 
@@ -38,70 +38,139 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
 		} finally {
 			setIsLoading(false)
 		}
-	}
+	}, [])
 
 	const createPlaybook = async (
 		name: string,
 		teamId: number,
 		description?: string
 	): Promise<Playbook> => {
-		const response = await fetch('/api/playbooks', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({ team_id: teamId, name, description })
-		})
-
-		if (!response.ok) {
-			const data = await response.json()
-			throw new Error(data.error || 'Failed to create playbook')
+		// Create temporary playbook with negative ID for optimistic update
+		const tempId = -Date.now()
+		const tempPlaybook: Playbook = {
+			id: tempId,
+			team_id: teamId,
+			name,
+			description: description || null,
+			created_by: 0, // Will be set by server
+			created_at: new Date(),
+			updated_at: new Date()
 		}
 
-		const data = await response.json()
-		setPlaybooks(prev => [data.playbook, ...prev])
-		return data.playbook
+		// Optimistic update
+		setPlaybooks(prev => [tempPlaybook, ...prev])
+		setError(null)
+
+		try {
+			const response = await fetch('/api/playbooks', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ team_id: teamId, name, description })
+			})
+
+			if (!response.ok) {
+				const data = await response.json()
+				throw new Error(data.error || 'Failed to create playbook')
+			}
+
+			const data = await response.json()
+			// Replace temp with real playbook
+			setPlaybooks(prev => prev.map(pb => (pb.id === tempId ? data.playbook : pb)))
+			return data.playbook
+		} catch (err) {
+			// Rollback on error
+			setPlaybooks(prev => prev.filter(pb => pb.id !== tempId))
+			const errorMsg = err instanceof Error ? err.message : 'Unknown error'
+			setError(errorMsg)
+			throw err
+		}
 	}
 
 	const updatePlaybook = async (
 		id: number,
 		updates: { name?: string; description?: string }
 	) => {
-		const response = await fetch(`/api/playbooks/${id}`, {
-			method: 'PUT',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(updates)
-		})
+		// Store original for rollback
+		let originalPlaybook: Playbook | undefined
 
-		if (!response.ok) {
+		// Optimistic update
+		setPlaybooks(prev =>
+			prev.map(pb => {
+				if (pb.id === id) {
+					originalPlaybook = pb
+					return { ...pb, ...updates, updated_at: new Date() }
+				}
+				return pb
+			})
+		)
+		setError(null)
+
+		try {
+			const response = await fetch(`/api/playbooks/${id}`, {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(updates)
+			})
+
+			if (!response.ok) {
+				const data = await response.json()
+				throw new Error(data.error || 'Failed to update playbook')
+			}
+
 			const data = await response.json()
-			throw new Error(data.error || 'Failed to update playbook')
+			// Replace with server version
+			setPlaybooks(prev => prev.map(pb => (pb.id === id ? data.playbook : pb)))
+		} catch (err) {
+			// Rollback to original
+			if (originalPlaybook) {
+				setPlaybooks(prev => prev.map(pb => (pb.id === id ? originalPlaybook! : pb)))
+			}
+			const errorMsg = err instanceof Error ? err.message : 'Unknown error'
+			setError(errorMsg)
+			throw err
 		}
-
-		const data = await response.json()
-		setPlaybooks(playbooks.map(pb => (pb.id === id ? data.playbook : pb)))
 	}
 
 	const deletePlaybook = async (id: number) => {
-		const response = await fetch(`/api/playbooks/${id}`, {
-			method: 'DELETE'
+		// Store original for rollback
+		let deletedPlaybook: Playbook | undefined
+
+		// Optimistic delete
+		setPlaybooks(prev => {
+			deletedPlaybook = prev.find(pb => pb.id === id)
+			return prev.filter(pb => pb.id !== id)
 		})
+		setError(null)
 
-		if (!response.ok) {
-			const data = await response.json()
-			throw new Error(data.error || 'Failed to delete playbook')
+		try {
+			const response = await fetch(`/api/playbooks/${id}`, {
+				method: 'DELETE'
+			})
+
+			if (!response.ok) {
+				const data = await response.json()
+				throw new Error(data.error || 'Failed to delete playbook')
+			}
+		} catch (err) {
+			// Rollback - restore deleted playbook
+			if (deletedPlaybook) {
+				setPlaybooks(prev => [deletedPlaybook!, ...prev])
+			}
+			const errorMsg = err instanceof Error ? err.message : 'Unknown error'
+			setError(errorMsg)
+			throw err
 		}
-
-		setPlaybooks(playbooks.filter(pb => pb.id !== id))
 	}
 
 	useEffect(() => {
 		if (currentTeamId) {
 			fetchPlaybooks()
 		}
-	}, [currentTeamId])
+	}, [currentTeamId, fetchPlaybooks])
 
 	return (
 		<PlaybookContext.Provider
