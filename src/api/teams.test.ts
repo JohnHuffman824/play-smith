@@ -83,4 +83,24 @@ describe('Teams API', () => {
 		expect(data.teams).toBeArray()
 		expect(data.teams.length).toBe(2)
 	})
+
+	test('GET /api/teams accepts session_token cookie', async () => {
+		const team = await teamRepo.create({ name: 'Team 1' })
+
+		await teamRepo.addMember({
+			team_id: team.id,
+			user_id: testUserId,
+			role: 'owner'
+		})
+
+		const response = await fetch(`${baseUrl}/api/teams`, {
+			headers: { Cookie: `session_token=${testSession}` }
+		})
+
+		expect(response.status).toBe(200)
+		const data = await response.json()
+		expect(data.teams).toBeArray()
+		expect(data.teams.length).toBe(1)
+		expect(data.teams[0].id).toBe(team.id)
+	})
 })
