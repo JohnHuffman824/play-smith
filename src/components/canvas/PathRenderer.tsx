@@ -27,6 +27,7 @@ interface PathRendererProps {
 	activeTool?: 'draw' | 'select' | 'erase'
 	onDelete?: (id: string) => void
 	onDragStart?: (drawingId: string, feetX: number, feetY: number) => void
+	onDoubleClick?: (drawingId: string, position: { x: number; y: number }) => void
 }
 
 /**
@@ -41,6 +42,7 @@ export function PathRenderer({
 	activeTool,
 	onDelete,
 	onDragStart,
+	onDoubleClick,
 }: PathRendererProps) {
 	const { d, endPoints } = useMemo(() => {
 		return buildPath(drawing, coordSystem)
@@ -94,6 +96,13 @@ export function PathRenderer({
 				const feet = coordSystem.pixelsToFeet(pixelX, pixelY)
 				onDragStart(drawing.id, feet.x, feet.y)
 			}
+		}
+	}
+
+	function handleDoubleClick(event: React.MouseEvent) {
+		if (activeTool == 'select' && onDoubleClick) {
+			event.stopPropagation()
+			onDoubleClick(drawing.id, { x: event.clientX, y: event.clientY })
 		}
 	}
 
@@ -162,6 +171,7 @@ export function PathRenderer({
 				style={{ ...eraseHover, ...selectStyle }}
 				pointerEvents='stroke'
 				onPointerDown={handlePointerDown}
+				onDoubleClick={handleDoubleClick}
 			/>
 			{ending}
 			{drawing.playerId && linkedPixel && (
