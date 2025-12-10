@@ -1,4 +1,4 @@
-import { describe, test, expect } from 'bun:test'
+import { describe, test, expect, beforeAll, afterAll } from 'bun:test'
 import { render, screen } from '@testing-library/react'
 import { RouterProvider, createMemoryRouter } from 'react-router-dom'
 import { routes } from './routes'
@@ -6,24 +6,32 @@ import { AuthProvider } from '../contexts/AuthContext'
 import { ThemeProvider } from '../contexts/ThemeContext'
 import { TeamProvider } from '../contexts/TeamContext'
 
-// Mock fetch for auth
-global.fetch = async (url: string) => {
-	if (url.includes('/api/auth/me')) {
-		return {
-			ok: true,
-			json: async () => ({ user: null })
-		} as Response
-	}
-	if (url.includes('/api/teams')) {
-		return {
-			ok: true,
-			json: async () => ({ teams: [] })
-		} as Response
-	}
-	return { ok: false, status: 404 } as Response
-}
-
 describe('routes', () => {
+	const originalFetch = global.fetch
+
+	beforeAll(() => {
+		// Mock fetch for auth
+		global.fetch = async (url: string) => {
+			if (url.includes('/api/auth/me')) {
+				return {
+					ok: true,
+					json: async () => ({ user: null })
+				} as Response
+			}
+			if (url.includes('/api/teams')) {
+				return {
+					ok: true,
+					json: async () => ({ teams: [] })
+				} as Response
+			}
+			return { ok: false, status: 404 } as Response
+		}
+	})
+
+	afterAll(() => {
+		// Restore original fetch
+		global.fetch = originalFetch
+	})
 	test('landing page route works', () => {
 		const router = createMemoryRouter(routes, {
 			initialEntries: ['/']

@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeEach, afterEach } from 'bun:test'
+import { describe, test, expect, beforeEach, afterEach, beforeAll, afterAll } from 'bun:test'
 import { render, screen, waitFor, cleanup } from '@testing-library/react'
 import { PlaybookProvider, usePlaybook } from './PlaybookContext'
 import { TeamProvider } from './TeamContext'
@@ -7,27 +7,10 @@ import { act } from 'react'
 
 // Mock fetch
 let mockPlaybooks: any[] = []
+const originalFetch = global.fetch
 
-beforeEach(() => {
-	// Reset mock data before each test
-	mockPlaybooks = [
-		{
-			id: 1,
-			team_id: 1,
-			name: 'Playbook 1',
-			description: null,
-			created_by: 1,
-			created_at: new Date(),
-			updated_at: new Date()
-		}
-	]
-})
-
-afterEach(() => {
-	cleanup()
-})
-
-global.fetch = async (url: string, options?: any) => {
+beforeAll(() => {
+	global.fetch = async (url: string, options?: any) => {
 	if (url.includes('/api/auth/me')) {
 		return {
 			ok: true,
@@ -104,7 +87,32 @@ global.fetch = async (url: string, options?: any) => {
 	}
 
 	return { ok: false, status: 404 } as Response
-}
+	}
+})
+
+afterAll(() => {
+	// Restore original fetch
+	global.fetch = originalFetch
+})
+
+beforeEach(() => {
+	// Reset mock data before each test
+	mockPlaybooks = [
+		{
+			id: 1,
+			team_id: 1,
+			name: 'Playbook 1',
+			description: null,
+			created_by: 1,
+			created_at: new Date(),
+			updated_at: new Date()
+		}
+	]
+})
+
+afterEach(() => {
+	cleanup()
+})
 
 function TestComponent() {
 	const { playbooks, isLoading, createPlaybook, updatePlaybook, deletePlaybook } =

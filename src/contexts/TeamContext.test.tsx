@@ -1,34 +1,43 @@
-import { describe, test, expect, beforeEach } from 'bun:test'
+import { describe, test, expect, beforeEach, beforeAll, afterAll } from 'bun:test'
 import { render, screen, waitFor } from '@testing-library/react'
 import { TeamProvider, useTeam } from './TeamContext'
 import { AuthProvider } from './AuthContext'
 import { act } from 'react'
 
-// Mock fetch
-global.fetch = async (url: string) => {
-	if (url.includes('/api/auth/me')) {
-		return {
-			ok: true,
-			json: async () => ({
-				user: { id: 1, email: 'test@example.com', name: 'Test User' }
-			})
-		} as Response
-	}
+const originalFetch = global.fetch
 
-	if (url.includes('/api/teams')) {
-		return {
-			ok: true,
-			status: 200,
-			json: async () => ({
-				teams: [
-					{ id: 1, name: 'Team 1', created_at: new Date(), updated_at: new Date() },
-					{ id: 2, name: 'Team 2', created_at: new Date(), updated_at: new Date() }
-				]
-			})
-		} as Response
+beforeAll(() => {
+	// Mock fetch
+	global.fetch = async (url: string) => {
+		if (url.includes('/api/auth/me')) {
+			return {
+				ok: true,
+				json: async () => ({
+					user: { id: 1, email: 'test@example.com', name: 'Test User' }
+				})
+			} as Response
+		}
+
+		if (url.includes('/api/teams')) {
+			return {
+				ok: true,
+				status: 200,
+				json: async () => ({
+					teams: [
+						{ id: 1, name: 'Team 1', created_at: new Date(), updated_at: new Date() },
+						{ id: 2, name: 'Team 2', created_at: new Date(), updated_at: new Date() }
+					]
+				})
+			} as Response
+		}
+		return { ok: false, status: 404 } as Response
 	}
-	return { ok: false, status: 404 } as Response
-}
+})
+
+afterAll(() => {
+	// Restore original fetch
+	global.fetch = originalFetch
+})
 
 function TestComponent() {
 	const { teams, currentTeamId, isLoading, switchTeam } = useTeam()

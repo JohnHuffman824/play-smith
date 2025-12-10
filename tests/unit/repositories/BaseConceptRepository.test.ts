@@ -1,5 +1,7 @@
 import { describe, test, expect, beforeEach } from 'bun:test'
-import { BaseConceptRepository } from '../../../src/db/repositories/BaseConceptRepository'
+import {
+	BaseConceptRepository
+} from '../../../src/db/repositories/BaseConceptRepository'
 import { db } from '../../../src/db/connection'
 import type { Drawing } from '../../../src/types/drawing.types'
 

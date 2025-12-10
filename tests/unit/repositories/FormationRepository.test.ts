@@ -1,5 +1,7 @@
 import { describe, test, expect, beforeEach } from 'bun:test'
-import { FormationRepository } from '../../../src/db/repositories/FormationRepository'
+import {
+	FormationRepository
+} from '../../../src/db/repositories/FormationRepository'
 import { db } from '../../../src/db/connection'
 
 describe('FormationRepository', () => {
