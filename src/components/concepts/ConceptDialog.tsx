@@ -18,7 +18,7 @@ interface ConceptDialogProps {
 	onClose: () => void
 	mode: 'create' | 'edit' | 'save-as'
 	concept?: BaseConcept
-	teamId: string
+	teamId?: string
 	playbookId?: string
 	onSave: (concept: Partial<BaseConcept>) => Promise<void>
 }

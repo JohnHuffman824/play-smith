@@ -1,7 +1,7 @@
 import { UnifiedSearchBar } from '../search/UnifiedSearchBar'
 
 interface PlayHeaderProps {
-	teamId: string
+	teamId?: string
 	playbookId?: string
 	onBackToPlaybook?: () => void
 }
@@ -14,13 +14,19 @@ export function PlayHeader({
 	return (
 		<div className="px-8 pt-6 pb-4">
 			<div className="flex gap-4 items-center">
-				<div className="flex-1">
-					<UnifiedSearchBar
-						teamId={teamId}
-						playbookId={playbookId}
-						placeholder="Search formations, concepts, groups..."
-					/>
-				</div>
+				{teamId ? (
+					<div className="flex-1">
+						<UnifiedSearchBar
+							teamId={teamId}
+							playbookId={playbookId}
+							placeholder="Search formations, concepts, groups..."
+						/>
+					</div>
+				) : (
+					<div className="flex-1 text-sm text-muted-foreground">
+						Personal playbook - no team concepts available
+					</div>
+				)}
 
 				{onBackToPlaybook && (
 					<button
