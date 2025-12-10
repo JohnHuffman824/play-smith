@@ -5,6 +5,7 @@ import { authAPI } from '../../src/api/auth'
 import { teamsAPI } from '../../src/api/teams'
 import { playbooksAPI } from '../../src/api/playbooks'
 import { sectionsAPI } from '../../src/api/sections'
+import { playsAPI } from '../../src/api/plays'
 
 let testServer: Server | null = null
 
@@ -23,8 +24,6 @@ export async function startTestServer(): Promise<{
 	testServer = serve({
 		port: 0, // Use random available port
 		routes: {
-			'/*': index,
-
 			'/api/auth/login': {
 				POST: authAPI.login,
 			},
@@ -64,6 +63,18 @@ export async function startTestServer(): Promise<{
 				DELETE: sectionsAPI.delete,
 			},
 
+			'/api/playbooks/:playbookId/plays': {
+				GET: playsAPI.list,
+				POST: playsAPI.create,
+			},
+			'/api/plays/:playId': {
+				PUT: playsAPI.update,
+				DELETE: playsAPI.delete,
+			},
+			'/api/plays/:playId/duplicate': {
+				POST: playsAPI.duplicate,
+			},
+
 			'/api/hello': {
 				async GET(req) {
 					return Response.json({
@@ -85,6 +96,8 @@ export async function startTestServer(): Promise<{
 					message: `Hello, ${name}!`,
 				})
 			},
+
+			'/*': index,
 		},
 
 		development: false, // Disable HMR in tests

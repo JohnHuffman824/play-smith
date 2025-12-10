@@ -5,6 +5,7 @@ import { authAPI } from "./api/auth"
 import { playbooksAPI } from "./api/playbooks"
 import { teamsAPI } from "./api/teams"
 import { sectionsAPI } from "./api/sections"
+import { playsAPI } from "./api/plays"
 
 const server = serve({
   routes: {
@@ -48,6 +49,19 @@ const server = serve({
     "/api/sections/:sectionId": {
       PUT: sectionsAPI.update,
       DELETE: sectionsAPI.delete
+    },
+
+    // Play API endpoints
+    "/api/playbooks/:playbookId/plays": {
+      GET: playsAPI.list,
+      POST: playsAPI.create
+    },
+    "/api/plays/:playId": {
+      PUT: playsAPI.update,
+      DELETE: playsAPI.delete
+    },
+    "/api/plays/:playId/duplicate": {
+      POST: playsAPI.duplicate
     },
 
     // Team API endpoints
