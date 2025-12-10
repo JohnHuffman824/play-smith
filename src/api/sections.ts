@@ -2,6 +2,7 @@ import { TeamRepository } from '../db/repositories/TeamRepository'
 import { PlaybookRepository } from '../db/repositories/PlaybookRepository'
 import { SectionRepository } from '../db/repositories/SectionRepository'
 import { getSessionUser } from './middleware/auth'
+import { checkPlaybookAccess } from './utils/checkPlaybookAccess'
 
 const teamRepo = new TeamRepository()
 const playbookRepo = new PlaybookRepository()
@@ -19,14 +20,7 @@ export const sectionsAPI = {
 			return Response.json({ error: 'Invalid playbook ID' }, { status: 400 })
 		}
 
-		const playbook = await playbookRepo.findById(playbookId)
-		if (!playbook) {
-			return Response.json({ error: 'Playbook not found' }, { status: 404 })
-		}
-
-		// Check if user has access to this playbook's team
-		const teams = await teamRepo.getUserTeams(userId)
-		const hasAccess = teams.some(team => team.id === playbook.team_id)
+		const { hasAccess } = await checkPlaybookAccess(playbookId, userId)
 
 		if (!hasAccess) {
 			return Response.json({ error: 'Access denied' }, { status: 403 })
@@ -48,14 +42,7 @@ export const sectionsAPI = {
 			return Response.json({ error: 'Invalid playbook ID' }, { status: 400 })
 		}
 
-		const playbook = await playbookRepo.findById(playbookId)
-		if (!playbook) {
-			return Response.json({ error: 'Playbook not found' }, { status: 404 })
-		}
-
-		// Check if user has access to this playbook's team
-		const teams = await teamRepo.getUserTeams(userId)
-		const hasAccess = teams.some(team => team.id === playbook.team_id)
+		const { hasAccess } = await checkPlaybookAccess(playbookId, userId)
 
 		if (!hasAccess) {
 			return Response.json({ error: 'Access denied' }, { status: 403 })
@@ -100,14 +87,7 @@ export const sectionsAPI = {
 			return Response.json({ error: 'Section not found' }, { status: 404 })
 		}
 
-		const playbook = await playbookRepo.findById(section.playbook_id)
-		if (!playbook) {
-			return Response.json({ error: 'Playbook not found' }, { status: 404 })
-		}
-
-		// Check if user has access to this playbook's team
-		const teams = await teamRepo.getUserTeams(userId)
-		const hasAccess = teams.some(team => team.id === playbook.team_id)
+		const { hasAccess } = await checkPlaybookAccess(section.playbook_id, userId)
 
 		if (!hasAccess) {
 			return Response.json({ error: 'Access denied' }, { status: 403 })
@@ -135,14 +115,7 @@ export const sectionsAPI = {
 			return Response.json({ error: 'Section not found' }, { status: 404 })
 		}
 
-		const playbook = await playbookRepo.findById(section.playbook_id)
-		if (!playbook) {
-			return Response.json({ error: 'Playbook not found' }, { status: 404 })
-		}
-
-		// Check if user has access to this playbook's team
-		const teams = await teamRepo.getUserTeams(userId)
-		const hasAccess = teams.some(team => team.id === playbook.team_id)
+		const { hasAccess } = await checkPlaybookAccess(section.playbook_id, userId)
 
 		if (!hasAccess) {
 			return Response.json({ error: 'Access denied' }, { status: 403 })
