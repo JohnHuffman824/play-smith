@@ -1,10 +1,20 @@
 import { describe, test, expect, beforeEach } from 'bun:test'
 import { render, screen, waitFor } from '@testing-library/react'
 import { TeamProvider, useTeam } from './TeamContext'
+import { AuthProvider } from './AuthContext'
 import { act } from 'react'
 
 // Mock fetch
 global.fetch = async (url: string) => {
+	if (url.includes('/api/auth/me')) {
+		return {
+			ok: true,
+			json: async () => ({
+				user: { id: 1, email: 'test@example.com', name: 'Test User' }
+			})
+		} as Response
+	}
+
 	if (url.includes('/api/teams')) {
 		return {
 			ok: true,
@@ -41,9 +51,11 @@ function TestComponent() {
 describe('TeamContext', () => {
 	test('fetches and provides teams', async () => {
 		render(
-			<TeamProvider>
-				<TestComponent />
-			</TeamProvider>
+			<AuthProvider>
+				<TeamProvider>
+					<TestComponent />
+				</TeamProvider>
+			</AuthProvider>
 		)
 
 		await waitFor(() => {
@@ -53,9 +65,11 @@ describe('TeamContext', () => {
 
 	test('allows switching teams', async () => {
 		render(
-			<TeamProvider>
-				<TestComponent />
-			</TeamProvider>
+			<AuthProvider>
+				<TeamProvider>
+					<TestComponent />
+				</TeamProvider>
+			</AuthProvider>
 		)
 
 		await waitFor(() => {
