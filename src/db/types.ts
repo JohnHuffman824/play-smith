@@ -26,7 +26,7 @@ export interface TeamMember {
 
 export interface Playbook {
 	id: number
-	team_id: number
+	team_id: number | null
 	name: string
 	description: string | null
 	created_by: number
