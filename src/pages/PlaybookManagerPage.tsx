@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { usePlaybook } from '../contexts/PlaybookContext'
 import { useTeam } from '../contexts/TeamContext'
 import { Sidebar } from '../components/playbook-manager/Sidebar'
+import { Toolbar } from '../components/playbook-manager/Toolbar'
 import { PlaybookCard } from '../components/playbook-manager/PlaybookCard'
 import { Modal } from '../components/playbook-manager/Modal'
 
@@ -14,10 +15,11 @@ export function PlaybookManagerPage() {
 		updatePlaybook,
 		deletePlaybook
 	} = usePlaybook()
-	const { currentTeamId } = useTeam()
+	const { teams, currentTeamId, switchTeam } = useTeam()
 
 	const [activeSection, setActiveSection] = useState('all')
 	const [searchQuery, setSearchQuery] = useState('')
+	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 	const [showNewPlaybookModal, setShowNewPlaybookModal] = useState(false)
 	const [newPlaybookName, setNewPlaybookName] = useState('')
 
@@ -54,6 +56,41 @@ export function PlaybookManagerPage() {
 		}
 	}
 
+	const handleNewFolder = () => {
+		// TODO: Implement folder creation
+		console.log('Create new folder')
+	}
+
+	const handleImport = () => {
+		// TODO: Implement import functionality
+		console.log('Import playbooks')
+	}
+
+	const handleExport = () => {
+		// TODO: Implement export functionality
+		console.log('Export playbooks')
+	}
+
+	const handleSettings = () => {
+		// TODO: Implement settings dialog
+		console.log('Open settings')
+	}
+
+	const handleManageTeams = () => {
+		// TODO: Implement team management
+		console.log('Manage teams')
+	}
+
+	const handleShare = (id: number) => {
+		// TODO: Implement share functionality
+		console.log('Share playbook:', id)
+	}
+
+	const handleExportPlaybook = (id: number) => {
+		// TODO: Implement single playbook export
+		console.log('Export playbook:', id)
+	}
+
 	if (isLoading) {
 		return (
 			<div className="flex items-center justify-center h-screen">
@@ -79,17 +116,21 @@ export function PlaybookManagerPage() {
 
 			<div className="flex-1 flex flex-col overflow-hidden">
 				{/* Toolbar */}
-				<div className="border-b border-border p-4">
-					<div className="flex items-center justify-between">
-						<h1 className="text-2xl font-bold">My Playbooks</h1>
-						<button
-							onClick={() => setShowNewPlaybookModal(true)}
-							className="px-4 py-2 bg-primary text-primary-foreground rounded-lg"
-						>
-							New Playbook
-						</button>
-					</div>
-				</div>
+				<Toolbar
+					viewMode={viewMode}
+					onViewModeChange={setViewMode}
+					searchQuery={searchQuery}
+					onSearchChange={setSearchQuery}
+					onNewPlaybook={() => setShowNewPlaybookModal(true)}
+					onNewFolder={handleNewFolder}
+					onImport={handleImport}
+					onExport={handleExport}
+					onSettingsClick={handleSettings}
+					teams={teams}
+					currentTeamId={currentTeamId}
+					onSwitchTeam={switchTeam}
+					onManageTeams={handleManageTeams}
+				/>
 
 				{/* Content */}
 				<div className="flex-1 overflow-auto p-6">
@@ -97,10 +138,25 @@ export function PlaybookManagerPage() {
 						{filteredPlaybooks.map(playbook => (
 							<PlaybookCard
 								key={playbook.id}
-								playbook={playbook}
-								onRename={handleRename}
-								onDelete={handleDelete}
+								id={playbook.id}
+								name={playbook.name}
+								type="playbook"
+								playCount={0}
+								lastModified={new Date(playbook.updated_at).toLocaleDateString()}
+								onRename={(id) => {
+									const newName = prompt('Rename playbook:', playbook.name)
+									if (newName?.trim()) {
+										handleRename(id, newName.trim())
+									}
+								}}
+								onDelete={(id) => {
+									if (confirm(`Delete "${playbook.name}"?`)) {
+										handleDelete(id)
+									}
+								}}
 								onDuplicate={handleDuplicate}
+								onExport={handleExportPlaybook}
+								onShare={handleShare}
 							/>
 						))}
 					</div>
