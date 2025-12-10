@@ -46,6 +46,18 @@ export class PlaybookRepository {
 		`
 	}
 
+	/**
+	 * Fetches all personal playbooks created by a specific user.
+	 * Personal playbooks have team_id = NULL and are not shared with any team.
+	 * Results are ordered by most recent update first.
+	 *
+	 * @param userId - The ID of the user who created the playbooks
+	 * @returns Array of personal playbooks belonging to the user, ordered by updated_at DESC
+	 *
+	 * @example
+	 * const personalPlaybooks = await playbookRepo.getUserPersonalPlaybooks(42)
+	 * // Returns all playbooks where team_id IS NULL and created_by = 42
+	 */
 	async getUserPersonalPlaybooks(userId: number): Promise<Playbook[]> {
 		return await db<Playbook[]>`
 			SELECT * FROM playbooks
