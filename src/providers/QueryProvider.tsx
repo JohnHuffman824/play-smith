@@ -31,10 +31,10 @@ export function QueryProvider({ children }: QueryProviderProps) {
 	return (
 		<QueryClientProvider client={queryClient}>
 			{children}
-			{/* DevTools only in development */}
-			{process.env.NODE_ENV === 'development' && (
+			{/* DevTools disabled - uncomment to enable in development */}
+			{/* {process.env.NODE_ENV === 'development' && (
 				<ReactQueryDevtools initialIsOpen={false} />
-			)}
+			)} */}
 		</QueryClientProvider>
 	)
 }
