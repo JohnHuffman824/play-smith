@@ -157,25 +157,56 @@ CREATE INDEX idx_playbook_shares_playbook ON playbook_shares(playbook_id);
 
 ## Section 2: Playbooks & Plays
 
+### Sections
+
+Sections organize plays within a playbook (e.g., "Opening Drive", "Red Zone", "Third Down Package").
+
+```sql
+CREATE TABLE sections (
+    id BIGSERIAL PRIMARY KEY,
+    playbook_id BIGINT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    display_order INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (playbook_id) REFERENCES playbooks(id) ON DELETE CASCADE,
+    UNIQUE (playbook_id, display_order)
+);
+
+CREATE INDEX idx_sections_playbook_id ON sections(playbook_id);
+
+CREATE TRIGGER update_sections_updated_at BEFORE UPDATE ON sections
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+```
+
+**Section structure:**
+- Sections belong to a playbook
+- `display_order` ensures consistent ordering (unique per playbook)
+- `ON DELETE CASCADE` removes sections when playbook is deleted
+
 ### Plays
 
 ```sql
 CREATE TYPE hash_position AS ENUM ('left', 'middle', 'right');
+CREATE TYPE play_type AS ENUM ('pass', 'run');
 
 CREATE TABLE plays (
     id BIGSERIAL PRIMARY KEY,
     playbook_id BIGINT NOT NULL,
+    section_id BIGINT, -- Optional grouping within playbook
     name VARCHAR(255), -- "Play" field (e.g., "Power Left")
+    play_type play_type, -- Pass or Run designation
     formation_id BIGINT, -- References team's formation library
     personnel_id BIGINT, -- References team's personnel library
     defensive_formation_id BIGINT, -- References team's formation library
     hash_position hash_position NOT NULL DEFAULT 'middle',
     notes TEXT, -- Optional coach notes
-    display_order INT NOT NULL DEFAULT 0, -- For ordering within playbook
+    display_order INT NOT NULL DEFAULT 0, -- For ordering within section/playbook
     created_by BIGINT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (playbook_id) REFERENCES playbooks(id) ON DELETE CASCADE,
+    FOREIGN KEY (section_id) REFERENCES sections(id) ON DELETE SET NULL,
     FOREIGN KEY (formation_id) REFERENCES formations(id) ON DELETE SET NULL,
     FOREIGN KEY (personnel_id) REFERENCES personnel_packages(id) ON DELETE SET NULL,
     FOREIGN KEY (defensive_formation_id) REFERENCES formations(id) ON DELETE SET NULL,
@@ -183,6 +214,7 @@ CREATE TABLE plays (
 );
 
 CREATE INDEX idx_plays_playbook ON plays(playbook_id);
+CREATE INDEX idx_plays_section ON plays(section_id);
 CREATE INDEX idx_plays_formation ON plays(formation_id);
 CREATE INDEX idx_plays_personnel ON plays(personnel_id);
 
@@ -192,9 +224,12 @@ CREATE TRIGGER update_plays_updated_at BEFORE UPDATE ON plays
 
 **Play structure:**
 - Each play belongs to a playbook
+- Optionally belongs to a section (nullable for ungrouped plays)
+- `play_type` distinguishes between passing and running plays
 - References team library entries for formation, personnel, defensive formation
 - `hash_position` determines the base positioning of the 5 offensive linemen
-- `display_order` allows custom ordering within a playbook (drag to reorder)
+- `display_order` allows custom ordering within section or playbook (drag to reorder)
+- `ON DELETE SET NULL` for section_id keeps plays when section is deleted
 - Formation/personnel/defensive_formation are nullable (can be free-form or unset)
 
 ### Play Tags (Many-to-Many)
