@@ -16,14 +16,22 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 function getStoredValue<T>(key: string, defaultValue: T): T {
-	if (typeof window === 'undefined') return defaultValue
-	const stored = localStorage.getItem(key)
-	return stored ? (JSON.parse(stored) as T) : defaultValue
+	if (typeof window === 'undefined' || typeof localStorage === 'undefined') return defaultValue
+	try {
+		const stored = localStorage.getItem(key)
+		return stored ? (JSON.parse(stored) as T) : defaultValue
+	} catch {
+		return defaultValue
+	}
 }
 
 function storeValue<T>(key: string, value: T): void {
-	if (typeof window !== 'undefined') {
-		localStorage.setItem(key, JSON.stringify(value))
+	if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+		try {
+			localStorage.setItem(key, JSON.stringify(value))
+		} catch {
+			// Silently fail if localStorage is not available
+		}
 	}
 }
 

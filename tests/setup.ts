@@ -20,3 +20,14 @@ global.KeyboardEvent = window.KeyboardEvent as any
 // Polyfill MouseEvent for tests
 global.MouseEvent = window.MouseEvent as any
 
+// Polyfill localStorage for tests
+const localStorageMock = {
+	getItem: (key: string) => null,
+	setItem: (key: string, value: string) => {},
+	removeItem: (key: string) => {},
+	clear: () => {},
+	length: 0,
+	key: (index: number) => null
+}
+global.localStorage = localStorageMock as any
+
