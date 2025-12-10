@@ -305,7 +305,7 @@ function PlaybookEditorContent({
             <div className="flex items-center gap-4">
               <button
                 onClick={onBack}
-                className={BUTTON_BASE}
+                className={`${BUTTON_BASE} cursor-pointer`}
                 title="Back to Playbooks"
               >
                 <ArrowLeft className="w-5 h-5" />
@@ -342,14 +342,14 @@ function PlaybookEditorContent({
             <div className="flex items-center gap-2">
               <button
                 onClick={handleImport}
-                className={BUTTON_BASE}
+                className={`${BUTTON_BASE} cursor-pointer`}
                 title="Import Plays"
               >
                 <Upload className="w-5 h-5" />
               </button>
               <button
                 onClick={handleExport}
-                className={BUTTON_BASE}
+                className={`${BUTTON_BASE} cursor-pointer`}
                 title={exportTitle}
               >
                 <Download className="w-5 h-5" />
@@ -359,7 +359,7 @@ function PlaybookEditorContent({
 
               <button
                 onClick={() => setShowShareDialog(true)}
-                className={BUTTON_BASE}
+                className={`${BUTTON_BASE} cursor-pointer`}
                 title="Share"
               >
                 <Share2 className="w-5 h-5" />
@@ -370,7 +370,7 @@ function PlaybookEditorContent({
               <div className="flex items-center bg-muted rounded-lg p-1">
                 <button
                   onClick={() => setViewMode(VIEW_MODE_GRID)}
-                  className={`p-2 rounded transition-all duration-200 ${
+                  className={`p-2 rounded transition-all duration-200 cursor-pointer ${
                     viewMode == VIEW_MODE_GRID
                       ? 'bg-card shadow-sm'
                       : 'hover:bg-accent/50'
@@ -381,7 +381,7 @@ function PlaybookEditorContent({
                 </button>
                 <button
                   onClick={() => setViewMode(VIEW_MODE_LIST)}
-                  className={`p-2 rounded transition-all duration-200 ${
+                  className={`p-2 rounded transition-all duration-200 cursor-pointer ${
                     viewMode == VIEW_MODE_LIST
                       ? 'bg-card shadow-sm'
                       : 'hover:bg-accent/50'
@@ -396,7 +396,7 @@ function PlaybookEditorContent({
 
               <button
                 onClick={() => setShowSettingsDialog(true)}
-                className={BUTTON_BASE}
+                className={`${BUTTON_BASE} cursor-pointer`}
                 title="Settings"
               >
                 <Settings className="w-5 h-5" />
@@ -476,7 +476,7 @@ function PlaybookEditorContent({
                   {!searchQuery && (
                     <button
                       onClick={() => setShowNewPlayModal(true)}
-                      className={`${PRIMARY_BUTTON_BASE} px-6 py-2.5`}
+                      className={`${PRIMARY_BUTTON_BASE} px-6 py-2.5 cursor-pointer`}
                     >
                       Create Your First Play
                     </button>
@@ -511,14 +511,14 @@ function PlaybookEditorContent({
             />
           </div>
           <div className="flex justify-end gap-2 pt-2">
-            <button onClick={closeNewPlayModal} className={MODAL_BUTTON_BASE}>
+            <button onClick={closeNewPlayModal} className={`${MODAL_BUTTON_BASE} cursor-pointer`}>
               Cancel
             </button>
             <button
               onClick={handleNewPlay}
               disabled={!newItemName.trim()}
-              className={`${PRIMARY_BUTTON_BASE} 
-                disabled:opacity-50 disabled:cursor-not-allowed`}
+              className={`${PRIMARY_BUTTON_BASE}
+                disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer`}
             >
               Create
             </button>
@@ -549,17 +549,17 @@ function PlaybookEditorContent({
             />
           </div>
           <div className="flex justify-end gap-2 pt-2">
-            <button 
-              onClick={closeNewSectionModal} 
-              className={MODAL_BUTTON_BASE}
+            <button
+              onClick={closeNewSectionModal}
+              className={`${MODAL_BUTTON_BASE} cursor-pointer`}
             >
               Cancel
             </button>
             <button
               onClick={handleNewSection}
               disabled={!newItemName.trim()}
-              className={`${PRIMARY_BUTTON_BASE} 
-                disabled:opacity-50 disabled:cursor-not-allowed`}
+              className={`${PRIMARY_BUTTON_BASE}
+                disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer`}
             >
               Create
             </button>
@@ -608,14 +608,14 @@ function PlaybookEditorContent({
             />
           </div>
           <div className="flex justify-end gap-2 pt-2">
-            <button onClick={closeRenameModal} className={MODAL_BUTTON_BASE}>
+            <button onClick={closeRenameModal} className={`${MODAL_BUTTON_BASE} cursor-pointer`}>
               Cancel
             </button>
             <button
               onClick={confirmRename}
               disabled={!renamePlayName.trim()}
               className={`${PRIMARY_BUTTON_BASE}
-                disabled:opacity-50 disabled:cursor-not-allowed`}
+                disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer`}
             >
               Rename
             </button>
@@ -635,14 +635,14 @@ function PlaybookEditorContent({
           <div className="flex justify-end gap-2 pt-2">
             <button
               onClick={closeDeleteConfirmModal}
-              className={MODAL_BUTTON_BASE}
+              className={`${MODAL_BUTTON_BASE} cursor-pointer`}
             >
               Cancel
             </button>
             <button
               onClick={confirmDelete}
               className={`${PRIMARY_BUTTON_BASE} bg-destructive
-                hover:bg-destructive/90`}
+                hover:bg-destructive/90 cursor-pointer`}
             >
               Delete
             </button>

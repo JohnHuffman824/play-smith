@@ -30,8 +30,8 @@ export function PlaybookEditorToolbar({
         <div className="flex items-center gap-2">
           <button
             onClick={onNewPlay}
-            className={`${BUTTON_BASE_CLASS} ${BUTTON_ACTIVE} 
-              flex items-center gap-2`}
+            className={`${BUTTON_BASE_CLASS} ${BUTTON_ACTIVE}
+              flex items-center gap-2 cursor-pointer`}
           >
             <Plus className="w-4 h-4" />
             <span>New Play</span>
@@ -39,8 +39,8 @@ export function PlaybookEditorToolbar({
 
           <button
             onClick={onNewSection}
-            className={`${BUTTON_BASE_CLASS} ${BUTTON_INACTIVE} 
-              flex items-center gap-2`}
+            className={`${BUTTON_BASE_CLASS} ${BUTTON_INACTIVE}
+              flex items-center gap-2 cursor-pointer`}
             title="Create New Section"
           >
             <FolderPlus className="w-4 h-4" />
@@ -55,7 +55,7 @@ export function PlaybookEditorToolbar({
             onClick={() => onSectionFilterChange(null)}
             className={`${BUTTON_BASE_CLASS} ${
               activeSectionFilter == null ? BUTTON_ACTIVE : BUTTON_INACTIVE
-            }`}
+            } cursor-pointer`}
           >
             All Plays
           </button>
@@ -65,10 +65,10 @@ export function PlaybookEditorToolbar({
               key={section.id}
               onClick={() => onSectionFilterChange(section.id)}
               className={`${BUTTON_BASE_CLASS} ${
-                activeSectionFilter == section.id 
-                  ? BUTTON_ACTIVE 
+                activeSectionFilter == section.id
+                  ? BUTTON_ACTIVE
                   : BUTTON_INACTIVE
-              }`}
+              } cursor-pointer`}
             >
               {section.name}
             </button>
