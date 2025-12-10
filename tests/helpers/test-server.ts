@@ -17,8 +17,12 @@ export async function startTestServer(): Promise<{
 	server: Server
 	url: string
 }> {
+	// If server is already running, return existing instance
 	if (testServer) {
-		throw new Error('Test server already running')
+		return {
+			server: testServer,
+			url: testServer.url.toString().replace(/\/$/, '')
+		}
 	}
 
 	testServer = serve({
@@ -111,12 +115,12 @@ export async function startTestServer(): Promise<{
 
 /**
  * Stop the test server if running
+ * NOTE: In test suite, we keep the server running across all test files
+ * It will be cleaned up when the test process exits
  */
 export async function stopTestServer(): Promise<void> {
-	if (testServer) {
-		testServer.stop()
-		testServer = null
-	}
+	// Don't stop the server - let it persist across test files
+	// The server will be cleaned up when the test process exits
 }
 
 /**

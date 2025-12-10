@@ -40,7 +40,9 @@ export function PlaybookManagerPage() {
 	const handleCreatePlaybook = async () => {
 		if (!newPlaybookName.trim()) return
 
-		const newPlaybook = await createPlaybook(newPlaybookName.trim(), currentTeamId ?? null)
+		// Use current team or default to first available team (user's "My Team")
+		const teamId = currentTeamId ?? teams[0]?.id ?? null
+		const newPlaybook = await createPlaybook(newPlaybookName.trim(), teamId)
 		setNewPlaybookName('')
 		setShowNewPlaybookModal(false)
 		navigate(`/playbooks/${newPlaybook.id}`)
