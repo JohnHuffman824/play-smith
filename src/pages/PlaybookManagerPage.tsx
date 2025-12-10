@@ -5,6 +5,7 @@ import { Sidebar } from '../components/playbook-manager/Sidebar'
 import { Toolbar } from '../components/playbook-manager/Toolbar'
 import { PlaybookCard } from '../components/playbook-manager/PlaybookCard'
 import { Modal } from '../components/playbook-manager/Modal'
+import { SettingsDialog } from '../components/playbook-manager/SettingsDialog'
 
 export function PlaybookManagerPage() {
 	const {
@@ -21,6 +22,7 @@ export function PlaybookManagerPage() {
 	const [searchQuery, setSearchQuery] = useState('')
 	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 	const [showNewPlaybookModal, setShowNewPlaybookModal] = useState(false)
+	const [showSettingsDialog, setShowSettingsDialog] = useState(false)
 	const [newPlaybookName, setNewPlaybookName] = useState('')
 
 	const filteredPlaybooks = useMemo(() => {
@@ -72,8 +74,7 @@ export function PlaybookManagerPage() {
 	}
 
 	const handleSettings = () => {
-		// TODO: Implement settings dialog
-		console.log('Open settings')
+		setShowSettingsDialog(true)
 	}
 
 	const handleManageTeams = () => {
@@ -221,6 +222,12 @@ export function PlaybookManagerPage() {
 					</div>
 				</div>
 			</Modal>
+
+			{/* Settings Dialog */}
+			<SettingsDialog
+				isOpen={showSettingsDialog}
+				onClose={() => setShowSettingsDialog(false)}
+			/>
 		</div>
 	)
 }
