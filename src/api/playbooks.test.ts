@@ -1,9 +1,10 @@
-import { describe, test, expect, beforeEach, afterEach } from 'bun:test'
+import { describe, test, expect, beforeAll, afterAll, beforeEach, afterEach } from 'bun:test'
 import { db } from '../db/connection'
 import { UserRepository } from '../db/repositories/UserRepository'
 import { TeamRepository } from '../db/repositories/TeamRepository'
 import { PlaybookRepository } from '../db/repositories/PlaybookRepository'
 import { SessionRepository } from '../db/repositories/SessionRepository'
+import { startTestServer, stopTestServer } from '../../tests/helpers/test-server'
 
 describe('Playbooks API', () => {
 	let userRepo: UserRepository
@@ -13,6 +14,18 @@ describe('Playbooks API', () => {
 	let testUserId: number
 	let testTeamId: number
 	let testSession: string
+	let baseUrl: string
+
+	beforeAll(async () => {
+		// Start test server
+		const { url } = await startTestServer()
+		baseUrl = url
+	})
+
+	afterAll(async () => {
+		// Stop test server
+		await stopTestServer()
+	})
 
 	beforeEach(async () => {
 		userRepo = new UserRepository()
@@ -68,7 +81,7 @@ describe('Playbooks API', () => {
 		})
 
 		// Make request
-		const response = await fetch('http://localhost:3000/api/playbooks', {
+		const response = await fetch(`${baseUrl}/api/playbooks`, {
 			headers: {
 				Cookie: `session=${testSession}`
 			}
@@ -90,7 +103,7 @@ describe('Playbooks API', () => {
 			created_by: testUserId
 		})
 
-		const response = await fetch(`http://localhost:3000/api/playbooks/${pb.id}`, {
+		const response = await fetch(`${baseUrl}/api/playbooks/${pb.id}`, {
 			headers: {
 				Cookie: `session=${testSession}`
 			}
@@ -104,7 +117,7 @@ describe('Playbooks API', () => {
 	})
 
 	test('GET /api/playbooks/:id returns 404 for non-existent playbook', async () => {
-		const response = await fetch('http://localhost:3000/api/playbooks/99999', {
+		const response = await fetch(`${baseUrl}/api/playbooks/99999`, {
 			headers: {
 				Cookie: `session=${testSession}`
 			}
@@ -137,7 +150,7 @@ describe('Playbooks API', () => {
 		})
 
 		// Try to access with test user's session
-		const response = await fetch(`http://localhost:3000/api/playbooks/${pb.id}`, {
+		const response = await fetch(`${baseUrl}/api/playbooks/${pb.id}`, {
 			headers: {
 				Cookie: `session=${testSession}`
 			}
@@ -155,7 +168,7 @@ describe('Playbooks API', () => {
 	})
 
 	test('POST /api/playbooks creates new playbook', async () => {
-		const response = await fetch('http://localhost:3000/api/playbooks', {
+		const response = await fetch(`${baseUrl}/api/playbooks`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -177,7 +190,7 @@ describe('Playbooks API', () => {
 	})
 
 	test('POST /api/playbooks validates required fields', async () => {
-		const response = await fetch('http://localhost:3000/api/playbooks', {
+		const response = await fetch(`${baseUrl}/api/playbooks`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -197,7 +210,7 @@ describe('Playbooks API', () => {
 	test('POST /api/playbooks requires team membership', async () => {
 		const otherTeam = await teamRepo.create({ name: 'Other Team' })
 
-		const response = await fetch('http://localhost:3000/api/playbooks', {
+		const response = await fetch(`${baseUrl}/api/playbooks`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -223,7 +236,7 @@ describe('Playbooks API', () => {
 			created_by: testUserId
 		})
 
-		const response = await fetch(`http://localhost:3000/api/playbooks/${pb.id}`, {
+		const response = await fetch(`${baseUrl}/api/playbooks/${pb.id}`, {
 			method: 'PUT',
 			headers: {
 				'Content-Type': 'application/json',
@@ -260,7 +273,7 @@ describe('Playbooks API', () => {
 			created_by: otherUser.id
 		})
 
-		const response = await fetch(`http://localhost:3000/api/playbooks/${pb.id}`, {
+		const response = await fetch(`${baseUrl}/api/playbooks/${pb.id}`, {
 			method: 'PUT',
 			headers: {
 				'Content-Type': 'application/json',
@@ -287,7 +300,7 @@ describe('Playbooks API', () => {
 			created_by: testUserId
 		})
 
-		const response = await fetch(`http://localhost:3000/api/playbooks/${pb.id}`, {
+		const response = await fetch(`${baseUrl}/api/playbooks/${pb.id}`, {
 			method: 'DELETE',
 			headers: {
 				Cookie: `session=${testSession}`
@@ -320,7 +333,7 @@ describe('Playbooks API', () => {
 			created_by: otherUser.id
 		})
 
-		const response = await fetch(`http://localhost:3000/api/playbooks/${pb.id}`, {
+		const response = await fetch(`${baseUrl}/api/playbooks/${pb.id}`, {
 			method: 'DELETE',
 			headers: {
 				Cookie: `session=${testSession}`

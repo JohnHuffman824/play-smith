@@ -1,21 +1,7 @@
-import { SessionRepository } from '../db/repositories/SessionRepository'
 import { TeamRepository } from '../db/repositories/TeamRepository'
+import { getSessionUser } from './middleware/auth'
 
-const sessionRepo = new SessionRepository()
 const teamRepo = new TeamRepository()
-
-async function getSessionUser(req: Request) {
-	const cookie = req.headers.get('Cookie')
-	if (!cookie) return null
-
-	const sessionMatch = cookie.match(/session=([^;]+)/)
-	if (!sessionMatch) return null
-
-	const session = await sessionRepo.findValidByToken(sessionMatch[1])
-	if (!session) return null
-
-	return session.user_id
-}
 
 export const teamsAPI = {
 	list: async (req: Request) => {

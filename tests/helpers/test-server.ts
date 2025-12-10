@@ -2,6 +2,8 @@ import { serve, Server } from 'bun'
 import index from '../../src/index.html'
 import { usersAPI, getUserById } from '../../src/api/users'
 import { authAPI } from '../../src/api/auth'
+import { teamsAPI } from '../../src/api/teams'
+import { playbooksAPI } from '../../src/api/playbooks'
 
 let testServer: Server | null = null
 
@@ -37,6 +39,20 @@ export async function startTestServer(): Promise<{
 
 			'/api/users': usersAPI,
 			'/api/users/:id': getUserById,
+
+			'/api/teams': {
+				GET: teamsAPI.list,
+			},
+
+			'/api/playbooks': {
+				GET: playbooksAPI.list,
+				POST: playbooksAPI.create,
+			},
+			'/api/playbooks/:id': {
+				GET: playbooksAPI.get,
+				PUT: playbooksAPI.update,
+				DELETE: playbooksAPI.delete,
+			},
 
 			'/api/hello': {
 				async GET(req) {

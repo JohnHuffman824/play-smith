@@ -1,8 +1,9 @@
-import { describe, test, expect, beforeEach, afterEach } from 'bun:test'
+import { describe, test, expect, beforeAll, afterAll, beforeEach, afterEach } from 'bun:test'
 import { db } from '../db/connection'
 import { UserRepository } from '../db/repositories/UserRepository'
 import { TeamRepository } from '../db/repositories/TeamRepository'
 import { SessionRepository } from '../db/repositories/SessionRepository'
+import { startTestServer, stopTestServer } from '../../tests/helpers/test-server'
 
 describe('Teams API', () => {
 	let userRepo: UserRepository
@@ -10,6 +11,18 @@ describe('Teams API', () => {
 	let sessionRepo: SessionRepository
 	let testUserId: number
 	let testSession: string
+	let baseUrl: string
+
+	beforeAll(async () => {
+		// Start test server
+		const { url } = await startTestServer()
+		baseUrl = url
+	})
+
+	afterAll(async () => {
+		// Stop test server
+		await stopTestServer()
+	})
 
 	beforeEach(async () => {
 		userRepo = new UserRepository()
@@ -29,10 +42,16 @@ describe('Teams API', () => {
 	})
 
 	afterEach(async () => {
+		// Capture team IDs from team_members before deletion
+		const teamRecords = await db`SELECT team_id FROM team_members WHERE user_id = ${testUserId}`
+		const teamIds = teamRecords.map(r => r.team_id)
+
 		await db`DELETE FROM team_members WHERE user_id = ${testUserId}`
-		await db`DELETE FROM teams WHERE id IN (
-			SELECT team_id FROM team_members WHERE user_id = ${testUserId}
-		)`
+
+		if (teamIds.length > 0) {
+			await db`DELETE FROM teams WHERE id = ANY(${teamIds})`
+		}
+
 		await db`DELETE FROM sessions WHERE user_id = ${testUserId}`
 		await db`DELETE FROM users WHERE id = ${testUserId}`
 	})
@@ -53,7 +72,7 @@ describe('Teams API', () => {
 			role: 'editor'
 		})
 
-		const response = await fetch('http://localhost:3000/api/teams', {
+		const response = await fetch(`${baseUrl}/api/teams`, {
 			headers: {
 				Cookie: `session=${testSession}`
 			}
