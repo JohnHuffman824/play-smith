@@ -1,5 +1,39 @@
 import type { RoleDefinition, SelectorDefinition, RelativeSelector } from '../types/concept.types'
 
+// Chip type constants - eliminates magic strings
+export const CHIP_TYPE_FORMATION = 'formation' as const
+export const CHIP_TYPE_CONCEPT = 'concept' as const
+export const CHIP_TYPE_CONCEPT_GROUP = 'concept_group' as const
+export const CHIP_TYPE_TEXT = 'text' as const
+
+// Entity type constants for API responses
+export const ENTITY_TYPE_FORMATION = 'formation' as const
+export const ENTITY_TYPE_CONCEPT = 'concept' as const
+export const ENTITY_TYPE_CONCEPT_GROUP = 'concept_group' as const
+
+// Dialog mode constants
+export const DIALOG_MODE_CREATE = 'create' as const
+export const DIALOG_MODE_EDIT = 'edit' as const
+export const DIALOG_MODE_SAVE_AS = 'save-as' as const
+
+// Scope constants
+export const SCOPE_TEAM = 'team' as const
+export const SCOPE_PLAYBOOK = 'playbook' as const
+
+// Targeting mode constants
+export const TARGETING_MODE_ABSOLUTE = 'absolute_role' as const
+export const TARGETING_MODE_RELATIVE = 'relative_selector' as const
+
+// Ball position constants
+export const BALL_POSITION_LEFT = 'left' as const
+export const BALL_POSITION_CENTER = 'center' as const
+export const BALL_POSITION_RIGHT = 'right' as const
+
+// Play direction constants
+export const PLAY_DIRECTION_LEFT = 'left' as const
+export const PLAY_DIRECTION_RIGHT = 'right' as const
+export const PLAY_DIRECTION_NA = 'na' as const
+
 export const PRESET_ROLES: RoleDefinition[] = [
 	{ id: 'x', name: 'X', category: 'receiver' },
 	{ id: 'y', name: 'Y', category: 'receiver' },

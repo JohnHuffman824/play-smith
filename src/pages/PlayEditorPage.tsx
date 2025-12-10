@@ -13,6 +13,13 @@ import { ConceptProvider, useConcept } from '../contexts/ConceptContext'
 import { useConceptData } from '../hooks/useConceptData'
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
 import { eventBus } from '../services/EventBus'
+import {
+	CHIP_TYPE_FORMATION,
+	CHIP_TYPE_CONCEPT,
+	CHIP_TYPE_CONCEPT_GROUP,
+	DIALOG_MODE_CREATE,
+	DIALOG_MODE_EDIT
+} from '../constants/concept.constants'
 
 function PlayEditorContent() {
 	const { theme } = useTheme()
@@ -80,11 +87,11 @@ function PlayEditorContent() {
 	// Apply selected concepts to canvas
 	useEffect(() => {
 		conceptState.appliedConcepts.forEach(chip => {
-			if (chip.type === 'formation' && chip.entity) {
+			if (chip.type === CHIP_TYPE_FORMATION && chip.entity) {
 				applyFormation(chip.entity as any)
-			} else if (chip.type === 'concept' && chip.entity) {
+			} else if (chip.type === CHIP_TYPE_CONCEPT && chip.entity) {
 				applyConcept(chip.entity as any)
-			} else if (chip.type === 'concept_group' && chip.entity) {
+			} else if (chip.type === CHIP_TYPE_CONCEPT_GROUP && chip.entity) {
 				applyConceptGroup(chip.entity as any)
 			}
 		})
@@ -204,7 +211,7 @@ function PlayEditorContent() {
 			<ConceptDialog
 				isOpen={conceptState.isConceptDialogOpen}
 				onClose={closeConceptDialog}
-				mode={conceptState.editingConceptId ? 'edit' : 'create'}
+				mode={conceptState.editingConceptId ? DIALOG_MODE_EDIT : DIALOG_MODE_CREATE}
 				concept={
 					conceptState.editingConceptId
 						? concepts.find(c => c.id === conceptState.editingConceptId)
