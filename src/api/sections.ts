@@ -1,10 +1,8 @@
-import { TeamRepository } from '../db/repositories/TeamRepository'
 import { PlaybookRepository } from '../db/repositories/PlaybookRepository'
 import { SectionRepository } from '../db/repositories/SectionRepository'
 import { getSessionUser } from './middleware/auth'
 import { checkPlaybookAccess } from './utils/checkPlaybookAccess'
 
-const teamRepo = new TeamRepository()
 const playbookRepo = new PlaybookRepository()
 const sectionRepo = new SectionRepository()
 

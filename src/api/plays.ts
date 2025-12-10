@@ -1,10 +1,8 @@
-import { TeamRepository } from '../db/repositories/TeamRepository'
 import { PlaybookRepository } from '../db/repositories/PlaybookRepository'
 import { getSessionUser } from './middleware/auth'
 import { db } from '../db/connection'
 import { checkPlaybookAccess } from './utils/checkPlaybookAccess'
 
-const teamRepo = new TeamRepository()
 const playbookRepo = new PlaybookRepository()
 
 export const playsAPI = {
