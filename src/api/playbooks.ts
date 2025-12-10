@@ -37,5 +37,32 @@ export const playbooksAPI = {
 		}
 
 		return Response.json({ playbooks: allPlaybooks })
+	},
+
+	get: async (req: Request) => {
+		const userId = await getSessionUser(req)
+		if (!userId) {
+			return Response.json({ error: 'Unauthorized' }, { status: 401 })
+		}
+
+		const playbookId = parseInt(req.params.id)
+		if (isNaN(playbookId)) {
+			return Response.json({ error: 'Invalid playbook ID' }, { status: 400 })
+		}
+
+		const playbook = await playbookRepo.findById(playbookId)
+		if (!playbook) {
+			return Response.json({ error: 'Playbook not found' }, { status: 404 })
+		}
+
+		// Check if user has access to this playbook's team
+		const teams = await teamRepo.getUserTeams(userId)
+		const hasAccess = teams.some(team => team.id === playbook.team_id)
+
+		if (!hasAccess) {
+			return Response.json({ error: 'Access denied' }, { status: 403 })
+		}
+
+		return Response.json({ playbook })
 	}
 }

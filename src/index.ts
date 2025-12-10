@@ -31,6 +31,9 @@ const server = serve({
     "/api/playbooks": {
       GET: playbooksAPI.list
     },
+    "/api/playbooks/:id": {
+      GET: playbooksAPI.get
+    },
 
     // Example API endpoints
     "/api/hello": {
