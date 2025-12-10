@@ -2,6 +2,7 @@ import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { AuthProvider } from './contexts/AuthContext'
 import { TeamProvider } from './contexts/TeamContext'
+import { PlaybookProvider } from './contexts/PlaybookContext'
 import { routes } from './router/routes'
 import './index.css'
 
@@ -12,7 +13,9 @@ export default function App() {
 		<ThemeProvider>
 			<AuthProvider>
 				<TeamProvider>
-					<RouterProvider router={router} />
+					<PlaybookProvider>
+						<RouterProvider router={router} />
+					</PlaybookProvider>
 				</TeamProvider>
 			</AuthProvider>
 		</ThemeProvider>
