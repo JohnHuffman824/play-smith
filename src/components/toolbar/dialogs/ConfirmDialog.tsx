@@ -1,13 +1,13 @@
-import { useTheme } from '../../../contexts/ThemeContext';
+import { useTheme } from '../../../contexts/ThemeContext'
 
 interface ConfirmDialogProps {
-  title: string;
-  message: string;
-  confirmLabel: string;
-  cancelLabel: string;
-  onConfirm: () => void;
-  onCancel: () => void;
-  variant?: 'danger' | 'default';
+  title: string
+  message: string
+  confirmLabel: string
+  cancelLabel: string
+  onConfirm: () => void
+  onCancel: () => void
+  variant?: 'danger' | 'default'
 }
 
 export function ConfirmDialog({
@@ -19,7 +19,7 @@ export function ConfirmDialog({
   onCancel,
   variant = 'default',
 }: ConfirmDialogProps) {
-  const { theme } = useTheme();
+  const { theme } = useTheme()
   
   return (
     <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
@@ -53,5 +53,5 @@ export function ConfirmDialog({
         </div>
       </div>
     </div>
-  );
+  )
 }

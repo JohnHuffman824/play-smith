@@ -1,10 +1,10 @@
-import { X } from 'lucide-react';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { X } from 'lucide-react'
+import { useTheme } from '../../../contexts/ThemeContext'
 
 interface ColorPickerDialogProps {
-  currentColor: string;
-  onColorChange: (color: string) => void;
-  onClose: () => void;
+  currentColor: string
+  onColorChange: (color: string) => void
+  onClose: () => void
 }
 
 const presetColors = [
@@ -20,10 +20,10 @@ const presetColors = [
   { name: 'Teal', value: '#14B8A6' },
   { name: 'Indigo', value: '#6366F1' },
   { name: 'Gray', value: '#6B7280' },
-];
+]
 
 export function ColorPickerDialog({ currentColor, onColorChange, onClose }: ColorPickerDialogProps) {
-  const { theme } = useTheme();
+  const { theme } = useTheme()
   
   return (
     <div 
@@ -93,5 +93,5 @@ export function ColorPickerDialog({ currentColor, onColorChange, onClose }: Colo
         </div>
       </div>
     </div>
-  );
+  )
 }

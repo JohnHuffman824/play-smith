@@ -1,18 +1,18 @@
-import { useTheme } from '../../../contexts/ThemeContext';
+import { useTheme } from '../../../contexts/ThemeContext'
 
 interface HashDialogProps {
-  currentAlignment: 'center' | 'left' | 'right';
-  onAlignmentChange: (alignment: 'center' | 'left' | 'right') => void;
-  onClose: () => void;
+  currentAlignment: 'center' | 'left' | 'right'
+  onAlignmentChange: (alignment: 'center' | 'left' | 'right') => void
+  onClose: () => void
 }
 
 export function HashDialog({ currentAlignment, onAlignmentChange, onClose }: HashDialogProps) {
-  const { theme } = useTheme();
+  const { theme } = useTheme()
   const alignments: Array<{ value: 'center' | 'left' | 'right'; label: string }> = [
     { value: 'left', label: 'Left' },
     { value: 'center', label: 'Middle' },
     { value: 'right', label: 'Right' },
-  ];
+  ]
 
   return (
     <>
@@ -33,8 +33,8 @@ export function HashDialog({ currentAlignment, onAlignmentChange, onClose }: Has
             <button
               key={alignment.value}
               onClick={() => {
-                onAlignmentChange(alignment.value);
-                onClose();
+                onAlignmentChange(alignment.value)
+                onClose()
               }}
               className={`w-full px-4 py-3 rounded-xl text-left transition-all cursor-pointer ${
                 currentAlignment === alignment.value
@@ -50,5 +50,5 @@ export function HashDialog({ currentAlignment, onAlignmentChange, onClose }: Has
         </div>
       </div>
     </>
-  );
+  )
 }

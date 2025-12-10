@@ -1,12 +1,12 @@
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '../../contexts/ThemeContext'
 
 interface PlayHeaderProps {
-  formation: string;
-  play: string;
-  defensiveFormation: string;
-  onFormationChange: (value: string) => void;
-  onPlayChange: (value: string) => void;
-  onDefensiveFormationChange: (value: string) => void;
+  formation: string
+  play: string
+  defensiveFormation: string
+  onFormationChange: (value: string) => void
+  onPlayChange: (value: string) => void
+  onDefensiveFormationChange: (value: string) => void
 }
 
 export function PlayHeader({
@@ -17,7 +17,7 @@ export function PlayHeader({
   onPlayChange,
   onDefensiveFormationChange,
 }: PlayHeaderProps) {
-  const { theme } = useTheme();
+  const { theme } = useTheme()
   
   return (
     <div className="px-8 pt-6 pb-4">
@@ -63,5 +63,5 @@ export function PlayHeader({
         </button>
       </div>
     </div>
-  );
+  )
 }

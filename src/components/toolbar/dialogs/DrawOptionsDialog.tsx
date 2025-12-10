@@ -1,14 +1,14 @@
-import { X } from 'lucide-react';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { X } from 'lucide-react'
+import { useTheme } from '../../../contexts/ThemeContext'
 
 interface DrawOptionsDialogProps {
-  lineStyle: 'solid' | 'dashed';
-  lineEnd: 'none' | 'arrow' | 'tShape';
-  brushSize: number;
-  onLineStyleChange: (style: 'solid' | 'dashed') => void;
-  onLineEndChange: (end: 'none' | 'arrow' | 'tShape') => void;
-  onBrushSizeChange: (size: number) => void;
-  onClose: () => void;
+  lineStyle: 'solid' | 'dashed'
+  lineEnd: 'none' | 'arrow' | 'tShape'
+  brushSize: number
+  onLineStyleChange: (style: 'solid' | 'dashed') => void
+  onLineEndChange: (end: 'none' | 'arrow' | 'tShape') => void
+  onBrushSizeChange: (size: number) => void
+  onClose: () => void
 }
 
 const brushSizes = [
@@ -16,7 +16,7 @@ const brushSizes = [
   { size: 3, label: 'Medium' },
   { size: 5, label: 'Thick' },
   { size: 7, label: 'Extra Thick' },
-];
+]
 
 export function DrawOptionsDialog({
   lineStyle,
@@ -27,7 +27,7 @@ export function DrawOptionsDialog({
   onBrushSizeChange,
   onClose,
 }: DrawOptionsDialogProps) {
-  const { theme } = useTheme();
+  const { theme } = useTheme()
   
   return (
     <div 
@@ -164,5 +164,5 @@ export function DrawOptionsDialog({
         </div>
       </div>
     </div>
-  );
+  )
 }
