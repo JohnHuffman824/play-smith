@@ -2,6 +2,7 @@ import { serve } from "bun";
 import index from "./index.html";
 import { usersAPI, getUserById } from "./api/users";
 import { authAPI } from "./api/auth";
+import { playbooksAPI } from "./api/playbooks";
 
 const server = serve({
   routes: {
@@ -25,6 +26,11 @@ const server = serve({
     // User API endpoints
     "/api/users": usersAPI,
     "/api/users/:id": getUserById,
+
+    // Playbook API endpoints
+    "/api/playbooks": {
+      GET: playbooksAPI.list
+    },
 
     // Example API endpoints
     "/api/hello": {
