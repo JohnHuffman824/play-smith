@@ -19,6 +19,18 @@ An American football play and playbook creator built with Bun, React, and TypeSc
 - **Database**: PostgreSQL (local or AWS RDS) with PostGIS extension
 - **Testing**: Bun test runner with Happy DOM
 
+## Routing
+
+The application uses React Router for client-side routing with the following structure:
+
+- `/` - Landing page (public)
+- `/login` - Login page (public)
+- `/playbooks` - Playbook manager (protected)
+- `/playbooks/:playbookId` - Playbook editor (protected)
+- `/playbooks/:playbookId/plays/:playId` - Play editor (protected)
+
+Protected routes require authentication and will redirect to `/login` with a return URL. After authentication is implemented, users will be redirected back to their originally requested page.
+
 ## Getting Started
 
 ### Prerequisites
@@ -90,6 +102,11 @@ bun --hot src/index.ts
 ```
 
 The application will be available at `http://localhost:3000`
+
+Navigate to:
+- `http://localhost:3000/` - Landing page
+- `http://localhost:3000/login` - Login page
+- `http://localhost:3000/playbooks` - Playbook manager (requires auth)
 
 ### Development Workflow
 
