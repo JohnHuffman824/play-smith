@@ -56,6 +56,15 @@ export interface Play {
 	updated_at: Date;
 }
 
+export interface Section {
+	id: number;
+	playbook_id: number;
+	name: string;
+	display_order: number;
+	created_at: Date;
+	updated_at: Date;
+}
+
 export interface Session {
 	id: number;
 	user_id: number;
