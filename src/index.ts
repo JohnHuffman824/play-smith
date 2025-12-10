@@ -34,7 +34,8 @@ const server = serve({
     },
     "/api/playbooks/:id": {
       GET: playbooksAPI.get,
-      PUT: playbooksAPI.update
+      PUT: playbooksAPI.update,
+      DELETE: playbooksAPI.delete
     },
 
     // Example API endpoints

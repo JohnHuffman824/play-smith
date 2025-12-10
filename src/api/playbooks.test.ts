@@ -279,4 +279,64 @@ describe('Playbooks API', () => {
 		await db`DELETE FROM teams WHERE id = ${otherTeam.id}`
 		await db`DELETE FROM users WHERE id = ${otherUser.id}`
 	})
+
+	test('DELETE /api/playbooks/:id deletes playbook', async () => {
+		const pb = await playbookRepo.create({
+			team_id: testTeamId,
+			name: 'To Delete',
+			created_by: testUserId
+		})
+
+		const response = await fetch(`http://localhost:3000/api/playbooks/${pb.id}`, {
+			method: 'DELETE',
+			headers: {
+				Cookie: `session=${testSession}`
+			}
+		})
+
+		expect(response.status).toBe(204)
+
+		// Verify deleted
+		const deleted = await playbookRepo.findById(pb.id)
+		expect(deleted).toBeNull()
+	})
+
+	test('DELETE /api/playbooks/:id requires team membership', async () => {
+		const otherUser = await userRepo.create({
+			email: `other-delete-${Date.now()}@example.com`,
+			name: 'Other',
+			password_hash: 'hash'
+		})
+		const otherTeam = await teamRepo.create({ name: 'Other Team' })
+		await teamRepo.addMember({
+			team_id: otherTeam.id,
+			user_id: otherUser.id,
+			role: 'owner'
+		})
+
+		const pb = await playbookRepo.create({
+			team_id: otherTeam.id,
+			name: 'Protected',
+			created_by: otherUser.id
+		})
+
+		const response = await fetch(`http://localhost:3000/api/playbooks/${pb.id}`, {
+			method: 'DELETE',
+			headers: {
+				Cookie: `session=${testSession}`
+			}
+		})
+
+		expect(response.status).toBe(403)
+
+		// Verify NOT deleted
+		const exists = await playbookRepo.findById(pb.id)
+		expect(exists).not.toBeNull()
+
+		// Cleanup
+		await db`DELETE FROM playbooks WHERE id = ${pb.id}`
+		await db`DELETE FROM team_members WHERE team_id = ${otherTeam.id}`
+		await db`DELETE FROM teams WHERE id = ${otherTeam.id}`
+		await db`DELETE FROM users WHERE id = ${otherUser.id}`
+	})
 })

@@ -133,5 +133,34 @@ export const playbooksAPI = {
 		const updated = await playbookRepo.update(playbookId, body)
 
 		return Response.json({ playbook: updated })
+	},
+
+	delete: async (req: Request) => {
+		const userId = await getSessionUser(req)
+		if (!userId) {
+			return Response.json({ error: 'Unauthorized' }, { status: 401 })
+		}
+
+		const playbookId = parseInt(req.params.id)
+		if (isNaN(playbookId)) {
+			return Response.json({ error: 'Invalid playbook ID' }, { status: 400 })
+		}
+
+		const playbook = await playbookRepo.findById(playbookId)
+		if (!playbook) {
+			return Response.json({ error: 'Playbook not found' }, { status: 404 })
+		}
+
+		// Check user has access
+		const teams = await teamRepo.getUserTeams(userId)
+		const hasAccess = teams.some(team => team.id === playbook.team_id)
+
+		if (!hasAccess) {
+			return Response.json({ error: 'Access denied' }, { status: 403 })
+		}
+
+		await playbookRepo.delete(playbookId)
+
+		return new Response(null, { status: 204 })
 	}
 }
