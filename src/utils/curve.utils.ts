@@ -3,7 +3,24 @@
  */
 
 import type { Coordinate } from '../types/field.types'
-import type { ControlPoint, PathSegment } from '../types/drawing.types'
+import type { ControlPoint, PathSegment, Drawing } from '../types/drawing.types'
+
+/**
+ * Extract main path coordinates from a drawing.
+ * Filters out bezier control points, returning just the path through-points.
+ */
+export function extractMainCoordinates(drawing: Drawing): Coordinate[] {
+	const coords: Coordinate[] = []
+
+	// Get all points that are not curve control points
+	for (const point of Object.values(drawing.points)) {
+		if (point.type !== 'curve') {
+			coords.push({ x: point.x, y: point.y })
+		}
+	}
+
+	return coords
+}
 
 /**
  * Catmull-Rom to Bezier conversion.

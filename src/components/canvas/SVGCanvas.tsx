@@ -9,7 +9,7 @@ import type { PathStyle, Drawing } from '../../types/drawing.types'
 import { pointToLineDistance } from '../../utils/canvas.utils'
 import type { Coordinate } from '../../types/field.types'
 import { mergeDrawings } from '../../utils/drawing.utils'
-import { smoothPathToCurves, convertToSharp } from '../../utils/curve.utils'
+import { smoothPathToCurves, convertToSharp, extractMainCoordinates } from '../../utils/curve.utils'
 
 interface SVGCanvasProps {
 	width: number
@@ -250,13 +250,7 @@ export function SVGCanvas({
 		if (updates.pathMode && updates.pathMode !== drawing.style.pathMode) {
 			if (updates.pathMode === 'curve') {
 				// Convert to curves using smoothPathToCurves
-				// Extract main coordinates (filtering out bezier control points)
-				const coords: Coordinate[] = []
-				for (const [id, point] of Object.entries(drawing.points)) {
-					if (point.type !== 'curve') {
-						coords.push({ x: point.x, y: point.y })
-					}
-				}
+				const coords = extractMainCoordinates(drawing)
 				const { points, segments } = smoothPathToCurves(coords)
 				newDrawing = { ...newDrawing, points, segments }
 			} else {
