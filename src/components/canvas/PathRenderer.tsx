@@ -7,6 +7,7 @@ import {
 	LINE_END_ARROW,
 	LINE_END_NONE,
 	LINE_END_TSHAPE,
+	SELECTION_GLOW_BLUR,
 	TSHAPE_LENGTH_MULTIPLIER,
 } from '../../constants/field.constants'
 import { FieldCoordinateSystem } from '../../utils/coordinates'
@@ -137,7 +138,10 @@ export function PathRenderer({
 						width='200%'
 						height='200%'
 					>
-						<feGaussianBlur stdDeviation='3' result='coloredBlur' />
+						<feGaussianBlur
+							stdDeviation={SELECTION_GLOW_BLUR}
+							result='coloredBlur'
+						/>
 						<feMerge>
 							<feMergeNode in='coloredBlur' />
 							<feMergeNode in='SourceGraphic' />

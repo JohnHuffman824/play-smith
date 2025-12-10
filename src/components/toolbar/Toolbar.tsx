@@ -12,6 +12,8 @@ import {
 	PaintBucket,
 	Pencil,
 	Undo2,
+	Save,
+	Check,
 } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import type { DrawingState, Tool } from '../../types/play.types'
@@ -60,6 +62,7 @@ export function Toolbar({
 	const [showSettingsDialog, setShowSettingsDialog] =
 		useState(false)
 	const [isSaving, setIsSaving] = useState(false)
+	const [showSuccess, setShowSuccess] = useState(false)
 	const drawDialogRef = useRef<HTMLDivElement>(null)
 	const baseButtonClass = [
 		'w-14 h-14 rounded-xl flex items-center justify-center',
@@ -261,6 +264,8 @@ export function Toolbar({
 	useEffect(() => {
 		const handleSaveComplete = () => {
 			setIsSaving(false)
+			setShowSuccess(true)
+			setTimeout(() => setShowSuccess(false), 2000)
 		}
 
 		eventBus.on('canvas:save-complete', handleSaveComplete)

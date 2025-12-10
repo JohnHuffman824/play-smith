@@ -85,7 +85,9 @@ export function DrawingPropertiesDialog({
 			{/* Color */}
 			<div className='mb-4'>
 				<label
-					className={`block text-xs mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}
+					className={`block text-xs mb-2 ${
+						theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
+					}`}
 				>
 					Color
 				</label>
@@ -109,7 +111,9 @@ export function DrawingPropertiesDialog({
 			{/* Path Mode */}
 			<div className='mb-4'>
 				<label
-					className={`block text-xs mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}
+					className={`block text-xs mb-2 ${
+						theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
+					}`}
 				>
 					Path Mode
 				</label>
@@ -161,7 +165,9 @@ export function DrawingPropertiesDialog({
 			{/* Line Style */}
 			<div className='mb-4'>
 				<label
-					className={`block text-xs mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}
+					className={`block text-xs mb-2 ${
+						theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
+					}`}
 				>
 					Line Style
 				</label>
@@ -200,7 +206,9 @@ export function DrawingPropertiesDialog({
 			{/* Line End */}
 			<div className='mb-4'>
 				<label
-					className={`block text-xs mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}
+					className={`block text-xs mb-2 ${
+						theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
+					}`}
 				>
 					Line End
 				</label>
@@ -267,7 +275,9 @@ export function DrawingPropertiesDialog({
 			{/* Thickness */}
 			<div>
 				<label
-					className={`block text-xs mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}
+					className={`block text-xs mb-2 ${
+						theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
+					}`}
 				>
 					Line Thickness
 				</label>
