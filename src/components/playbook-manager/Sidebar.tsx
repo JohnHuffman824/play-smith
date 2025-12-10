@@ -1,4 +1,4 @@
-import { BookOpen, Folder, Star, Clock, Trash2, Settings, Users } from 'lucide-react'
+import { BookOpen, Folder, Star, Clock, Trash2, Users } from 'lucide-react'
 import { HEADER_HEIGHT } from '../../constants/layout'
 
 interface SidebarProps {
