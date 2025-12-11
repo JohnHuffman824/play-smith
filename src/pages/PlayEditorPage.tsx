@@ -314,8 +314,9 @@ function PlayEditorContent() {
 		)
 	}
 
-	// Show loading screen until play data and concepts are fully loaded
-	if (!isPlayLoaded || conceptsLoading) {
+	// Show loading screen until play data is fully loaded
+	// Only wait for concepts if we have a teamId (concepts need teamId to load)
+	if (!isPlayLoaded || (teamId && conceptsLoading)) {
 		return (
 			<div className={`flex items-center justify-center h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
 				<div className="text-center">
