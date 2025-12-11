@@ -5,11 +5,6 @@ import { useFieldCoordinates } from '../../hooks/useFieldCoordinates'
 import { usePlayContext } from '../../contexts/PlayContext'
 import { eventBus } from '../../services/EventBus'
 import {
-	LINEMAN_Y,
-	SPACING_CENTER_TO_CENTER,
-	LEFT_HASH_INNER_EDGE,
-	RIGHT_HASH_INNER_EDGE,
-	CENTER_X,
 	PLAYER_RADIUS_FEET,
 	INITIALIZATION_DELAY_MS,
 	CURSOR_Z_INDEX,
@@ -19,7 +14,6 @@ import {
 	TOOL_SELECT,
 	TOOL_FILL,
 	TOOL_ADD_PLAYER,
-	EVENT_FILL_LINEMAN,
 	EVENT_FILL_PLAYER,
 	UNLINK_DISTANCE_FEET,
 } from '../../constants/field.constants'
@@ -30,7 +24,6 @@ import type {
 	PathStyle,
 } from '../../types/drawing.types'
 import { FootballField } from '../field/FootballField'
-import { Lineman } from '../player/Lineman'
 import { Player } from '../player/Player'
 import { PlayerLabelDialog } from '../player/PlayerLabelDialog'
 import { Pencil, PaintBucket } from 'lucide-react'
@@ -47,15 +40,11 @@ interface CanvasProps {
 // Helper to dispatch fill events
 function dispatchFillEvent(
 	eventName: string,
-	id: number | string,
+	id: string,
 	color: string,
 ) {
 	if (eventName == EVENT_FILL_PLAYER) {
-		eventBus.emit('player:fill', { id: id as string, color })
-		return
-	}
-	if (eventName == EVENT_FILL_LINEMAN) {
-		eventBus.emit('lineman:fill', { id: id as number, color })
+		eventBus.emit('player:fill', { id, color })
 	}
 }
 
@@ -100,9 +89,6 @@ export function Canvas({
   showFieldMarkings = false,
 }: CanvasProps) {
   const whiteboardRef = useRef<HTMLDivElement>(null);
-  const [linemanPositions, setLinemanPositions] = useState<
-    { id: number; x: number; y: number }[]
-  >([]);
   const [cursorPosition, setCursorPosition] = useState<{
     x: number;
     y: number;
@@ -110,23 +96,14 @@ export function Canvas({
   const [isOverCanvas, setIsOverCanvas] = useState(false);
   const [isHoveringDeletable, setIsHoveringDeletable] =
     useState(false);
-  const [players, setPlayers] = useState<
-    Array<{
-      id: string;
-      x: number;
-      y: number;
-      label: string;
-      color: string;
-    }>
-  >([]);
   const [showLabelDialog, setShowLabelDialog] = useState(false);
   const [selectedPlayerId, setSelectedPlayerId] = useState<
     string | null
   >(null);
   const [labelDialogPosition, setLabelDialogPosition] =
     useState({ x: 0, y: 0 });
-	const { state, setDrawings } = usePlayContext()
-	const { drawings } = state
+	const { state, setDrawings, setPlayers, dispatch } = usePlayContext()
+	const { drawings, players } = state
 	const [canvasDimensions, setCanvasDimensions] = useState({
 		width: 0,
 		height: 0,
@@ -150,37 +127,10 @@ export function Canvas({
 		lineEnd: drawingState.lineEnd,
 	}
 
-	function computeInitialLinemanPositions() {
-		let centerLinemanX = CENTER_X
-		if (hashAlignment == 'left') {
-			centerLinemanX = LEFT_HASH_INNER_EDGE
-		} else if (hashAlignment == 'right') {
-			centerLinemanX = RIGHT_HASH_INNER_EDGE
-		}
-
-		const positions = []
-		for (let i = 0; i < 5; i++) {
-			const offsetFromCenter = (i - 2) * SPACING_CENTER_TO_CENTER
-			positions.push({
-				id: i,
-				x: centerLinemanX + offsetFromCenter,
-				y: LINEMAN_Y,
-			})
-		}
-		return positions
-	}
-
 	// History state for undo functionality
 	interface HistorySnapshot {
 		drawings: typeof drawings
-		players: Array<{
-			id: string
-			x: number
-			y: number
-			label: string
-			color: string
-		}>
-		linemanPositions: { id: number; x: number; y: number }[]
+		players: typeof players
 	}
 
 	const [history, setHistory] = useState<HistorySnapshot[]>([])
@@ -190,7 +140,6 @@ export function Canvas({
 		const snapshot: HistorySnapshot = {
 			drawings: JSON.parse(JSON.stringify(drawings)),
 			players: JSON.parse(JSON.stringify(players)),
-			linemanPositions: JSON.parse(JSON.stringify(linemanPositions)),
 		}
 
 		setHistory((prev) => {
@@ -218,37 +167,34 @@ export function Canvas({
 			if (!previousSnapshot) {
 				setDrawings([])
 				setPlayers([])
-				setLinemanPositions(computeInitialLinemanPositions())
 				setHistory([])
 				return
 			}
 
 			setDrawings(previousSnapshot.drawings)
 			setPlayers(previousSnapshot.players)
-			setLinemanPositions(previousSnapshot.linemanPositions)
 
 			setHistory((prev) => prev.slice(0, -2))
 		}
 
 		eventBus.on('canvas:undo', handleUndo)
 		return () => eventBus.off('canvas:undo', handleUndo)
-	}, [history, hashAlignment])
+	}, [history, setDrawings, setPlayers])
 
-	// Handle clear canvas event (drawings + players + linemen)
+	// Handle clear canvas event (drawings only, players managed by PlayContext)
 	useEffect(() => {
 		function handleClear() {
 			setDrawings([])
-			setPlayers([])
-			setLinemanPositions(computeInitialLinemanPositions())
+			// Players including linemen are preserved via PlayContext
 		}
 
 		eventBus.on('canvas:clear', handleClear)
 		return () => eventBus.off('canvas:clear', handleClear)
-	}, [setDrawings, hashAlignment])
+	}, [setDrawings])
 
-	// Initialize linemen positions from container size
+	// Initialize canvas dimensions
 	useEffect(() => {
-		function initializeLinemen() {
+		function initializeDimensions() {
 			if (!whiteboardRef.current) return
 
 			const rect = whiteboardRef.current.getBoundingClientRect()
@@ -257,16 +203,14 @@ export function Canvas({
 				width: rect.width,
 				height: rect.height,
 			})
-
-			setLinemanPositions(computeInitialLinemanPositions())
 		}
 
 		const timer = setTimeout(
-			initializeLinemen,
+			initializeDimensions,
 			INITIALIZATION_DELAY_MS,
 		)
 		return () => clearTimeout(timer)
-	}, [hashAlignment])
+	}, [])
 
   // Add resize handler to update dimensions and trigger re-render
   useEffect(() => {
@@ -311,34 +255,6 @@ export function Canvas({
     };
   }, [showPlayBar]);
 
-  function handleLinemanPositionChange(
-    id: number,
-    x: number,
-    y: number,
-  ) {
-    setLinemanPositions((prev) => {
-      const index = prev.findIndex((p) => p.id == id);
-      if (index == -1) return prev;
-
-      // Calculate the offset from the previous position
-      const oldPosition = prev[index];
-      if (!oldPosition) return prev;
-      
-      const offsetX = x - oldPosition.x;
-      const offsetY = y - oldPosition.y;
-
-      // Move all linemen by the same offset to keep them locked together
-      const newPositions = prev.map((p) => ({
-        ...p,
-        x: p.x + offsetX,
-        y: p.y + offsetY,
-      }));
-
-      return newPositions;
-    });
-  }
-
-
   function getCursorStyle() {
     switch (drawingState.tool) {
       case TOOL_ERASE:
@@ -348,16 +264,6 @@ export function Canvas({
         return "none";
       default:
         return "default";
-    }
-  }
-
-  function handleFillLineman(id: number) {
-    if (drawingState.tool == TOOL_FILL) {
-      dispatchFillEvent(
-        EVENT_FILL_LINEMAN,
-        id,
-        drawingState.color,
-      );
     }
   }
 
@@ -419,41 +325,52 @@ export function Canvas({
 
   function handlePlayerPositionChange(
     id: string,
-    x: number,
-    y: number,
+    newX: number,
+    newY: number,
   ) {
 		const player = players.find((p) => p.id == id)
 		if (!player) return
 
-		const deltaX = x - player.x
-		const deltaY = y - player.y
+		if (player.isLineman) {
+			// Calculate offset from original position
+			const offsetX = newX - player.x
+			const offsetY = newY - player.y
 
-		// Update player position
-		setPlayers((prev) =>
-			prev.map((p) => (p.id == id ? { ...p, x, y } : p)),
-		)
+			// Move all linemen by same offset
+			const updatedPlayers = players.map((p) => {
+				if (!p.isLineman) return p
+				return { ...p, x: p.x + offsetX, y: p.y + offsetY }
+			})
+			setPlayers(updatedPlayers)
+		} else {
+			const deltaX = newX - player.x
+			const deltaY = newY - player.y
 
-		// Move any linked drawings by the same delta
-		const linkedDrawings = drawings.filter((d) => d.playerId == id)
-		if (linkedDrawings.length > 0) {
-			setDrawings(
-				drawings.map((drawing) => {
-					if (drawing.playerId != id) return drawing
-					// Update all points in the shared pool
-					const updatedPoints: Record<string, import('../../types/drawing.types').ControlPoint> = {}
-					for (const [pointId, point] of Object.entries(drawing.points)) {
-						updatedPoints[pointId] = {
-							...point,
-							x: point.x + deltaX,
-							y: point.y + deltaY,
+			// Normal single-player update
+			dispatch({ type: 'UPDATE_PLAYER', id, updates: { x: newX, y: newY } })
+
+			// Move any linked drawings by the same delta
+			const linkedDrawings = drawings.filter((d) => d.playerId == id)
+			if (linkedDrawings.length > 0) {
+				setDrawings(
+					drawings.map((drawing) => {
+						if (drawing.playerId != id) return drawing
+						// Update all points in the shared pool
+						const updatedPoints: Record<string, import('../../types/drawing.types').ControlPoint> = {}
+						for (const [pointId, point] of Object.entries(drawing.points)) {
+							updatedPoints[pointId] = {
+								...point,
+								x: point.x + deltaX,
+								y: point.y + deltaY,
+							}
 						}
-					}
-					return {
-						...drawing,
-						points: updatedPoints,
-					}
-				}),
-			)
+						return {
+							...drawing,
+							points: updatedPoints,
+						}
+					}),
+				)
+			}
 		}
   }
 
@@ -490,6 +407,9 @@ export function Canvas({
   }
 
   function handlePlayerDeleteById(id: string) {
+    const player = players.find((p) => p.id == id)
+    if (player?.isLineman) return // Protected from deletion
+
     setPlayers((prev) => prev.filter((p) => p.id != id));
     // Reset hover state when deleting a player to show circular cursor again
     setIsHoveringDeletable(false);
@@ -585,11 +505,6 @@ export function Canvas({
 	function handleDeleteDrawing(id: string) {
 		setDrawings(drawings.filter((d) => d.id != id))
 	}
-
-	// Determine if linemen should be interactable based on the current tool
-	const linemanInteractable =
-		drawingState.tool == TOOL_SELECT ||
-		drawingState.tool == TOOL_FILL
 
 	// Determine if players should be interactable
 	const playerInteractable =
@@ -766,32 +681,7 @@ export function Canvas({
             className="absolute top-0 left-0 w-full h-full overflow-hidden"
             style={{ pointerEvents: 'none', borderRadius: 'inherit' }}
           >
-            {linemanPositions.map((pos) => (
-              <Lineman
-                key={pos.id}
-                id={pos.id}
-                initialX={pos.x}
-                initialY={pos.y}
-                containerWidth={canvasDimensions.width}
-                containerHeight={canvasDimensions.height}
-                isCenter={pos.id == 2}
-                onPositionChange={handleLinemanPositionChange}
-                onFill={handleFillLineman}
-                interactable={linemanInteractable}
-                currentTool={drawingState.tool}
-              />
-            ))}
-          </div>
-
-					<div className={cursorOverlayClasses} style={{ borderRadius: 'inherit' }}>
-						<div
-							className='absolute top-0 left-0 w-full h-full overflow-hidden'
-							style={{
-								pointerEvents: 'none',
-								borderRadius: 'inherit',
-							}}
-						>
-              {players.map((player) => (
+            {players.map((player) => (
                 <Player
                   key={player.id}
                   id={player.id}
@@ -816,7 +706,6 @@ export function Canvas({
                 />
               ))}
             </div>
-          </div>
         </div>
       </div>
 
