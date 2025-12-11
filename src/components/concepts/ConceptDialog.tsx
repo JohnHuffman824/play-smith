@@ -264,7 +264,7 @@ export function ConceptDialog({
 						/>
 
 						{/* Canvas */}
-						<div ref={canvasContainerRef} className="flex-1 flex flex-col pr-6 p-1" style={{ minHeight: 0 }}>
+						<div ref={canvasContainerRef} className="relative flex-1">
 							<Canvas
 								drawingState={{
 									tool: selectedTool,
@@ -278,7 +278,6 @@ export function ConceptDialog({
 								}}
 								hashAlignment={hashAlignment}
 								showPlayBar={false}
-							containerMode="fill"
 								showFieldMarkings={true}
 							/>
 						</div>
@@ -286,13 +285,14 @@ export function ConceptDialog({
 
 					{/* Color Picker Dialog */}
 					{showColorPicker && (
+					<div className="absolute left-28 top-24 z-50">
 						<ColorPickerDialog
 							currentColor={color}
 							onColorChange={setColor}
 							onClose={() => setShowColorPicker(false)}
-							position={{ left: 'left-28', top: 'top-24' }}
 							useRelativePosition={true}
 						/>
+					</div>
 					)}
 				</div>
 
