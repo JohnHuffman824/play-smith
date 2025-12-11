@@ -8,9 +8,15 @@ import { DrawingPropertiesDialog } from '../toolbar/dialogs/DrawingPropertiesDia
 import type { PathStyle, Drawing } from '../../types/drawing.types'
 import { pointToLineDistance } from '../../utils/canvas.utils'
 import type { Coordinate } from '../../types/field.types'
-import { mergeDrawings } from '../../utils/drawing.utils'
+import {
+	mergeDrawings,
+	getDrawingStartPoint,
+	getDrawingEndPoint,
+	findPlayerSnapTarget
+} from '../../utils/drawing.utils'
 import { convertToSharp, extractMainCoordinates } from '../../utils/curve.utils'
 import { processSmoothPath } from '../../utils/smooth-path.utils'
+import { PLAYER_RADIUS_FEET } from '../../constants/field.constants'
 
 // Constants
 const NODE_PROXIMITY_THRESHOLD = 20
@@ -87,6 +93,11 @@ export function SVGCanvas({
 	const [editingDrawing, setEditingDrawing] = useState<{
 		drawing: Drawing
 		position: { x: number; y: number }
+	} | null>(null)
+	const [wholeDrawingSnapTarget, setWholeDrawingSnapTarget] = useState<{
+		playerId: string
+		pointId: string
+		playerPosition: { x: number; y: number }
 	} | null>(null)
 
 	// Auto-clear lastDrawnDrawingId after 3 seconds
