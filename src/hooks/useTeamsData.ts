@@ -1,7 +1,8 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { useState, useCallback, useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import { teamKeys, fetchTeams, type TeamWithRole } from '../api/queries/teamQueries'
+import { useTeamContext } from '../contexts/TeamContext'
 
 interface UseTeamsDataReturn {
 	teams: TeamWithRole[]
@@ -16,7 +17,7 @@ interface UseTeamsDataReturn {
 export function useTeamsData(): UseTeamsDataReturn {
 	const navigate = useNavigate()
 	const queryClient = useQueryClient()
-	const [currentTeamId, setCurrentTeamId] = useState<number | null>(null)
+	const { currentTeamId, setCurrentTeamId } = useTeamContext()
 
 	const handleUnauthorized = useCallback((error: Error) => {
 		if (error.message === 'UNAUTHORIZED') {
@@ -40,16 +41,19 @@ export function useTeamsData(): UseTeamsDataReturn {
 		}
 	}, [queryError, handleUnauthorized])
 
-	// Auto-select first team if none selected
+	// Auto-select first team if none selected or if stored team doesn't exist
 	useEffect(() => {
-		if (teams.length > 0 && currentTeamId === null) {
-			setCurrentTeamId(teams[0].id)
+		if (teams.length > 0) {
+			const storedTeamExists = teams.some(t => t.id === currentTeamId)
+			if (currentTeamId === null || !storedTeamExists) {
+				setCurrentTeamId(teams[0]!.id)
+			}
 		}
-	}, [teams, currentTeamId])
+	}, [teams, currentTeamId, setCurrentTeamId])
 
 	const switchTeam = useCallback((teamId: number) => {
 		setCurrentTeamId(teamId)
-	}, [])
+	}, [setCurrentTeamId])
 
 	const refetch = useCallback(async () => {
 		await queryClient.invalidateQueries({ queryKey: teamKeys.list() })
