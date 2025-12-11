@@ -229,7 +229,7 @@ export function ConceptDialog({
 				</div>
 
 				{/* Canvas Area */}
-				<div className="flex-1 flex min-h-0 relative">
+				<div className="flex-1 flex min-h-0 relative pr-6 gap-4">
 					<PlayProvider>
 						{/* Left Toolbar */}
 						<ConceptToolbar
@@ -261,7 +261,7 @@ export function ConceptDialog({
 						/>
 
 						{/* Canvas */}
-						<div ref={canvasContainerRef} className="flex-1 flex flex-col pr-8 rounded-2xl border-2 border-gray-300 dark:border-gray-600">
+						<div ref={canvasContainerRef} className="flex-1 flex flex-col rounded-2xl border-2 border-gray-300 dark:border-gray-600">
 							<Canvas
 								drawingState={{
 									tool: selectedTool,
