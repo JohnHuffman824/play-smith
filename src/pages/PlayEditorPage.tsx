@@ -194,6 +194,8 @@ function PlayEditorContent() {
 				setHashAlignment={setHashAlignment}
 				showPlayBar={playState.showPlayBar}
 				setShowPlayBar={setShowPlayBar}
+				playId={playId}
+				onDeletePlay={handleDeletePlay}
 			/>
 			<div className='flex-1 flex flex-col relative'>
 				<PlayHeader
