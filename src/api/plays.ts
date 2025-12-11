@@ -171,8 +171,8 @@ export const playsAPI = {
 			return Response.json({ error: 'Access denied' }, { status: 403 })
 		}
 
-		// Get plays with drawing data from applied concepts
-		const plays = await db`
+		// Get plays with drawing data from applied concepts and custom drawings
+		const rawPlays = await db`
 			SELECT
 				p.id,
 				p.name,
@@ -182,6 +182,8 @@ export const playsAPI = {
 				p.personnel_id,
 				p.defensive_formation_id,
 				p.updated_at,
+				p.custom_players,
+				p.custom_drawings,
 				(
 					SELECT COALESCE(json_agg(json_build_object('id', t.id, 'name', t.name, 'color', t.color)), '[]'::json)
 					FROM tags t JOIN play_tags pt ON pt.tag_id = t.id
@@ -192,11 +194,36 @@ export const playsAPI = {
 					FROM concept_applications ca
 					JOIN concept_player_assignments cpa ON cpa.concept_id = ca.concept_id
 					WHERE ca.play_id = p.id AND cpa.drawing_data IS NOT NULL
-				) as drawings
+				) as concept_drawings
 			FROM plays p
 			WHERE p.playbook_id = ${playbookId}
 			ORDER BY p.display_order ASC
 		`
+
+		// Merge concept drawings and custom drawings
+		const plays = rawPlays.map((p: any) => {
+			const conceptDrawings = p.concept_drawings || []
+			const customDrawings = (typeof p.custom_drawings === 'string'
+				? JSON.parse(p.custom_drawings)
+				: p.custom_drawings || [])
+			const customPlayers = (typeof p.custom_players === 'string'
+				? JSON.parse(p.custom_players)
+				: p.custom_players || [])
+
+			return {
+				id: p.id,
+				name: p.name,
+				section_id: p.section_id,
+				play_type: p.play_type,
+				formation_id: p.formation_id,
+				personnel_id: p.personnel_id,
+				defensive_formation_id: p.defensive_formation_id,
+				updated_at: p.updated_at,
+				tags: p.tags,
+				drawings: [...conceptDrawings, ...customDrawings],
+				players: customPlayers
+			}
+		})
 
 		return Response.json({ plays })
 	},
