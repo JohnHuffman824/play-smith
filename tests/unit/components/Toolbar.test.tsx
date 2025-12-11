@@ -1,11 +1,16 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test'
-import { render } from '@testing-library/react'
+import { cleanup, render } from '@testing-library/react'
 import { Toolbar } from '../../../src/components/toolbar/Toolbar'
 import { ThemeProvider } from '../../../src/contexts/ThemeContext'
 import type { DrawingState } from '../../../src/types/play.types'
 import type { HashAlignment } from '../../../src/types/field.types'
 
 describe('Toolbar - Responsive Layout', () => {
+
+	afterEach(() => {
+		cleanup()
+	})
+
 	let originalInnerHeight: number
 
 	beforeEach(() => {

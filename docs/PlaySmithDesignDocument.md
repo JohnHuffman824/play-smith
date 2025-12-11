@@ -49,6 +49,7 @@ The play editor is the main workspace for creating and editing plays.
 
 - **Center**: Whiteboard canvas
 - **Left**: Toolbar with tool icons
+- **Top**: Unified search for formations/concepts/groups with draggable chips
 - **Above whiteboard**: Four input fields (left to right)
 	1. Formation
 	2. Play
@@ -108,6 +109,13 @@ By default, each play auto-populates with 5 offensive linemen:
 - Center (middle lineman) is automatically placed at field center
 - Position can be adjusted via the hash button (left hash, middle, or right hash)
 
+### Concept Application Search
+
+- Unified search bar surfaces formations, concepts, and concept groups
+- Selecting a result adds a draggable chip above the canvas
+- Chips can be reordered via drag-and-drop and removed inline
+- Applied chips automatically apply their formation/concept/group to the canvas
+
 ### Drawing–Player Linking
 
 - Link by dragging a drawing node inside a player’s radius (glow indicates snap); one drawing per player
@@ -116,6 +124,19 @@ By default, each play auto-populates with 5 offensive linemen:
 - Unlink via the player label dialog (unlink button beside custom text/delete); the node reappears ~5 ft along the prior segment direction from the player
 - If no link exists, the player dialog’s custom text input spans the full row
 - Prevent merging two drawings when both drawings already have player links
+
+### Multi-Selection Overlay
+
+- Selecting 2+ objects shows an overlay with actions:
+	- Save selection as concept (opens concept dialog)
+	- Duplicate selection (placeholder)
+	- Delete selection
+
+### Persistence
+
+- Plays load from `/api/plays/{id}` (players, drawings, hash alignment, name)
+- Save via `PUT /api/plays/{id}` (name, players, drawings, hash)
+- Delete via `DELETE /api/plays/{id}` with post-delete navigation to playbook
 
 ### Placeholder Ideas
 
@@ -167,6 +188,10 @@ Completed drawings are saved as components. A sub-dialog opens next to the tool
 for line customization:
 - Line style: solid or dashed
 - End style: arrow, T-shape, or none
+- Path mode: sharp (angular) or curve (smoothed)
+- Line thickness presets: Thin/Medium/Thick/Extra Thick
+- Drawing properties dialog lets users edit color, style, ends, path mode, and
+	thickness after creation
 
 ### Erase
 
@@ -273,10 +298,29 @@ all plays and playbooks.
 - Values: Light Mode, Dark Mode
 - Function: Toggles between light and dark color schemes
 
+**Snap Distance**
+- Range: 10–50 px (default 20 px)
+- Function: Sets snap threshold used for merging points and alignment
+
 **Move Skills on Hash Change**
 - Values: Yes, No
 - Function: Determines whether skill position players move with linemen when
 	hash position changes
+
+---
+
+## Keyboard Shortcuts
+
+- S: Select tool
+- A: Add player
+- D: Draw (opens/toggles draw options)
+- E: Erase
+- C: Color picker dialog
+- F: Fill tool
+- H: Ball-on-hash dialog
+- G: Add component/concept dialog
+- Delete/⌫: Delete selection
+- ⌘Z: Undo canvas history
 
 ---
 

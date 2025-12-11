@@ -32,10 +32,12 @@ describe('Routing Flow Integration', () => {
 		global.fetch = mockFetch as any
 
 		// Default: mock unauthenticated user
-		mockFetch.mockResolvedValue({
-			ok: true,
-			json: async () => ({ user: null }),
-		} as Response)
+		mockFetch.mockResolvedValue(
+			new Response(JSON.stringify({ user: null }), {
+				status: 200,
+				headers: { 'Content-Type': 'application/json' }
+			})
+		)
 	})
 
 	afterEach(() => {
@@ -101,30 +103,36 @@ describe('Routing Flow Integration', () => {
 		// Mock multiple API calls in sequence
 		mockFetch
 			// First call: auth check
-			.mockResolvedValueOnce({
-				ok: true,
-				json: async () => ({
-					user: { id: 1, email: 'test@example.com', name: 'Test User' },
-				}),
-			} as Response)
+			.mockResolvedValueOnce(
+				new Response(JSON.stringify({
+					user: { id: 1, email: 'test@example.com', name: 'Test User' }
+				}), {
+					status: 200,
+					headers: { 'Content-Type': 'application/json' }
+				})
+			)
 			// Second call: playbooks list
-			.mockResolvedValueOnce({
-				ok: true,
-				json: async () => ({
+			.mockResolvedValueOnce(
+				new Response(JSON.stringify({
 					playbooks: [
 						{ id: 1, name: 'Test Playbook', team_id: 1 }
 					]
-				}),
-			} as Response)
+				}), {
+					status: 200,
+					headers: { 'Content-Type': 'application/json' }
+				})
+			)
 			// Third call: teams list
-			.mockResolvedValueOnce({
-				ok: true,
-				json: async () => ({
+			.mockResolvedValueOnce(
+				new Response(JSON.stringify({
 					teams: [
 						{ id: 1, name: 'Test Team' }
 					]
-				}),
-			} as Response)
+				}), {
+					status: 200,
+					headers: { 'Content-Type': 'application/json' }
+				})
+			)
 
 		const router = createMemoryRouter(routes, {
 			initialEntries: ['/playbooks']
@@ -145,16 +153,17 @@ describe('Routing Flow Integration', () => {
 		// Mock multiple API calls in sequence
 		mockFetch
 			// First call: auth check
-			.mockResolvedValueOnce({
-				ok: true,
-				json: async () => ({
-					user: { id: 1, email: 'test@example.com', name: 'Test User' },
-				}),
-			} as Response)
+			.mockResolvedValueOnce(
+				new Response(JSON.stringify({
+					user: { id: 1, email: 'test@example.com', name: 'Test User' }
+				}), {
+					status: 200,
+					headers: { 'Content-Type': 'application/json' }
+				})
+			)
 			// Second call: playbook detail
-			.mockResolvedValueOnce({
-				ok: true,
-				json: async () => ({
+			.mockResolvedValueOnce(
+				new Response(JSON.stringify({
 					playbook: {
 						id: 123,
 						name: 'Test Playbook',
@@ -164,17 +173,22 @@ describe('Routing Flow Integration', () => {
 					},
 					sections: [],
 					plays: []
-				}),
-			} as Response)
+				}), {
+					status: 200,
+					headers: { 'Content-Type': 'application/json' }
+				})
+			)
 			// Third call: teams list (for the team selector)
-			.mockResolvedValueOnce({
-				ok: true,
-				json: async () => ({
+			.mockResolvedValueOnce(
+				new Response(JSON.stringify({
 					teams: [
 						{ id: 1, name: 'Test Team' }
 					]
-				}),
-			} as Response)
+				}), {
+					status: 200,
+					headers: { 'Content-Type': 'application/json' }
+				})
+			)
 
 		const router = createMemoryRouter(routes, {
 			initialEntries: ['/playbooks/123']

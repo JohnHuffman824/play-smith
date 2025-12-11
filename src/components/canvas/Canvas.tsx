@@ -124,6 +124,8 @@ export function Canvas({
   const [isOverCanvas, setIsOverCanvas] = useState(false)
   const [isHoveringDeletable, setIsHoveringDeletable] =
     useState(false)
+  const [isHoveringDrawing, setIsHoveringDrawing] =
+    useState(false)
   const [players, setPlayers] = useState<
     Array<{
       id: string
@@ -702,6 +704,12 @@ export function Canvas({
 								setSelectedPlayerId(null)
 							}
 						}}
+						onDrawingHoverChange={(isHovered) => {
+							// Only track hover state when add player tool is active
+							if (drawingState.tool == TOOL_ADD_PLAYER) {
+								setIsHoveringDrawing(isHovered)
+							}
+						}}
 					/>
 				</div>
 
@@ -776,7 +784,8 @@ export function Canvas({
           {/* Custom Add Player Cursor - Player circle preview */}
           {drawingState.tool == TOOL_ADD_PLAYER &&
             isOverCanvas &&
-            cursorPosition && (
+            cursorPosition &&
+            !isHoveringDrawing && (
               <div
                 className="absolute pointer-events-none"
                 style={{

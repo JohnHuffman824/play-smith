@@ -1,12 +1,14 @@
 import { X } from 'lucide-react'
 import { useTheme } from '../../../contexts/ThemeContext'
 import type { Drawing, PathStyle } from '../../../types/drawing.types'
+import type { FieldCoordinateSystem } from '../../../utils/coordinates'
 
 interface DrawingPropertiesDialogProps {
 	drawing: Drawing
 	position: { x: number; y: number }
 	onUpdate: (updates: Partial<PathStyle>) => void
 	onClose: () => void
+	coordSystem: FieldCoordinateSystem
 }
 
 const DIALOG_WIDTH = 280
@@ -23,13 +25,13 @@ const brushSizes = [
 
 const colorPresets = [
 	'#000000', // Black
+	'#FFFFFF', // White
 	'#EF4444', // Red
 	'#F97316', // Orange
 	'#F59E0B', // Amber
 	'#10B981', // Green
 	'#3B82F6', // Blue
 	'#8B5CF6', // Purple
-	'#EC4899', // Pink
 ]
 
 export function DrawingPropertiesDialog({
@@ -37,6 +39,7 @@ export function DrawingPropertiesDialog({
 	position,
 	onUpdate,
 	onClose,
+	coordSystem,
 }: DrawingPropertiesDialogProps) {
 	const { theme } = useTheme()
 	const { style } = drawing
@@ -282,30 +285,38 @@ export function DrawingPropertiesDialog({
 					Line Thickness
 				</label>
 				<div className='grid grid-cols-2 gap-2'>
-					{brushSizes.map((brush) => (
-						<button
-							key={brush.size}
-							onClick={() => onUpdate({ strokeWidth: brush.size })}
-							className={`py-3 px-3 rounded-lg transition-all cursor-pointer ${
-								style.strokeWidth === brush.size
-									? 'bg-blue-500 text-white'
-									: theme === 'dark'
-										? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-										: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-							}`}
-						>
-							<div className='flex flex-col items-center gap-1'>
-								<div
-									className='bg-current rounded-full'
-									style={{
-										width: `${brush.size * 2}px`,
-										height: `${brush.size * 2}px`,
-									}}
-								/>
-								<span className='text-xs'>{brush.label}</span>
-							</div>
-						</button>
-					))}
+					{brushSizes.map((brush) => {
+						// Convert pixel size to feet for storage
+						const strokeWidthInFeet = brush.size / coordSystem.scale
+
+						// Check if current style matches (compare in feet)
+						const isSelected = Math.abs(style.strokeWidth - strokeWidthInFeet) < 0.01
+
+						return (
+							<button
+								key={brush.size}
+								onClick={() => onUpdate({ strokeWidth: strokeWidthInFeet })}
+								className={`py-3 px-3 rounded-lg transition-all cursor-pointer ${
+									isSelected
+										? 'bg-blue-500 text-white'
+										: theme === 'dark'
+											? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+											: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+								}`}
+							>
+								<div className='flex flex-col items-center gap-1'>
+									<div
+										className='bg-current rounded-full'
+										style={{
+											width: `${brush.size * 2}px`,
+											height: `${brush.size * 2}px`,
+										}}
+									/>
+									<span className='text-xs'>{brush.label}</span>
+								</div>
+							</button>
+						)
+					})}
 				</div>
 			</div>
 		</div>

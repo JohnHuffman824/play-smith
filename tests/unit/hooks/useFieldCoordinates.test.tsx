@@ -3,11 +3,16 @@
  * Verifies hook provides coordinate system that updates with dimensions
  */
 
-import { describe, it, expect } from 'bun:test'
-import { renderHook } from '@testing-library/react'
+import { describe, it, expect, afterEach } from 'bun:test'
+import { cleanup, renderHook } from '@testing-library/react'
 import { useFieldCoordinates } from '../../../src/hooks/useFieldCoordinates'
 
 describe('useFieldCoordinates', () => {
+
+	afterEach(() => {
+		cleanup()
+	})
+
 	it('should return coordinate system instance', () => {
 		const { result } = renderHook(() =>
 			useFieldCoordinates({ containerWidth: 800, containerHeight: 600 })

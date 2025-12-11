@@ -15,7 +15,7 @@ export interface PixelCoordinate extends Coordinate {
 	// Coordinate in web pixels, origin at top-left (0,0), Y increases downward
 }
 
-export type HashAlignment = 'center' | 'left' | 'right'
+export type HashAlignment = 'left' | 'middle' | 'right'
 
 export interface FieldDimensions {
 	width: number

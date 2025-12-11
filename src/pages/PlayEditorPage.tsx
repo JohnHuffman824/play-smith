@@ -34,6 +34,7 @@ function PlayEditorContent() {
 		setDrawingState,
 		setHashAlignment,
 		setShowPlayBar,
+		setPlayers,
 		applyFormation,
 		applyConcept,
 		applyConceptGroup,
@@ -76,9 +77,11 @@ function PlayEditorContent() {
 		async function handleSave() {
 			if (!playId) {
 				console.error('No play ID - cannot save')
-				eventBus.emit('canvas:save-complete')
+				eventBus.emit('canvas:save-complete', { success: false, error: 'No play ID' })
 				return
 			}
+
+			console.log('Saving play with players:', playState.players)
 
 			try {
 				const response = await fetch(`/api/plays/${playId}`, {
@@ -93,14 +96,22 @@ function PlayEditorContent() {
 				})
 
 				if (!response.ok) {
-					console.error('Save failed:', await response.json())
+					const errorData = await response.json()
+					console.error('Save failed:', errorData)
+					eventBus.emit('canvas:save-complete', {
+						success: false,
+						error: errorData.error || 'Failed to save play'
+					})
 				} else {
 					console.log('Play saved successfully')
+					eventBus.emit('canvas:save-complete', { success: true })
 				}
-				eventBus.emit('canvas:save-complete')
 			} catch (error) {
 				console.error('Save error:', error)
-				eventBus.emit('canvas:save-complete')
+				eventBus.emit('canvas:save-complete', {
+					success: false,
+					error: error instanceof Error ? error.message : 'Failed to save play'
+				})
 			}
 		}
 
@@ -123,6 +134,8 @@ function PlayEditorContent() {
 				const data = await response.json()
 				const play = data.play
 
+				console.log('Loading play - players from API:', play.players)
+
 				// Set teamId from play response (via playbook join)
 				if (play.teamId) {
 					setTeamId(play.teamId)
@@ -135,9 +148,10 @@ function PlayEditorContent() {
 					dispatch({ type: 'SET_HASH_ALIGNMENT', alignment: play.hashAlignment })
 				}
 				if (play.players?.length > 0) {
-					play.players.forEach((player: any) => {
-						dispatch({ type: 'ADD_PLAYER', player })
-					})
+					console.log('Setting players:', play.players)
+					setPlayers(play.players)
+				} else {
+					console.log('No players to load')
 				}
 				if (play.drawings?.length > 0) {
 					dispatch({ type: 'SET_DRAWINGS', drawings: play.drawings })
@@ -150,7 +164,7 @@ function PlayEditorContent() {
 		}
 
 		loadPlay()
-	}, [playId, dispatch])
+	}, [playId, dispatch, setPlayers])
 
 	// Apply selected concepts to canvas
 	useEffect(() => {

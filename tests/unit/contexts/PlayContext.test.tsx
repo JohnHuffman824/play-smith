@@ -3,16 +3,21 @@
  * Verifies state management and reducer logic
  */
 
-import { describe, it, expect } from 'bun:test'
-import { renderHook, act } from '@testing-library/react'
-import { PlayProvider, usePlayContext } from '../../../src/contexts/PlayContext'
-import { ReactNode } from 'react'
+import { afterEach, describe, it, expect } afterEach } from 'bun:test'
+import { afterEach, cleanup, renderHook, act } from '@testing-library/react'
+import { afterEach, PlayProvider, usePlayContext } from '../../../src/contexts/PlayContext'
+import { afterEach, ReactNode } from 'react'
 
 const wrapper = ({ children }: { children: ReactNode }) => (
 	<PlayProvider>{children}</PlayProvider>
 )
 
 describe('PlayContext', () => {
+
+	afterEach(() => {
+		cleanup()
+	})
+
 	describe('initialization', () => {
 		it('should provide initial state', () => {
 			const { result } = renderHook(() => usePlayContext(), { wrapper })

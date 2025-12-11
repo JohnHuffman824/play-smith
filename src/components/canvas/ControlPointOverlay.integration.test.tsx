@@ -1,10 +1,15 @@
-import { describe, test, expect, beforeEach } from 'bun:test'
-import { render, fireEvent } from '@testing-library/react'
-import { ControlPointOverlay } from './ControlPointOverlay'
-import { FieldCoordinateSystem } from '../../utils/coordinates'
+import { afterEach, describe, test, expect, beforeEach } afterEach } from 'bun:test'
+import { afterEach, cleanup, render, fireEvent } from '@testing-library/react'
+import { afterEach, ControlPointOverlay } from './ControlPointOverlay'
+import { afterEach, FieldCoordinateSystem } from '../../utils/coordinates'
 import type { Drawing } from '../../types/drawing.types'
 
 describe('ControlPointOverlay - Node Linking Integration', () => {
+
+	afterEach(() => {
+		cleanup()
+	})
+
 	const mockCoordSystem = new FieldCoordinateSystem(800, 400)
 	type MergeArgs = [string, string, string, string]
 	let mergeCallArgs: MergeArgs[] = []

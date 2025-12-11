@@ -1,30 +1,35 @@
-import { describe, test, expect, beforeAll, afterAll } from 'bun:test'
-import { render, screen, waitFor } from '@testing-library/react'
-import { RouterProvider, createMemoryRouter } from 'react-router-dom'
-import { routes } from './routes'
-import { AuthProvider } from '../contexts/AuthContext'
-import { ThemeProvider } from '../contexts/ThemeContext'
-import { act } from 'react'
+import { afterEach, describe, test, expect, beforeAll, afterAll } afterEach } from 'bun:test'
+import { afterEach, cleanup, render, screen, waitFor } from '@testing-library/react'
+import { afterEach, RouterProvider, createMemoryRouter } from 'react-router-dom'
+import { afterEach, routes } from './routes'
+import { afterEach, AuthProvider } from '../contexts/AuthContext'
+import { afterEach, ThemeProvider } from '../contexts/ThemeContext'
+import { afterEach, act } from 'react'
 
 describe('routes', () => {
+
+	afterEach(() => {
+		cleanup()
+	})
+
 	const originalFetch = global.fetch
 
 	beforeAll(() => {
 		// Mock fetch for auth
 		global.fetch = async (url: string) => {
 			if (url.includes('/api/auth/me')) {
-				return {
-					ok: true,
-					json: async () => ({ user: null })
-				} as Response
+				return new Response(JSON.stringify({ user: null }), {
+					status: 200,
+					headers: { 'Content-Type': 'application/json' }
+				})
 			}
 			if (url.includes('/api/teams')) {
-				return {
-					ok: true,
-					json: async () => ({ teams: [] })
-				} as Response
+				return new Response(JSON.stringify({ teams: [] }), {
+					status: 200,
+					headers: { 'Content-Type': 'application/json' }
+				})
 			}
-			return { ok: false, status: 404 } as Response
+			return new Response(null, { status: 404 })
 		}
 	})
 

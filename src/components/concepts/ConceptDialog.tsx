@@ -47,7 +47,7 @@ export function ConceptDialog({
 	const [playDirection, setPlayDirection] = useState<PlayDirection>('na')
 	const [selectedTool, setSelectedTool] = useState<Tool>('select')
 	const [color, setColor] = useState('#000000')
-	const [hashAlignment, setHashAlignment] = useState<'left' | 'center' | 'right'>('center')
+	const [hashAlignment, setHashAlignment] = useState<HashAlignment>('middle')
 	const [isSaving, setIsSaving] = useState(false)
 	const [nameError, setNameError] = useState('')
 	const [touched, setTouched] = useState(false)

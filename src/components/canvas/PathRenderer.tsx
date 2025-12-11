@@ -94,6 +94,7 @@ interface PathRendererProps {
 	activeTool?: 'draw' | 'select' | 'erase'
 	onDelete?: (id: string) => void
 	onDragStart?: (drawingId: string, feetX: number, feetY: number) => void
+	onHover?: (isHovered: boolean) => void
 }
 
 /**
@@ -109,6 +110,7 @@ export function PathRenderer({
 	activeTool,
 	onDelete,
 	onDragStart,
+	onHover,
 }: PathRendererProps) {
 	const { d, endDirection } = useMemo(() => {
 		return buildPath(drawing, coordSystem)
@@ -189,7 +191,12 @@ export function PathRenderer({
 		: null
 
 	return (
-		<g className={className} onClick={handleClick}>
+		<g
+			className={className}
+			onClick={handleClick}
+			onMouseEnter={() => onHover?.(true)}
+			onMouseLeave={() => onHover?.(false)}
+		>
 			{/* SVG filter for selection glow */}
 			{isSelected && (
 				<defs>

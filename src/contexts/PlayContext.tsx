@@ -4,12 +4,13 @@
 * Eliminates props drilling through multiple component levels
 */
 
-import { createContext, useContext, useReducer } from 'react'
+import { createContext, useContext, useReducer, useCallback, useMemo } from 'react'
 import type { ReactNode } from 'react'
 import type { DrawingState, PlayCard, Tool } from '../types/play.types'
 import type { HashAlignment } from '../types/field.types'
 import type { Drawing } from '../types/drawing.types'
 import type { Formation, BaseConcept, ConceptGroup } from '../types/concept.types'
+import { useTheme } from './ThemeContext'
 
 interface Player {
 	id: string
@@ -42,6 +43,7 @@ type PlayAction =
 	| { type: 'SET_HASH_ALIGNMENT'; alignment: HashAlignment }
 	| { type: 'TOGGLE_PLAY_BAR' }
 	| { type: 'SET_SHOW_PLAY_BAR'; show: boolean }
+	| { type: 'SET_PLAYERS'; players: Player[] }
 	| { type: 'ADD_PLAYER'; player: Player }
 	| { type: 'UPDATE_PLAYER'; id: string; updates: Partial<Player> }
 	| { type: 'DELETE_PLAYER'; id: string }
@@ -67,6 +69,7 @@ interface PlayContextType {
 	deletePlayCard: (id: string) => void
 	setHashAlignment: (alignment: HashAlignment) => void
 	setShowPlayBar: (show: boolean) => void
+	setPlayers: (players: Player[]) => void
 	setDrawings: (drawings: Drawing[]) => void
 	addDrawing: (drawing: Drawing) => void
 	deleteDrawing: (id: string) => void
@@ -93,7 +96,7 @@ const initialState: PlayState = {
 	play: '',
 	defensiveFormation: '',
 	playCards: [],
-	hashAlignment: 'center',
+	hashAlignment: 'middle',
 	showPlayBar: true,
 	players: [],
 	drawings: [],
@@ -114,6 +117,7 @@ type SetHashAlignmentAction = Extract<
 	{ type: 'SET_HASH_ALIGNMENT' }
 >
 type SetShowPlayBarAction = Extract<PlayAction, { type: 'SET_SHOW_PLAY_BAR' }>
+type SetPlayersAction = Extract<PlayAction, { type: 'SET_PLAYERS' }>
 type AddPlayerAction = Extract<PlayAction, { type: 'ADD_PLAYER' }>
 type UpdatePlayerAction = Extract<PlayAction, { type: 'UPDATE_PLAYER' }>
 type DeletePlayerAction = Extract<PlayAction, { type: 'DELETE_PLAYER' }>
@@ -199,6 +203,13 @@ function applySetShowPlayBar(
 	action: SetShowPlayBarAction,
 ): PlayState {
 	return { ...state, showPlayBar: action.show }
+}
+
+function applySetPlayers(
+	state: PlayState,
+	action: SetPlayersAction,
+): PlayState {
+	return { ...state, players: action.players }
 }
 
 function applyAddPlayer(
@@ -354,6 +365,8 @@ function playReducer(state: PlayState, action: PlayAction): PlayState {
 			return applyTogglePlayBar(state)
 		case 'SET_SHOW_PLAY_BAR':
 			return applySetShowPlayBar(state, action)
+		case 'SET_PLAYERS':
+			return applySetPlayers(state, action)
 		case 'ADD_PLAYER':
 			return applyAddPlayer(state, action)
 		case 'UPDATE_PLAYER':
@@ -385,65 +398,135 @@ function playReducer(state: PlayState, action: PlayAction): PlayState {
 * Provides play context and actions to descendants.
 */
 export function PlayProvider({ children }: { children: ReactNode }) {
-	const [state, dispatch] = useReducer(playReducer, initialState)
+	const { theme } = useTheme()
 
-	const value: PlayContextType = {
-		state,
-		dispatch,
-		setTool(tool: Tool) {
-			dispatch({ type: 'SET_TOOL', tool })
-		},
-		setDrawingState(updates: Partial<DrawingState>) {
-			dispatch({ type: 'SET_DRAWING_STATE', drawingState: updates })
-		},
-		setFormation(formation: string) {
-			dispatch({ type: 'SET_FORMATION', formation })
-		},
-		setPlay(play: string) {
-			dispatch({ type: 'SET_PLAY', play })
-		},
-		setDefensiveFormation(formation: string) {
-			dispatch({ type: 'SET_DEFENSIVE_FORMATION', defensiveFormation: formation })
-		},
-		addPlayCard() {
-			const newCard: PlayCard = {
-				id: Date.now().toString(),
-				name: `Play ${state.playCards.length + 1}`,
-				thumbnail: '',
-			}
-			dispatch({ type: 'ADD_PLAY_CARD', card: newCard })
-		},
-		deletePlayCard(id: string) {
-			dispatch({ type: 'DELETE_PLAY_CARD', id })
-		},
-		setHashAlignment(alignment: HashAlignment) {
-			dispatch({ type: 'SET_HASH_ALIGNMENT', alignment })
-		},
-		setShowPlayBar(show: boolean) {
-			dispatch({ type: 'SET_SHOW_PLAY_BAR', show })
-		},
-		setDrawings(drawings: Drawing[]) {
-			dispatch({ type: 'SET_DRAWINGS', drawings })
-		},
-		addDrawing(drawing: Drawing) {
-			dispatch({ type: 'ADD_DRAWING', drawing })
-		},
-		deleteDrawing(id: string) {
-			dispatch({ type: 'DELETE_DRAWING', id })
-		},
-		updateDrawing(id: string, updates: Partial<Drawing>) {
-			dispatch({ type: 'UPDATE_DRAWING', id, updates })
-		},
-		applyFormation(formation: Formation) {
-			dispatch({ type: 'APPLY_FORMATION', formation })
-		},
-		applyConcept(concept: BaseConcept) {
-			dispatch({ type: 'APPLY_CONCEPT', concept })
-		},
-		applyConceptGroup(conceptGroup: ConceptGroup) {
-			dispatch({ type: 'APPLY_CONCEPT_GROUP', conceptGroup })
+	// Create theme-aware initial state
+	const themeAwareInitialState: PlayState = {
+		...initialState,
+		drawingState: {
+			...initialState.drawingState,
+			// Use white in dark mode, black in light mode
+			color: theme === 'dark' ? '#FFFFFF' : '#000000',
 		},
 	}
+
+	const [state, dispatch] = useReducer(playReducer, themeAwareInitialState)
+
+	// Memoize all convenience methods to prevent infinite loops in components
+	const setTool = useCallback((tool: Tool) => {
+		dispatch({ type: 'SET_TOOL', tool })
+	}, [])
+
+	const setDrawingState = useCallback((updates: Partial<DrawingState>) => {
+		dispatch({ type: 'SET_DRAWING_STATE', drawingState: updates })
+	}, [])
+
+	const setFormation = useCallback((formation: string) => {
+		dispatch({ type: 'SET_FORMATION', formation })
+	}, [])
+
+	const setPlay = useCallback((play: string) => {
+		dispatch({ type: 'SET_PLAY', play })
+	}, [])
+
+	const setDefensiveFormation = useCallback((formation: string) => {
+		dispatch({ type: 'SET_DEFENSIVE_FORMATION', defensiveFormation: formation })
+	}, [])
+
+	const addPlayCard = useCallback(() => {
+		const newCard: PlayCard = {
+			id: Date.now().toString(),
+			name: `Play ${state.playCards.length + 1}`,
+			thumbnail: '',
+		}
+		dispatch({ type: 'ADD_PLAY_CARD', card: newCard })
+	}, [state.playCards.length])
+
+	const deletePlayCard = useCallback((id: string) => {
+		dispatch({ type: 'DELETE_PLAY_CARD', id })
+	}, [])
+
+	const setHashAlignment = useCallback((alignment: HashAlignment) => {
+		dispatch({ type: 'SET_HASH_ALIGNMENT', alignment })
+	}, [])
+
+	const setShowPlayBar = useCallback((show: boolean) => {
+		dispatch({ type: 'SET_SHOW_PLAY_BAR', show })
+	}, [])
+
+	const setPlayers = useCallback((players: Player[]) => {
+		dispatch({ type: 'SET_PLAYERS', players })
+	}, [])
+
+	const setDrawings = useCallback((drawings: Drawing[]) => {
+		dispatch({ type: 'SET_DRAWINGS', drawings })
+	}, [])
+
+	const addDrawing = useCallback((drawing: Drawing) => {
+		dispatch({ type: 'ADD_DRAWING', drawing })
+	}, [])
+
+	const deleteDrawing = useCallback((id: string) => {
+		dispatch({ type: 'DELETE_DRAWING', id })
+	}, [])
+
+	const updateDrawing = useCallback((id: string, updates: Partial<Drawing>) => {
+		dispatch({ type: 'UPDATE_DRAWING', id, updates })
+	}, [])
+
+	const applyFormation = useCallback((formation: Formation) => {
+		dispatch({ type: 'APPLY_FORMATION', formation })
+	}, [])
+
+	const applyConcept = useCallback((concept: BaseConcept) => {
+		dispatch({ type: 'APPLY_CONCEPT', concept })
+	}, [])
+
+	const applyConceptGroup = useCallback((conceptGroup: ConceptGroup) => {
+		dispatch({ type: 'APPLY_CONCEPT_GROUP', conceptGroup })
+	}, [])
+
+	// Memoize the context value to prevent unnecessary re-renders
+	const value = useMemo<PlayContextType>(() => ({
+		state,
+		dispatch,
+		setTool,
+		setDrawingState,
+		setFormation,
+		setPlay,
+		setDefensiveFormation,
+		addPlayCard,
+		deletePlayCard,
+		setHashAlignment,
+		setShowPlayBar,
+		setPlayers,
+		setDrawings,
+		addDrawing,
+		deleteDrawing,
+		updateDrawing,
+		applyFormation,
+		applyConcept,
+		applyConceptGroup,
+	}), [
+		state,
+		setTool,
+		setDrawingState,
+		setFormation,
+		setPlay,
+		setDefensiveFormation,
+		addPlayCard,
+		deletePlayCard,
+		setHashAlignment,
+		setShowPlayBar,
+		setPlayers,
+		setDrawings,
+		addDrawing,
+		deleteDrawing,
+		updateDrawing,
+		applyFormation,
+		applyConcept,
+		applyConceptGroup,
+	])
 
 	return <PlayContext.Provider value={value}>{children}</PlayContext.Provider>
 }

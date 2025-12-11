@@ -3,6 +3,32 @@ import { useFieldCoordinates, usePlayerDrag } from '@/hooks'
 import { PLAYER_RADIUS_FEET } from '@/constants'
 import { eventBus } from '@/services'
 
+/**
+ * Calculate the luminance of a color to determine if text should be black or white
+ * Uses WCAG relative luminance formula for accessibility
+ */
+function getTextColorForBackground(hexColor: string): string {
+	// Remove # if present
+	const hex = hexColor.replace('#', '')
+
+	// Parse RGB values
+	const r = parseInt(hex.substring(0, 2), 16) / 255
+	const g = parseInt(hex.substring(2, 4), 16) / 255
+	const b = parseInt(hex.substring(4, 6), 16) / 255
+
+	// Apply gamma correction (WCAG formula)
+	const rsRGB = r <= 0.03928 ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4)
+	const gsRGB = g <= 0.03928 ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4)
+	const bsRGB = b <= 0.03928 ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4)
+
+	// Calculate relative luminance
+	const luminance = 0.2126 * rsRGB + 0.7152 * gsRGB + 0.0722 * bsRGB
+
+	// If luminance > 0.5, background is light, use black text
+	// Otherwise use white text
+	return luminance > 0.5 ? 'black' : 'white'
+}
+
 interface PlayerProps {
   id: string
   initialX: number // Feet coordinates
@@ -142,6 +168,9 @@ export function Player({
     return 'grab'
   }
 
+  // Calculate text color based on background color for visibility
+  const textColor = getTextColorForBackground(fillColor)
+
   return (
     <div
       ref={playerRef}
@@ -178,7 +207,7 @@ export function Player({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          color: 'white',
+          color: textColor,
           fontWeight: 'bold',
           fontSize: `${radiusInPixels}px`,
           fontFamily: 'SF Compact Rounded, system-ui, sans-serif',

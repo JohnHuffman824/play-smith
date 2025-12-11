@@ -14,6 +14,7 @@ import {
 	Undo2,
 	Save,
 	Check,
+	X,
 	UserPlus,
 	Loader2,
 	RotateCcw,
@@ -75,6 +76,7 @@ export function Toolbar({
 		useState(false)
 	const [isSaving, setIsSaving] = useState(false)
 	const [showSuccess, setShowSuccess] = useState(false)
+	const [showError, setShowError] = useState(false)
 	const [columnCount, setColumnCount] = useState(1)
 	const [rowsPerColumn, setRowsPerColumn] = useState(14)
 	const drawDialogRef = useRef<HTMLDivElement>(null)
@@ -319,10 +321,19 @@ export function Toolbar({
 
 	// Listen for save completion
 	useEffect(() => {
-		const handleSaveComplete = () => {
+		const handleSaveComplete = (result: { success: boolean; error?: string }) => {
 			setIsSaving(false)
-			setShowSuccess(true)
-			setTimeout(() => setShowSuccess(false), 2000)
+
+			if (result.success) {
+				setShowSuccess(true)
+				setTimeout(() => setShowSuccess(false), 2000)
+			} else {
+				setShowError(true)
+				setTimeout(() => setShowError(false), 2000)
+				if (result.error) {
+					console.error('Save failed:', result.error)
+				}
+			}
 		}
 
 		eventBus.on('canvas:save-complete', handleSaveComplete)
@@ -572,17 +583,31 @@ export function Toolbar({
 					<button
 						onClick={handleSavePlay}
 						disabled={isSaving}
-						className={`${coloredButtonClass(
-							'bg-green-50 text-green-600 hover:bg-green-100',
-							'bg-green-900 text-green-400 hover:bg-green-800',
-						)} transition-transform duration-200 ease-out ${
-							showSuccess ? 'scale-[1.2]' : 'scale-100'
+						className={`${
+							showSuccess
+								? coloredButtonClass(
+										'bg-green-50 text-green-600 hover:bg-green-100',
+										'bg-green-900 text-green-400 hover:bg-green-800',
+								  )
+								: showError
+								? coloredButtonClass(
+										'bg-red-50 text-red-600 hover:bg-red-100',
+										'bg-red-900 text-red-400 hover:bg-red-800',
+								  )
+								: coloredButtonClass(
+										'bg-green-50 text-green-600 hover:bg-green-100',
+										'bg-green-900 text-green-400 hover:bg-green-800',
+								  )
+						} transition-transform duration-200 ease-out ${
+							showSuccess || showError ? 'scale-[1.2]' : 'scale-100'
 						} ${isSaving ? 'opacity-70 cursor-not-allowed' : ''}`}
 					>
 						{isSaving ? (
 							<Loader2 size={22} className="animate-spin" />
 						) : showSuccess ? (
 							<Check size={22} />
+						) : showError ? (
+							<X size={22} />
 						) : (
 							<Save size={22} />
 						)}

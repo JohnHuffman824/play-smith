@@ -1,10 +1,15 @@
 import { describe, test, expect, mock, beforeEach, afterEach } from 'bun:test'
-import { render, screen, waitFor } from '@testing-library/react'
+import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { ProtectedRoute } from './ProtectedRoute'
 import { AuthProvider } from '../contexts/AuthContext'
 
 describe('ProtectedRoute', () => {
+
+	afterEach(() => {
+		cleanup()
+	})
+
 	const originalFetch = global.fetch
 
 	beforeEach(() => {

@@ -439,4 +439,95 @@ describe('Plays API', () => {
 		expect(savedPlayers).toEqual(customPlayers)
 		expect(savedDrawings).toEqual(customDrawings)
 	})
+
+	test('PUT /api/plays/:playId returns JSON error on database failure', async () => {
+		// Use a non-existent play ID to trigger database error
+		const nonExistentPlayId = 999999
+
+		const response = await fetch(`${baseUrl}/api/plays/${nonExistentPlayId}`, {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+				Cookie: `session_token=${fixture.sessionToken}`
+			},
+			body: JSON.stringify({
+				name: 'Updated Name'
+			})
+		})
+
+		// Should return JSON error, not HTML
+		expect(response.status).toBe(404)
+		expect(response.headers.get('content-type')).toContain('application/json')
+
+		const data = await response.json()
+		expect(data.error).toBeDefined()
+		expect(data.error).toBeTypeOf('string')
+	})
+
+	test('PUT /api/plays/:playId returns JSON error on malformed JSON', async () => {
+		const [play] = await db`
+			INSERT INTO plays (playbook_id, name, created_by, display_order)
+			VALUES (${fixture.playbookId}, 'Test Play', ${fixture.userId}, 0)
+			RETURNING id
+		`
+
+		// Send malformed JSON
+		const response = await fetch(`${baseUrl}/api/plays/${play.id}`, {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+				Cookie: `session_token=${fixture.sessionToken}`
+			},
+			body: '{invalid json'
+		})
+
+		// Should return 500 with JSON error, not HTML
+		expect(response.status).toBe(500)
+		expect(response.headers.get('content-type')).toContain('application/json')
+
+		const data = await response.json()
+		expect(data.error).toBeDefined()
+		expect(data.error).toBeTypeOf('string')
+	})
+
+	test('PUT then GET /api/plays/:playId persists and returns custom players', async () => {
+		// Create a play
+		const [play] = await db`
+			INSERT INTO plays (playbook_id, name, created_by, display_order)
+			VALUES (${fixture.playbookId}, 'Test Play', ${fixture.userId}, 0)
+			RETURNING id
+		`
+
+		const customPlayers = [
+			{ id: 'player-1', x: 50, y: 50, label: 'QB', color: '#ff0000' },
+			{ id: 'player-2', x: 100, y: 100, label: 'WR', color: '#00ff00' }
+		]
+
+		// Save players via PUT
+		const putResponse = await fetch(`${baseUrl}/api/plays/${play.id}`, {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json', Cookie: `session_token=${fixture.sessionToken}` },
+			body: JSON.stringify({ custom_players: customPlayers })
+		})
+
+		expect(putResponse.status).toBe(200)
+
+		// Reload via GET
+		const getResponse = await fetch(`${baseUrl}/api/plays/${play.id}`, {
+			headers: { Cookie: `session_token=${fixture.sessionToken}` }
+		})
+
+		expect(getResponse.status).toBe(200)
+		const data = await getResponse.json()
+
+		// Verify players are returned
+		expect(data.play.players).toBeDefined()
+		expect(data.play.players.length).toBe(2)
+		expect(data.play.players).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({ id: 'player-1', x: 50, y: 50, label: 'QB', color: '#ff0000' }),
+				expect.objectContaining({ id: 'player-2', x: 100, y: 100, label: 'WR', color: '#00ff00' })
+			])
+		)
+	})
 })

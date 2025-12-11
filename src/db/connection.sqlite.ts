@@ -268,9 +268,14 @@ export const db = Object.assign(
 			// Replace PostgreSQL json_agg with SQLite json_group_array
 			.replace(/json_agg\(/gi, "json_group_array(")
 			// Replace PostgreSQL type casting (::type) with SQLite CAST
+		.replace(/::float\b/gi, " * 1.0") // Convert to float by multiplying by 1.0
 			.replace(/\)::int\b/gi, ")") // COALESCE returns int already, no need to cast
 			.replace(/\)::bigint\b/gi, ")")
 			.replace(/\)::text\b/gi, ")")
+		// Replace PostgreSQL EXTRACT(EPOCH FROM ...) with SQLite equivalent
+		.replace(/EXTRACT\s*\(\s*EPOCH\s+FROM\s+\(\s*datetime\('now'\)\s*-\s*COALESCE\(([^)]+)\)\s*\)\s*\)/gi, "(julianday(datetime('now')) - julianday(COALESCE($1))) * 86400")
+		// Replace PostgreSQL ILIKE with SQLite LIKE
+		.replace(/\bILIKE\b/gi, "LIKE")
 			// Replace PostgreSQL ANY() with SQLite IN()
 			.replace(/=\s*ANY\s*\(/gi, "IN (")
 

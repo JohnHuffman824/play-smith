@@ -40,12 +40,14 @@ describe('App Integration', () => {
 		global.fetch = mockFetch as any
 
 		// Mock authenticated user by default
-		mockFetch.mockResolvedValue({
-			ok: true,
-			json: async () => ({
-				user: { id: 1, email: 'test@example.com', name: 'Test User' },
-			}),
-		} as Response)
+		mockFetch.mockResolvedValue(
+			new Response(JSON.stringify({
+				user: { id: 1, email: 'test@example.com', name: 'Test User' }
+			}), {
+				status: 200,
+				headers: { 'Content-Type': 'application/json' }
+			})
+		)
 	})
 
 	afterEach(() => {

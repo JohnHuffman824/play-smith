@@ -177,7 +177,8 @@ function convertToControlPoints(
 		return { points, segments: pathSegments }
 	}
 
-	// Create control points
+	// Create control points with sequential IDs
+	// Each point is created once and shared between consecutive segments
 	for (let i = 0; i < segments.length; i++) {
 		const segment = segments[i]
 		const isFirst = i === 0
@@ -185,7 +186,7 @@ function convertToControlPoints(
 
 		// Add start point (for first segment only)
 		if (isFirst) {
-			const startId = `p-${i * 2}`
+			const startId = `p-${i}`
 			points[startId] = {
 				id: startId,
 				x: segment.start.x,
@@ -194,8 +195,8 @@ function convertToControlPoints(
 			}
 		}
 
-		// Add end point
-		const endId = `p-${i * 2 + 1}`
+		// Add end point (always)
+		const endId = `p-${i + 1}`
 		points[endId] = {
 			id: endId,
 			x: segment.end.x,
@@ -204,11 +205,12 @@ function convertToControlPoints(
 		}
 	}
 
-	// Create line segments
+	// Create line segments that reference consecutive points
+	// This ensures each segment shares its endpoint with the next segment's start point
 	for (let i = 0; i < segments.length; i++) {
 		pathSegments.push({
 			type: 'line',
-			pointIds: [`p-${i * 2}`, `p-${i * 2 + 1}`],
+			pointIds: [`p-${i}`, `p-${i + 1}`],
 		})
 	}
 

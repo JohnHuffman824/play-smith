@@ -1,23 +1,12 @@
-import { describe, test, expect, mock } from 'bun:test'
-import { render, screen } from '@testing-library/react'
+import { describe, test, expect, mock, beforeAll, afterAll, afterEach } from 'bun:test'
+import { cleanup, render, screen } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { PlayEditorPage } from '../../../src/pages/PlayEditorPage'
 import { ThemeProvider } from '../../../src/contexts/ThemeContext'
 import { AuthProvider } from '../../../src/contexts/AuthContext'
 import { QueryProvider } from '../../../src/providers/QueryProvider'
 
-// Mock fetch for auth
-global.fetch = async (url: string) => {
-	if (url.includes('/api/auth/me')) {
-		return {
-			ok: true,
-			json: async () => ({
-				user: { id: 1, email: 'test@example.com', name: 'Test User' }
-			})
-		} as Response
-	}
-	return { ok: false, status: 404 } as Response
-}
+const originalFetch = global.fetch
 
 function renderPlayEditor(route: string) {
 	return render(
@@ -41,6 +30,30 @@ function renderPlayEditor(route: string) {
 }
 
 describe('PlayEditorPage - URL Params', () => {
+
+	afterEach(() => {
+		cleanup()
+	})
+
+	beforeAll(() => {
+		// Mock fetch for auth
+		global.fetch = async (url: string) => {
+			if (url.includes('/api/auth/me')) {
+				return new Response(JSON.stringify({
+					user: { id: 1, email: 'test@example.com', name: 'Test User' }
+				}), {
+					status: 200,
+					headers: { 'Content-Type': 'application/json' }
+				})
+			}
+			return new Response(null, { status: 404 })
+		}
+	})
+
+	afterAll(() => {
+		global.fetch = originalFetch
+	})
+
 	test('should extract playId from URL params', () => {
 		renderPlayEditor('/playbooks/1/play/42')
 

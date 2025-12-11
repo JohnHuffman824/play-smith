@@ -48,6 +48,7 @@ interface SVGCanvasProps {
 	isOverCanvas?: boolean
 	cursorPosition?: { x: number; y: number } | null
 	onSelectionChange?: (id: string | null) => void
+	onDrawingHoverChange?: (isHovered: boolean) => void
 }
 
 /**
@@ -72,6 +73,7 @@ export function SVGCanvas({
 	onLinkDrawingToPlayer,
 	onMovePlayer,
 	onSelectionChange,
+	onDrawingHoverChange,
 }: SVGCanvasProps) {
 	const [selectedDrawingId, setSelectedDrawingId] = useState<string | null>(
 		null,
@@ -341,6 +343,7 @@ export function SVGCanvas({
 					activeTool={activeTool}
 					onDelete={onDeleteDrawing}
 					onDragStart={handleDrawingDragStart}
+					onHover={onDrawingHoverChange}
 				/>
 			))}
 
@@ -415,6 +418,7 @@ export function SVGCanvas({
 				position={editingDrawing.position}
 				onUpdate={handleDrawingStyleUpdate}
 				onClose={() => setEditingDrawing(null)}
+				coordSystem={coordSystem}
 			/>
 		)}
 		</div>

@@ -1,5 +1,5 @@
-import { describe, test, expect, beforeAll, afterAll } from 'bun:test'
-import { render, screen, waitFor } from '@testing-library/react'
+import { describe, test, expect, beforeAll, afterAll, afterEach } from 'bun:test'
+import { render, screen, waitFor, cleanup } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ThemeProvider } from '../contexts/ThemeContext'
@@ -15,78 +15,83 @@ describe('PlayEditorPage', () => {
 		global.fetch = async (url: string) => {
 			// Check more specific routes first
 			if (url.includes('/formations')) {
-				return {
-					ok: true,
-					json: async () => ({
-						formations: []
-					})
-				} as Response
+				return new Response(JSON.stringify({
+					formations: []
+				}), {
+					status: 200,
+					headers: { 'Content-Type': 'application/json' }
+				})
 			}
 			if (url.includes('/roles')) {
-				return {
-					ok: true,
-					json: async () => ({
-						roles: []
-					})
-				} as Response
+				return new Response(JSON.stringify({
+					roles: []
+				}), {
+					status: 200,
+					headers: { 'Content-Type': 'application/json' }
+				})
 			}
 			if (url.includes('/api/auth/me')) {
-				return {
-					ok: true,
-					json: async () => ({
-						user: { id: 1, email: 'test@example.com', name: 'Test User' }
-					})
-				} as Response
+				return new Response(JSON.stringify({
+					user: { id: 1, email: 'test@example.com', name: 'Test User' }
+				}), {
+					status: 200,
+					headers: { 'Content-Type': 'application/json' }
+				})
 			}
 			if (url.includes('/api/teams')) {
-				return {
-					ok: true,
-					json: async () => ({
-						teams: [{ id: 1, name: 'Test Team' }]
-					})
-				} as Response
+				return new Response(JSON.stringify({
+					teams: [{ id: 1, name: 'Test Team' }]
+				}), {
+					status: 200,
+					headers: { 'Content-Type': 'application/json' }
+				})
 			}
 			if (url.includes('/api/plays/')) {
-				return {
-					ok: true,
-					json: async () => ({
-						play: {
-							id: 1,
-							name: 'Test Play',
-							teamId: 1,
-							playbook_id: 1,
-							players: [],
-							drawings: []
-						}
-					})
-				} as Response
+				return new Response(JSON.stringify({
+					play: {
+						id: 1,
+						name: 'Test Play',
+						teamId: 1,
+						playbook_id: 1,
+						players: [],
+						drawings: []
+					}
+				}), {
+					status: 200,
+					headers: { 'Content-Type': 'application/json' }
+				})
 			}
 			if (url.includes('/preset-routes')) {
-				return {
-					ok: true,
-					json: async () => ({
-						routes: []
-					})
-				} as Response
+				return new Response(JSON.stringify({
+					routes: []
+				}), {
+					status: 200,
+					headers: { 'Content-Type': 'application/json' }
+				})
 			}
 			if (url.includes('/concepts')) {
-				return {
-					ok: true,
-					json: async () => ({
-						concepts: []
-					})
-				} as Response
+				return new Response(JSON.stringify({
+					concepts: []
+				}), {
+					status: 200,
+					headers: { 'Content-Type': 'application/json' }
+				})
 			}
 			if (url.includes('/concept-groups')) {
-				return {
-					ok: true,
-					json: async () => ({
-						groups: []
-					})
-				} as Response
+				return new Response(JSON.stringify({
+					groups: []
+				}), {
+					status: 200,
+					headers: { 'Content-Type': 'application/json' }
+				})
 			}
-			return { ok: false, status: 404 } as Response
+			return new Response(null, { status: 404 })
 		}
+	})
+
+	afterEach(() => {
+		// Clean up React components after each test
+		cleanup()
 	})
 
 	afterAll(() => {

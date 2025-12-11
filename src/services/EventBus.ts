@@ -28,6 +28,7 @@ export type EventMap = {
 	'canvas:clear': void
 	'canvas:undo': void
 	'canvas:save': void
+	'canvas:save-complete': { success: boolean; error?: string }
 	
 	// Player operations
 	'player:add': { x?: number; y?: number }

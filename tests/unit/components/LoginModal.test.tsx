@@ -1,17 +1,18 @@
-import { describe, test, expect, mock, beforeEach, afterEach } from 'bun:test'
+import { describe, test, expect, mock, beforeAll, beforeEach, afterAll, afterEach } from 'bun:test'
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react'
 import { LoginModal } from '../../../src/components/auth/LoginModal'
 import { AuthProvider } from '../../../src/contexts/AuthContext'
 
-// Mock fetch
+const originalFetch = global.fetch
 const mockFetch = mock()
-global.fetch = mockFetch as any
 
 function renderLoginModal() {
-	mockFetch.mockResolvedValue({
-		ok: true,
-		json: async () => ({ user: null }),
-	} as Response)
+	mockFetch.mockResolvedValue(
+		new Response(JSON.stringify({ user: null }), {
+			status: 200,
+			headers: { 'Content-Type': 'application/json' }
+		})
+	)
 
 	return render(
 		<AuthProvider>
@@ -21,12 +22,20 @@ function renderLoginModal() {
 }
 
 describe('LoginModal', () => {
+	beforeAll(() => {
+		global.fetch = mockFetch as any
+	})
+
 	beforeEach(() => {
 		mockFetch.mockReset()
 	})
 
 	afterEach(() => {
 		cleanup()
+	})
+
+	afterAll(() => {
+		global.fetch = originalFetch
 	})
 	test('renders login form by default', () => {
 		renderLoginModal()
