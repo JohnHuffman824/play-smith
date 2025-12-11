@@ -89,7 +89,7 @@ export class BaseConceptRepository {
 				${data.play_direction ?? 'na'},
 				${data.created_by}
 			)
-			RETURNING *
+			RETURNING id, team_id, playbook_id, name, description, targeting_mode, ball_position, play_direction, created_by, created_at, updated_at, usage_count, last_used_at
 		`
 
 		if (!concept) {
@@ -111,7 +111,7 @@ export class BaseConceptRepository {
 						${JSON.stringify(assignment.drawing_data)},
 						${assignment.order_index ?? index}
 					)
-					RETURNING *
+					RETURNING id, concept_id, role, selector_type, selector_params, drawing_data, order_index, created_at
 				`.then(rows => rows[0])
 			)
 		)
@@ -124,7 +124,9 @@ export class BaseConceptRepository {
 
 	async findById(id: number): Promise<BaseConceptWithAssignments | null> {
 		const [concept] = await db<BaseConcept[]>`
-			SELECT * FROM base_concepts WHERE id = ${id}
+			SELECT id, team_id, playbook_id, name, description, targeting_mode, ball_position, play_direction, created_by, created_at, updated_at, usage_count, last_used_at
+			FROM base_concepts
+			WHERE id = ${id}
 		`
 
 		if (!concept) {
@@ -132,7 +134,8 @@ export class BaseConceptRepository {
 		}
 
 		const assignments = await db<ConceptPlayerAssignment[]>`
-			SELECT * FROM concept_player_assignments
+			SELECT id, concept_id, role, selector_type, selector_params, drawing_data, order_index, created_at
+			FROM concept_player_assignments
 			WHERE concept_id = ${id}
 			ORDER BY order_index
 		`
@@ -149,7 +152,8 @@ export class BaseConceptRepository {
 	): Promise<BaseConcept[]> {
 		if (playbookId) {
 			return await db<BaseConcept[]>`
-				SELECT * FROM base_concepts
+				SELECT id, team_id, playbook_id, name, description, targeting_mode, ball_position, play_direction, created_by, created_at, updated_at, usage_count, last_used_at
+				FROM base_concepts
 				WHERE (team_id = ${teamId} AND playbook_id IS NULL)
 					OR (team_id = ${teamId} AND playbook_id = ${playbookId})
 				ORDER BY usage_count DESC, last_used_at DESC NULLS LAST
@@ -157,7 +161,8 @@ export class BaseConceptRepository {
 		}
 
 		return await db<BaseConcept[]>`
-			SELECT * FROM base_concepts
+			SELECT id, team_id, playbook_id, name, description, targeting_mode, ball_position, play_direction, created_by, created_at, updated_at, usage_count, last_used_at
+			FROM base_concepts
 			WHERE team_id = ${teamId} AND playbook_id IS NULL
 			ORDER BY usage_count DESC, last_used_at DESC NULLS LAST
 		`
@@ -174,7 +179,7 @@ export class BaseConceptRepository {
 		if (playbookId) {
 			return await db<Array<BaseConcept & { frecency_score: number }>>`
 				SELECT
-					*,
+					id, team_id, playbook_id, name, description, targeting_mode, ball_position, play_direction, created_by, created_at, updated_at, usage_count, last_used_at,
 					(usage_count::float / (EXTRACT(EPOCH FROM (NOW() - COALESCE(last_used_at, created_at))) / 86400 + 1)) as frecency_score
 				FROM base_concepts
 				WHERE (team_id = ${teamId} OR team_id IS NULL)
@@ -187,7 +192,7 @@ export class BaseConceptRepository {
 
 		return await db<Array<BaseConcept & { frecency_score: number }>>`
 			SELECT
-				*,
+				id, team_id, playbook_id, name, description, targeting_mode, ball_position, play_direction, created_by, created_at, updated_at, usage_count, last_used_at,
 				(usage_count::float / (EXTRACT(EPOCH FROM (NOW() - COALESCE(last_used_at, created_at))) / 86400 + 1)) as frecency_score
 			FROM base_concepts
 			WHERE (team_id = ${teamId} OR team_id IS NULL)
@@ -224,7 +229,7 @@ export class BaseConceptRepository {
 					play_direction = COALESCE(${data.play_direction ?? null}, play_direction),
 					updated_at = CURRENT_TIMESTAMP
 				WHERE id = ${id}
-				RETURNING *
+				RETURNING id, team_id, playbook_id, name, description, targeting_mode, ball_position, play_direction, created_by, created_at, updated_at, usage_count, last_used_at
 			`
 
 			if (!concept) {
