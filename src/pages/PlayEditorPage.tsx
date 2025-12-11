@@ -126,8 +126,6 @@ function PlayEditorContent() {
 						error: errorData.error || 'Failed to save play'
 					})
 				} else {
-					console.log('Play saved successfully')
-
 					// Save tags
 					await fetch(`/api/plays/${playId}/tags`, {
 						method: 'PUT',
@@ -189,8 +187,6 @@ function PlayEditorContent() {
 					const tagsData = await tagsRes.json()
 					setSelectedTags(tagsData.tags || [])
 				}
-
-				console.log('Play loaded successfully')
 			} catch (error) {
 				console.error('Load error:', error)
 			}
