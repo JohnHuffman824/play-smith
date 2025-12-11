@@ -34,7 +34,7 @@ interface SVGCanvasProps {
 	onDeleteDrawing?: (id: string) => void
 	eraseSize?: number
 	snapThreshold: number
-	selectedDrawingIds: string[]
+	selectedDrawingIds?: string[]
 	onLinkDrawingToPlayer?: (
 		drawingId: string,
 		pointId: string,
@@ -68,7 +68,7 @@ export function SVGCanvas({
 	onDeleteDrawing,
 	eraseSize = 0,
 	snapThreshold,
-	selectedDrawingIds,
+	selectedDrawingIds = [],
 	onLinkDrawingToPlayer,
 	onMovePlayer,
 	onSelectionChange,
@@ -337,6 +337,7 @@ export function SVGCanvas({
 			{activeTool === 'select' && isOverCanvas && (
 				<MultiDrawingControlPointOverlay
 					drawings={drawings}
+					selectedDrawingIds={selectedDrawingIds}
 					players={players}
 					coordSystem={coordSystem}
 					snapThreshold={snapThreshold}
@@ -349,11 +350,10 @@ export function SVGCanvas({
 			)}
 
 			{/* Show draggable nodes for selected drawing when cursor is over canvas (non-SELECT tools) */}
-			{activeTool !== 'select' && selectedDrawingId && isOverCanvas && (
+			{activeTool !== 'select' && selectedDrawingIds.length > 0 && (
 				<ControlPointOverlay
 					drawing={
-						drawings.find((item) => item.id == selectedDrawingId) ??
-							null
+						drawings.find((item) => selectedDrawingIds.includes(item.id)) ?? null
 					}
 					drawings={drawings}
 					players={players}
