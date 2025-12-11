@@ -4,7 +4,8 @@ import type { RoleTerminology } from '../types'
 export class RoleTerminologyRepository {
 	async getTeamRoles(teamId: number): Promise<RoleTerminology[]> {
 		return await db<RoleTerminology[]>`
-			SELECT * FROM role_terminology
+			SELECT id, team_id, standard_role, custom_name, position_type, created_at, updated_at
+			FROM role_terminology
 			WHERE team_id = ${teamId}
 			ORDER BY standard_role
 		`
@@ -30,7 +31,7 @@ export class RoleTerminologyRepository {
 			DO UPDATE SET
 				custom_name = EXCLUDED.custom_name,
 				updated_at = CURRENT_TIMESTAMP
-			RETURNING *
+			RETURNING id, team_id, standard_role, custom_name, position_type, created_at, updated_at
 		`
 
 		if (!role) {
