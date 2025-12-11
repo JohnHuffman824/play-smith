@@ -40,22 +40,21 @@ export function PlayCardsSection({
 						className="flex gap-4 h-full overflow-x-auto overflow-y-hidden pb-2"
 						style={{ scrollbarGutter: 'stable' }}
 					>
-						{plays.map((play) => (
-							<div
-								key={play.id}
-								className="flex-shrink-0 w-64 [&>div]:!border-gray-200 dark:[&>div]:!border-gray-700"
-							>
-								<PlayCard
-									{...play}
-									selected={play.id === currentPlayId}
-									onSelect={() => {}}
-									onOpen={onOpenPlay}
-									onRename={() => {}}
-									onDelete={() => {}}
-									onDuplicate={() => {}}
-								/>
-							</div>
-						))}
+						{plays
+							.filter((play) => play.id !== currentPlayId)
+							.map((play) => (
+								<div key={play.id} className="flex-shrink-0">
+									<PlayCard
+										{...play}
+										selected={false}
+										onSelect={() => {}}
+										onOpen={onOpenPlay}
+										onRename={() => {}}
+										onDelete={() => {}}
+										onDuplicate={() => {}}
+									/>
+								</div>
+							))}
 						{/* Add Play button */}
 						<button
 							onClick={onAddPlay}
