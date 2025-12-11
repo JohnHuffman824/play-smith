@@ -53,7 +53,8 @@ async function handleResponse<T>(response: Response): Promise<T> {
 
 export async function fetchFormations(teamId: string): Promise<Formation[]> {
 	const response = await fetch(`/api/teams/${teamId}/formations`)
-	return handleResponse(response)
+	const data = await handleResponse<{ formations: Formation[] }>(response)
+	return data.formations
 }
 
 export async function createFormation(
@@ -113,7 +114,8 @@ export async function fetchConcepts(
 		? `/api/playbooks/${playbookId}/concepts`
 		: `/api/teams/${teamId}/concepts`
 	const response = await fetch(url)
-	return handleResponse(response)
+	const data = await handleResponse<{ concepts: BaseConcept[] }>(response)
+	return data.concepts
 }
 
 export async function createConcept(
@@ -172,7 +174,8 @@ export async function fetchConceptGroups(
 		? `/api/playbooks/${playbookId}/concept-groups`
 		: `/api/teams/${teamId}/concept-groups`
 	const response = await fetch(url)
-	return handleResponse(response)
+	const data = await handleResponse<{ groups: ConceptGroup[] }>(response)
+	return data.groups
 }
 
 export async function createConceptGroup(
@@ -223,12 +226,14 @@ export async function deleteConceptGroup(id: number): Promise<void> {
 
 export async function fetchPresetRoutes(): Promise<PresetRoute[]> {
 	const response = await fetch('/api/preset-routes')
-	return handleResponse(response)
+	const data = await handleResponse<{ routes: PresetRoute[] }>(response)
+	return data.routes
 }
 
 export async function fetchRoles(teamId: string): Promise<RoleTerminology[]> {
 	const response = await fetch(`/api/teams/${teamId}/roles`)
-	return handleResponse(response)
+	const data = await handleResponse<{ roles: RoleTerminology[] }>(response)
+	return data.roles
 }
 
 export async function updateRoles(

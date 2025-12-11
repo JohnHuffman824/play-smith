@@ -14,6 +14,7 @@ import {
 	Undo2,
 	Save,
 	Check,
+	UserPlus,
 } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import type { DrawingState, Tool } from '../../types/play.types'
@@ -314,27 +315,7 @@ export function Toolbar({
 							drawingState.tool == 'addPlayer',
 						)}
 					>
-						<svg
-							width='22'
-							height='22'
-							viewBox='0 0 24 24'
-							fill='none'
-							stroke='currentColor'
-							strokeWidth='2'
-							strokeLinecap='round'
-							strokeLinejoin='round'
-						>
-							{/* Head */}
-							<circle cx='12' cy='5' r='3' />
-							{/* Body */}
-							<line x1='12' y1='8' x2='12' y2='17' />
-							{/* Arms */}
-							<line x1='12' y1='11' x2='6' y2='14' />
-							<line x1='12' y1='11' x2='18' y2='14' />
-							{/* Legs */}
-							<line x1='12' y1='17' x2='7' y2='22' />
-							<line x1='12' y1='17' x2='17' y2='22' />
-						</svg>
+						<UserPlus size={22} />
 					</button>
 				</Tooltip>
 
@@ -469,8 +450,8 @@ export function Toolbar({
 					</button>
 				</Tooltip>
 
-				{/* Add Concept Tool */}
-				<Tooltip content='Add Concept (G)'>
+				{/* Create Concept Tool */}
+				<Tooltip content='Create Concept (G)'>
 					<button
 						onClick={() => {
 							handleToolChange('addComponent')

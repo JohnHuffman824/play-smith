@@ -227,14 +227,42 @@ function buildPath(
 			commands.push(`Q ${control.x} ${control.y} ${end.x} ${end.y}`)
 			endPoints.push(end)
 		} else if (segment.type == 'cubic') {
-			if (points.length < 3) continue
-			const c1 = toPixels(points[0]!, coordSystem)
-			const c2 = toPixels(points[1]!, coordSystem)
-			const end = toPixels(points[2]!, coordSystem)
-			commands.push(
-				`C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${end.x} ${end.y}`,
-			)
-			endPoints.push(end)
+			// Handle both NEW and OLD cubic formats
+			if (segment.pointIds.length === 2) {
+				// NEW FORMAT: pointIds = [fromId, toId], handles stored in nodes
+				const fromPoint = drawing.points[segment.pointIds[0]]
+				const toPoint = drawing.points[segment.pointIds[1]]
+				if (!fromPoint || !toPoint) continue
+
+				// Calculate absolute control point positions from relative handles
+				const cp1: Coordinate = {
+					x: fromPoint.x + (fromPoint.handleOut?.x ?? 0),
+					y: fromPoint.y + (fromPoint.handleOut?.y ?? 0),
+				}
+				const cp2: Coordinate = {
+					x: toPoint.x + (toPoint.handleIn?.x ?? 0),
+					y: toPoint.y + (toPoint.handleIn?.y ?? 0),
+				}
+
+				const c1 = toPixels(cp1, coordSystem)
+				const c2 = toPixels(cp2, coordSystem)
+				const end = toPixels(toPoint, coordSystem)
+
+				commands.push(
+					`C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${end.x} ${end.y}`,
+				)
+				endPoints.push(end)
+			} else {
+				// OLD FORMAT: pointIds = [cp1Id, cp2Id, endId] (backward compatibility)
+				if (points.length < 3) continue
+				const c1 = toPixels(points[0]!, coordSystem)
+				const c2 = toPixels(points[1]!, coordSystem)
+				const end = toPixels(points[2]!, coordSystem)
+				commands.push(
+					`C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${end.x} ${end.y}`,
+				)
+				endPoints.push(end)
+			}
 		}
 	}
 

@@ -11,6 +11,9 @@ import type { Coordinate } from '../../types/field.types'
 import { mergeDrawings } from '../../utils/drawing.utils'
 import { smoothPathToCurves, convertToSharp, extractMainCoordinates } from '../../utils/curve.utils'
 
+// Constants
+const NODE_PROXIMITY_THRESHOLD = 20
+
 interface SVGCanvasProps {
 	width: number
 	height: number
@@ -325,6 +328,8 @@ export function SVGCanvas({
 					players={players}
 					coordSystem={coordSystem}
 					snapThreshold={snapThreshold}
+					cursorPosition={cursorPosition}
+					proximityThreshold={NODE_PROXIMITY_THRESHOLD}
 					onDragPoint={handleDragPoint}
 					onMerge={handleMerge}
 					onLinkToPlayer={handleLinkToPlayer}

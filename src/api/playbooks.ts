@@ -15,19 +15,12 @@ export const playbooksAPI = {
 
 		// Get user's teams
 		const teams = await teamRepo.getUserTeams(userId)
+		const teamIds = teams.map(t => t.id)
 
-		// Get playbooks for all teams
-		const allPlaybooks = []
-		for (const team of teams) {
-			const teamPlaybooks = await playbookRepo.getTeamPlaybooks(team.id)
-			allPlaybooks.push(...teamPlaybooks)
-		}
+		// Get all playbooks (team + personal) with play counts in single optimized query
+		const playbooks = await playbookRepo.getUserPlaybooksWithCounts(userId, teamIds)
 
-		// Get personal playbooks
-		const personalPlaybooks = await playbookRepo.getUserPersonalPlaybooks(userId)
-		allPlaybooks.push(...personalPlaybooks)
-
-		return Response.json({ playbooks: allPlaybooks })
+		return Response.json({ playbooks })
 	},
 
 	get: async (req: Request) => {

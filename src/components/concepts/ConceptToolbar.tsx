@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import {
 	MousePointer,
 	UserPlus,
@@ -7,12 +8,17 @@ import {
 	PaintBucket
 } from 'lucide-react'
 import type { Tool } from '../../types/play.types'
+import type { HashAlignment } from '../../types/play.types'
+import { HashDialog } from '../toolbar/dialogs/HashDialog'
+import { Tooltip } from '../toolbar/Tooltip'
 
 interface ConceptToolbarProps {
 	selectedTool: Tool
 	onToolChange: (tool: Tool) => void
 	color: string
 	onColorChange: (color: string) => void
+	hashAlignment: HashAlignment
+	onHashAlignmentChange: (alignment: HashAlignment) => void
 }
 
 const TOOLS = [
@@ -37,30 +43,34 @@ export function ConceptToolbar({
 	selectedTool,
 	onToolChange,
 	color,
-	onColorChange
+	onColorChange,
+	hashAlignment,
+	onHashAlignmentChange
 }: ConceptToolbarProps) {
+	const [showHashDialog, setShowHashDialog] = useState(false)
+
 	return (
-		<div className="flex flex-col gap-2 p-2 bg-gray-50 dark:bg-gray-900 border-r border-gray-300 dark:border-gray-600">
+		<div className="flex flex-col p-2 bg-gray-50 dark:bg-gray-900 border-r border-gray-300 dark:border-gray-600" style={{ gap: '12px' }}>
 			{/* Tools */}
 			{TOOLS.map(tool => {
 				const Icon = tool.icon
 				const isSelected = selectedTool === tool.id
 				return (
-					<button
-						key={tool.id}
-						onClick={() => onToolChange(tool.id)}
-						className={`
-							p-2 rounded transition-colors
-							${isSelected
-								? 'bg-blue-500 text-white'
-								: 'hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-							}
-						`}
-						title={tool.label}
-						aria-label={tool.label}
-					>
-						<Icon className="w-5 h-5" />
-					</button>
+					<Tooltip key={tool.id} content={tool.label}>
+						<button
+							onClick={() => onToolChange(tool.id)}
+							className={`
+								p-2 rounded-xl transition-all
+								${isSelected
+									? 'bg-blue-500 text-white shadow-lg scale-105'
+									: 'hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+								}
+							`}
+							aria-label={tool.label}
+						>
+							<Icon className="w-5 h-5" />
+						</button>
+					</Tooltip>
 				)
 			})}
 
@@ -68,19 +78,20 @@ export function ConceptToolbar({
 
 			{/* Color Selector */}
 			<div className="relative group">
-				<button
-					className="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-					title="Color"
-					aria-label="Color picker"
-				>
-					<div className="relative">
-						<Palette className="w-5 h-5 text-gray-700 dark:text-gray-300" />
-						<div
-							className="absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white dark:border-gray-900"
-							style={{ backgroundColor: color }}
-						/>
-					</div>
-				</button>
+				<Tooltip content="Color">
+					<button
+						className="p-2 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-all"
+						aria-label="Color picker"
+					>
+						<div className="relative">
+							<Palette className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+							<div
+								className="absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white dark:border-gray-900"
+								style={{ backgroundColor: color }}
+							/>
+						</div>
+					</button>
+				</Tooltip>
 
 				{/* Color Palette Dropdown */}
 				<div className="absolute left-full ml-2 top-0 hidden group-hover:block bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg p-2 z-50">
@@ -117,20 +128,62 @@ export function ConceptToolbar({
 			</div>
 
 			{/* Fill Tool */}
-			<button
-				onClick={() => onToolChange('fill')}
-				className={`
-					p-2 rounded transition-colors
-					${selectedTool === 'fill'
-						? 'bg-blue-500 text-white'
-						: 'hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-					}
-				`}
-				title="Fill (F)"
-				aria-label="Fill tool"
-			>
-				<PaintBucket className="w-5 h-5" />
-			</button>
+			<Tooltip content="Fill (F)">
+				<button
+					onClick={() => onToolChange('fill')}
+					className={`
+						p-2 rounded-xl transition-all
+						${selectedTool === 'fill'
+							? 'bg-blue-500 text-white shadow-lg scale-105'
+							: 'hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+						}
+					`}
+					aria-label="Fill tool"
+				>
+					<PaintBucket className="w-5 h-5" />
+				</button>
+			</Tooltip>
+
+			<div className="h-px bg-gray-300 dark:bg-gray-600 my-2" />
+
+			{/* Ball on Hash Button */}
+			<div className="relative">
+				<Tooltip content="Ball on Hash (H)">
+					<button
+						onClick={() => setShowHashDialog(!showHashDialog)}
+						className="p-2 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-all"
+						aria-label="Ball on Hash"
+						data-hash-dialog
+					>
+						<svg
+							width="20"
+							height="20"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							strokeWidth="2"
+							strokeLinecap="round"
+							className="text-gray-700 dark:text-gray-300"
+						>
+							<line x1="4" y1="8" x2="20" y2="8" strokeDasharray="2 2" />
+							<line x1="4" y1="12" x2="20" y2="12" strokeDasharray="2 2" />
+							<line x1="4" y1="16" x2="20" y2="16" strokeDasharray="2 2" />
+						</svg>
+					</button>
+				</Tooltip>
+
+				{showHashDialog && (
+					<HashDialog
+						isOpen={showHashDialog}
+						onClose={() => setShowHashDialog(false)}
+						hashAlignment={hashAlignment}
+						onHashAlignmentChange={alignment => {
+							onHashAlignmentChange(alignment)
+							setShowHashDialog(false)
+						}}
+					/>
+				)}
+			</div>
 		</div>
 	)
 }

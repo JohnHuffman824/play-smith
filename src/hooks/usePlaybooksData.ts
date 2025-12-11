@@ -1,0 +1,155 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom'
+import { useMemo, useCallback, useEffect } from 'react'
+import type { Playbook } from '../db/types'
+import {
+	playbookKeys,
+	fetchPlaybooks,
+	createPlaybook as apiCreatePlaybook,
+	updatePlaybook as apiUpdatePlaybook,
+	deletePlaybook as apiDeletePlaybook,
+	type PlaybookWithCount
+} from '../api/queries/playbookQueries'
+
+interface UsePlaybooksDataReturn {
+	playbooks: PlaybookWithCount[]
+	personalPlaybooks: PlaybookWithCount[]
+	teamPlaybooks: PlaybookWithCount[]
+	isLoading: boolean
+	error: string | null
+	createPlaybook: (name: string, teamId: number | null, description?: string) => Promise<Playbook>
+	updatePlaybook: (id: number, updates: { name?: string; description?: string }) => Promise<void>
+	deletePlaybook: (id: number) => Promise<void>
+	refetch: () => Promise<void>
+}
+
+export function usePlaybooksData(): UsePlaybooksDataReturn {
+	const navigate = useNavigate()
+	const queryClient = useQueryClient()
+
+	const handleUnauthorized = useCallback((error: Error) => {
+		if (error.message === 'UNAUTHORIZED') {
+			navigate('/login')
+		}
+	}, [navigate])
+
+	// QUERY
+	const {
+		data: playbooks = [],
+		isLoading,
+		error: queryError
+	} = useQuery({
+		queryKey: playbookKeys.list(),
+		queryFn: fetchPlaybooks
+	})
+
+	// Handle unauthorized errors
+	useEffect(() => {
+		if (queryError) {
+			handleUnauthorized(queryError as Error)
+		}
+	}, [queryError, handleUnauthorized])
+
+	// Derived state - split into personal and team playbooks
+	const { personalPlaybooks, teamPlaybooks } = useMemo(() => ({
+		personalPlaybooks: playbooks.filter(pb => pb.team_id === null),
+		teamPlaybooks: playbooks.filter(pb => pb.team_id !== null)
+	}), [playbooks])
+
+	// CREATE MUTATION
+	const createMutation = useMutation({
+		mutationFn: (data: { name: string; team_id: number | null; description?: string }) =>
+			apiCreatePlaybook(data),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: playbookKeys.list() })
+		},
+		onError: handleUnauthorized
+	})
+
+	// UPDATE MUTATION with optimistic update
+	const updateMutation = useMutation({
+		mutationFn: ({ id, data }: { id: number; data: { name?: string; description?: string } }) =>
+			apiUpdatePlaybook(id, data),
+		onMutate: async ({ id, data }) => {
+			await queryClient.cancelQueries({ queryKey: playbookKeys.list() })
+			const previous = queryClient.getQueryData<PlaybookWithCount[]>(playbookKeys.list())
+
+			queryClient.setQueryData<PlaybookWithCount[]>(
+				playbookKeys.list(),
+				old => old?.map(pb => pb.id === id ? { ...pb, ...data, updated_at: new Date() } : pb)
+			)
+
+			return { previous }
+		},
+		onError: (err, variables, context) => {
+			if (context?.previous) {
+				queryClient.setQueryData(playbookKeys.list(), context.previous)
+			}
+			handleUnauthorized(err as Error)
+		},
+		onSettled: () => {
+			queryClient.invalidateQueries({ queryKey: playbookKeys.list() })
+		}
+	})
+
+	// DELETE MUTATION with optimistic update
+	const deleteMutation = useMutation({
+		mutationFn: apiDeletePlaybook,
+		onMutate: async (id: number) => {
+			await queryClient.cancelQueries({ queryKey: playbookKeys.list() })
+			const previous = queryClient.getQueryData<PlaybookWithCount[]>(playbookKeys.list())
+
+			queryClient.setQueryData<PlaybookWithCount[]>(
+				playbookKeys.list(),
+				old => old?.filter(pb => pb.id !== id)
+			)
+
+			return { previous }
+		},
+		onError: (err, variables, context) => {
+			if (context?.previous) {
+				queryClient.setQueryData(playbookKeys.list(), context.previous)
+			}
+			handleUnauthorized(err as Error)
+		},
+		onSettled: () => {
+			queryClient.invalidateQueries({ queryKey: playbookKeys.list() })
+		}
+	})
+
+	// WRAPPER FUNCTIONS (maintain API compatibility)
+	const createPlaybook = async (
+		name: string,
+		teamId: number | null,
+		description?: string
+	): Promise<Playbook> => {
+		return createMutation.mutateAsync({ name, team_id: teamId, description })
+	}
+
+	const updatePlaybook = async (
+		id: number,
+		updates: { name?: string; description?: string }
+	): Promise<void> => {
+		await updateMutation.mutateAsync({ id, data: updates })
+	}
+
+	const deletePlaybook = async (id: number): Promise<void> => {
+		await deleteMutation.mutateAsync(id)
+	}
+
+	const refetch = useCallback(async () => {
+		await queryClient.invalidateQueries({ queryKey: playbookKeys.list() })
+	}, [queryClient])
+
+	return {
+		playbooks,
+		personalPlaybooks,
+		teamPlaybooks,
+		isLoading,
+		error: queryError?.message || null,
+		createPlaybook,
+		updatePlaybook,
+		deletePlaybook,
+		refetch
+	}
+}

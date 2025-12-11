@@ -3,11 +3,17 @@ import { useNavigate, useParams } from 'react-router-dom'
 import PlaybookEditor from '@/components/playbook-editor/PlaybookEditor'
 import type { PlaybookDetails } from '@/types/playbook'
 
+interface Team {
+	id: number
+	name: string
+}
+
 export function PlaybookEditorPage() {
 	const { playbookId } = useParams()
 	const navigate = useNavigate()
 
 	const [playbook, setPlaybook] = useState<PlaybookDetails | null>(null)
+	const [team, setTeam] = useState<Team | null>(null)
 	const [isLoading, setIsLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
 
@@ -50,6 +56,18 @@ export function PlaybookEditorPage() {
 
 				const playbookData = await playbookRes.json()
 				setPlaybook(playbookData.playbook)
+
+				// Fetch team data if playbook has a team_id
+				if (playbookData.playbook.team_id) {
+					const teamRes = await fetch('/api/teams')
+					if (teamRes.ok) {
+						const teamData = await teamRes.json()
+						const playbookTeam = teamData.teams.find((t: Team) => t.id === playbookData.playbook.team_id)
+						if (playbookTeam) {
+							setTeam(playbookTeam)
+						}
+					}
+				}
 			} catch (err) {
 				setError(err instanceof Error ? err.message : 'An error occurred')
 			} finally {
@@ -62,8 +80,15 @@ export function PlaybookEditorPage() {
 
 	// Navigation handlers
 	const handleBack = () => navigate('/playbooks')
-	const handleOpenPlay = (playId: string) =>
-		navigate(`/playbooks/${playbookId}/plays/${playId}`)
+	const handleOpenPlay = (playId: string) => {
+		// Include teamId in URL for PlayEditorPage
+		const teamId = playbook?.team_id || team?.id
+		if (teamId) {
+			navigate(`/playbooks/${playbookId}/plays/${playId}?teamId=${teamId}`)
+		} else {
+			navigate(`/playbooks/${playbookId}/plays/${playId}`)
+		}
+	}
 	const handleImport = () => {
 	}
 	const handleExport = () => {
@@ -121,6 +146,8 @@ export function PlaybookEditorPage() {
 		<PlaybookEditor
 			playbookId={playbookId}
 			playbookName={playbook.name}
+			teamId={playbook.team_id?.toString()}
+			teamName={team?.name}
 			onBack={handleBack}
 			onOpenPlay={handleOpenPlay}
 			onImport={handleImport}

@@ -34,6 +34,10 @@ export interface Playbook {
 	updated_at: Date
 }
 
+export interface PlaybookWithCount extends Playbook {
+	play_count: number
+}
+
 export interface PlaybookShare {
 	id: number
 	playbook_id: number

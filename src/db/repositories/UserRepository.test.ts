@@ -5,6 +5,7 @@ import { db } from '../connection'
 describe('UserRepository', () => {
 	const repo = new UserRepository()
 	let testUserId: number
+	const testEmail = `test-${Date.now()}@example.com`
 
 	afterAll(async () => {
 		// Cleanup
@@ -15,13 +16,13 @@ describe('UserRepository', () => {
 
 	test('create user', async () => {
 		const user = await repo.create({
-			email: 'test@example.com',
+			email: testEmail,
 			name: 'Test User',
 			password_hash: '$2a$10$test.hash.placeholder',
 		})
 
 		expect(user.id).toBeGreaterThan(0)
-		expect(user.email).toBe('test@example.com')
+		expect(user.email).toBe(testEmail)
 		expect(user.name).toBe('Test User')
 
 		testUserId = user.id
@@ -31,11 +32,11 @@ describe('UserRepository', () => {
 		const user = await repo.findById(testUserId)
 
 		expect(user).toBeDefined()
-		expect(user?.email).toBe('test@example.com')
+		expect(user?.email).toBe(testEmail)
 	})
 
 	test('find user by email', async () => {
-		const user = await repo.findByEmail('test@example.com')
+		const user = await repo.findByEmail(testEmail)
 
 		expect(user).toBeDefined()
 		expect(user?.id).toBe(testUserId)

@@ -1,7 +1,7 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { usePlaybook } from '../contexts/PlaybookContext'
-import { useTeam } from '../contexts/TeamContext'
+import { usePlaybooksData } from '../hooks/usePlaybooksData'
+import { useTeamsData } from '../hooks/useTeamsData'
 import { Sidebar } from '../components/playbook-manager/Sidebar'
 import { Toolbar } from '../components/playbook-manager/Toolbar'
 import { PlaybookCard } from '../components/playbook-manager/PlaybookCard'
@@ -11,14 +11,18 @@ import { SettingsDialog } from '../components/playbook-manager/SettingsDialog'
 export function PlaybookManagerPage() {
 	const navigate = useNavigate()
 	const {
-		playbooks,
-		isLoading,
-		error,
+		personalPlaybooks: allPersonalPlaybooks,
+		teamPlaybooks: allTeamPlaybooks,
+		isLoading: playbooksLoading,
+		error: playbooksError,
 		createPlaybook,
 		updatePlaybook,
 		deletePlaybook
-	} = usePlaybook()
-	const { teams, currentTeamId, switchTeam } = useTeam()
+	} = usePlaybooksData()
+	const { teams, currentTeamId, switchTeam, isLoading: teamsLoading } = useTeamsData()
+
+	const isLoading = playbooksLoading || teamsLoading
+	const error = playbooksError
 
 	const [activeSection, setActiveSection] = useState('all')
 	const [searchQuery, setSearchQuery] = useState('')
@@ -27,15 +31,19 @@ export function PlaybookManagerPage() {
 	const [showSettingsDialog, setShowSettingsDialog] = useState(false)
 	const [newPlaybookName, setNewPlaybookName] = useState('')
 
-	const { personalPlaybooks, teamPlaybooks } = useMemo(() => {
-		const filtered = playbooks.filter(pb =>
+	const personalPlaybooks = useMemo(
+		() => allPersonalPlaybooks.filter(pb =>
 			pb.name.toLowerCase().includes(searchQuery.toLowerCase())
-		)
-		return {
-			personalPlaybooks: filtered.filter(pb => pb.team_id === null),
-			teamPlaybooks: filtered.filter(pb => pb.team_id !== null)
-		}
-	}, [playbooks, searchQuery])
+		),
+		[allPersonalPlaybooks, searchQuery]
+	)
+
+	const teamPlaybooks = useMemo(
+		() => allTeamPlaybooks.filter(pb =>
+			pb.name.toLowerCase().includes(searchQuery.toLowerCase())
+		),
+		[allTeamPlaybooks, searchQuery]
+	)
 
 	const handleCreatePlaybook = async () => {
 		if (!newPlaybookName.trim()) return
@@ -91,6 +99,19 @@ export function PlaybookManagerPage() {
 		// TODO: Implement single playbook export
 	}
 
+	const handleRenamePrompt = useCallback((id: number, currentName: string) => {
+		const newName = prompt('Rename playbook:', currentName)
+		if (newName?.trim()) {
+			handleRename(id, newName.trim())
+		}
+	}, [])
+
+	const handleDeletePrompt = useCallback((id: number, name: string) => {
+		if (confirm(`Delete "${name}"?`)) {
+			handleDelete(id)
+		}
+	}, [])
+
 	if (isLoading) {
 		return (
 			<div className="flex items-center justify-center h-screen">
@@ -145,19 +166,10 @@ export function PlaybookManagerPage() {
 										id={playbook.id}
 										name={playbook.name}
 										type="playbook"
-										playCount={0}
+										playCount={playbook.play_count}
 										lastModified={new Date(playbook.updated_at).toLocaleDateString()}
-										onRename={(id) => {
-											const newName = prompt('Rename playbook:', playbook.name)
-											if (newName?.trim()) {
-												handleRename(id, newName.trim())
-											}
-										}}
-										onDelete={(id) => {
-											if (confirm(`Delete "${playbook.name}"?`)) {
-												handleDelete(id)
-											}
-										}}
+										onRename={() => handleRenamePrompt(playbook.id, playbook.name)}
+										onDelete={() => handleDeletePrompt(playbook.id, playbook.name)}
 										onDuplicate={handleDuplicate}
 										onExport={handleExportPlaybook}
 										onShare={handleShare}
@@ -178,19 +190,10 @@ export function PlaybookManagerPage() {
 										id={playbook.id}
 										name={playbook.name}
 										type="playbook"
-										playCount={0}
+										playCount={playbook.play_count}
 										lastModified={new Date(playbook.updated_at).toLocaleDateString()}
-										onRename={(id) => {
-											const newName = prompt('Rename playbook:', playbook.name)
-											if (newName?.trim()) {
-												handleRename(id, newName.trim())
-											}
-										}}
-										onDelete={(id) => {
-											if (confirm(`Delete "${playbook.name}"?`)) {
-												handleDelete(id)
-											}
-										}}
+										onRename={() => handleRenamePrompt(playbook.id, playbook.name)}
+										onDelete={() => handleDeletePrompt(playbook.id, playbook.name)}
 										onDuplicate={handleDuplicate}
 										onExport={handleExportPlaybook}
 										onShare={handleShare}

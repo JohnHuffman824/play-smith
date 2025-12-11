@@ -267,7 +267,7 @@ This plan outlines the implementation of Play Smith's Formations and Custom Conc
 
 **3.3 Concept Selection Sub-Dialog** (1 day)
 - [ ] Create `src/components/concepts/ConceptSelectionDialog.tsx`
-  - Appears when "Add Concept" toolbar button clicked
+  - Appears when "Create Concept" toolbar button clicked
   - Lists available concepts (formations, base, groups)
   - Search filter
   - "[+ Create New Concept]" button → opens ConceptDialog
@@ -325,7 +325,7 @@ This plan outlines the implementation of Play Smith's Formations and Custom Conc
   - Keep tags separate (as per design)
   - Wire up concept application to canvas
 - [ ] Update `src/components/plays/PlayToolbar.tsx`
-  - Replace "Add Component" (G) button with "Add Concept"
+  - Replace "Add Component" (G) button with "Create Concept"
   - Open ConceptSelectionDialog on click
 - [ ] Add multi-select context menu
   - Shift-select multiple players/drawings

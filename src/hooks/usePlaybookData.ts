@@ -57,10 +57,22 @@ export function usePlaybookData(playbookId: string | undefined): UsePlaybookData
 
 	// Helper to group plays by section
 	const groupPlaysBySections = useCallback((allPlays: Play[], allSections: Array<{ id: string; name: string }>) => {
-		return allSections.map(section => ({
+		const sections = allSections.map(section => ({
 			...section,
 			plays: allPlays.filter(play => play.section_id === section.id)
 		}))
+
+		// Add unsectioned plays as a default section if they exist
+		const unsectionedPlays = allPlays.filter(play => play.section_id === null)
+		if (unsectionedPlays.length > 0) {
+			sections.unshift({
+				id: '__unsectioned__',
+				name: 'Plays',
+				plays: unsectionedPlays
+			})
+		}
+
+		return sections
 	}, [])
 
 	// Fetch data

@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { Toolbar } from '../components/toolbar/Toolbar'
 import { Canvas } from '../components/canvas/Canvas'
 import { PlayHeader } from '../components/plays/PlayHeader'
 import { PlayCardsSection } from '../components/plays/PlayCardsSection'
-import { AddConceptSubDialog } from '../components/concepts/AddConceptSubDialog'
 import { ConceptDialog } from '../components/concepts/ConceptDialog'
 import { SelectionOverlay } from '../components/canvas/SelectionOverlay'
 import { useTheme } from '../contexts/ThemeContext'
@@ -23,7 +22,9 @@ import {
 
 function PlayEditorContent() {
 	const { theme } = useTheme()
-	const { teamId, playbookId } = useParams<{ teamId: string; playbookId?: string }>()
+	const { playbookId } = useParams<{ playbookId?: string }>()
+	const [searchParams] = useSearchParams()
+	const teamId = searchParams.get('teamId')
 	const navigate = useNavigate()
 
 	const {
@@ -51,7 +52,6 @@ function PlayEditorContent() {
 		isLoading: conceptsLoading
 	} = useConceptData(teamId, playbookId)
 
-	const [showAddConceptDialog, setShowAddConceptDialog] = useState(false)
 	const [selectedObjectIds, setSelectedObjectIds] = useState<string[]>([])
 
 	// Set up keyboard shortcuts
@@ -60,12 +60,12 @@ function PlayEditorContent() {
 	// Listen for component:add event from toolbar
 	useEffect(() => {
 		function handleAddComponent() {
-			setShowAddConceptDialog(true)
+			openConceptDialog()
 		}
 
 		eventBus.on('component:add', handleAddComponent)
 		return () => eventBus.off('component:add', handleAddComponent)
-	}, [])
+	}, [openConceptDialog])
 
 	// Listen for save event from toolbar
 	useEffect(() => {
@@ -102,25 +102,6 @@ function PlayEditorContent() {
 		} else if (teamId) {
 			navigate(`/teams/${teamId}/playbooks`)
 		}
-	}
-
-	function handleSelectFormation(formation: any) {
-		applyFormation(formation)
-		setShowAddConceptDialog(false)
-	}
-
-	function handleSelectConcept(concept: any) {
-		applyConcept(concept)
-		setShowAddConceptDialog(false)
-	}
-
-	function handleSelectGroup(group: any) {
-		applyConceptGroup(group)
-		setShowAddConceptDialog(false)
-	}
-
-	function handleCreateNewConcept() {
-		openConceptDialog()
 	}
 
 	async function handleSaveConcept(conceptData: any) {
@@ -193,18 +174,6 @@ function PlayEditorContent() {
 				/>
 			</div>
 
-			{/* Add Concept Dialog */}
-			<AddConceptSubDialog
-				isOpen={showAddConceptDialog}
-				onClose={() => setShowAddConceptDialog(false)}
-				formations={formations}
-				concepts={concepts}
-				conceptGroups={conceptGroups}
-				onSelectFormation={handleSelectFormation}
-				onSelectConcept={handleSelectConcept}
-				onSelectGroup={handleSelectGroup}
-				onCreateNew={handleCreateNewConcept}
-			/>
 
 			{/* Concept Dialog */}
 			<ConceptDialog
