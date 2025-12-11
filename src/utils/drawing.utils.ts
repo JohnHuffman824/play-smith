@@ -401,3 +401,249 @@ export function deletePointFromDrawing(
 	}
 }
 
+// POINT INSERTION UTILITIES FOR ADD NODE FEATURE
+
+interface SegmentHitResult {
+	segmentIndex: number
+	insertPosition: Coordinate  // The position to insert the new point (in feet)
+	distance: number
+}
+
+/**
+ * Find which segment a point is closest to, considering Chaikin smoothing for curved paths.
+ * Returns the segment index and the position where a new point should be inserted.
+ */
+export function findClosestSegmentPosition(
+	drawing: Drawing,
+	clickPositionFeet: Coordinate,
+	coordSystem: { feetToPixels: (x: number, y: number) => Coordinate; pixelsToFeet: (x: number, y: number) => Coordinate; scale: number }
+): SegmentHitResult | null {
+	if (drawing.segments.length === 0) return null
+
+	// Get ordered points
+	const orderedPoints = getOrderedPointsFromDrawing(drawing)
+	if (orderedPoints.length < 2) return null
+
+	let bestResult: SegmentHitResult | null = null
+	let bestDistance = Infinity
+
+	if (drawing.style.pathMode === 'curve') {
+		// For curved paths, apply Chaikin smoothing and find position on smoothed curve
+		const pixelPoints = orderedPoints.map(p => coordSystem.feetToPixels(p.x, p.y))
+
+		// Apply Chaikin 3 times (matching PathRenderer)
+		let smoothedPixels = pixelPoints
+		for (let i = 0; i < 3; i++) {
+			smoothedPixels = chaikinSubdivideSimple(smoothedPixels, true)
+		}
+
+		const clickPixel = coordSystem.feetToPixels(clickPositionFeet.x, clickPositionFeet.y)
+
+		// Find closest point on smoothed curve
+		let closestSmoothedIndex = 0
+		let closestT = 0
+		let minDist = Infinity
+
+		for (let i = 0; i < smoothedPixels.length - 1; i++) {
+			const p1 = smoothedPixels[i]
+			const p2 = smoothedPixels[i + 1]
+			const { distance, t } = pointToSegmentInfo(clickPixel, p1, p2)
+			if (distance < minDist) {
+				minDist = distance
+				closestSmoothedIndex = i
+				closestT = t
+			}
+		}
+
+		// Map smoothed index back to original segment
+		// Each Chaikin iteration roughly doubles the points
+		// After 3 iterations: originalIndex ≈ smoothedIndex / 8
+		const originalSegmentIndex = Math.min(
+			Math.floor(closestSmoothedIndex / 8),
+			drawing.segments.length - 1
+		)
+
+		// Calculate insert position by interpolating on the smoothed curve
+		const p1 = smoothedPixels[closestSmoothedIndex]
+		const p2 = smoothedPixels[closestSmoothedIndex + 1]
+		const insertPixel = {
+			x: p1.x + closestT * (p2.x - p1.x),
+			y: p1.y + closestT * (p2.y - p1.y)
+		}
+		const insertFeet = coordSystem.pixelsToFeet(insertPixel.x, insertPixel.y)
+
+		bestResult = {
+			segmentIndex: originalSegmentIndex,
+			insertPosition: insertFeet,
+			distance: minDist
+		}
+	} else {
+		// For sharp paths, check each segment directly
+		const clickPixel = coordSystem.feetToPixels(clickPositionFeet.x, clickPositionFeet.y)
+
+		for (let i = 0; i < drawing.segments.length; i++) {
+			const segment = drawing.segments[i]
+			const points = segment.pointIds.map(id => drawing.points[id]).filter(Boolean) as ControlPoint[]
+
+			if (points.length < 2) continue
+
+			const p1Pixel = coordSystem.feetToPixels(points[0].x, points[0].y)
+			const p2Pixel = coordSystem.feetToPixels(points[points.length - 1].x, points[points.length - 1].y)
+
+			const { distance, t } = pointToSegmentInfo(clickPixel, p1Pixel, p2Pixel)
+
+			if (distance < bestDistance) {
+				bestDistance = distance
+				const insertFeet = {
+					x: points[0].x + t * (points[points.length - 1].x - points[0].x),
+					y: points[0].y + t * (points[points.length - 1].y - points[0].y)
+				}
+				bestResult = {
+					segmentIndex: i,
+					insertPosition: insertFeet,
+					distance
+				}
+			}
+		}
+	}
+
+	return bestResult
+}
+
+/**
+ * Simple Chaikin subdivision (matching PathRenderer logic)
+ */
+function chaikinSubdivideSimple(
+	points: Coordinate[],
+	preserveEndpoints: boolean
+): Coordinate[] {
+	if (points.length < 2) return points
+
+	const result: Coordinate[] = []
+
+	for (let i = 0; i < points.length - 1; i++) {
+		const p0 = points[i]
+		const p1 = points[i + 1]
+
+		const q = { x: 0.75 * p0.x + 0.25 * p1.x, y: 0.75 * p0.y + 0.25 * p1.y }
+		const r = { x: 0.25 * p0.x + 0.75 * p1.x, y: 0.25 * p0.y + 0.75 * p1.y }
+
+		if (preserveEndpoints && i === 0) {
+			result.push(p0)
+			result.push(r)
+		} else if (preserveEndpoints && i === points.length - 2) {
+			result.push(q)
+			result.push(p1)
+		} else {
+			result.push(q)
+			result.push(r)
+		}
+	}
+
+	return result
+}
+
+/**
+ * Get distance and parametric t value for closest point on segment
+ */
+function pointToSegmentInfo(
+	point: Coordinate,
+	segStart: Coordinate,
+	segEnd: Coordinate
+): { distance: number; t: number } {
+	const dx = segEnd.x - segStart.x
+	const dy = segEnd.y - segStart.y
+	const lengthSq = dx * dx + dy * dy
+
+	if (lengthSq === 0) {
+		const dist = Math.sqrt(
+			(point.x - segStart.x) ** 2 + (point.y - segStart.y) ** 2
+		)
+		return { distance: dist, t: 0 }
+	}
+
+	let t = ((point.x - segStart.x) * dx + (point.y - segStart.y) * dy) / lengthSq
+	t = Math.max(0, Math.min(1, t))
+
+	const closestX = segStart.x + t * dx
+	const closestY = segStart.y + t * dy
+	const distance = Math.sqrt((point.x - closestX) ** 2 + (point.y - closestY) ** 2)
+
+	return { distance, t }
+}
+
+/**
+ * Get ordered points from a drawing by traversing segments
+ */
+function getOrderedPointsFromDrawing(drawing: Drawing): ControlPoint[] {
+	const orderedIds: string[] = []
+	const seen = new Set<string>()
+
+	for (const segment of drawing.segments) {
+		for (const pointId of segment.pointIds) {
+			if (!seen.has(pointId)) {
+				orderedIds.push(pointId)
+				seen.add(pointId)
+			}
+		}
+	}
+
+	return orderedIds.map(id => drawing.points[id]).filter(Boolean) as ControlPoint[]
+}
+
+/**
+ * Insert a new point into a drawing at the specified segment.
+ * Splits the segment into two line segments.
+ */
+export function insertPointIntoDrawing(
+	drawing: Drawing,
+	segmentIndex: number,
+	newPointPosition: Coordinate
+): Drawing {
+	const segment = drawing.segments[segmentIndex]
+	if (!segment) return drawing
+
+	// Create new point
+	const newPointId = `point-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+	const newPoint: ControlPoint = {
+		id: newPointId,
+		x: newPointPosition.x,
+		y: newPointPosition.y,
+		type: 'corner'
+	}
+
+	// Add to points pool
+	const newPoints = {
+		...drawing.points,
+		[newPointId]: newPoint
+	}
+
+	// Split the segment into two
+	const startPointId = segment.pointIds[0]
+	const endPointId = segment.pointIds[segment.pointIds.length - 1]
+
+	const newSegment1: PathSegment = {
+		type: 'line',
+		pointIds: [startPointId, newPointId]
+	}
+
+	const newSegment2: PathSegment = {
+		type: 'line',
+		pointIds: [newPointId, endPointId]
+	}
+
+	// Replace the old segment with two new ones
+	const newSegments = [
+		...drawing.segments.slice(0, segmentIndex),
+		newSegment1,
+		newSegment2,
+		...drawing.segments.slice(segmentIndex + 1)
+	]
+
+	return {
+		...drawing,
+		points: newPoints,
+		segments: newSegments
+	}
+}
+
