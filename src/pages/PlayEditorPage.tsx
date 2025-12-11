@@ -126,6 +126,27 @@ function PlayEditorContent() {
 		}
 	}
 
+	async function handleDeletePlay() {
+		if (!playId) return
+
+		const response = await fetch(`/api/plays/${playId}`, {
+			method: 'DELETE',
+			credentials: 'include'
+		})
+
+		if (!response.ok) {
+			const data = await response.json()
+			throw new Error(data.error ?? 'Failed to delete play')
+		}
+
+		// Navigate back to playbook after deletion
+		if (playbookId) {
+			navigate(`/playbooks/${playbookId}`)
+		} else {
+			navigate('/playbooks')
+		}
+	}
+
 	async function handleSaveConcept(conceptData: any) {
 		if (conceptState.editingConceptId) {
 			await updateConcept(conceptState.editingConceptId, conceptData)
