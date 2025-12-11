@@ -31,7 +31,9 @@ export class PlaybookRepository {
 	// Fetches a playbook by id or null when missing
 	async findById(id: number): Promise<Playbook | null> {
 		const [playbook] = await db<Playbook[]>`
-			SELECT * FROM playbooks WHERE id = ${id}
+			SELECT id, team_id, name, description, created_by, created_at, updated_at
+			FROM playbooks
+			WHERE id = ${id}
 		`
 
 		return playbook ?? null
@@ -40,7 +42,8 @@ export class PlaybookRepository {
 	// Lists playbooks for a team ordered by latest update
 	async getTeamPlaybooks(teamId: number): Promise<Playbook[]> {
 		return await db<Playbook[]>`
-			SELECT * FROM playbooks
+			SELECT id, team_id, name, description, created_by, created_at, updated_at
+			FROM playbooks
 			WHERE team_id = ${teamId}
 			ORDER BY updated_at DESC
 		`
@@ -60,7 +63,8 @@ export class PlaybookRepository {
 	 */
 	async getUserPersonalPlaybooks(userId: number): Promise<Playbook[]> {
 		return await db<Playbook[]>`
-			SELECT * FROM playbooks
+			SELECT id, team_id, name, description, created_by, created_at, updated_at
+			FROM playbooks
 			WHERE team_id IS NULL AND created_by = ${userId}
 			ORDER BY updated_at DESC, id DESC
 		`
@@ -78,7 +82,7 @@ export class PlaybookRepository {
 				name = COALESCE(${data.name ?? null}, name),
 				description = COALESCE(${data.description ?? null}, description)
 			WHERE id = ${id}
-			RETURNING *
+			RETURNING id, team_id, name, description, created_by, created_at, updated_at
 		`
 
 		return playbook ?? null
@@ -95,7 +99,10 @@ export class PlaybookRepository {
 		teamIds: number[]
 	): Promise<Array<Playbook & { play_count: number }>> {
 		return await db<Array<Playbook & { play_count: number }>>`
-			SELECT p.*, COALESCE(COUNT(pl.id), 0)::int as play_count
+			SELECT
+				p.id, p.team_id, p.name, p.description,
+				p.created_by, p.created_at, p.updated_at,
+				COALESCE(COUNT(pl.id), 0)::int as play_count
 			FROM playbooks p
 			LEFT JOIN plays pl ON pl.playbook_id = p.id
 			WHERE p.team_id = ANY(${teamIds}) OR (p.team_id IS NULL AND p.created_by = ${userId})
