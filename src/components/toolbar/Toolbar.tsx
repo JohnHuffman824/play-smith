@@ -76,7 +76,7 @@ export function Toolbar({
 	const [isSaving, setIsSaving] = useState(false)
 	const [showSuccess, setShowSuccess] = useState(false)
 	const [columnCount, setColumnCount] = useState(1)
-	const [rowsPerColumn, setRowsPerColumn] = useState(13)
+	const [rowsPerColumn, setRowsPerColumn] = useState(14)
 	const drawDialogRef = useRef<HTMLDivElement>(null)
 	const baseButtonClass = [
 		'w-14 h-14 rounded-xl flex items-center justify-center',
@@ -212,7 +212,7 @@ export function Toolbar({
 			const BUTTON_SIZE = 56 // 14 * 4 (w-14 h-14 in pixels)
 			const GAP = 12
 			const PADDING = 12
-			const TOTAL_BUTTONS = 13 // Count of all toolbar buttons
+			const TOTAL_BUTTONS = 14 // Count of all toolbar buttons
 
 			// Use window height as the stable constraint
 			const availableHeight = window.innerHeight - (2 * PADDING)
