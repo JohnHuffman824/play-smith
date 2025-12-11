@@ -64,7 +64,7 @@
 ### 5. Integration (COMPLETE)
 - ✓ PlayEditorPage wrapped with ConceptProvider
 - ✓ PlayHeader replaced with UnifiedSearchBar
-- ✓ Toolbar "Add Concept (G)" button wired
+- ✓ Toolbar "Create Concept (G)" button wired
 - ✓ AddConceptSubDialog connected to toolbar
 - ✓ ConceptDialog connected for create/edit
 - ✓ Concept application to canvas (formations, concepts, groups)
@@ -210,7 +210,7 @@ bun --hot ./src/index.ts
 - Selected items auto-apply to canvas
 
 ### 4. Create New Concept
-- Click "Add Concept (G)" button in toolbar
+- Click "Create Concept (G)" button in toolbar
 - Click "Create New Concept" in dialog
 - Draw routes on canvas
 - Set targeting mode (Absolute Role / Relative Selector)
@@ -362,7 +362,7 @@ The implementation is **production-ready** and fully integrated. All components 
 1. Start server: `bun --hot ./src/index.ts`
 2. Navigate to play editor
 3. Use unified search bar to find/apply concepts
-4. Click "Add Concept (G)" to browse/create concepts
+4. Click "Create Concept (G)" to browse/create concepts
 5. Multi-select objects and save as concept
 
 **Architecture is solid, extensible, and ready for Phase 2 (Conditional Rules) when needed.**

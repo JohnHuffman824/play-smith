@@ -170,7 +170,7 @@ function PlayEditorContent() {
 				/>
 			</div>
 
-			{/* Add Concept Dialog */}
+			{/* Create Concept Dialog */}
 			<AddConceptSubDialog
 				isOpen={showAddConceptDialog}
 				onClose={() => setShowAddConceptDialog(false)}

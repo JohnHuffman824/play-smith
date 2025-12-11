@@ -561,21 +561,21 @@ The concept system integrates into both the Play Editor (toolbar) and Playbook M
 
 ### Toolbar Integration (Play Editor)
 
-The left-side toolbar includes an **"Add Concept"** button that **replaces** the existing "Add Component" (G) button.
+The left-side toolbar includes an **"Create Concept"** button that **replaces** the existing "Add Component" (G) button.
 
 **Toolbar Button:**
 - **Icon:** Plus (+) (reuses Add Component icon)
-- **Label:** "Add Concept"
+- **Label:** "Create Concept"
 - **Shortcut:** G
 - **Action:** Opens **Concept Selection Sub-Dialog**
 
 **Concept Selection Sub-Dialog:**
 
-When "Add Concept" button is clicked, a sub-dialog appears listing:
+When "Create Concept" button is clicked, a sub-dialog appears listing:
 
 ```
 ┌────────────────────────────────────────┐
-│  Add Concept to Play                   │
+│  Create Concept to Play                   │
 ├────────────────────────────────────────┤
 │                                        │
 │  Available Concepts:                   │
@@ -604,7 +604,7 @@ When "Add Concept" button is clicked, a sub-dialog appears listing:
 - This action is only available via multi-selection context menu (see Selection-Based Workflow below)
 
 **Rationale:**
-- "Add Concept" consolidates concept application and creation
+- "Create Concept" consolidates concept application and creation
 - "Add Component" concept deprecated in favor of formations/concepts system
 - Single toolbar button keeps UI clean
 
@@ -653,7 +653,7 @@ Coach draws routes for X (post) and Y (corner)
 ### Concept Dialog Design
 
 The Concept Dialog is the central interface for creating and editing concepts. It appears when:
-- "Add Concept" toolbar button clicked (empty dialog)
+- "Create Concept" toolbar button clicked (empty dialog)
 - "Save as Concept" context menu clicked (pre-populated)
 - Editing existing concept from search or concept library
 
@@ -811,7 +811,7 @@ This mode is deferred to Phase 2. When implemented, it will support IF-THEN rule
 - **Purpose:** Visual preview of routes and player positions
 - **Interaction:**
   - If from "Save as Concept" → shows selected elements (preview mode)
-  - If from "Add Concept" → drawing area (editable mode, coach draws routes)
+  - If from "Create Concept" → drawing area (editable mode, coach draws routes)
   - Coach can click on mini canvas to draw routes for assigned players
 
 **Rationale for reusability:**
@@ -828,7 +828,7 @@ The concept system is accessible from two main areas:
 
 #### 1. Play Editor (Primary)
 - **Location:** Left sidebar toolbar
-- **Button:** "Add Concept" (opens empty dialog)
+- **Button:** "Create Concept" (opens empty dialog)
 - **Context Menu:** Shift-select objects → "Save as Concept" (opens pre-populated dialog)
 - **Search Bar:** Type to search/apply existing concepts
 
@@ -1497,7 +1497,7 @@ LIMIT 10;
 ## Open Questions
 
 1. ~~**Position-agnostic implementation**~~ - ✅ RESOLVED: Three targeting modes (Absolute Role, Relative Selector, Conditional Rules)
-2. ~~**Toolbar changes**~~ - ✅ RESOLVED: "Add Concept" button in toolbar, "Save as Concept" via context menu, no separate linking tool needed
+2. ~~**Toolbar changes**~~ - ✅ RESOLVED: "Create Concept" button in toolbar, "Save as Concept" via context menu, no separate linking tool needed
 3. ~~**Dialog designs**~~ - ✅ RESOLVED: Comprehensive Concept Dialog with targeting modes, ball position, play direction, save scope, and mini canvas
 4. **Search ranking** - How should autocomplete prioritize results (recency, frequency, alphabetical)?
    - Proposed: Frecency algorithm (frequency + recency weighted)
