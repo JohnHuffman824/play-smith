@@ -68,7 +68,7 @@ export class PlaybookRepository {
 
 	// Applies provided fields to an existing playbook
 	async update(id: number, data: PlaybookUpdate): Promise<Playbook | null> {
-		if (Object.keys(data).length == 0) {
+		if (Object.keys(data).length === 0) {
 			return this.findById(id)
 		}
 
@@ -87,5 +87,20 @@ export class PlaybookRepository {
 	// Removes a playbook by id
 	async delete(id: number): Promise<void> {
 		await db`DELETE FROM playbooks WHERE id = ${id}`
+	}
+
+	// Fetches all playbooks accessible to user with play counts in single query
+	async getUserPlaybooksWithCounts(
+		userId: number,
+		teamIds: number[]
+	): Promise<Array<Playbook & { play_count: number }>> {
+		return await db<Array<Playbook & { play_count: number }>>`
+			SELECT p.*, COALESCE(COUNT(pl.id), 0)::int as play_count
+			FROM playbooks p
+			LEFT JOIN plays pl ON pl.playbook_id = p.id
+			WHERE p.team_id = ANY(${teamIds}) OR (p.team_id IS NULL AND p.created_by = ${userId})
+			GROUP BY p.id
+			ORDER BY p.updated_at DESC
+		`
 	}
 }

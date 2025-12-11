@@ -1,4 +1,4 @@
-import { RouteObject } from 'react-router-dom'
+import type { RouteObject } from 'react-router-dom'
 import { LandingPage } from '../pages/LandingPage'
 import { LoginPage } from '../pages/LoginPage'
 import { PlaybookManagerPage } from '../pages/PlaybookManagerPage'

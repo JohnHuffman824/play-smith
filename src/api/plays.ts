@@ -153,20 +153,26 @@ export const playsAPI = {
 			return Response.json({ error: 'Access denied' }, { status: 403 })
 		}
 
-		// Get lightweight plays (no geometry or notes)
+		// Get plays with drawing data from applied concepts
 		const plays = await db`
 			SELECT
-				id,
-				name,
-				section_id,
-				play_type,
-				formation_id,
-				personnel_id,
-				defensive_formation_id,
-				updated_at
-			FROM plays
-			WHERE playbook_id = ${playbookId}
-			ORDER BY display_order ASC
+				p.id,
+				p.name,
+				p.section_id,
+				p.play_type,
+				p.formation_id,
+				p.personnel_id,
+				p.defensive_formation_id,
+				p.updated_at,
+				(
+					SELECT json_agg(cpa.drawing_data)
+					FROM concept_applications ca
+					JOIN concept_player_assignments cpa ON cpa.concept_id = ca.concept_id
+					WHERE ca.play_id = p.id AND cpa.drawing_data IS NOT NULL
+				) as drawings
+			FROM plays p
+			WHERE p.playbook_id = ${playbookId}
+			ORDER BY p.display_order ASC
 		`
 
 		return Response.json({ plays })
@@ -230,7 +236,11 @@ export const playsAPI = {
 		}
 
 		// Get play and check it exists
-		const [play] = await db`SELECT * FROM plays WHERE id = ${playId}`
+		const [play] = await db`
+			SELECT id, playbook_id
+			FROM plays
+			WHERE id = ${playId}
+		`
 		if (!play) {
 			return Response.json({ error: 'Play not found' }, { status: 404 })
 		}
@@ -242,18 +252,41 @@ export const playsAPI = {
 		}
 
 		const body = await req.json()
-		const { name, section_id, play_type } = body
 
-		// Update play
-		const [updated] = await db`
+		// Build dynamic UPDATE based on provided fields
+		const updates: string[] = []
+		const values: any[] = []
+
+		if (body.name !== undefined) {
+			updates.push('name')
+			values.push(body.name)
+		}
+		if (body.section_id !== undefined) {
+			updates.push('section_id')
+			values.push(body.section_id)
+		}
+		if (body.play_type !== undefined) {
+			updates.push('play_type')
+			values.push(body.play_type)
+		}
+
+		if (updates.length === 0) {
+			return Response.json({ error: 'No fields to update' }, { status: 400 })
+		}
+
+		// Build UPDATE query dynamically
+		const setClause = updates.map((col, i) => `${col} = $${i + 1}`).join(', ')
+		const query = `
 			UPDATE plays
-			SET
-				name = COALESCE(${name ?? null}, name),
-				section_id = COALESCE(${section_id ?? null}, section_id),
-				play_type = COALESCE(${play_type ?? null}, play_type)
-			WHERE id = ${playId}
-			RETURNING *
+			SET ${setClause}
+			WHERE id = $${updates.length + 1}
+			RETURNING id, playbook_id, name, section_id, play_type,
+					  formation_id, personnel_id, defensive_formation_id,
+					  hash_position, notes, display_order, created_by,
+					  created_at, updated_at
 		`
+
+		const [updated] = await db.unsafe(query, [...values, playId])
 
 		return Response.json({ play: updated })
 	},
@@ -269,8 +302,14 @@ export const playsAPI = {
 			return Response.json({ error: 'Invalid play ID' }, { status: 400 })
 		}
 
-		// Get play and check it exists
-		const [play] = await db`SELECT * FROM plays WHERE id = ${playId}`
+		// Get play to duplicate
+		const [play] = await db`
+			SELECT id, playbook_id, name, section_id, play_type,
+				   formation_id, personnel_id, defensive_formation_id,
+				   hash_position, notes
+			FROM plays
+			WHERE id = ${playId}
+		`
 		if (!play) {
 			return Response.json({ error: 'Play not found' }, { status: 404 })
 		}
@@ -335,7 +374,11 @@ export const playsAPI = {
 		}
 
 		// Get play and check it exists
-		const [play] = await db`SELECT * FROM plays WHERE id = ${playId}`
+		const [play] = await db`
+			SELECT id, playbook_id
+			FROM plays
+			WHERE id = ${playId}
+		`
 		if (!play) {
 			return Response.json({ error: 'Play not found' }, { status: 404 })
 		}

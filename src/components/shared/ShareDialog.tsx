@@ -1,18 +1,26 @@
-import { 
-  X, 
-  Mail, 
-  Link as LinkIcon, 
-  Check, 
-  ChevronDown 
+import {
+  X,
+  Mail,
+  Link as LinkIcon,
+  Check,
+  ChevronDown
 } from 'lucide-react'
 import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
-interface ShareRecipient {
+type ShareRecipient = {
   email: string
   role: 'viewer' | 'collaborator'
 }
 
-interface ShareDialogProps {
+type ShareDialogProps = {
   isOpen: boolean
   onClose: () => void
   playbookName: string
@@ -21,6 +29,7 @@ interface ShareDialogProps {
 
 const ROLE_VIEWER = 'viewer'
 const ROLE_COLLABORATOR = 'collaborator'
+const LINK_COPIED_TIMEOUT_MS = 2000
 
 export function ShareDialog({ 
   isOpen, 
@@ -32,8 +41,6 @@ export function ShareDialog({
   const [recipients, setRecipients] = useState<ShareRecipient[]>([])
   const [linkCopied, setLinkCopied] = useState(false)
   const [defaultRole, setDefaultRole] = useState<'viewer' | 'collaborator'>(ROLE_VIEWER)
-  const [showRoleMenu, setShowRoleMenu] = useState(false)
-  const [activeRecipientMenu, setActiveRecipientMenu] = useState<string | null>(null)
 
   if (!isOpen) return null
 
@@ -72,7 +79,7 @@ export function ShareDialog({
     const shareLink = `${origin}/shared/${slug}`
     navigator.clipboard.writeText(shareLink)
     setLinkCopied(true)
-    setTimeout(() => setLinkCopied(false), 2000)
+    setTimeout(() => setLinkCopied(false), LINK_COPIED_TIMEOUT_MS)
   }
 
   const canAddEmail = emailInput.trim() && emailInput.includes('@')
@@ -92,18 +99,19 @@ export function ShareDialog({
             shadow-2xl w-full max-w-lg overflow-hidden"
           onClick={(e) => e.stopPropagation()}
         >
-          <div 
-            className="flex items-center justify-between px-6 py-4 
+          <div
+            className="flex items-center justify-between px-6 py-4
               border-b border-border"
           >
             <h2>Share Playbook</h2>
-            <button
+            <Button
               onClick={onClose}
-              className="p-1.5 hover:bg-accent rounded-lg 
-                transition-all duration-200"
+              variant="ghost"
+              size="icon"
+              className="h-auto w-auto p-1.5"
             >
               <X className="w-5 h-5" />
-            </button>
+            </Button>
           </div>
 
           <div className="p-6 space-y-6">
@@ -132,12 +140,10 @@ export function ShareDialog({
                     </p>
                   </div>
                 </div>
-                <button
+                <Button
                   onClick={handleCopyLink}
-                  className="px-4 py-2 bg-primary 
-                    text-primary-foreground rounded-lg hover:opacity-90 
-                    transition-all duration-200 flex items-center gap-2 
-                    whitespace-nowrap"
+                  variant="default"
+                  className="whitespace-nowrap"
                 >
                   {linkCopied ? (
                     <>
@@ -147,7 +153,7 @@ export function ShareDialog({
                   ) : (
                     'Copy Link'
                   )}
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -177,70 +183,48 @@ export function ShareDialog({
                       transition-all duration-200"
                   />
                 </div>
-                <div className="relative">
-                  <button
-                    onClick={() => setShowRoleMenu(!showRoleMenu)}
-                    className="px-4 py-2.5 bg-accent hover:bg-accent/80 
-                      rounded-lg transition-all duration-200 
-                      flex items-center gap-2 min-w-[140px] 
-                      justify-between"
-                  >
-                    <span>
-                      {defaultRole == ROLE_VIEWER ? 'Viewer' : 'Collaborator'}
-                    </span>
-                    <ChevronDown className="w-4 h-4" />
-                  </button>
-                  {showRoleMenu && (
-                    <>
-                      <div
-                        className="fixed inset-0 z-20"
-                        onClick={() => setShowRoleMenu(false)}
-                      />
-                      <div 
-                        className="absolute right-0 top-full mt-1 
-                          bg-popover border border-border rounded-lg 
-                          shadow-xl py-1 min-w-[200px] z-30"
-                      >
-                        <button
-                          onClick={() => {
-                            setDefaultRole(ROLE_VIEWER)
-                            setShowRoleMenu(false)
-                          }}
-                          className="w-full px-4 py-2 text-left 
-                            hover:bg-accent transition-colors duration-150"
-                        >
-                          <div className="font-medium">Viewer</div>
-                          <div className="text-muted-foreground">
-                            Can view only
-                          </div>
-                        </button>
-                        <div className="h-px bg-border my-1" />
-                        <button
-                          onClick={() => {
-                            setDefaultRole(ROLE_COLLABORATOR)
-                            setShowRoleMenu(false)
-                          }}
-                          className="w-full px-4 py-2 text-left 
-                            hover:bg-accent transition-colors duration-150"
-                        >
-                          <div className="font-medium">Collaborator</div>
-                          <div className="text-muted-foreground">
-                            Can edit and share
-                          </div>
-                        </button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="secondary"
+                      className="min-w-[140px] justify-between h-auto py-2.5 cursor-pointer"
+                    >
+                      <span>
+                        {defaultRole == ROLE_VIEWER ? 'Viewer' : 'Collaborator'}
+                      </span>
+                      <ChevronDown className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="min-w-[200px]">
+                    <DropdownMenuItem
+                      onClick={() => setDefaultRole(ROLE_VIEWER)}
+                      className="flex-col items-start h-auto py-2"
+                    >
+                      <div className="font-medium">Viewer</div>
+                      <div className="text-muted-foreground text-sm">
+                        Can view only
                       </div>
-                    </>
-                  )}
-                </div>
-                <button
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => setDefaultRole(ROLE_COLLABORATOR)}
+                      className="flex-col items-start h-auto py-2"
+                    >
+                      <div className="font-medium">Collaborator</div>
+                      <div className="text-muted-foreground text-sm">
+                        Can edit and share
+                      </div>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <Button
                   onClick={handleAddEmail}
                   disabled={!canAddEmail}
-                  className="px-4 py-2.5 bg-accent hover:bg-accent/80 
-                    rounded-lg transition-all duration-200 
-                    disabled:opacity-50 disabled:cursor-not-allowed"
+                  variant="secondary"
+                  className="h-auto py-2.5"
                 >
                   Add
-                </button>
+                </Button>
               </div>
 
               {recipients.length > 0 && (
@@ -265,83 +249,57 @@ export function ShareDialog({
                         </div>
                         <span className="truncate">{recipient.email}</span>
                       </div>
-                      <div 
+                      <div
                         className="flex items-center gap-2 flex-shrink-0"
                       >
-                        <div className="relative">
-                          <button
-                            onClick={() => setActiveRecipientMenu(
-                              activeRecipientMenu == recipient.email 
-                                ? null 
-                                : recipient.email
-                            )}
-                            className="px-3 py-1.5 bg-accent/50 
-                              hover:bg-accent rounded-lg 
-                              transition-all duration-200 
-                              flex items-center gap-2 text-sm"
-                          >
-                            <span>
-                              {recipient.role == ROLE_VIEWER 
-                                ? 'Viewer' 
-                                : 'Collaborator'
-                              }
-                            </span>
-                            <ChevronDown className="w-3 h-3" />
-                          </button>
-                          {activeRecipientMenu == recipient.email && (
-                            <>
-                              <div
-                                className="fixed inset-0 z-20"
-                                onClick={() => setActiveRecipientMenu(null)}
-                              />
-                              <div 
-                                className="absolute right-0 top-full mt-1 
-                                  bg-popover border border-border 
-                                  rounded-lg shadow-xl py-1 min-w-[200px] 
-                                  z-30"
-                              >
-                                <button
-                                  onClick={() => {
-                                    handleRoleChange(recipient.email, ROLE_VIEWER)
-                                    setActiveRecipientMenu(null)
-                                  }}
-                                  className="w-full px-4 py-2 text-left 
-                                    hover:bg-accent transition-colors 
-                                    duration-150"
-                                >
-                                  <div className="font-medium">Viewer</div>
-                                  <div className="text-muted-foreground">
-                                    Can view only
-                                  </div>
-                                </button>
-                                <div className="h-px bg-border my-1" />
-                                <button
-                                  onClick={() => {
-                                    handleRoleChange(recipient.email, ROLE_COLLABORATOR)
-                                    setActiveRecipientMenu(null)
-                                  }}
-                                  className="w-full px-4 py-2 text-left 
-                                    hover:bg-accent transition-colors 
-                                    duration-150"
-                                >
-                                  <div className="font-medium">
-                                    Collaborator
-                                  </div>
-                                  <div className="text-muted-foreground">
-                                    Can edit and share
-                                  </div>
-                                </button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              className="h-auto py-1.5 bg-accent/50 hover:bg-accent cursor-pointer"
+                            >
+                              <span>
+                                {recipient.role == ROLE_VIEWER
+                                  ? 'Viewer'
+                                  : 'Collaborator'
+                                }
+                              </span>
+                              <ChevronDown className="w-3 h-3" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="min-w-[200px]">
+                            <DropdownMenuItem
+                              onClick={() => handleRoleChange(recipient.email, ROLE_VIEWER)}
+                              className="flex-col items-start h-auto py-2"
+                            >
+                              <div className="font-medium">Viewer</div>
+                              <div className="text-muted-foreground text-sm">
+                                Can view only
                               </div>
-                            </>
-                          )}
-                        </div>
-                        <button
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => handleRoleChange(recipient.email, ROLE_COLLABORATOR)}
+                              className="flex-col items-start h-auto py-2"
+                            >
+                              <div className="font-medium">
+                                Collaborator
+                              </div>
+                              <div className="text-muted-foreground text-sm">
+                                Can edit and share
+                              </div>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                        <Button
                           onClick={() => handleRemoveEmail(recipient.email)}
-                          className="p-1 hover:bg-accent rounded 
-                            transition-all duration-200"
+                          variant="ghost"
+                          size="icon"
+                          className="h-auto w-auto p-1"
                         >
                           <X className="w-4 h-4" />
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   ))}
@@ -354,26 +312,23 @@ export function ShareDialog({
             </p>
           </div>
 
-          <div 
-            className="flex justify-end gap-2 px-6 py-4 
+          <div
+            className="flex justify-end gap-2 px-6 py-4
               border-t border-border bg-muted/20"
           >
-            <button
+            <Button
               onClick={onClose}
-              className="px-4 py-2 hover:bg-accent rounded-lg 
-                transition-all duration-200"
+              variant="ghost"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={handleShare}
               disabled={recipients.length == 0}
-              className="px-4 py-2 bg-primary text-primary-foreground 
-                rounded-lg hover:opacity-90 transition-all duration-200 
-                disabled:opacity-50 disabled:cursor-not-allowed"
+              variant="default"
             >
               {shareButtonText}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

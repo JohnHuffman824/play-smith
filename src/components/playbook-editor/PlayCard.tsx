@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import {
   MoreVertical,
   Edit,
@@ -9,16 +8,25 @@ import {
   Play
 } from 'lucide-react'
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
   PLAY_TYPE_PASS,
   PLAY_TYPE_BADGE_PASS,
   PLAY_TYPE_BADGE_RUN,
   MAX_VISIBLE_TAGS,
   TAG_COLORS,
   DEFAULT_TAG_COLOR,
-  MENU_ITEM_BASE,
 } from './constants/playbook'
+import { formatDateDayMonthYear } from '@/utils/date.utils'
+import { PlayThumbnailSVG } from './PlayThumbnailSVG'
+import type { Drawing } from '@/types/drawing.types'
 
-interface PlayCardProps {
+type PlayCardProps = {
   id: string
   name: string
   formation: string
@@ -27,6 +35,7 @@ interface PlayCardProps {
   tags: string[]
   lastModified: string
   thumbnail?: string
+  drawings?: Drawing[]
   personnel?: string
   selected?: boolean
   onSelect?: (id: string) => void
@@ -37,11 +46,16 @@ interface PlayCardProps {
   onDuplicate: (id: string) => void
 }
 
-interface MenuItem {
-  label: string
-  icon: typeof Edit
-  onClick: () => void
-  destructive?: boolean
+type PlayCardThumbnailProps = {
+  thumbnail?: string
+  drawings?: Drawing[]
+  name: string
+  playType: string
+  onOpen: () => void
+}
+
+type PlayCardTagsProps = {
+  tags: string[]
 }
 
 function getTagColor(tag: string) {
@@ -50,43 +64,31 @@ function getTagColor(tag: string) {
 
 function PlayCardThumbnail({
   thumbnail,
+  drawings,
   name,
   playType,
-  onOpen,
-  onAnimate
-}: {
-  thumbnail?: string
-  name: string
-  playType: string
-  onOpen: () => void
-  onAnimate?: () => void
-}) {
+  onOpen
+}: PlayCardThumbnailProps) {
+  console.log(`PlayCard "${name}" - drawings:`, drawings, 'length:', drawings?.length)
   const badgeClass = playType == PLAY_TYPE_PASS
     ? PLAY_TYPE_BADGE_PASS
     : PLAY_TYPE_BADGE_RUN
 
-  const handleClick = () => {
-    // If onAnimate is provided, use it; otherwise fall back to onOpen
-    if (onAnimate) {
-      onAnimate()
-    } else {
-      onOpen()
-    }
-  }
-
   return (
     <div className="relative group/thumbnail">
       <div
-        onClick={handleClick}
+        onClick={onOpen}
         className="aspect-video bg-muted flex items-center
           justify-center cursor-pointer hover:bg-accent
           transition-colors duration-200"
       >
-        {thumbnail ? (
-          <img 
-            src={thumbnail} 
-            alt={name} 
-            className="w-full h-full object-cover" 
+        {drawings && drawings.length > 0 ? (
+          <PlayThumbnailSVG drawings={drawings} className="w-full h-full" />
+        ) : thumbnail ? (
+          <img
+            src={thumbnail}
+            alt={name}
+            className="w-full h-full object-cover"
           />
         ) : (
           <div className="text-center p-6">
@@ -142,77 +144,22 @@ function PlayCardThumbnail({
         )}
       </div>
 
-      <div className="absolute top-2 right-2">
-        <span
-          className={`px-2.5 py-1 rounded-md text-xs shadow-sm
-            backdrop-blur-sm ${badgeClass}`}
-        >
-          {playType}
-        </span>
-      </div>
-
-      {/* Play button overlay for animation */}
-      {onAnimate && (
-        <div
-          className="absolute inset-0 flex items-center justify-center
-            bg-black/0 group-hover/thumbnail:bg-black/30
-            transition-all duration-200 pointer-events-none"
-        >
-          <div
-            className="w-12 h-12 rounded-full bg-primary/90 flex items-center
-              justify-center opacity-0 group-hover/thumbnail:opacity-100
-              transform scale-75 group-hover/thumbnail:scale-100
-              transition-all duration-200 pointer-events-auto"
+      {playType && (
+        <div className="absolute top-2 right-2">
+          <span
+            className={`px-2.5 py-1 rounded-md text-xs shadow-sm
+              backdrop-blur-sm ${badgeClass}`}
           >
-            <Play className="w-6 h-6 text-white ml-0.5" fill="white" />
-          </div>
+            {playType}
+          </span>
         </div>
       )}
     </div>
   )
 }
 
-function PlayCardMenu({ 
-  menuItems, 
-  showMenu, 
-  onClose 
-}: { 
-  menuItems: MenuItem[]
-  showMenu: boolean
-  onClose: () => void
-}) {
-  if (!showMenu) return null
 
-  return (
-    <>
-      <div className="fixed inset-0 z-10" onClick={onClose} />
-      <div 
-        className="absolute right-0 top-full mt-1 w-48 
-          bg-popover border border-border rounded-lg shadow-lg 
-          z-20 py-1"
-      >
-        {menuItems.map((item, index) => (
-          <div key={item.label}>
-            {item.destructive && index > 0 && (
-              <div className="h-px bg-border my-1" />
-            )}
-            <button
-              onClick={item.onClick}
-              className={`${MENU_ITEM_BASE} ${
-                item.destructive ? 'text-destructive' : ''
-              }`}
-            >
-              <item.icon className="w-4 h-4" />
-              {item.label}
-            </button>
-          </div>
-        ))}
-      </div>
-    </>
-  )
-}
-
-function PlayCardTags({ tags }: { tags: string[] }) {
+function PlayCardTags({ tags }: PlayCardTagsProps) {
   if (tags.length == 0) return null
 
   const visibleTags = tags.slice(0, MAX_VISIBLE_TAGS)
@@ -250,6 +197,7 @@ export function PlayCard({
   tags,
   lastModified,
   thumbnail,
+  drawings,
   personnel,
   selected = false,
   onSelect,
@@ -259,48 +207,8 @@ export function PlayCard({
   onDelete,
   onDuplicate,
 }: PlayCardProps) {
-  const [showMenu, setShowMenu] = useState(false)
-
-  const closeMenu = () => setShowMenu(false)
-
-  const menuItems: MenuItem[] = [
-    {
-      label: 'Open',
-      icon: Edit,
-      onClick: () => {
-        onOpen(id)
-        closeMenu()
-      },
-    },
-    {
-      label: 'Rename',
-      icon: Edit,
-      onClick: () => {
-        onRename(id)
-        closeMenu()
-      },
-    },
-    {
-      label: 'Duplicate',
-      icon: Copy,
-      onClick: () => {
-        onDuplicate(id)
-        closeMenu()
-      },
-    },
-    {
-      label: 'Delete',
-      icon: Trash2,
-      onClick: () => {
-        onDelete(id)
-        closeMenu()
-      },
-      destructive: true,
-    },
-  ]
-
-  const cardClass = `group relative bg-card border border-border 
-    rounded-xl overflow-hidden hover:shadow-lg 
+  const cardClass = `group relative bg-card border border-border
+    rounded-xl overflow-hidden hover:shadow-lg
     transition-all duration-200 ${
       selected ? 'ring-2 ring-primary' : ''
     }`
@@ -309,10 +217,10 @@ export function PlayCard({
     <div className={cardClass}>
       <PlayCardThumbnail
         thumbnail={thumbnail}
+        drawings={drawings}
         name={name}
         playType={playType}
         onOpen={() => onOpen(id)}
-        onAnimate={onAnimate ? () => onAnimate(id) : undefined}
       />
 
       {onSelect && (
@@ -321,16 +229,16 @@ export function PlayCard({
             e.stopPropagation()
             onSelect(id)
           }}
-          className="absolute top-2 left-2 p-1 bg-background/80 
-            backdrop-blur-sm rounded-full hover:bg-background 
+          className="absolute top-2 left-2 p-1 bg-background/80
+            backdrop-blur-sm rounded-full hover:bg-background
             transition-all duration-200"
         >
           {selected ? (
             <CheckCircle2 className="w-5 h-5 text-primary" />
           ) : (
-            <Circle 
-              className="w-5 h-5 text-muted-foreground opacity-0 
-                group-hover:opacity-100 transition-opacity" 
+            <Circle
+              className="w-5 h-5 text-muted-foreground opacity-0
+                group-hover:opacity-100 transition-opacity"
             />
           )}
         </button>
@@ -339,23 +247,37 @@ export function PlayCard({
       <div className="p-4">
         <div className="flex items-start justify-between gap-2 mb-3">
           <h3 className="flex-1 line-clamp-1">{name}</h3>
-          
-          <div className="relative">
-            <button
-              onClick={() => setShowMenu(!showMenu)}
-              className="p-1 hover:bg-accent rounded 
-                transition-all duration-200 opacity-0 
-                group-hover:opacity-100"
-            >
-              <MoreVertical className="w-4 h-4" />
-            </button>
 
-            <PlayCardMenu
-              menuItems={menuItems}
-              showMenu={showMenu}
-              onClose={closeMenu}
-            />
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className="p-1 hover:bg-accent rounded
+                  transition-all duration-200 opacity-0
+                  group-hover:opacity-100 cursor-pointer"
+              >
+                <MoreVertical className="w-4 h-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => onOpen(id)}>
+                <Edit className="w-4 h-4" />
+                Open
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onRename(id)}>
+                <Edit className="w-4 h-4" />
+                Rename
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onDuplicate(id)}>
+                <Copy className="w-4 h-4" />
+                Duplicate
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => onDelete(id)} variant="destructive">
+                <Trash2 className="w-4 h-4" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         <div className="flex items-center gap-2 mb-2">
@@ -386,7 +308,7 @@ export function PlayCard({
         <PlayCardTags tags={tags} />
 
         <div className="pt-2 border-t border-border">
-          <p className="text-muted-foreground">{lastModified}</p>
+          <p className="text-muted-foreground">{formatDateDayMonthYear(lastModified)}</p>
         </div>
       </div>
     </div>

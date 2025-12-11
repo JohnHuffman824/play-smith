@@ -1,8 +1,14 @@
-import { BookOpen, MoreVertical, Folder, Download, Share2 } from 'lucide-react'
-import { useState } from 'react'
+import { BookOpen, MoreVertical, Folder, Download, Share2, Edit, Copy, Trash2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
-interface PlaybookCardProps {
+type PlaybookCardProps = {
 	id: number
 	name: string
 	type: 'playbook' | 'folder'
@@ -29,7 +35,6 @@ export function PlaybookCard({
 	onExport,
 	onShare,
 }: PlaybookCardProps) {
-	const [showMenu, setShowMenu] = useState(false)
 	const navigate = useNavigate()
 
 	const handleOpen = () => {
@@ -86,95 +91,67 @@ export function PlaybookCard({
 				)}
 
 				{/* More Options Button */}
-				<button
-					className="absolute top-2 right-2 p-1.5 rounded-lg bg-card/90 backdrop-blur-sm border border-border opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-accent z-10"
-					onClick={(e) => {
-						e.stopPropagation()
-						setShowMenu(!showMenu)
-					}}
-				>
-					<MoreVertical className="w-4 h-4 text-foreground" />
-				</button>
-
-				{/* Context Menu */}
-				{showMenu && (
-					<>
-						<div
-							className="fixed inset-0 z-20"
+				<DropdownMenu>
+					<DropdownMenuTrigger asChild>
+						<button
+							className="absolute top-2 right-2 p-1.5 rounded-lg bg-card/90 backdrop-blur-sm border border-border opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-accent z-10 cursor-pointer"
 							onClick={(e) => {
 								e.stopPropagation()
-								setShowMenu(false)
 							}}
-						/>
-						<div className="absolute top-11 right-2 bg-popover border border-border rounded-lg shadow-xl py-1 min-w-[160px] z-30">
-							<button
-								className="w-full px-4 py-2 hover:bg-accent transition-colors duration-150 text-left"
-								onClick={(e) => {
-									e.stopPropagation()
-									handleOpen()
-									setShowMenu(false)
-								}}
-							>
-								Open
-							</button>
-							<button
-								className="w-full px-4 py-2 hover:bg-accent transition-colors duration-150 text-left"
-								onClick={(e) => {
-									e.stopPropagation()
-									onRename(id)
-									setShowMenu(false)
-								}}
-							>
-								Rename
-							</button>
-							<button
-								className="w-full px-4 py-2 hover:bg-accent transition-colors duration-150 text-left"
-								onClick={(e) => {
-									e.stopPropagation()
-									onDuplicate(id)
-									setShowMenu(false)
-								}}
-							>
-								Duplicate
-							</button>
-							{onExport && (
-								<button
-									className="w-full px-4 py-2 hover:bg-accent transition-colors duration-150 text-left"
-									onClick={(e) => {
-										e.stopPropagation()
-										onExport(id)
-										setShowMenu(false)
-									}}
-								>
-									Export
-								</button>
-							)}
-							{onShare && (
-								<button
-									className="w-full px-4 py-2 hover:bg-accent transition-colors duration-150 text-left"
-									onClick={(e) => {
-										e.stopPropagation()
-										onShare(id)
-										setShowMenu(false)
-									}}
-								>
-									Share
-								</button>
-							)}
-							<div className="h-px bg-border my-1" />
-							<button
-								className="w-full px-4 py-2 hover:bg-accent text-destructive transition-colors duration-150 text-left"
-								onClick={(e) => {
-									e.stopPropagation()
-									onDelete(id)
-									setShowMenu(false)
-								}}
-							>
-								Delete
-							</button>
-						</div>
-					</>
-				)}
+						>
+							<MoreVertical className="w-4 h-4 text-foreground" />
+						</button>
+					</DropdownMenuTrigger>
+					<DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+						<DropdownMenuItem onClick={(e) => {
+							e.stopPropagation()
+							handleOpen()
+						}}>
+							<BookOpen className="w-4 h-4" />
+							Open
+						</DropdownMenuItem>
+						<DropdownMenuItem onClick={(e) => {
+							e.stopPropagation()
+							onRename(id)
+						}}>
+							<Edit className="w-4 h-4" />
+							Rename
+						</DropdownMenuItem>
+						<DropdownMenuItem onClick={(e) => {
+							e.stopPropagation()
+							onDuplicate(id)
+						}}>
+							<Copy className="w-4 h-4" />
+							Duplicate
+						</DropdownMenuItem>
+						{onExport && (
+							<DropdownMenuItem onClick={(e) => {
+								e.stopPropagation()
+								onExport(id)
+							}}>
+								<Download className="w-4 h-4" />
+								Export
+							</DropdownMenuItem>
+						)}
+						{onShare && (
+							<DropdownMenuItem onClick={(e) => {
+								e.stopPropagation()
+								onShare(id)
+							}}>
+								<Share2 className="w-4 h-4" />
+								Share
+							</DropdownMenuItem>
+						)}
+						<DropdownMenuSeparator />
+						<DropdownMenuItem onClick={(e) => {
+							e.stopPropagation()
+							onDelete(id)
+						}} variant="destructive">
+							<Trash2 className="w-4 h-4" />
+							Delete
+						</DropdownMenuItem>
+					</DropdownMenuContent>
+				</DropdownMenu>
 			</div>
 
 			{/* Card Info */}

@@ -1,10 +1,16 @@
 import type React from 'react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { FieldCoordinateSystem } from '../../utils/coordinates'
 import type { Drawing } from '../../types/drawing.types'
+import type { Coordinate } from '../../types/field.types'
 import { findSnapTarget, findPlayerSnapTarget } from '../../utils/drawing.utils'
 import type { SnapTarget, PlayerSnapTarget } from '../../utils/drawing.utils'
 import { PLAYER_RADIUS_FEET } from '../../constants/field.constants'
+import { pointToLineDistance } from '../../utils/canvas.utils'
+
+// Constants for proximity filtering
+const BEZIER_SAMPLE_POINTS = 10
+const DEFAULT_PROXIMITY_THRESHOLD = 20
 
 interface MultiDrawingControlPointOverlayProps {
 	drawings: Drawing[]
@@ -17,6 +23,8 @@ interface MultiDrawingControlPointOverlayProps {
 	}>
 	coordSystem: FieldCoordinateSystem
 	snapThreshold: number
+	cursorPosition?: { x: number; y: number } | null
+	proximityThreshold?: number
 	onDragPoint?: (
 		drawingId: string,
 		pointId: string,
@@ -42,6 +50,143 @@ interface MultiDragState {
 }
 
 /**
+ * Sample points along a cubic bezier curve.
+ */
+function sampleCubicBezier(
+	p0: Coordinate,
+	cp1: Coordinate,
+	cp2: Coordinate,
+	p3: Coordinate,
+	numSamples: number,
+): Coordinate[] {
+	const samples: Coordinate[] = []
+	for (let i = 0; i <= numSamples; i++) {
+		const t = i / numSamples
+		const t2 = t * t
+		const t3 = t2 * t
+		const mt = 1 - t
+		const mt2 = mt * mt
+		const mt3 = mt2 * mt
+
+		samples.push({
+			x: mt3 * p0.x + 3 * mt2 * t * cp1.x + 3 * mt * t2 * cp2.x + t3 * p3.x,
+			y: mt3 * p0.y + 3 * mt2 * t * cp1.y + 3 * mt * t2 * cp2.y + t3 * p3.y,
+		})
+	}
+	return samples
+}
+
+/**
+ * Calculate minimum distance from a pixel position to any segment of a drawing.
+ */
+function getDistanceToDrawingPath(
+	pixelPos: Coordinate,
+	drawing: Drawing,
+	coordSystem: FieldCoordinateSystem
+): number {
+	let minDistance = Infinity
+
+	for (const segment of drawing.segments) {
+		const pointIds = segment.pointIds
+
+		if (segment.type === 'line') {
+			// Line: two points
+			const p1 = drawing.points[pointIds[0]]
+			const p2 = drawing.points[pointIds[1]]
+			if (!p1 || !p2) continue
+
+			const pixel1 = coordSystem.feetToPixels(p1.x, p1.y)
+			const pixel2 = coordSystem.feetToPixels(p2.x, p2.y)
+			const dist = pointToLineDistance(pixelPos, pixel1, pixel2)
+			minDistance = Math.min(minDistance, dist)
+
+		} else if (segment.type === 'cubic') {
+			// Handle both NEW and OLD formats
+			if (pointIds.length === 2) {
+				// NEW FORMAT: handles in nodes
+				const fromPoint = drawing.points[pointIds[0]]
+				const toPoint = drawing.points[pointIds[1]]
+				if (!fromPoint || !toPoint) continue
+
+				// If handles exist, sample the bezier curve
+				if (fromPoint.handleOut && toPoint.handleIn) {
+					const p0 = coordSystem.feetToPixels(fromPoint.x, fromPoint.y)
+					const cp1X = fromPoint.x + fromPoint.handleOut.x
+					const cp1Y = fromPoint.y + fromPoint.handleOut.y
+					const cp1 = coordSystem.feetToPixels(cp1X, cp1Y)
+					const cp2X = toPoint.x + toPoint.handleIn.x
+					const cp2Y = toPoint.y + toPoint.handleIn.y
+					const cp2 = coordSystem.feetToPixels(cp2X, cp2Y)
+					const p3 = coordSystem.feetToPixels(toPoint.x, toPoint.y)
+
+					const samples = sampleCubicBezier(
+						p0,
+						cp1,
+						cp2,
+						p3,
+						BEZIER_SAMPLE_POINTS
+					)
+
+					for (let i = 0; i < samples.length - 1; i++) {
+						const dist = pointToLineDistance(
+							pixelPos,
+							samples[i],
+							samples[i + 1]
+						)
+						minDistance = Math.min(minDistance, dist)
+					}
+				} else {
+					// Fallback to straight line
+					const pixel1 = coordSystem.feetToPixels(fromPoint.x, fromPoint.y)
+					const pixel2 = coordSystem.feetToPixels(toPoint.x, toPoint.y)
+					const dist = pointToLineDistance(pixelPos, pixel1, pixel2)
+					minDistance = Math.min(minDistance, dist)
+				}
+			} else {
+				// OLD FORMAT: separate control points
+				const p0 = drawing.points[pointIds[0]]
+				const cp1 = drawing.points[pointIds[1]]
+				const cp2 = drawing.points[pointIds[2]]
+				if (!p0 || !cp1 || !cp2) continue
+
+				const pixel0 = coordSystem.feetToPixels(p0.x, p0.y)
+				const pixelCp1 = coordSystem.feetToPixels(cp1.x, cp1.y)
+				const pixelCp2 = coordSystem.feetToPixels(cp2.x, cp2.y)
+
+				const samples = sampleCubicBezier(
+					pixel0,
+					pixelCp1,
+					pixelCp2,
+					pixelCp2,
+					BEZIER_SAMPLE_POINTS
+				)
+
+				for (let i = 0; i < samples.length - 1; i++) {
+					const dist = pointToLineDistance(
+						pixelPos,
+						samples[i],
+						samples[i + 1]
+					)
+					minDistance = Math.min(minDistance, dist)
+				}
+			}
+		} else if (segment.type === 'quadratic') {
+			// Approximate quadratic as line for distance calculation
+			const control = drawing.points[pointIds[0]]
+			const end = drawing.points[pointIds[1]]
+			if (!control || !end) continue
+
+			const pixel1 = coordSystem.feetToPixels(control.x, control.y)
+			const pixel2 = coordSystem.feetToPixels(end.x, end.y)
+			const dist = pointToLineDistance(pixelPos, pixel1, pixel2)
+			minDistance = Math.min(minDistance, dist)
+		}
+	}
+
+	return minDistance
+}
+
+/**
  * Unified overlay that renders draggable control points for ALL drawings.
  * Eliminates race conditions from multiple overlay components.
  */
@@ -50,6 +195,8 @@ export function MultiDrawingControlPointOverlay({
 	players,
 	coordSystem,
 	snapThreshold,
+	cursorPosition,
+	proximityThreshold = DEFAULT_PROXIMITY_THRESHOLD,
 	onDragPoint,
 	onMerge,
 	onLinkToPlayer,
@@ -176,7 +323,21 @@ export function MultiDrawingControlPointOverlay({
 		}
 	}
 
-	// Collect all control points from shared point pools
+	// Filter drawings by proximity to cursor
+	const nearbyDrawings = useMemo(() => {
+		if (!cursorPosition) return drawings
+
+		return drawings.filter(drawing => {
+			const distance = getDistanceToDrawingPath(
+				cursorPosition,
+				drawing,
+				coordSystem
+			)
+			return distance <= proximityThreshold
+		})
+	}, [drawings, cursorPosition, coordSystem, proximityThreshold])
+
+	// Collect control points only from nearby drawings
 	// No deduplication needed - each drawing's point pool already has unique points!
 	const controlPoints: Array<{
 		drawingId: string
@@ -186,7 +347,7 @@ export function MultiDrawingControlPointOverlay({
 		color: string
 	}> = []
 
-	for (const drawing of drawings) {
+	for (const drawing of nearbyDrawings) {
 		// Iterate over the point pool directly
 		for (const [pointId, point] of Object.entries(drawing.points)) {
 			// Skip points linked to players

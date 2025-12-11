@@ -1,4 +1,5 @@
 import { ReactNode } from 'react'
+import { Button } from '../ui/button'
 
 interface ModalProps {
 	isOpen: boolean
@@ -22,12 +23,14 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
 			<div className="relative bg-background rounded-lg shadow-lg max-w-md w-full mx-4 p-6">
 				<div className="flex items-center justify-between mb-4">
 					<h2 className="text-xl font-semibold">{title}</h2>
-					<button
+					<Button
 						onClick={onClose}
-						className="text-muted-foreground hover:text-foreground"
+						variant="ghost"
+						size="icon"
+						className="h-auto w-auto p-1"
 					>
 						✕
-					</button>
+					</Button>
 				</div>
 				{children}
 			</div>

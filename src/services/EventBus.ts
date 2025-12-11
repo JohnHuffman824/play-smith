@@ -1,16 +1,14 @@
 /**
-* Type-safe event bus for application-wide event communication
-* Replaces the unsafe window.dispatchEvent/addEventListener pattern
-*/
+ * Type-safe event bus for application-wide event communication
+ * Replaces the unsafe window.dispatchEvent/addEventListener pattern
+ */
 
-import type { Tool } from '../types/play.types'
-import type { HashAlignment } from '../types/field.types'
 import type { Drawing } from '../types/drawing.types'
 
 /**
-* Central registry of all application events with their payload types
-*/
-export interface EventMap {
+ * Central registry of all application events with their payload types
+ */
+export type EventMap = {
 	// Tool change events
 	'tool:select': void
 	'tool:draw': void
@@ -64,12 +62,22 @@ export interface EventMap {
 }
 
 type EventHandler<T> = T extends void ? () => void : (data: T) => void
+type EventKey = keyof EventMap
+type AnyEventHandler = EventHandler<EventMap[EventKey]>
 
 /**
-* Type-safe event bus implementation
-*/
+ * Type-safe event bus implementation
+ */
 class TypedEventBus {
-	private listeners = new Map<keyof EventMap, Set<Function>>()
+	private listeners = new Map<EventKey, Set<AnyEventHandler>>()
+
+	private getHandlers<K extends EventKey>(
+		event: K
+	): Set<EventHandler<EventMap[K]>> | undefined {
+		return this.listeners.get(event) as
+			| Set<EventHandler<EventMap[K]>>
+			| undefined
+	}
 
 	/**
 	 * Subscribe to an event
@@ -78,10 +86,14 @@ class TypedEventBus {
 		event: K,
 		handler: EventHandler<EventMap[K]>
 	): void {
-		if (!this.listeners.has(event)) {
-			this.listeners.set(event, new Set())
+		const handlers = this.getHandlers(event)
+		if (!handlers) {
+			const newHandlers = new Set<EventHandler<EventMap[K]>>()
+			newHandlers.add(handler)
+			this.listeners.set(event, newHandlers)
+			return
 		}
-		this.listeners.get(event)!.add(handler)
+		handlers.add(handler)
 	}
 
 	/**
@@ -91,7 +103,7 @@ class TypedEventBus {
 		event: K,
 		handler: EventHandler<EventMap[K]>
 	): void {
-		this.listeners.get(event)?.delete(handler)
+		this.getHandlers(event)?.delete(handler)
 	}
 
 	/**
@@ -101,16 +113,17 @@ class TypedEventBus {
 		event: K,
 		...args: EventMap[K] extends void ? [] : [EventMap[K]]
 	): void {
-		const handlers = this.listeners.get(event)
-		if (handlers) {
-			handlers.forEach(handler => {
-				if (args.length > 0) {
-					(handler as Function)(args[0])
-				} else {
-					(handler as Function)()
-				}
-			})
+		const handlers = this.getHandlers(event)
+		if (!handlers) {
+			return
 		}
+		handlers.forEach(handler => {
+			if (args.length > 0) {
+				handler(args[0])
+			} else {
+				handler()
+			}
+		})
 	}
 
 	/**
@@ -128,12 +141,13 @@ class TypedEventBus {
 	 * Get count of listeners for debugging
 	 */
 	listenerCount(event: keyof EventMap): number {
-		return this.listeners.get(event)?.size ?? 0
+		const handlers = this.getHandlers(event)
+		return handlers?.size ?? 0
 	}
 }
 
 /**
-* Singleton instance of the event bus
-* Import this to use events throughout the application
-*/
+ * Singleton instance of the event bus
+ * Import this to use events throughout the application
+ */
 export const eventBus = new TypedEventBus()

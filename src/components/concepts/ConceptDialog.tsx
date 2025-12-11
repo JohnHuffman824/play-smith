@@ -12,6 +12,13 @@ import { TargetingTooltip } from './TargetingTooltip'
 import { PlayProvider } from '../../contexts/PlayContext'
 import type { Tool } from '../../types/play.types'
 import { generateThumbnail } from '../../utils/thumbnail'
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue
+} from '../ui/select'
 
 interface ConceptDialogProps {
 	isOpen: boolean
@@ -40,6 +47,7 @@ export function ConceptDialog({
 	const [playDirection, setPlayDirection] = useState<PlayDirection>('na')
 	const [selectedTool, setSelectedTool] = useState<Tool>('select')
 	const [color, setColor] = useState('#000000')
+	const [hashAlignment, setHashAlignment] = useState<'left' | 'center' | 'right'>('center')
 	const [isSaving, setIsSaving] = useState(false)
 	const [nameError, setNameError] = useState('')
 	const [touched, setTouched] = useState(false)
@@ -146,24 +154,8 @@ export function ConceptDialog({
 	return (
 		<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
 			<div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-[90vw] h-[90vh] flex flex-col">
-				{/* Header */}
-				<div className="flex items-center justify-between px-6 py-4 border-b border-gray-300 dark:border-gray-600">
-					<h2 className="text-xl font-semibold">
-						{mode === 'create' && 'Create New Concept'}
-						{mode === 'edit' && 'Edit Concept'}
-						{mode === 'save-as' && 'Save Selection as Concept'}
-					</h2>
-					<button
-						onClick={onClose}
-						className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-						aria-label="Close dialog"
-					>
-						<X className="w-5 h-5" />
-					</button>
-				</div>
-
 				{/* Name and Scope */}
-				<div className="px-6 py-4 border-b border-gray-300 dark:border-gray-600 flex items-center gap-4">
+				<div className="px-6 py-4 border-b border-gray-300 dark:border-gray-600 flex items-start gap-4">
 					<div className="flex-1">
 						<label className="block text-sm font-medium mb-1">
 							Concept Name
@@ -201,7 +193,7 @@ export function ConceptDialog({
 							<button
 								onClick={() => setScope('team')}
 								className={`
-									px-4 py-2 rounded-md text-sm font-medium transition-colors
+									px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer
 									${scope === 'team'
 										? 'bg-blue-500 text-white'
 										: 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
@@ -219,13 +211,21 @@ export function ConceptDialog({
 										? 'bg-blue-500 text-white'
 										: 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
 									}
-									${!playbookId ? 'opacity-50 cursor-not-allowed' : ''}
+									${!playbookId ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
 								`}
 							>
 								Playbook
 							</button>
 						</div>
 					</div>
+
+					<button
+						onClick={onClose}
+						className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors cursor-pointer ml-auto"
+						aria-label="Close dialog"
+					>
+						<X className="w-5 h-5" />
+					</button>
 				</div>
 
 				{/* Canvas Area */}
@@ -236,10 +236,12 @@ export function ConceptDialog({
 						onToolChange={setSelectedTool}
 						color={color}
 						onColorChange={setColor}
+						hashAlignment={hashAlignment}
+						onHashAlignmentChange={setHashAlignment}
 					/>
 
 					{/* Canvas */}
-					<div ref={canvasContainerRef} className="flex-1 overflow-hidden">
+					<div ref={canvasContainerRef} className="flex-1 flex flex-col overflow-hidden" style={{ minHeight: 0 }}>
 						<PlayProvider>
 							<Canvas
 								drawingState={{
@@ -252,10 +254,9 @@ export function ConceptDialog({
 									eraseSize: 40,
 									snapThreshold: 20
 								}}
-								hashAlignment="center"
+								hashAlignment={hashAlignment}
 								showPlayBar={false}
-								width="100%"
-								height="100%"
+							containerMode="fill"
 								showFieldMarkings={true}
 							/>
 						</PlayProvider>
@@ -268,33 +269,21 @@ export function ConceptDialog({
 						{/* Targeting Mode */}
 						<div className="flex items-center gap-2">
 							<label className="text-sm font-medium">
-								Targeting:
+								Target Type:
 							</label>
-							<select
+							<Select
 								value={targetingMode}
-								onChange={e => setTargetingMode(e.target.value as TargetingMode)}
-								className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-sm"
+								onValueChange={v => setTargetingMode(v as TargetingMode)}
 							>
-								<option value="absolute_role">Absolute Role</option>
-								<option value="relative_selector">Relative Selector</option>
-							</select>
+								<SelectTrigger className="w-[140px]">
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="absolute_role">Absolute</SelectItem>
+									<SelectItem value="relative_selector">Relative</SelectItem>
+								</SelectContent>
+							</Select>
 							<TargetingTooltip />
-						</div>
-
-						{/* Ball Position */}
-						<div className="flex items-center gap-2">
-							<label className="text-sm font-medium">
-								Ball:
-							</label>
-							<select
-								value={ballPosition}
-								onChange={e => setBallPosition(e.target.value as BallPosition)}
-								className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-sm"
-							>
-								<option value="left">Left Hash</option>
-								<option value="center">Center</option>
-								<option value="right">Right Hash</option>
-							</select>
 						</div>
 
 						{/* Play Direction */}
@@ -302,21 +291,25 @@ export function ConceptDialog({
 							<label className="text-sm font-medium">
 								Direction:
 							</label>
-							<select
+							<Select
 								value={playDirection}
-								onChange={e => setPlayDirection(e.target.value as PlayDirection)}
-								className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-sm"
+								onValueChange={v => setPlayDirection(v as PlayDirection)}
 							>
-								<option value="na">N/A</option>
-								<option value="left">Left</option>
-								<option value="right">Right</option>
-							</select>
+								<SelectTrigger className="w-[100px]">
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="na">N/A</SelectItem>
+									<SelectItem value="left">Left</SelectItem>
+									<SelectItem value="right">Right</SelectItem>
+								</SelectContent>
+							</Select>
 						</div>
 
 						{/* Flip Button */}
 						<button
 							onClick={handleFlip}
-							className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-2"
+							className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-2 cursor-pointer"
 							title="Flip concept horizontally"
 						>
 							<FlipHorizontal className="w-4 h-4" />
@@ -328,14 +321,14 @@ export function ConceptDialog({
 					<div className="flex items-center gap-2">
 						<button
 							onClick={onClose}
-							className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+							className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
 						>
 							Cancel
 						</button>
 						<button
 							onClick={handleSave}
 							disabled={!isFormValid || isSaving}
-							className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+							className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
 						>
 							{isSaving ? 'Saving...' : mode === 'edit' ? 'Update' : 'Create'}
 						</button>

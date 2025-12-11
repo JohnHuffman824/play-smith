@@ -1,9 +1,11 @@
 import { UserRepository } from '../db/repositories/UserRepository'
 import { SessionRepository } from '../db/repositories/SessionRepository'
+import { TeamRepository } from '../db/repositories/TeamRepository'
 import { AuthService } from '../services/AuthService'
 
 const userRepo = new UserRepository()
 const sessionRepo = new SessionRepository()
+const teamRepo = new TeamRepository()
 const authService = new AuthService()
 
 const SESSION_COOKIE_NAME = 'session_token'
@@ -101,6 +103,14 @@ export const authAPI = {
 			email,
 			name,
 			password_hash: passwordHash,
+		})
+
+		// Create default "My Team" for new user
+		const defaultTeam = await teamRepo.create({ name: 'My Team' })
+		await teamRepo.addMember({
+			team_id: defaultTeam.id,
+			user_id: user.id,
+			role: 'owner'
 		})
 
 		const token = authService.generateSessionToken()

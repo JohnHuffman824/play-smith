@@ -6,16 +6,21 @@ import {
   CheckCircle2,
   Circle
 } from 'lucide-react'
-import { useState } from 'react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import {
   PLAY_TYPE_PASS,
   PLAY_TYPE_LIST_PASS,
   PLAY_TYPE_LIST_RUN,
-  MENU_ITEM_BASE,
 } from './constants/playbook'
 import type { Play } from './types'
 
-interface PlayListViewProps {
+type PlayListViewProps = {
   plays: Play[]
   selectedPlays: Set<string>
   onSelect: (id: string) => void
@@ -23,48 +28,6 @@ interface PlayListViewProps {
   onRename: (id: string) => void
   onDelete: (id: string) => void
   onDuplicate: (id: string) => void
-}
-
-interface MenuItem {
-  label: string
-  icon: typeof Edit
-  onClick: () => void
-  destructive?: boolean
-}
-
-function PlayRowMenu({ 
-  menuItems, 
-  isActive, 
-  onClose 
-}: { 
-  menuItems: MenuItem[]
-  isActive: boolean
-  onClose: () => void
-}) {
-  if (!isActive) return null
-
-  return (
-    <>
-      <div className="fixed inset-0 z-10" onClick={onClose} />
-      <div 
-        className="absolute right-0 top-full mt-1 w-48 
-          bg-popover border border-border rounded-lg shadow-lg 
-          z-20 py-1"
-      >
-        {menuItems.map((item, index) => (
-          <div key={item.label}>
-            {item.destructive && index > 0 && (
-              <div className="h-px bg-border my-1" />
-            )}
-            <button onClick={item.onClick} className={MENU_ITEM_BASE}>
-              <item.icon className="w-4 h-4" />
-              {item.label}
-            </button>
-          </div>
-        ))}
-      </div>
-    </>
-  )
 }
 
 export function PlayListView({
@@ -76,46 +39,6 @@ export function PlayListView({
   onDelete,
   onDuplicate,
 }: PlayListViewProps) {
-  const [activeMenu, setActiveMenu] = useState<string | null>(null)
-
-  const closeMenu = () => setActiveMenu(null)
-
-  const createMenuItems = (playId: string): MenuItem[] => [
-    {
-      label: 'Open',
-      icon: Edit,
-      onClick: () => {
-        onOpen(playId)
-        closeMenu()
-      },
-    },
-    {
-      label: 'Rename',
-      icon: Edit,
-      onClick: () => {
-        onRename(playId)
-        closeMenu()
-      },
-    },
-    {
-      label: 'Duplicate',
-      icon: Copy,
-      onClick: () => {
-        onDuplicate(playId)
-        closeMenu()
-      },
-    },
-    {
-      label: 'Delete',
-      icon: Trash2,
-      onClick: () => {
-        onDelete(playId)
-        closeMenu()
-      },
-      destructive: true,
-    },
-  ]
-
   return (
     <div 
       className="bg-card border border-border rounded-xl 
@@ -222,25 +145,39 @@ export function PlayListView({
                 </span>
               </div>
 
-              <div 
-                className="col-span-1 flex items-center 
-                  justify-end relative"
+              <div
+                className="col-span-1 flex items-center
+                  justify-end"
               >
-                <button
-                  onClick={() => 
-                    setActiveMenu(activeMenu == play.id ? null : play.id)
-                  }
-                  className="p-1 hover:bg-accent rounded 
-                    transition-all duration-200"
-                >
-                  <MoreVertical className="w-4 h-4" />
-                </button>
-
-                <PlayRowMenu
-                  menuItems={createMenuItems(play.id)}
-                  isActive={activeMenu == play.id}
-                  onClose={closeMenu}
-                />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      className="p-1 hover:bg-accent rounded
+                        transition-all duration-200 cursor-pointer"
+                    >
+                      <MoreVertical className="w-4 h-4" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => onOpen(play.id)}>
+                      <Edit className="w-4 h-4" />
+                      Open
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onRename(play.id)}>
+                      <Edit className="w-4 h-4" />
+                      Rename
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onDuplicate(play.id)}>
+                      <Copy className="w-4 h-4" />
+                      Duplicate
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => onDelete(play.id)} variant="destructive">
+                      <Trash2 className="w-4 h-4" />
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
           )

@@ -229,7 +229,7 @@ export function LoginModal() {
 									type="button"
 									onClick={() => setShowPassword(!showPassword)}
 									className="absolute right-4 top-1/2 -translate-y-1/2
-										text-gray-400 hover:text-gray-600 transition-colors"
+										text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
 									aria-label="Toggle password visibility"
 								>
 									{showPassword
@@ -246,7 +246,7 @@ export function LoginModal() {
 							disabled={isSubmitting}
 							className="w-full py-3.5 bg-blue-500 hover:bg-blue-600
 								text-white rounded-2xl font-semibold transition-all
-								hover:shadow-lg disabled:opacity-50
+								hover:shadow-lg disabled:opacity-50 cursor-pointer
 								disabled:cursor-not-allowed mb-4"
 						>
 							{isSubmitting
@@ -277,7 +277,7 @@ export function LoginModal() {
 								type="button"
 								onClick={switchMode}
 								className="text-blue-600 hover:text-blue-700
-									font-semibold transition-colors"
+									font-semibold transition-colors cursor-pointer"
 							>
 								{isLogin ? 'Sign up' : 'Sign in'}
 							</button>

@@ -33,6 +33,8 @@ import type { Play, Section } from './types'
 interface PlaybookEditorProps {
   playbookId?: string
   playbookName?: string
+  teamId?: string
+  teamName?: string
   onBack?: () => void
   onOpenPlay?: (playId: string) => void
   onImport?: () => void
@@ -53,6 +55,8 @@ function formatDate(date: Date): string {
 function PlaybookEditorContent({
   playbookId,
   playbookName = DEFAULT_PLAYBOOK_NAME,
+  teamId,
+  teamName,
   onBack,
   onOpenPlay,
   onImport,
@@ -323,7 +327,14 @@ function PlaybookEditorContent({
                 <ArrowLeft className="w-5 h-5" />
               </button>
               <div>
-                <h1 className="mb-1">{playbookName}</h1>
+                <div className="flex items-baseline gap-3 mb-1">
+                  <h1>{playbookName}</h1>
+                  {teamName && (
+                    <span className="text-sm text-muted-foreground">
+                      {teamName}
+                    </span>
+                  )}
+                </div>
                 <p className="text-muted-foreground">
                   {totalPlays} play{totalPlays != 1 ? 's' : ''} across{' '}
                   {sections.length} section{sections.length != 1 ? 's' : ''}
