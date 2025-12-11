@@ -589,16 +589,28 @@ export function Toolbar({
 					</button>
 				</Tooltip>
 
-				{/* Clear Button */}
-				<Tooltip content='Clear'>
+				{/* Delete Play Button */}
+				<Tooltip content='Delete Play'>
 					<button
-						onClick={handleClearPlay}
-						className={coloredButtonClass(
+						onClick={handleDeletePlay}
+						disabled={!playId || isDeleting}
+						className={`${coloredButtonClass(
 							'bg-red-50 text-red-500 hover:bg-red-100',
 							'bg-red-900 text-red-400 hover:bg-red-800',
-						)}
+						)} ${
+							!playId || isDeleting
+								? 'opacity-50 cursor-not-allowed'
+								: ''
+						}`}
 					>
-						<Trash2 size={22} />
+						{isDeleting ? (
+							<Loader2
+								size={22}
+								className="animate-spin"
+							/>
+						) : (
+							<Trash2 size={22} />
+						)}
 					</button>
 				</Tooltip>
 			</div>
