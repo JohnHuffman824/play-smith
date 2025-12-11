@@ -325,7 +325,7 @@ export function SVGCanvas({
 					drawing={drawing}
 					coordSystem={coordSystem}
 					onSelect={handleSelect}
-					isSelected={selectedDrawingId == drawing.id}
+					isSelected={selectedDrawingIds.includes(drawing.id)}
 					activeTool={activeTool}
 					onDelete={onDeleteDrawing}
 					onDragStart={handleDrawingDragStart}
