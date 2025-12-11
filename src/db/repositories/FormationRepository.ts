@@ -62,7 +62,7 @@ export class FormationRepository {
 				${data.description ?? null},
 				${data.created_by}
 			)
-			RETURNING *
+			RETURNING id, team_id, name, description, created_by, created_at, updated_at
 		`
 
 		if (!formation) {
@@ -82,7 +82,7 @@ export class FormationRepository {
 						${pos.position_y},
 						${pos.hash_relative ?? false}
 					)
-					RETURNING *
+					RETURNING id, formation_id, role, position_x, position_y, hash_relative, created_at
 				`.then(rows => rows[0])
 			)
 		)
@@ -95,7 +95,9 @@ export class FormationRepository {
 
 	async findById(id: number): Promise<FormationWithPositions | null> {
 		const [formation] = await db<Formation[]>`
-			SELECT * FROM formations WHERE id = ${id}
+			SELECT id, team_id, name, description, created_by, created_at, updated_at
+			FROM formations
+			WHERE id = ${id}
 		`
 
 		if (!formation) {
@@ -103,7 +105,8 @@ export class FormationRepository {
 		}
 
 		const positions = await db<FormationPlayerPosition[]>`
-			SELECT * FROM formation_player_positions
+			SELECT id, formation_id, role, position_x, position_y, hash_relative, created_at
+			FROM formation_player_positions
 			WHERE formation_id = ${id}
 			ORDER BY role
 		`
@@ -116,7 +119,8 @@ export class FormationRepository {
 
 	async getTeamFormations(teamId: number): Promise<Formation[]> {
 		return await db<Formation[]>`
-			SELECT * FROM formations
+			SELECT id, team_id, name, description, created_by, created_at, updated_at
+			FROM formations
 			WHERE team_id = ${teamId}
 			ORDER BY updated_at DESC
 		`
@@ -144,7 +148,7 @@ export class FormationRepository {
 					description = COALESCE(${data.description ?? null}, description),
 					updated_at = CURRENT_TIMESTAMP
 				WHERE id = ${id}
-				RETURNING *
+				RETURNING id, team_id, name, description, created_by, created_at, updated_at
 			`
 
 			if (!formation) {
