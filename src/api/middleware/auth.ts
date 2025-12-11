@@ -1,4 +1,4 @@
-import { SessionRepository } from '../../db/repositories/SessionRepository'
+import { SessionRepository } from '@/db/repositories/SessionRepository.ts'
 
 const sessionRepo = new SessionRepository()
 

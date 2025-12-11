@@ -58,7 +58,7 @@ export class ConceptGroupRepository {
 			)
 		}
 
-		return this.findById(group.id) as Promise<ConceptGroupWithDetails>
+		return await this.findById(group.id) as Promise<ConceptGroupWithDetails>
 	}
 
 	async findById(id: number): Promise<ConceptGroupWithDetails | null> {
