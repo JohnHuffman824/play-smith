@@ -26,6 +26,7 @@ import {
 import { formatDateDayMonthYear } from '@/utils/date.utils'
 import { PlayThumbnailSVG } from './PlayThumbnailSVG'
 import type { Drawing } from '@/types/drawing.types'
+import { createDefaultLinemen } from '@/utils/lineman.utils'
 
 export interface Player {
   id: string
@@ -89,6 +90,10 @@ function PlayCardThumbnail({
     ? PLAY_TYPE_BADGE_PASS
     : PLAY_TYPE_BADGE_RUN
 
+  // Use default linemen if no players provided
+  const defaultLinemen = createDefaultLinemen('middle')
+  const displayPlayers = (players && players.length > 0) ? players : defaultLinemen
+
   return (
     <div className="relative group/thumbnail">
       <div
@@ -97,66 +102,11 @@ function PlayCardThumbnail({
           justify-center cursor-pointer hover:bg-accent
           transition-colors duration-200"
       >
-        {drawings && drawings.length > 0 ? (
-          <PlayThumbnailSVG drawings={drawings} players={players} className="w-full h-full" />
-        ) : thumbnail ? (
-          <img
-            src={thumbnail}
-            alt={name}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="text-center p-6">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <div className="w-3 h-3 rounded-full bg-primary" />
-              <div className="w-3 h-3 rounded-full bg-primary" />
-              <div className="w-3 h-3 rounded-full bg-primary" />
-              <div className="w-3 h-3 rounded-full bg-primary" />
-              <div className="w-3 h-3 rounded-full bg-primary" />
-            </div>
-            <div className="text-muted-foreground">
-              <svg
-                width="100"
-                height="60"
-                viewBox="0 0 100 60"
-                className="mx-auto opacity-50"
-              >
-                <line
-                  x1="20"
-                  y1="30"
-                  x2="20"
-                  y2="10"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                />
-                <line
-                  x1="40"
-                  y1="30"
-                  x2="50"
-                  y2="10"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                />
-                <line
-                  x1="60"
-                  y1="30"
-                  x2="50"
-                  y2="10"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                />
-                <line
-                  x1="80"
-                  y1="30"
-                  x2="80"
-                  y2="10"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                />
-              </svg>
-            </div>
-          </div>
-        )}
+        <PlayThumbnailSVG
+          drawings={drawings || []}
+          players={displayPlayers}
+          className="w-full h-full"
+        />
       </div>
 
       {playType && (
