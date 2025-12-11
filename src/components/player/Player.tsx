@@ -1,9 +1,7 @@
 import { useRef, useEffect, useState } from 'react'
-import { Trash2 } from 'lucide-react'
-import { useFieldCoordinates } from '../../hooks/useFieldCoordinates'
-import { usePlayerDrag } from '../../hooks/usePlayerDrag'
-import { PLAYER_RADIUS_FEET } from '../../constants/field.constants'
-import { eventBus } from '../../services/EventBus'
+import { useFieldCoordinates, usePlayerDrag } from '@/hooks'
+import { PLAYER_RADIUS_FEET } from '@/constants'
+import { eventBus } from '@/services'
 
 interface PlayerProps {
   id: string
@@ -51,7 +49,6 @@ export function Player({
   // Drag behavior
   const {
     isDragging,
-    dragOffset,
     setIsDragging,
     setDragOffset,
     position,
@@ -183,9 +180,12 @@ export function Player({
           justifyContent: 'center',
           color: 'white',
           fontWeight: 'bold',
-          fontSize: '16px',
+          fontSize: `${radiusInPixels}px`,
           fontFamily: 'SF Compact Rounded, system-ui, sans-serif',
           userSelect: 'none',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
         }}
       >
         {label}

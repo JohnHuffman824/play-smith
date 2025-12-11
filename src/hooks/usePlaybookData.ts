@@ -53,7 +53,7 @@ export function usePlaybookData(playbookId: string | undefined): UsePlaybookData
 			playType: apiPlay.play_type || '',
 			defensiveFormation: apiPlay.defensive_formation_id ? String(apiPlay.defensive_formation_id) : '',
 			tags: [], // Tags not yet implemented in API
-			lastModified: apiPlay.updated_at || new Date().toISOString(),
+			lastModified: apiPlay.updated_at ? new Date(apiPlay.updated_at).toLocaleDateString() : new Date().toLocaleDateString(),
 			drawings: apiPlay.drawings || []
 		}
 	}, [])

@@ -4,7 +4,6 @@ import { RouterProvider, createMemoryRouter } from 'react-router-dom'
 import { routes } from './routes'
 import { AuthProvider } from '../contexts/AuthContext'
 import { ThemeProvider } from '../contexts/ThemeContext'
-import { TeamProvider } from '../contexts/TeamContext'
 import { act } from 'react'
 
 describe('routes', () => {
@@ -42,9 +41,7 @@ describe('routes', () => {
 			render(
 				<AuthProvider>
 					<ThemeProvider>
-						<TeamProvider>
 							<RouterProvider router={router} />
-						</TeamProvider>
 					</ThemeProvider>
 				</AuthProvider>
 			)
@@ -64,9 +61,7 @@ describe('routes', () => {
 			render(
 				<AuthProvider>
 					<ThemeProvider>
-						<TeamProvider>
 							<RouterProvider router={router} />
-						</TeamProvider>
 					</ThemeProvider>
 				</AuthProvider>
 			)
@@ -86,9 +81,7 @@ describe('routes', () => {
 			render(
 				<AuthProvider>
 					<ThemeProvider>
-						<TeamProvider>
 							<RouterProvider router={router} />
-						</TeamProvider>
 					</ThemeProvider>
 				</AuthProvider>
 			)

@@ -1,80 +1,47 @@
-import { describe, test, expect, beforeAll, afterAll, beforeEach, afterEach } from 'bun:test'
+import { describe, test, expect, beforeAll, afterAll, afterEach } from 'bun:test'
 import { db } from '../db/connection'
-import { UserRepository } from '../db/repositories/UserRepository'
-import { TeamRepository } from '../db/repositories/TeamRepository'
-import { SessionRepository } from '../db/repositories/SessionRepository'
 import { startTestServer, stopTestServer } from '../../tests/helpers/test-server'
+import {
+	createTestFixture,
+	cleanupTestFixture,
+	cleanupTestData,
+	createTestTeam,
+	addTeamMember,
+	type TestFixtures
+} from '../../tests/helpers/factories'
 
 describe('Teams API', () => {
-	let userRepo: UserRepository
-	let teamRepo: TeamRepository
-	let sessionRepo: SessionRepository
-	let testUserId: number
-	let testSession: string
+	let fixture: TestFixtures
 	let baseUrl: string
 
 	beforeAll(async () => {
-		// Start test server
+		// Start test server once
 		const { url } = await startTestServer()
 		baseUrl = url
+
+		// Create shared fixture (user, team, playbook, session)
+		fixture = await createTestFixture()
 	})
 
 	afterAll(async () => {
-		// Stop test server
+		// Clean up shared fixture
+		await cleanupTestFixture(fixture)
 		await stopTestServer()
 	})
 
-	beforeEach(async () => {
-		userRepo = new UserRepository()
-		teamRepo = new TeamRepository()
-		sessionRepo = new SessionRepository()
-
-		const user = await userRepo.create({
-			email: `test-${Date.now()}@example.com`,
-			name: 'Test User',
-			password_hash: 'hash'
-		})
-		testUserId = user.id
-
-		const token = crypto.randomUUID()
-		const session = await sessionRepo.create(testUserId, token)
-		testSession = session.token
-	})
-
 	afterEach(async () => {
-		// Capture team IDs from team_members before deletion
-		const teamRecords = await db`SELECT team_id FROM team_members WHERE user_id = ${testUserId}`
-		const teamIds = teamRecords.map(r => r.team_id)
-
-		await db`DELETE FROM team_members WHERE user_id = ${testUserId}`
-
-		if (teamIds.length > 0) {
-			await db`DELETE FROM teams WHERE id = ANY(${teamIds})`
-		}
-
-		await db`DELETE FROM sessions WHERE user_id = ${testUserId}`
-		await db`DELETE FROM users WHERE id = ${testUserId}`
+		// Clean up test-specific data between tests
+		await cleanupTestData(fixture.playbookId)
 	})
 
 	test('GET /api/teams returns user teams', async () => {
-		// Create teams
-		const team1 = await teamRepo.create({ name: 'Team 1' })
-		const team2 = await teamRepo.create({ name: 'Team 2' })
-
-		await teamRepo.addMember({
-			team_id: team1.id,
-			user_id: testUserId,
-			role: 'owner'
-		})
-		await teamRepo.addMember({
-			team_id: team2.id,
-			user_id: testUserId,
-			role: 'editor'
-		})
+		// Create additional team
+		const team2 = await createTestTeam()
+		await addTeamMember(team2.id, fixture.userId, 'editor')
 
 		const response = await fetch(`${baseUrl}/api/teams`, {
 			headers: {
-				Cookie: `session=${testSession}`
+				Cookie: `session_token=${fixture.sessionToken}`
 			}
 		})
 
@@ -82,25 +49,21 @@ describe('Teams API', () => {
 		const data = await response.json()
 		expect(data.teams).toBeArray()
 		expect(data.teams.length).toBe(2)
+
+		// Cleanup additional team
+		await db`DELETE FROM team_members WHERE team_id = ${team2.id}`
+		await db`DELETE FROM teams WHERE id = ${team2.id}`
 	})
 
 	test('GET /api/teams accepts session_token cookie', async () => {
-		const team = await teamRepo.create({ name: 'Team 1' })
-
-		await teamRepo.addMember({
-			team_id: team.id,
-			user_id: testUserId,
-			role: 'owner'
-		})
-
 		const response = await fetch(`${baseUrl}/api/teams`, {
-			headers: { Cookie: `session_token=${testSession}` }
+			headers: { Cookie: `session_token=${fixture.sessionToken}` }
 		})
 
 		expect(response.status).toBe(200)
 		const data = await response.json()
 		expect(data.teams).toBeArray()
 		expect(data.teams.length).toBe(1)
-		expect(data.teams[0].id).toBe(team.id)
+		expect(data.teams[0].id).toBe(fixture.teamId)
 	})
 })

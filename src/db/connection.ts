@@ -1,42 +1,32 @@
-import postgres from 'postgres'
+/**
+ * Smart database connection that automatically switches based on environment:
+ * - Test environment (NODE_ENV=test or BUN_ENV=test): Uses in-memory SQLite
+ * - Production/development: Uses PostgreSQL
+ *
+ * This allows tests to run fast with isolated in-memory databases while
+ * production code uses the real PostgreSQL database.
+ */
 
-const DATABASE_URL_REQUIRED = 'DATABASE_URL environment variable is required'
-const CONNECTING_MESSAGE = '📊 Connecting to PostgreSQL database...'
-const CONNECTION_SUCCESS_MESSAGE = '✅ Database connection successful'
-const CONNECTION_FAILURE_MESSAGE = '❌ Database connection failed:'
+const isTestEnv =
+	process.env.NODE_ENV === 'test' ||
+	process.env.BUN_ENV === 'test' ||
+	Bun.env.NODE_ENV === 'test' ||
+	Bun.env.BUN_ENV === 'test'
 
-if (!process.env.DATABASE_URL) {
-	throw new Error(DATABASE_URL_REQUIRED)
+let _db: any
+let _testConnection: any
+
+if (isTestEnv) {
+	// Use SQLite for tests
+	const sqlite = require('./connection.sqlite')
+	_db = sqlite.db
+	_testConnection = sqlite.testConnection
+} else {
+	// Use PostgreSQL for production/development
+	const postgres = require('./connection.postgres')
+	_db = postgres.db
+	_testConnection = postgres.testConnection
 }
 
-console.log(CONNECTING_MESSAGE)
-
-// Establishes a shared Postgres connection pool for app-wide reuse
-export const db = postgres(process.env.DATABASE_URL, {
-	max: 10,
-	idle_timeout: 20,
-	connect_timeout: 10,
-	transform: {
-		undefined: null
-	},
-	types: {
-		bigint: {
-			to: 20,
-			from: [20],
-			parse: (value: string) => parseInt(value, 10),
-			serialize: (value: number) => value.toString()
-		}
-	}
-})
-
-// Verifies database reachability during startup to fail fast
-export async function testConnection(): Promise<boolean> {
-	try {
-		await db`SELECT 1`
-		console.log(CONNECTION_SUCCESS_MESSAGE)
-		return true
-	} catch (error) {
-		console.error(CONNECTION_FAILURE_MESSAGE, error)
-		return false
-	}
-}
+export const db = _db
+export const testConnection = _testConnection

@@ -18,8 +18,10 @@ export const sectionsAPI = {
 			return Response.json({ error: 'Invalid playbook ID' }, { status: 400 })
 		}
 
-		const { hasAccess } = await checkPlaybookAccess(playbookId, userId)
-
+		const { hasAccess, playbook } = await checkPlaybookAccess(playbookId, userId)
+		if (!playbook) {
+			return Response.json({ error: 'Playbook not found' }, { status: 404 })
+		}
 		if (!hasAccess) {
 			return Response.json({ error: 'Access denied' }, { status: 403 })
 		}
@@ -40,8 +42,10 @@ export const sectionsAPI = {
 			return Response.json({ error: 'Invalid playbook ID' }, { status: 400 })
 		}
 
-		const { hasAccess } = await checkPlaybookAccess(playbookId, userId)
-
+		const { hasAccess, playbook } = await checkPlaybookAccess(playbookId, userId)
+		if (!playbook) {
+			return Response.json({ error: 'Playbook not found' }, { status: 404 })
+		}
 		if (!hasAccess) {
 			return Response.json({ error: 'Access denied' }, { status: 403 })
 		}

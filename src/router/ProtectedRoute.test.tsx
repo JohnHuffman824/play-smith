@@ -17,8 +17,13 @@ describe('ProtectedRoute', () => {
 	})
 
 	test('shows loading state while checking auth', () => {
-		// Mock a slow auth check
-		global.fetch = mock(() => new Promise(() => {})) // Never resolves
+		// Mock a slow auth check that never resolves
+		global.fetch = mock((url: string) => {
+			if (url.includes('/api/auth/me')) {
+				return new Promise(() => {}) // Never resolves
+			}
+			return Promise.resolve(new Response(null, { status: 404 }))
+		})
 
 		render(
 			<AuthProvider>
@@ -35,9 +40,17 @@ describe('ProtectedRoute', () => {
 
 	test('renders children when user is authenticated', async () => {
 		const mockUser = { id: 1, email: 'test@example.com', name: 'Test' }
-		global.fetch = mock(() =>
-			Promise.resolve(new Response(JSON.stringify(mockUser)))
-		)
+		global.fetch = mock((url: string) => {
+			if (url.includes('/api/auth/me')) {
+				return Promise.resolve(
+					new Response(JSON.stringify({ user: mockUser }), {
+						status: 200,
+						headers: { 'Content-Type': 'application/json' }
+					})
+				)
+			}
+			return Promise.resolve(new Response(null, { status: 404 }))
+		})
 
 		render(
 			<AuthProvider>
@@ -56,11 +69,19 @@ describe('ProtectedRoute', () => {
 	})
 
 	test('redirects to login when user is not authenticated', async () => {
-		global.fetch = mock(() =>
-			Promise.resolve(new Response(null, { status: 401 }))
-		)
+		global.fetch = mock((url: string) => {
+			if (url.includes('/api/auth/me')) {
+				return Promise.resolve(
+					new Response(JSON.stringify({ user: null }), {
+						status: 200,
+						headers: { 'Content-Type': 'application/json' }
+					})
+				)
+			}
+			return Promise.resolve(new Response(null, { status: 404 }))
+		})
 
-		render(
+		const { container } = render(
 			<AuthProvider>
 				<MemoryRouter initialEntries={['/playbooks']}>
 					<ProtectedRoute>
@@ -70,10 +91,12 @@ describe('ProtectedRoute', () => {
 			</AuthProvider>
 		)
 
-		// Wait for auth check to complete and redirect to happen
+		// Wait for auth check to complete
 		await waitFor(() => {
-			// Component should redirect, so protected content should not be visible
-			expect(() => screen.getByText('Protected Content')).toThrow()
+			// After auth check, user is null, so ProtectedRoute should not render children
+			// Instead it renders a Navigate component which doesn't show the protected content
+			const content = container.querySelector('div')?.textContent
+			expect(content).not.toContain('Protected Content')
 		})
 	})
 })

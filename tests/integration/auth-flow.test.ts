@@ -1,22 +1,35 @@
-import { describe, test, expect, beforeAll, afterAll } from 'bun:test'
+import { describe, test, expect, beforeAll, afterAll, beforeEach, afterEach } from 'bun:test'
 import { AuthService } from '../../src/services/AuthService'
-import { UserRepository } from '../../src/db/repositories/UserRepository'
-import { SessionRepository } from '../../src/db/repositories/SessionRepository'
 import { db } from '../../src/db/connection'
 import { startTestServer, stopTestServer } from '../helpers/test-server'
+import { createTestUser } from '../helpers/factories'
+
+// Save the original fetch before any tests run
+const ORIGINAL_FETCH = fetch
 
 describe('Complete Auth Flow Integration', () => {
 	const authService = new AuthService()
-	const userRepo = new UserRepository()
-	const sessionRepo = new SessionRepository()
 
 	let createdUserId: number
 	let baseUrl: string
 
 	beforeAll(async () => {
+		// Ensure we have real fetch
+		global.fetch = ORIGINAL_FETCH
+
 		// Start test server
 		const { url } = await startTestServer()
 		baseUrl = url
+	})
+
+	beforeEach(() => {
+		// Restore real fetch in case other tests mocked it
+		global.fetch = ORIGINAL_FETCH
+	})
+
+	afterEach(() => {
+		// Restore real fetch after each test
+		global.fetch = ORIGINAL_FETCH
 	})
 
 	afterAll(async () => {
@@ -108,9 +121,9 @@ describe('Complete Auth Flow Integration', () => {
 	})
 
 	test('session expires correctly', async () => {
-		// Create a test user
+		// Create a test user using factory
 		const passwordHash = await authService.hashPassword('testpass')
-		const user = await userRepo.create({
+		const user = await createTestUser({
 			email: `expiry-test-${Date.now()}@example.com`,
 			name: 'Expiry Test',
 			password_hash: passwordHash,
@@ -137,10 +150,10 @@ describe('Complete Auth Flow Integration', () => {
 	})
 
 	test('password hashing prevents direct database access', async () => {
-		// Create a user
+		// Create a user using factory
 		const password = 'secretpassword'
 		const passwordHash = await authService.hashPassword(password)
-		const user = await userRepo.create({
+		const user = await createTestUser({
 			email: `hash-test-${Date.now()}@example.com`,
 			name: 'Hash Test',
 			password_hash: passwordHash,

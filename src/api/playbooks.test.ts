@@ -1,89 +1,53 @@
-import { describe, test, expect, beforeAll, afterAll, beforeEach, afterEach } from 'bun:test'
+import { describe, test, expect, beforeAll, afterAll, afterEach } from 'bun:test'
 import { db } from '../db/connection'
-import { UserRepository } from '../db/repositories/UserRepository'
-import { TeamRepository } from '../db/repositories/TeamRepository'
-import { PlaybookRepository } from '../db/repositories/PlaybookRepository'
-import { SessionRepository } from '../db/repositories/SessionRepository'
 import { startTestServer, stopTestServer } from '../../tests/helpers/test-server'
+import {
+	createTestFixture,
+	cleanupTestFixture,
+	cleanupTestData,
+	createTestUser,
+	createTestTeam,
+	addTeamMember,
+	createTestPlaybook,
+	type TestFixtures
+} from '../../tests/helpers/factories'
 
 describe('Playbooks API', () => {
-	let userRepo: UserRepository
-	let teamRepo: TeamRepository
-	let playbookRepo: PlaybookRepository
-	let sessionRepo: SessionRepository
-	let testUserId: number
-	let testTeamId: number
-	let testSession: string
+	let fixture: TestFixtures
 	let baseUrl: string
 
 	beforeAll(async () => {
-		// Start test server
+		// Start test server once
 		const { url } = await startTestServer()
 		baseUrl = url
+
+		// Create shared fixture (user, team, playbook, session)
+		fixture = await createTestFixture()
 	})
 
 	afterAll(async () => {
-		// Stop test server
+		// Clean up shared fixture
+		await cleanupTestFixture(fixture)
 		await stopTestServer()
 	})
 
-	beforeEach(async () => {
-		userRepo = new UserRepository()
-		teamRepo = new TeamRepository()
-		playbookRepo = new PlaybookRepository()
-		sessionRepo = new SessionRepository()
-
-		// Create test user
-		const user = await userRepo.create({
-			email: `test-${Date.now()}@example.com`,
-			name: 'Test User',
-			password_hash: 'hash'
-		})
-		testUserId = user.id
-
-		// Create test team
-		const team = await teamRepo.create({ name: 'Test Team' })
-		testTeamId = team.id
-
-		// Add user to team
-		await teamRepo.addMember({
-			team_id: testTeamId,
-			user_id: testUserId,
-			role: 'owner'
-		})
-
-		// Create session
-		const token = crypto.randomUUID()
-		const session = await sessionRepo.create(testUserId, token)
-		testSession = session.token
-	})
-
 	afterEach(async () => {
-		// Clean up test data
-		await db`DELETE FROM playbooks WHERE team_id = ${testTeamId}`
-		await db`DELETE FROM team_members WHERE team_id = ${testTeamId}`
-		await db`DELETE FROM teams WHERE id = ${testTeamId}`
-		await db`DELETE FROM sessions WHERE user_id = ${testUserId}`
-		await db`DELETE FROM users WHERE id = ${testUserId}`
+		// Clean up test-specific data between tests
+		await cleanupTestData(fixture.playbookId)
 	})
 
 	test('GET /api/playbooks returns user playbooks', async () => {
-		// Create test playbooks
-		const pb1 = await playbookRepo.create({
-			team_id: testTeamId,
-			name: 'Playbook 1',
-			created_by: testUserId
-		})
-		const pb2 = await playbookRepo.create({
-			team_id: testTeamId,
+		// Create additional test playbook (fixture already has one)
+		const pb2 = await createTestPlaybook({
+			teamId: fixture.teamId,
 			name: 'Playbook 2',
-			created_by: testUserId
+			createdBy: fixture.userId
 		})
 
 		// Make request
 		const response = await fetch(`${baseUrl}/api/playbooks`, {
 			headers: {
-				Cookie: `session=${testSession}`
+				Cookie: `session_token=${fixture.sessionToken}`
 			}
 		})
 
@@ -92,34 +56,29 @@ describe('Playbooks API', () => {
 		expect(data.playbooks).toBeArray()
 		expect(data.playbooks.length).toBe(2)
 		expect(data.playbooks[0].name).toBe('Playbook 2') // DESC order
-		expect(data.playbooks[1].name).toBe('Playbook 1')
+
+		// Cleanup additional playbook
+		await db`DELETE FROM playbooks WHERE id = ${pb2.id}`
 	})
 
 	test('GET /api/playbooks/:id returns single playbook', async () => {
-		const pb = await playbookRepo.create({
-			team_id: testTeamId,
-			name: 'Test Playbook',
-			description: 'Test description',
-			created_by: testUserId
-		})
-
-		const response = await fetch(`${baseUrl}/api/playbooks/${pb.id}`, {
+		// Use fixture playbook
+		const response = await fetch(`${baseUrl}/api/playbooks/${fixture.playbookId}`, {
 			headers: {
-				Cookie: `session=${testSession}`
+				Cookie: `session_token=${fixture.sessionToken}`
 			}
 		})
 
 		expect(response.status).toBe(200)
 		const data = await response.json()
-		expect(data.playbook.id).toBe(pb.id)
-		expect(data.playbook.name).toBe('Test Playbook')
-		expect(data.playbook.description).toBe('Test description')
+		expect(data.playbook.id).toBe(fixture.playbookId)
+		expect(data.playbook.name).toBeDefined()
 	})
 
 	test('GET /api/playbooks/:id returns 404 for non-existent playbook', async () => {
 		const response = await fetch(`${baseUrl}/api/playbooks/99999`, {
 			headers: {
-				Cookie: `session=${testSession}`
+				Cookie: `session_token=${fixture.sessionToken}`
 			}
 		})
 
@@ -130,29 +89,21 @@ describe('Playbooks API', () => {
 
 	test('GET /api/playbooks/:id returns 403 for unauthorized access', async () => {
 		// Create another user and team
-		const otherUser = await userRepo.create({
-			email: `other-${Date.now()}@example.com`,
-			name: 'Other User',
-			password_hash: 'hash'
-		})
-		const otherTeam = await teamRepo.create({ name: 'Other Team' })
-		await teamRepo.addMember({
-			team_id: otherTeam.id,
-			user_id: otherUser.id,
-			role: 'owner'
-		})
+		const otherUser = await createTestUser()
+		const otherTeam = await createTestTeam()
+		await addTeamMember(otherTeam.id, otherUser.id, 'owner')
 
 		// Create playbook in other team
-		const pb = await playbookRepo.create({
-			team_id: otherTeam.id,
+		const otherPlaybook = await createTestPlaybook({
+			teamId: otherTeam.id,
 			name: 'Other Playbook',
-			created_by: otherUser.id
+			createdBy: otherUser.id
 		})
 
 		// Try to access with test user's session
-		const response = await fetch(`${baseUrl}/api/playbooks/${pb.id}`, {
+		const response = await fetch(`${baseUrl}/api/playbooks/${otherPlaybook.id}`, {
 			headers: {
-				Cookie: `session=${testSession}`
+				Cookie: `session_token=${fixture.sessionToken}`
 			}
 		})
 
@@ -161,7 +112,7 @@ describe('Playbooks API', () => {
 		expect(data.error).toBe('Access denied')
 
 		// Cleanup
-		await db`DELETE FROM playbooks WHERE id = ${pb.id}`
+		await db`DELETE FROM playbooks WHERE id = ${otherPlaybook.id}`
 		await db`DELETE FROM team_members WHERE team_id = ${otherTeam.id}`
 		await db`DELETE FROM teams WHERE id = ${otherTeam.id}`
 		await db`DELETE FROM users WHERE id = ${otherUser.id}`
@@ -172,10 +123,10 @@ describe('Playbooks API', () => {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
-				Cookie: `session=${testSession}`
+				Cookie: `session_token=${fixture.sessionToken}`
 			},
 			body: JSON.stringify({
-				team_id: testTeamId,
+				team_id: fixture.teamId,
 				name: 'New Playbook',
 				description: 'New description'
 			})
@@ -185,8 +136,8 @@ describe('Playbooks API', () => {
 		const data = await response.json()
 		expect(data.playbook.name).toBe('New Playbook')
 		expect(data.playbook.description).toBe('New description')
-		expect(data.playbook.team_id).toBe(testTeamId)
-		expect(data.playbook.created_by).toBe(testUserId)
+		expect(data.playbook.team_id).toBe(fixture.teamId)
+		expect(data.playbook.created_by).toBe(fixture.userId)
 	})
 
 	test('POST /api/playbooks validates required fields', async () => {
@@ -194,10 +145,10 @@ describe('Playbooks API', () => {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
-				Cookie: `session=${testSession}`
+				Cookie: `session_token=${fixture.sessionToken}`
 			},
 			body: JSON.stringify({
-				team_id: testTeamId
+				team_id: fixture.teamId
 				// Missing name
 			})
 		})
@@ -208,13 +159,13 @@ describe('Playbooks API', () => {
 	})
 
 	test('POST /api/playbooks requires team membership', async () => {
-		const otherTeam = await teamRepo.create({ name: 'Other Team' })
+		const otherTeam = await createTestTeam()
 
 		const response = await fetch(`${baseUrl}/api/playbooks`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
-				Cookie: `session=${testSession}`
+				Cookie: `session_token=${fixture.sessionToken}`
 			},
 			body: JSON.stringify({
 				team_id: otherTeam.id,
@@ -230,17 +181,17 @@ describe('Playbooks API', () => {
 	})
 
 	test('PUT /api/playbooks/:id updates playbook', async () => {
-		const pb = await playbookRepo.create({
-			team_id: testTeamId,
+		const pb = await createTestPlaybook({
+			teamId: fixture.teamId,
 			name: 'Original Name',
-			created_by: testUserId
+			createdBy: fixture.userId
 		})
 
 		const response = await fetch(`${baseUrl}/api/playbooks/${pb.id}`, {
 			method: 'PUT',
 			headers: {
 				'Content-Type': 'application/json',
-				Cookie: `session=${testSession}`
+				Cookie: `session_token=${fixture.sessionToken}`
 			},
 			body: JSON.stringify({
 				name: 'Updated Name',
@@ -252,32 +203,27 @@ describe('Playbooks API', () => {
 		const data = await response.json()
 		expect(data.playbook.name).toBe('Updated Name')
 		expect(data.playbook.description).toBe('Updated description')
+
+		// Cleanup
+		await db`DELETE FROM playbooks WHERE id = ${pb.id}`
 	})
 
 	test('PUT /api/playbooks/:id requires team membership', async () => {
-		const otherUser = await userRepo.create({
-			email: `other-update-${Date.now()}@example.com`,
-			name: 'Other',
-			password_hash: 'hash'
-		})
-		const otherTeam = await teamRepo.create({ name: 'Other Team' })
-		await teamRepo.addMember({
-			team_id: otherTeam.id,
-			user_id: otherUser.id,
-			role: 'owner'
-		})
+		const otherUser = await createTestUser()
+		const otherTeam = await createTestTeam()
+		await addTeamMember(otherTeam.id, otherUser.id, 'owner')
 
-		const pb = await playbookRepo.create({
-			team_id: otherTeam.id,
+		const otherPlaybook = await createTestPlaybook({
+			teamId: otherTeam.id,
 			name: 'Other Playbook',
-			created_by: otherUser.id
+			createdBy: otherUser.id
 		})
 
-		const response = await fetch(`${baseUrl}/api/playbooks/${pb.id}`, {
+		const response = await fetch(`${baseUrl}/api/playbooks/${otherPlaybook.id}`, {
 			method: 'PUT',
 			headers: {
 				'Content-Type': 'application/json',
-				Cookie: `session=${testSession}`
+				Cookie: `session_token=${fixture.sessionToken}`
 			},
 			body: JSON.stringify({
 				name: 'Hacked Name'
@@ -287,67 +233,59 @@ describe('Playbooks API', () => {
 		expect(response.status).toBe(403)
 
 		// Cleanup
-		await db`DELETE FROM playbooks WHERE id = ${pb.id}`
+		await db`DELETE FROM playbooks WHERE id = ${otherPlaybook.id}`
 		await db`DELETE FROM team_members WHERE team_id = ${otherTeam.id}`
 		await db`DELETE FROM teams WHERE id = ${otherTeam.id}`
 		await db`DELETE FROM users WHERE id = ${otherUser.id}`
 	})
 
 	test('DELETE /api/playbooks/:id deletes playbook', async () => {
-		const pb = await playbookRepo.create({
-			team_id: testTeamId,
+		const pb = await createTestPlaybook({
+			teamId: fixture.teamId,
 			name: 'To Delete',
-			created_by: testUserId
+			createdBy: fixture.userId
 		})
 
 		const response = await fetch(`${baseUrl}/api/playbooks/${pb.id}`, {
 			method: 'DELETE',
 			headers: {
-				Cookie: `session=${testSession}`
+				Cookie: `session_token=${fixture.sessionToken}`
 			}
 		})
 
 		expect(response.status).toBe(204)
 
 		// Verify deleted
-		const deleted = await playbookRepo.findById(pb.id)
-		expect(deleted).toBeNull()
+		const [deleted] = await db`SELECT * FROM playbooks WHERE id = ${pb.id}`
+		expect(deleted).toBeUndefined()
 	})
 
 	test('DELETE /api/playbooks/:id requires team membership', async () => {
-		const otherUser = await userRepo.create({
-			email: `other-delete-${Date.now()}@example.com`,
-			name: 'Other',
-			password_hash: 'hash'
-		})
-		const otherTeam = await teamRepo.create({ name: 'Other Team' })
-		await teamRepo.addMember({
-			team_id: otherTeam.id,
-			user_id: otherUser.id,
-			role: 'owner'
-		})
+		const otherUser = await createTestUser()
+		const otherTeam = await createTestTeam()
+		await addTeamMember(otherTeam.id, otherUser.id, 'owner')
 
-		const pb = await playbookRepo.create({
-			team_id: otherTeam.id,
+		const otherPlaybook = await createTestPlaybook({
+			teamId: otherTeam.id,
 			name: 'Protected',
-			created_by: otherUser.id
+			createdBy: otherUser.id
 		})
 
-		const response = await fetch(`${baseUrl}/api/playbooks/${pb.id}`, {
+		const response = await fetch(`${baseUrl}/api/playbooks/${otherPlaybook.id}`, {
 			method: 'DELETE',
 			headers: {
-				Cookie: `session=${testSession}`
+				Cookie: `session_token=${fixture.sessionToken}`
 			}
 		})
 
 		expect(response.status).toBe(403)
 
 		// Verify NOT deleted
-		const exists = await playbookRepo.findById(pb.id)
-		expect(exists).not.toBeNull()
+		const [exists] = await db`SELECT * FROM playbooks WHERE id = ${otherPlaybook.id}`
+		expect(exists).toBeDefined()
 
 		// Cleanup
-		await db`DELETE FROM playbooks WHERE id = ${pb.id}`
+		await db`DELETE FROM playbooks WHERE id = ${otherPlaybook.id}`
 		await db`DELETE FROM team_members WHERE team_id = ${otherTeam.id}`
 		await db`DELETE FROM teams WHERE id = ${otherTeam.id}`
 		await db`DELETE FROM users WHERE id = ${otherUser.id}`

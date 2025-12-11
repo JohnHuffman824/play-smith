@@ -1,11 +1,13 @@
-import { describe, test, expect, beforeAll, afterAll } from 'bun:test'
-import { UserRepository } from '../../src/db/repositories/UserRepository'
+import { describe, test, expect, beforeAll, afterAll, beforeEach, afterEach } from 'bun:test'
 import { AuthService } from '../../src/services/AuthService'
 import { db } from '../../src/db/connection'
-import { startTestServer, stopTestServer, getTestServerUrl } from '../helpers/test-server'
+import { startTestServer, stopTestServer } from '../helpers/test-server'
+import { createTestUser } from '../helpers/factories'
+
+// Save the original fetch before any tests run
+const ORIGINAL_FETCH = fetch
 
 describe('Auth API', () => {
-	const userRepo = new UserRepository()
 	const authService = new AuthService()
 
 	let testUserId: number
@@ -14,18 +16,31 @@ describe('Auth API', () => {
 	let baseUrl: string
 
 	beforeAll(async () => {
+		// Ensure we have real fetch
+		global.fetch = ORIGINAL_FETCH
+
 		// Start test server
 		const { url } = await startTestServer()
 		baseUrl = url
 
-		// Create a test user
+		// Create a test user using factory
 		const passwordHash = await authService.hashPassword(testPassword)
-		const user = await userRepo.create({
+		const user = await createTestUser({
 			email: testEmail,
 			name: 'API Test User',
 			password_hash: passwordHash,
 		})
 		testUserId = user.id
+	})
+
+	beforeEach(() => {
+		// Restore real fetch in case other tests mocked it
+		global.fetch = ORIGINAL_FETCH
+	})
+
+	afterEach(() => {
+		// Restore real fetch after each test
+		global.fetch = ORIGINAL_FETCH
 	})
 
 	afterAll(async () => {
@@ -125,7 +140,7 @@ describe('Auth API', () => {
 			expect(setCookie).toContain('session_token=')
 
 			// Cleanup
-			const user = await userRepo.findByEmail('newuser@example.com')
+			const [user] = await db`SELECT id FROM users WHERE email = 'newuser@example.com'`
 			if (user) {
 				await db`DELETE FROM sessions WHERE user_id = ${user.id}`
 				await db`DELETE FROM users WHERE id = ${user.id}`

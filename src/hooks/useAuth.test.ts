@@ -1,5 +1,5 @@
 import { describe, test, expect, mock, beforeEach, afterEach } from 'bun:test'
-import { renderHook, waitFor } from '@testing-library/react'
+import { renderHook, waitFor, cleanup } from '@testing-library/react'
 import { useAuth } from './useAuth'
 
 describe('useAuth', () => {
@@ -8,14 +8,20 @@ describe('useAuth', () => {
 	beforeEach(() => {
 		// Clear all mocks
 		mock.restore()
+		cleanup()
 	})
 
-	afterEach(() => {
+	afterEach(async () => {
+		// Wait for any pending async operations to complete
+		await waitFor(() => {}, { timeout: 50 })
+
+		cleanup()
+
 		// Restore original fetch to prevent pollution
 		global.fetch = originalFetch
 	})
 
-	test('returns loading state initially', () => {
+	test('returns loading state initially', async () => {
 		global.fetch = mock(() =>
 			Promise.resolve(new Response(JSON.stringify({ id: 1, email: 'test@example.com' })))
 		)
@@ -24,6 +30,11 @@ describe('useAuth', () => {
 
 		expect(result.current.loading).toBe(true)
 		expect(result.current.user).toBe(null)
+
+		// Wait for fetch to complete to prevent act warnings
+		await waitFor(() => {
+			expect(result.current.loading).toBe(false)
+		})
 	})
 
 	test('returns user when authenticated', async () => {
