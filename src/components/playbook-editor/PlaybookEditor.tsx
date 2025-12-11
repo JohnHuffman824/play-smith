@@ -3,6 +3,7 @@ import { PlaybookEditorToolbar } from './PlaybookEditorToolbar'
 import { PlayCard } from './PlayCard'
 import { PlayListView } from './PlayListView'
 import { Modal } from '@/components/shared/Modal'
+import { Input } from '../ui/input'
 import { SettingsDialog } from '@/components/shared/SettingsDialog'
 import { ShareDialog } from '@/components/shared/ShareDialog'
 import { PlayViewerModal } from '@/components/animation/PlayViewerModal'
@@ -24,7 +25,6 @@ import {
   VIEW_MODE_LIST,
   DEFAULT_PLAYBOOK_NAME,
   BUTTON_BASE,
-  INPUT_BASE,
   MODAL_BUTTON_BASE,
   PRIMARY_BUTTON_BASE,
 } from './constants/playbook'
@@ -516,7 +516,7 @@ function PlaybookEditorContent({
         <div className="space-y-4">
           <div>
             <label className="block mb-2">Play Name</label>
-            <input
+            <Input
               type="text"
               value={newItemName}
               onChange={(e) => setNewItemName(e.target.value)}
@@ -526,7 +526,6 @@ function PlaybookEditorContent({
                 }
               }}
               placeholder="Enter play name..."
-              className={INPUT_BASE}
               autoFocus
             />
           </div>
@@ -554,7 +553,7 @@ function PlaybookEditorContent({
         <div className="space-y-4">
           <div>
             <label className="block mb-2">Section Name</label>
-            <input
+            <Input
               type="text"
               value={newItemName}
               onChange={(e) => setNewItemName(e.target.value)}
@@ -564,7 +563,6 @@ function PlaybookEditorContent({
                 }
               }}
               placeholder="Enter section name..."
-              className={INPUT_BASE}
               autoFocus
             />
           </div>
@@ -613,7 +611,7 @@ function PlaybookEditorContent({
         <div className="space-y-4">
           <div>
             <label className="block mb-2">Play Name</label>
-            <input
+            <Input
               type="text"
               value={renamePlayName}
               onChange={(e) => setRenamePlayName(e.target.value)}
@@ -623,7 +621,6 @@ function PlaybookEditorContent({
                 }
               }}
               placeholder="Enter play name..."
-              className={INPUT_BASE}
               autoFocus
             />
           </div>

@@ -26,7 +26,6 @@ export const PLAY_TYPE_LIST_RUN = 'bg-green-500/10 text-green-500'
 // Common Class Names
 export const BUTTON_BASE = 'p-2 hover:bg-accent rounded-lg transition-all duration-200'
 export const MENU_ITEM_BASE = 'w-full px-4 py-2 text-left hover:bg-accent transition-colors duration-200 flex items-center gap-2'
-export const INPUT_BASE = 'w-full px-4 py-2.5 bg-input-background rounded-lg border-0 outline-none focus:ring-2 focus:ring-ring/20 transition-all duration-200'
 export const MODAL_BUTTON_BASE = 'px-4 py-2 hover:bg-accent rounded-lg transition-all duration-200'
 export const PRIMARY_BUTTON_BASE = 'px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-all duration-200'
 
