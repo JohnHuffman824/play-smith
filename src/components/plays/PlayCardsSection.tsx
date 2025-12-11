@@ -26,7 +26,7 @@ export function PlayCardsSection({
 		<div
 			className={`border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'} relative`}
 			style={{
-				height: showPlayBar ? '420px' : '0px',
+				height: showPlayBar ? '340px' : '0px',
 				overflow: 'hidden',
 				zIndex: 0,
 				transition: 'height 800ms ease-in-out',
@@ -34,10 +34,10 @@ export function PlayCardsSection({
 		>
 			{/* Only render content when visible for performance */}
 			{showPlayBar && (
-				<div className="h-[420px] px-4 py-4">
+				<div className="h-[340px] px-4 flex items-center">
 					<div
 						ref={scrollContainerRef}
-						className="flex gap-4 h-full overflow-x-auto overflow-y-hidden pb-2"
+						className="flex gap-4 overflow-x-auto overflow-y-hidden"
 						style={{ scrollbarGutter: 'stable' }}
 					>
 						{plays
