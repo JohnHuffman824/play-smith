@@ -12,6 +12,7 @@ import { conceptGroupsAPI } from './api/concept-groups'
 import { rolesAPI } from './api/roles'
 import { presetRoutesAPI } from './api/preset-routes'
 import { unifiedSearchAPI } from './api/unified-search'
+import { tagsAPI, playTagsAPI, playbookTagsAPI } from './api/tags'
 
 const server = serve({
   routes: {
@@ -69,6 +70,27 @@ const server = serve({
     },
     "/api/plays/:playId/duplicate": {
       POST: playsAPI.duplicate
+    },
+
+    // Tag API endpoints
+    '/api/tags/presets': {
+      GET: tagsAPI.listPresets
+    },
+    '/api/teams/:teamId/tags': {
+      GET: tagsAPI.listTeamTags,
+      POST: tagsAPI.create
+    },
+    '/api/tags/:tagId': {
+      PUT: tagsAPI.update,
+      DELETE: tagsAPI.delete
+    },
+    '/api/plays/:playId/tags': {
+      GET: playTagsAPI.list,
+      PUT: playTagsAPI.set
+    },
+    '/api/playbooks/:playbookId/tags': {
+      GET: playbookTagsAPI.list,
+      PUT: playbookTagsAPI.set
     },
 
     // Team API endpoints
