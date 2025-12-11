@@ -42,6 +42,8 @@ interface ToolbarProps {
 	setHashAlignment: (alignment: HashAlignment) => void
 	showPlayBar: boolean
 	setShowPlayBar: (show: boolean) => void
+	playId?: string
+	onDeletePlay?: () => Promise<void>
 }
 
 /**
@@ -54,6 +56,8 @@ export function Toolbar({
 	setHashAlignment,
 	showPlayBar,
 	setShowPlayBar,
+	playId,
+	onDeletePlay,
 }: ToolbarProps) {
 	const { theme } = useTheme()
 	const [showColorPicker, setShowColorPicker] = useState(false)
