@@ -333,7 +333,16 @@ export function SVGCanvas({
 	}
 
 	function handleDrawingDragEnd() {
+		// Link to player if snap target exists
+		if (wholeDrawingSnapTarget && drawingDragState && onLinkDrawingToPlayer) {
+			onLinkDrawingToPlayer(
+				drawingDragState.drawingId,
+				wholeDrawingSnapTarget.pointId,
+				wholeDrawingSnapTarget.playerId,
+			)
+		}
 		setDrawingDragState(null)
+		setWholeDrawingSnapTarget(null)
 	}
 
 	function handleDrawingDoubleClick(
