@@ -34,6 +34,7 @@ interface SVGCanvasProps {
 	onDeleteDrawing?: (id: string) => void
 	eraseSize?: number
 	snapThreshold: number
+	selectedDrawingIds: string[]
 	onLinkDrawingToPlayer?: (
 		drawingId: string,
 		pointId: string,
@@ -46,6 +47,7 @@ interface SVGCanvasProps {
 	) => void
 	isOverCanvas?: boolean
 	cursorPosition?: { x: number; y: number } | null
+	onSelectionChange?: (id: string | null) => void
 }
 
 /**
@@ -66,8 +68,10 @@ export function SVGCanvas({
 	onDeleteDrawing,
 	eraseSize = 0,
 	snapThreshold,
+	selectedDrawingIds,
 	onLinkDrawingToPlayer,
 	onMovePlayer,
+	onSelectionChange,
 }: SVGCanvasProps) {
 	const [selectedDrawingId, setSelectedDrawingId] = useState<string | null>(
 		null,
@@ -98,11 +102,13 @@ export function SVGCanvas({
 		onChange([...drawings, drawing])
 		setSelectedDrawingId(drawing.id)
 		setLastDrawnDrawingId(drawing.id)
+		onSelectionChange?.(drawing.id)
 	}
 
 	function handleSelect(id: string) {
 		setSelectedDrawingId(id)
 		setLastDrawnDrawingId(null)
+		onSelectionChange?.(id)
 	}
 
 	function handleDragPoint(
@@ -277,7 +283,7 @@ export function SVGCanvas({
 				onPointerMove={handleDrawingDragMove}
 				onPointerUp={handleDrawingDragEnd}
 				onPointerDown={(e) => {
-					if (activeTool != 'erase') return
+					if (activeTool == 'erase') {
 					const rect = (e.currentTarget as SVGSVGElement).getBoundingClientRect()
 					const click: Coordinate = {
 						x: e.clientX - rect.left,
@@ -306,7 +312,12 @@ export function SVGCanvas({
 							prev == hit.id ? null : prev,
 						)
 					}
-				}}
+				} else if (activeTool == 'select' && e.target === e.currentTarget) {
+					// Clicking empty space in select mode clears selection
+					setSelectedDrawingId(null)
+					onSelectionChange?.(null)
+				}
+			}}
 			>
 			{drawings.map((drawing) => (
 				<PathRenderer
