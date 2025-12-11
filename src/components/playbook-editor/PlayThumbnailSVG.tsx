@@ -215,14 +215,11 @@ function buildPathString(
 }
 
 export function PlayThumbnailSVG({ drawings, className }: PlayThumbnailSVGProps) {
-	console.log('PlayThumbnailSVG received drawings:', drawings)
-
 	// Calculate bounding box
 	const bbox = calculateBoundingBox(drawings)
 
 	// If no valid bounding box, return null (no drawings to render)
 	if (!bbox) {
-		console.log('No valid bounding box - no drawings to render')
 		return null
 	}
 
