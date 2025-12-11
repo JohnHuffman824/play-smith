@@ -22,7 +22,10 @@ import {
 
 function PlayEditorContent() {
 	const { theme } = useTheme()
-	const { playbookId } = useParams<{ playbookId?: string }>()
+	const { playbookId, playId } = useParams<{
+		playbookId?: string
+		playId?: string
+	}>()
 	const [searchParams] = useSearchParams()
 	const teamId = searchParams.get('teamId')
 	const navigate = useNavigate()
@@ -34,7 +37,9 @@ function PlayEditorContent() {
 		setShowPlayBar,
 		applyFormation,
 		applyConcept,
-		applyConceptGroup
+		applyConceptGroup,
+		deleteDrawing,
+		dispatch
 	} = usePlayContext()
 
 	const {
@@ -96,6 +101,23 @@ function PlayEditorContent() {
 		})
 	}, [conceptState.appliedConcepts])
 
+	// Listen for delete selection event
+	useEffect(() => {
+		function handleDeleteSelection() {
+			// Delete all selected objects
+			for (const id of selectedObjectIds) {
+				// Try to delete as drawing first
+				deleteDrawing(id)
+				// Also dispatch player deletion
+				dispatch({ type: 'DELETE_PLAYER', id })
+			}
+			setSelectedObjectIds([])
+		}
+
+		eventBus.on('selection:delete', handleDeleteSelection)
+		return () => eventBus.off('selection:delete', handleDeleteSelection)
+	}, [selectedObjectIds, deleteDrawing, dispatch])
+
 	function handleBackToPlaybook() {
 		if (playbookId) {
 			navigate(`/playbooks/${playbookId}`)
@@ -121,7 +143,10 @@ function PlayEditorContent() {
 	}
 
 	function handleDeleteSelection() {
-		// TODO: Delete selected objects
+		for (const id of selectedObjectIds) {
+			deleteDrawing(id)
+			dispatch({ type: 'DELETE_PLAYER', id })
+		}
 		setSelectedObjectIds([])
 	}
 
@@ -129,10 +154,12 @@ function PlayEditorContent() {
 		// TODO: Duplicate selected objects
 	}
 
-	if (!teamId) {
+	if (!playbookId || !playId) {
 		return (
 			<div className="flex items-center justify-center h-screen">
-				<p className="text-red-500">Team ID is required</p>
+				<p className="text-red-500">
+					Playbook ID and Play ID are required
+				</p>
 			</div>
 		)
 	}
@@ -157,6 +184,7 @@ function PlayEditorContent() {
 					drawingState={playState.drawingState}
 					hashAlignment={playState.hashAlignment}
 					showPlayBar={playState.showPlayBar}
+					onSelectionChange={setSelectedObjectIds}
 				/>
 				<PlayCardsSection
 					playCards={playState.playCards}
