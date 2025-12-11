@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { FieldCoordinateSystem } from '../../utils/coordinates'
 import { PathRenderer } from './PathRenderer'
 import { ControlPointOverlay } from './ControlPointOverlay'
@@ -13,7 +13,8 @@ import {
 	getDrawingStartPoint,
 	getDrawingEndPoint,
 	findPlayerSnapTarget,
-	deletePointFromDrawing
+	deletePointFromDrawing,
+	insertPointIntoDrawing
 } from '../../utils/drawing.utils'
 import { convertToSharp, extractMainCoordinates } from '../../utils/curve.utils'
 import { processSmoothPath } from '../../utils/smooth-path.utils'
@@ -217,6 +218,34 @@ export function SVGCanvas({
 		} else {
 			// Update the drawing with the point removed
 			onChange(drawings.map(d => d.id === drawingId ? updatedDrawing : d))
+		}
+	}
+
+	function handleAddPoint(drawingId: string, segmentIndex: number, position: Coordinate) {
+		const drawing = drawings.find(d => d.id === drawingId)
+		if (!drawing) return
+
+		const updatedDrawing = insertPointIntoDrawing(drawing, segmentIndex, position)
+		onChange(drawings.map(d => d.id === drawingId ? updatedDrawing : d))
+	}
+
+	// Store ref to overlay's path context menu handler
+	const overlayPathContextMenuHandler = useRef<((
+		drawingId: string,
+		segmentIndex: number,
+		insertPosition: Coordinate,
+		pixelPosition: { x: number; y: number }
+	) => void) | null>(null)
+
+	function handlePathContextMenu(
+		drawingId: string,
+		segmentIndex: number,
+		insertPosition: Coordinate,
+		pixelPosition: { x: number; y: number }
+	) {
+		// Call the overlay's handler if it's available
+		if (overlayPathContextMenuHandler.current) {
+			overlayPathContextMenuHandler.current(drawingId, segmentIndex, insertPosition, pixelPosition)
 		}
 	}
 
@@ -498,6 +527,7 @@ export function SVGCanvas({
 					onDelete={onDeleteDrawing}
 					onDragStart={handleDrawingDragStart}
 					onHover={onDrawingHoverChange}
+					onPathContextMenu={activeTool === 'select' ? handlePathContextMenu : undefined}
 				/>
 			))}
 
@@ -515,6 +545,8 @@ export function SVGCanvas({
 					onMerge={handleMerge}
 					onLinkToPlayer={handleLinkToPlayer}
 					onDeletePoint={activeTool === 'select' ? handleDeletePoint : undefined}
+					onAddPoint={activeTool === 'select' ? handleAddPoint : undefined}
+					onPathContextMenuHandlerRef={overlayPathContextMenuHandler}
 				/>
 			)}
 

@@ -8,6 +8,7 @@ import type { SnapTarget, PlayerSnapTarget } from '../../utils/drawing.utils'
 import { PLAYER_RADIUS_FEET } from '../../constants/field.constants'
 import { pointToLineDistance } from '../../utils/canvas.utils'
 import { NodeDeletePopup } from './NodeDeletePopup'
+import { NodeAddPopup } from './NodeAddPopup'
 
 // Constants for proximity filtering
 const BEZIER_SAMPLE_POINTS = 10
@@ -45,6 +46,13 @@ interface MultiDrawingControlPointOverlayProps {
 		playerId: string,
 	) => void
 	onDeletePoint?: (drawingId: string, pointId: string) => void
+	onAddPoint?: (drawingId: string, segmentIndex: number, position: Coordinate) => void
+	onPathContextMenuHandlerRef?: React.MutableRefObject<((
+		drawingId: string,
+		segmentIndex: number,
+		insertPosition: Coordinate,
+		pixelPosition: { x: number; y: number }
+	) => void) | null>
 }
 
 interface MultiDragState {
@@ -207,6 +215,8 @@ export function MultiDrawingControlPointOverlay({
 	onMerge,
 	onLinkToPlayer,
 	onDeletePoint,
+	onAddPoint,
+	onPathContextMenuHandlerRef,
 }: MultiDrawingControlPointOverlayProps) {
 	const [dragState, setDragState] = useState<MultiDragState | null>(null)
 	const [snapTarget, setSnapTarget] = useState<SnapTarget | null>(null)
@@ -216,6 +226,12 @@ export function MultiDrawingControlPointOverlay({
 	const [contextMenuState, setContextMenuState] = useState<{
 		drawingId: string
 		pointId: string
+		pixelPosition: { x: number; y: number }
+	} | null>(null)
+	const [addPopupState, setAddPopupState] = useState<{
+		drawingId: string
+		segmentIndex: number
+		insertPosition: Coordinate
 		pixelPosition: { x: number; y: number }
 	} | null>(null)
 	const overlayRef = useRef<SVGGElement | null>(null)
@@ -327,10 +343,11 @@ export function MultiDrawingControlPointOverlay({
 
 	// Close popup on click outside
 	useEffect(() => {
-		if (!contextMenuState) return
+		if (!contextMenuState && !addPopupState) return
 
 		function handleClickOutside(e: MouseEvent) {
 			setContextMenuState(null)
+			setAddPopupState(null)
 		}
 
 		// Use setTimeout to avoid immediately closing from the same event
@@ -344,7 +361,19 @@ export function MultiDrawingControlPointOverlay({
 			window.removeEventListener('click', handleClickOutside)
 			window.removeEventListener('contextmenu', handleClickOutside)
 		}
-	}, [contextMenuState])
+	}, [contextMenuState, addPopupState])
+
+	// Expose path context menu handler to parent via ref
+	useEffect(() => {
+		if (onPathContextMenuHandlerRef) {
+			onPathContextMenuHandlerRef.current = handlePathContextMenu
+		}
+		return () => {
+			if (onPathContextMenuHandlerRef) {
+				onPathContextMenuHandlerRef.current = null
+			}
+		}
+	}, [onPathContextMenuHandlerRef])
 
 	// Start drag for a specific drawing's point
 	function startDrag(drawingId: string, pointId: string) {
@@ -383,6 +412,33 @@ export function MultiDrawingControlPointOverlay({
 
 	function handleClosePopup() {
 		setContextMenuState(null)
+	}
+
+	function handlePathContextMenu(
+		drawingId: string,
+		segmentIndex: number,
+		insertPosition: Coordinate,
+		pixelPosition: { x: number; y: number }
+	) {
+		// Only show add popup if not clicking on a control point
+		setContextMenuState(null) // Close delete popup if open
+		setAddPopupState({
+			drawingId,
+			segmentIndex,
+			insertPosition,
+			pixelPosition
+		})
+	}
+
+	function handleAddFromPopup() {
+		if (addPopupState && onAddPoint) {
+			onAddPoint(
+				addPopupState.drawingId,
+				addPopupState.segmentIndex,
+				addPopupState.insertPosition
+			)
+		}
+		setAddPopupState(null)
 	}
 
 	// Show nodes for drawings that are EITHER hovered OR selected
@@ -516,6 +572,26 @@ export function MultiDrawingControlPointOverlay({
 							position={contextMenuState.pixelPosition}
 							onDelete={handleDeleteFromPopup}
 							onClose={handleClosePopup}
+						/>
+					</div>
+				</foreignObject>
+			)}
+
+			{/* Add node popup */}
+			{addPopupState && (
+				<foreignObject
+					x={0}
+					y={0}
+					width="100%"
+					height="100%"
+					pointerEvents="none"
+					style={{ overflow: 'visible' }}
+				>
+					<div style={{ pointerEvents: 'auto' }}>
+						<NodeAddPopup
+							position={addPopupState.pixelPosition}
+							onAdd={handleAddFromPopup}
+							onClose={() => setAddPopupState(null)}
 						/>
 					</div>
 				</foreignObject>
