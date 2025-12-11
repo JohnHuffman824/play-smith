@@ -5,7 +5,8 @@ import {
   Trash2,
   Copy,
   CheckCircle2,
-  Circle
+  Circle,
+  Play
 } from 'lucide-react'
 import {
   PLAY_TYPE_PASS,
@@ -30,6 +31,7 @@ interface PlayCardProps {
   selected?: boolean
   onSelect?: (id: string) => void
   onOpen: (id: string) => void
+  onAnimate?: (id: string) => void
   onRename: (id: string) => void
   onDelete: (id: string) => void
   onDuplicate: (id: string) => void
@@ -46,27 +48,38 @@ function getTagColor(tag: string) {
   return TAG_COLORS[tag] || DEFAULT_TAG_COLOR
 }
 
-function PlayCardThumbnail({ 
-  thumbnail, 
-  name, 
-  playType, 
-  onOpen 
-}: { 
+function PlayCardThumbnail({
+  thumbnail,
+  name,
+  playType,
+  onOpen,
+  onAnimate
+}: {
   thumbnail?: string
   name: string
   playType: string
   onOpen: () => void
+  onAnimate?: () => void
 }) {
-  const badgeClass = playType == PLAY_TYPE_PASS 
-    ? PLAY_TYPE_BADGE_PASS 
+  const badgeClass = playType == PLAY_TYPE_PASS
+    ? PLAY_TYPE_BADGE_PASS
     : PLAY_TYPE_BADGE_RUN
 
+  const handleClick = () => {
+    // If onAnimate is provided, use it; otherwise fall back to onOpen
+    if (onAnimate) {
+      onAnimate()
+    } else {
+      onOpen()
+    }
+  }
+
   return (
-    <div className="relative">
+    <div className="relative group/thumbnail">
       <div
-        onClick={onOpen}
-        className="aspect-video bg-muted flex items-center 
-          justify-center cursor-pointer hover:bg-accent 
+        onClick={handleClick}
+        className="aspect-video bg-muted flex items-center
+          justify-center cursor-pointer hover:bg-accent
           transition-colors duration-200"
       >
         {thumbnail ? (
@@ -131,12 +144,30 @@ function PlayCardThumbnail({
 
       <div className="absolute top-2 right-2">
         <span
-          className={`px-2.5 py-1 rounded-md text-xs shadow-sm 
+          className={`px-2.5 py-1 rounded-md text-xs shadow-sm
             backdrop-blur-sm ${badgeClass}`}
         >
           {playType}
         </span>
       </div>
+
+      {/* Play button overlay for animation */}
+      {onAnimate && (
+        <div
+          className="absolute inset-0 flex items-center justify-center
+            bg-black/0 group-hover/thumbnail:bg-black/30
+            transition-all duration-200 pointer-events-none"
+        >
+          <div
+            className="w-12 h-12 rounded-full bg-primary/90 flex items-center
+              justify-center opacity-0 group-hover/thumbnail:opacity-100
+              transform scale-75 group-hover/thumbnail:scale-100
+              transition-all duration-200 pointer-events-auto"
+          >
+            <Play className="w-6 h-6 text-white ml-0.5" fill="white" />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -223,6 +254,7 @@ export function PlayCard({
   selected = false,
   onSelect,
   onOpen,
+  onAnimate,
   onRename,
   onDelete,
   onDuplicate,
@@ -280,6 +312,7 @@ export function PlayCard({
         name={name}
         playType={playType}
         onOpen={() => onOpen(id)}
+        onAnimate={onAnimate ? () => onAnimate(id) : undefined}
       />
 
       {onSelect && (

@@ -65,7 +65,7 @@ export function AddConceptSubDialog({
 			<div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-[600px] max-h-[700px] flex flex-col">
 				{/* Header */}
 				<div className="px-6 py-4 border-b border-gray-300 dark:border-gray-600">
-					<h3 className="text-lg font-semibold mb-4">Add Concept</h3>
+					<h3 className="text-lg font-semibold mb-4">Create Concept</h3>
 
 					{/* Search */}
 					<div className="relative">

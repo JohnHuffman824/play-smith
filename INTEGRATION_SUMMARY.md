@@ -52,7 +52,7 @@ After:  [🔍 Search formations, concepts, groups...]
 - Smart parsing: "X Post" → auto-detects role + concept
 - Frecency-ranked results
 
-### 2. Add Concept Button (Toolbar)
+### 2. Create Concept Button (Toolbar)
 **Keyboard Shortcut:** `G`
 
 Opens browse dialog with 3 tabs:
@@ -236,7 +236,7 @@ src/
 │   ├── canvas/
 │   │   └── Canvas.tsx (+ configurable props)
 │   ├── toolbar/
-│   │   └── Toolbar.tsx ("Add Concept" label)
+│   │   └── Toolbar.tsx ("Create Concept" label)
 │   └── plays/
 │       └── PlayHeader.tsx (complete rewrite)
 └── pages/
@@ -300,7 +300,7 @@ Expected: ~190 passing, ~72 failing (baseline)
 - [ ] Select formation from dropdown → see blue chip
 - [ ] Click X on chip → chip removed
 - [ ] Drag chip → reorder works
-- [ ] Click "Add Concept (G)" → dialog opens
+- [ ] Click "Create Concept (G)" → dialog opens
 - [ ] Switch between tabs (Formations/Concepts/Groups)
 - [ ] Search in dialog → results filtered
 - [ ] Click "Create New Concept" → ConceptDialog opens

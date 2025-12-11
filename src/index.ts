@@ -63,6 +63,7 @@ const server = serve({
       POST: playsAPI.create
     },
     "/api/plays/:playId": {
+      GET: playsAPI.get,
       PUT: playsAPI.update,
       DELETE: playsAPI.delete
     },

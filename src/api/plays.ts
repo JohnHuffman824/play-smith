@@ -1,11 +1,141 @@
-import { PlaybookRepository } from '../db/repositories/PlaybookRepository'
 import { getSessionUser } from './middleware/auth'
 import { db } from '../db/connection'
 import { checkPlaybookAccess } from './utils/checkPlaybookAccess'
 
-const playbookRepo = new PlaybookRepository()
+type FormationPosition = {
+	id: number
+	role: string
+	position_x: string | number
+	position_y: string | number
+}
+
+type ConceptApplication = {
+	concept_id: number | null
+	concept_group_id: number | null
+	order_index: number
+}
+
+type GroupConcept = {
+	concept_id: number
+}
+
+type ConceptAssignment = {
+	id: number
+	concept_id: number
+	role: string | null
+	drawing_data: Record<string, unknown> | null
+	order_index: number
+}
+
+type PlayerData = {
+	id: string
+	x: number
+	y: number
+	label: string
+	color: string
+}
 
 export const playsAPI = {
+	/**
+	 * Get full play data including players and drawings for animation.
+	 */
+	get: async (req: Request) => {
+		const userId = await getSessionUser(req)
+		if (!userId) {
+			return Response.json({ error: 'Unauthorized' }, { status: 401 })
+		}
+
+		const playId = parseInt(req.params.playId)
+		if (isNaN(playId)) {
+			return Response.json({ error: 'Invalid play ID' }, { status: 400 })
+		}
+
+		const [play] = await db`SELECT * FROM plays WHERE id = ${playId}`
+		if (!play) {
+			return Response.json({ error: 'Play not found' }, { status: 404 })
+		}
+
+		const { hasAccess } = await checkPlaybookAccess(play.playbook_id, userId)
+		if (!hasAccess) {
+			return Response.json({ error: 'Access denied' }, { status: 403 })
+		}
+
+		let players: PlayerData[] = []
+
+		if (play.formation_id) {
+			const positions: FormationPosition[] = await db`
+				SELECT id, role, position_x, position_y
+				FROM formation_player_positions
+				WHERE formation_id = ${play.formation_id}
+			`
+			players = positions.map((pos) => ({
+				id: `player-${pos.role}-${pos.id}`,
+				x: Number(pos.position_x),
+				y: Number(pos.position_y),
+				label: pos.role,
+				color: '#000000',
+			}))
+		}
+
+		const conceptApplications: ConceptApplication[] = await db`
+			SELECT ca.concept_id, ca.concept_group_id, ca.order_index
+			FROM concept_applications ca
+			WHERE ca.play_id = ${playId}
+			ORDER BY ca.order_index
+		`
+
+		const directConceptIds = conceptApplications
+			.filter((ca) => ca.concept_id !== null)
+			.map((ca) => ca.concept_id as number)
+
+		const conceptGroupIds = conceptApplications
+			.filter((ca) => ca.concept_group_id !== null)
+			.map((ca) => ca.concept_group_id as number)
+
+		let groupConceptIds: number[] = []
+		if (conceptGroupIds.length > 0) {
+			const groupConcepts: GroupConcept[] = await db`
+				SELECT concept_id
+				FROM concept_group_concepts
+				WHERE concept_group_id = ANY(${conceptGroupIds})
+			`
+			groupConceptIds = groupConcepts.map((gc) => gc.concept_id)
+		}
+
+		const allConceptIds = [...directConceptIds, ...groupConceptIds]
+
+		let drawings: Record<string, unknown>[] = []
+		if (allConceptIds.length > 0) {
+			const assignments: ConceptAssignment[] = await db`
+				SELECT id, concept_id, role, drawing_data, order_index
+				FROM concept_player_assignments
+				WHERE concept_id = ANY(${allConceptIds})
+				ORDER BY order_index
+			`
+
+			drawings = assignments
+				.filter((a) => a.drawing_data !== null)
+				.map((a) => {
+					const drawingData = a.drawing_data as Record<string, unknown>
+					const linkedPlayer = players.find((p) => p.label === a.role)
+					return {
+						...drawingData,
+						id: drawingData.id ?? `drawing-${a.id}`,
+						playerId: linkedPlayer?.id ?? null,
+					}
+				})
+		}
+
+		return Response.json({
+			play: {
+				id: String(play.id),
+				name: play.name || 'Untitled Play',
+				players,
+				drawings,
+			},
+		})
+	},
+
 	list: async (req: Request) => {
 		const userId = await getSessionUser(req)
 		if (!userId) {

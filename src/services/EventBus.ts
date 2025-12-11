@@ -48,6 +48,19 @@ export interface EventMap {
 	
 	// System events
 	'system:resize': void
+
+	// Animation events
+	'animation:play': void
+	'animation:pause': void
+	'animation:stop': void
+	'animation:seek': { progress: number }
+	'animation:speed': { speed: number }
+	'animation:next': void
+	'animation:prev': void
+	'animation:toggleGhost': void
+	'animation:toggleLoop': void
+	'animation:openViewer': { playId: string }
+	'animation:closeViewer': void
 }
 
 type EventHandler<T> = T extends void ? () => void : (data: T) => void
