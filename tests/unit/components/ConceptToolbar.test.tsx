@@ -24,6 +24,16 @@ describe('ConceptToolbar - Add Player Tool', () => {
 					onHashAlignmentChange={() => {}}
 					showColorPicker={false}
 					onShowColorPickerChange={() => {}}
+					showDrawOptions={false}
+					onShowDrawOptionsChange={() => {}}
+					lineStyle="solid"
+					lineEnd="arrow"
+					brushSize={3}
+					pathMode="sharp"
+					onLineStyleChange={() => {}}
+					onLineEndChange={() => {}}
+					onBrushSizeChange={() => {}}
+					onPathModeChange={() => {}}
 				/>
 			</ThemeProvider>
 		)
@@ -46,5 +56,84 @@ describe('ConceptToolbar - Add Player Tool', () => {
 
 		// Must be 'addPlayer' (camelCase) to match Canvas.tsx TOOL_ADD_PLAYER constant
 		expect(capturedTool).toBe('addPlayer')
+	})
+})
+
+describe('ConceptToolbar - Draw Options Integration', () => {
+	afterEach(() => {
+		cleanup()
+	})
+
+	test('clicking draw button twice toggles DrawOptionsDialog', () => {
+		let showDrawOptions = false
+		const { container, rerender } = render(
+			<ThemeProvider>
+				<ConceptToolbar
+					selectedTool="draw"
+					onToolChange={() => {}}
+					color="#000000"
+					onColorChange={() => {}}
+					hashAlignment="middle"
+					onHashAlignmentChange={() => {}}
+					showColorPicker={false}
+					onShowColorPickerChange={() => {}}
+					showDrawOptions={showDrawOptions}
+					onShowDrawOptionsChange={(show) => {
+						showDrawOptions = show
+					}}
+					lineStyle="solid"
+					lineEnd="arrow"
+					brushSize={3}
+					pathMode="sharp"
+					onLineStyleChange={() => {}}
+					onLineEndChange={() => {}}
+					onBrushSizeChange={() => {}}
+					onPathModeChange={() => {}}
+				/>
+			</ThemeProvider>
+		)
+
+		// Find the draw button
+		const drawButton = Array.from(container.querySelectorAll('button')).find(btn =>
+			btn.getAttribute('aria-label')?.includes('Draw')
+		)
+
+		expect(drawButton).toBeTruthy()
+
+		// First click - should open the dialog
+		fireEvent.click(drawButton!)
+		expect(showDrawOptions).toBe(true)
+
+		// Re-render with updated state
+		rerender(
+			<ThemeProvider>
+				<ConceptToolbar
+					selectedTool="draw"
+					onToolChange={() => {}}
+					color="#000000"
+					onColorChange={() => {}}
+					hashAlignment="middle"
+					onHashAlignmentChange={() => {}}
+					showColorPicker={false}
+					onShowColorPickerChange={() => {}}
+					showDrawOptions={showDrawOptions}
+					onShowDrawOptionsChange={(show) => {
+						showDrawOptions = show
+					}}
+					lineStyle="solid"
+					lineEnd="arrow"
+					brushSize={3}
+					pathMode="sharp"
+					onLineStyleChange={() => {}}
+					onLineEndChange={() => {}}
+					onBrushSizeChange={() => {}}
+					onPathModeChange={() => {}}
+				/>
+			</ThemeProvider>
+		)
+
+		// Second click - should close the dialog
+		fireEvent.click(drawButton!)
+		expect(showDrawOptions).toBe(false)
 	})
 })
