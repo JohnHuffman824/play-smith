@@ -18,7 +18,7 @@ export class ConceptApplicationRepository {
 				${data.concept_group_id ?? null},
 				${data.order_index ?? 0}
 			)
-			RETURNING *
+			RETURNING id, play_id, concept_id, concept_group_id, order_index, applied_at
 		`
 
 		if (!application) {
@@ -30,7 +30,8 @@ export class ConceptApplicationRepository {
 
 	async getPlayApplications(playId: number): Promise<ConceptApplication[]> {
 		return await db<ConceptApplication[]>`
-			SELECT * FROM concept_applications
+			SELECT id, play_id, concept_id, concept_group_id, order_index, applied_at
+			FROM concept_applications
 			WHERE play_id = ${playId}
 			ORDER BY order_index
 		`
