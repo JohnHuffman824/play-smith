@@ -545,7 +545,7 @@ export function Toolbar({
 				<Tooltip content='Tags (T)'>
 					<button
 						onClick={handleToggleTags}
-						className={neutralButtonClass(lightToggleClass)}
+						className={neutralButtonClass(lightNeutralClass)}
 					>
 						<Tag size={22} />
 					</button>
@@ -559,7 +559,7 @@ export function Toolbar({
 				>
 					<button
 						onClick={() => setShowPlayBar(!showPlayBar)}
-						className={neutralButtonClass(lightToggleClass)}
+						className={neutralButtonClass(lightNeutralClass)}
 					>
 						{showPlayBar ? (
 							<Eye size={22} />
@@ -576,7 +576,7 @@ export function Toolbar({
 							closeAllDialogs()
 							setShowSettingsDialog(!showSettingsDialog)
 						}}
-						className={neutralButtonClass(lightToggleClass)}
+						className={neutralButtonClass(lightNeutralClass)}
 					>
 						<Settings size={22} />
 					</button>
