@@ -29,7 +29,8 @@ export class ConceptGroupRepository {
                     ${data.name},
                     ${data.description ?? null},
                     ${data.formation_id ?? null},
-                    ${data.created_by}) RETURNING *
+                    ${data.created_by})
+            RETURNING id, team_id, playbook_id, name, description, formation_id, created_by, created_at, updated_at, usage_count, last_used_at
 		`
 
 		if (!group) {
@@ -54,7 +55,7 @@ export class ConceptGroupRepository {
 
 	async findById(id: number): Promise<ConceptGroupWithDetails | null> {
 		const [group] = await db<ConceptGroup[]>`
-            SELECT *
+            SELECT id, team_id, playbook_id, name, description, formation_id, created_by, created_at, updated_at, usage_count, last_used_at
             FROM concept_groups
             WHERE id = ${id}
 		`
@@ -65,14 +66,14 @@ export class ConceptGroupRepository {
 
 		const formation = group.formation_id
 			? await db<Formation[]>`
-                    SELECT *
+                    SELECT id, team_id, name, description, created_by, created_at, updated_at
                     FROM formations
                     WHERE id = ${group.formation_id}
 			`.then(rows => rows[0] ?? null)
 			: null
 
 		const concepts = await db<Array<BaseConcept & { order_index: number }>>`
-            SELECT bc.*, cgc.order_index
+            SELECT bc.id, bc.team_id, bc.playbook_id, bc.name, bc.description, bc.targeting_mode, bc.ball_position, bc.play_direction, bc.created_by, bc.created_at, bc.updated_at, bc.usage_count, bc.last_used_at, cgc.order_index
             FROM base_concepts bc
                      INNER JOIN concept_group_concepts cgc ON cgc.concept_id = bc.id
             WHERE cgc.concept_group_id = ${id}
@@ -92,7 +93,7 @@ export class ConceptGroupRepository {
 	): Promise<ConceptGroup[]> {
 		if (playbookId) {
 			return await db<ConceptGroup[]>`
-                SELECT *
+                SELECT id, team_id, playbook_id, name, description, formation_id, created_by, created_at, updated_at, usage_count, last_used_at
                 FROM concept_groups
                 WHERE (team_id = ${teamId} AND playbook_id IS NULL)
                    OR (team_id = ${teamId} AND playbook_id = ${playbookId})
@@ -101,7 +102,7 @@ export class ConceptGroupRepository {
 		}
 
 		return await db<ConceptGroup[]>`
-            SELECT *
+            SELECT id, team_id, playbook_id, name, description, formation_id, created_by, created_at, updated_at, usage_count, last_used_at
             FROM concept_groups
             WHERE team_id = ${teamId}
               AND playbook_id IS NULL
@@ -119,7 +120,7 @@ export class ConceptGroupRepository {
 
 		if (playbookId) {
 			return await db<Array<ConceptGroup & { frecency_score: number }>>`
-                SELECT *,
+                SELECT id, team_id, playbook_id, name, description, formation_id, created_by, created_at, updated_at, usage_count, last_used_at,
                        (usage_count::float / (EXTRACT(EPOCH FROM (NOW() - COALESCE(last_used_at, created_at))) / 86400 + 1)) as frecency_score
                 FROM concept_groups
                 WHERE team_id = ${teamId}
@@ -131,7 +132,7 @@ export class ConceptGroupRepository {
 		}
 
 		return await db<Array<ConceptGroup & { frecency_score: number }>>`
-            SELECT *,
+            SELECT id, team_id, playbook_id, name, description, formation_id, created_by, created_at, updated_at, usage_count, last_used_at,
                    (usage_count::float / (EXTRACT(EPOCH FROM (NOW() - COALESCE(last_used_at, created_at))) / 86400 + 1)) as frecency_score
             FROM concept_groups
             WHERE team_id = ${teamId}
@@ -158,7 +159,8 @@ export class ConceptGroupRepository {
                     description  = COALESCE(${data.description ?? null}, description),
                     formation_id = COALESCE(${data.formation_id ?? null}, formation_id),
                     updated_at   = CURRENT_TIMESTAMP
-                WHERE id = ${id} RETURNING *
+                WHERE id = ${id}
+                RETURNING id, team_id, playbook_id, name, description, formation_id, created_by, created_at, updated_at, usage_count, last_used_at
 			`
 
 			if (!group) {
