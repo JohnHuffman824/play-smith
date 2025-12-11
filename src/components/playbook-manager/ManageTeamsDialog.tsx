@@ -251,12 +251,9 @@ export function ManageTeamsDialog({ isOpen, onClose }: ManageTeamsDialogProps) {
 									teams.map((team) => (
 										<div
 											key={team.id}
-											className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-accent/50 transition-colors"
+											className="flex items-center justify-between p-4 rounded-lg border border-border"
 										>
-											<button
-												onClick={() => handleSelectTeam(team)}
-												className="flex items-center gap-3 flex-1 text-left"
-											>
+											<div className="flex items-center gap-3 flex-1">
 												<Users className="w-5 h-5 text-muted-foreground" />
 												<div className="flex-1">
 													<div className="font-medium">{team.name}</div>
@@ -265,9 +262,17 @@ export function ManageTeamsDialog({ isOpen, onClose }: ManageTeamsDialogProps) {
 														<span className="capitalize">{team.role}</span>
 													</div>
 												</div>
-											</button>
-											{team.role === 'owner' && (
-												<div className="flex items-center gap-2">
+											</div>
+											<div className="flex items-center gap-2">
+												<Button
+													onClick={() => handleSelectTeam(team)}
+													variant="outline"
+													size="sm"
+												>
+													<UserPlus className="w-4 h-4 mr-2" />
+													Manage Members
+												</Button>
+												{team.role === 'owner' && (
 													<Button
 														onClick={() => handleEditTeam(team)}
 														variant="ghost"
@@ -275,8 +280,8 @@ export function ManageTeamsDialog({ isOpen, onClose }: ManageTeamsDialogProps) {
 													>
 														<Edit2 className="w-4 h-4" />
 													</Button>
-												</div>
-											)}
+												)}
+											</div>
 										</div>
 									))
 								)}
