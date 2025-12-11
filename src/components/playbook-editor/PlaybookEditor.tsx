@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { PlaybookEditorToolbar } from './PlaybookEditorToolbar'
 import { PlayCard } from './PlayCard'
 import { PlayListView } from './PlayListView'
 import { Modal } from '@/components/shared/Modal'
 import { SettingsDialog } from '@/components/shared/SettingsDialog'
 import { ShareDialog } from '@/components/shared/ShareDialog'
+import { PlayViewerModal } from '@/components/animation/PlayViewerModal'
 import { ThemeProvider, useTheme } from '@/contexts/ThemeContext'
 import { usePlaybookData } from '@/hooks/usePlaybookData'
 import {
@@ -84,6 +85,8 @@ function PlaybookEditorContent({
   const [deletePlayId, setDeletePlayId] = useState<string | null>(null)
   const [selectedPlays, setSelectedPlays] = useState<Set<string>>(new Set())
   const [activeSectionFilter, setActiveSectionFilter] = useState<string | null>(null)
+  const [showPlayViewer, setShowPlayViewer] = useState(false)
+  const [viewingPlayId, setViewingPlayId] = useState<string | null>(null)
 
   const {
     sections,
@@ -192,6 +195,16 @@ function PlaybookEditorContent({
     if (onOpenPlay) {
       onOpenPlay(playId)
     }
+  }
+
+  function handleAnimatePlay(playId: string) {
+    setViewingPlayId(playId)
+    setShowPlayViewer(true)
+  }
+
+  function handleClosePlayViewer() {
+    setShowPlayViewer(false)
+    setViewingPlayId(null)
   }
 
   function handleRenamePlay(playId: string) {
@@ -451,6 +464,7 @@ function PlaybookEditorContent({
                             selected={selectedPlays.has(play.id)}
                             onSelect={() => togglePlaySelection(play.id)}
                             onOpen={handleOpenPlay}
+                            onAnimate={handleAnimatePlay}
                             onRename={handleRenamePlay}
                             onDelete={handleDeletePlay}
                             onDuplicate={handleDuplicatePlay}
@@ -659,6 +673,21 @@ function PlaybookEditorContent({
           </div>
         </div>
       </Modal>
+
+      {/* Play Animation Viewer Modal */}
+      {showPlayViewer && viewingPlayId && playbookId && (
+        <PlayViewerModal
+          isOpen={showPlayViewer}
+          onClose={handleClosePlayViewer}
+          playbookId={playbookId}
+          initialPlayId={viewingPlayId}
+          plays={allPlays.map(play => ({
+            id: play.id,
+            name: play.name,
+          }))}
+          canEdit={true}
+        />
+      )}
     </div>
   )
 }

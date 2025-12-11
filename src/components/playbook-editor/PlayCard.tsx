@@ -4,7 +4,8 @@ import {
   Trash2,
   Copy,
   CheckCircle2,
-  Circle
+  Circle,
+  Play
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -39,6 +40,7 @@ type PlayCardProps = {
   selected?: boolean
   onSelect?: (id: string) => void
   onOpen: (id: string) => void
+  onAnimate?: (id: string) => void
   onRename: (id: string) => void
   onDelete: (id: string) => void
   onDuplicate: (id: string) => void
@@ -68,13 +70,12 @@ function PlayCardThumbnail({
   onOpen
 }: PlayCardThumbnailProps) {
   console.log(`PlayCard "${name}" - drawings:`, drawings, 'length:', drawings?.length)
-
   const badgeClass = playType == PLAY_TYPE_PASS
     ? PLAY_TYPE_BADGE_PASS
     : PLAY_TYPE_BADGE_RUN
 
   return (
-    <div className="relative">
+    <div className="relative group/thumbnail">
       <div
         onClick={onOpen}
         className="aspect-video bg-muted flex items-center
@@ -201,6 +202,7 @@ export function PlayCard({
   selected = false,
   onSelect,
   onOpen,
+  onAnimate,
   onRename,
   onDelete,
   onDuplicate,
