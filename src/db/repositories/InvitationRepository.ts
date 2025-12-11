@@ -14,7 +14,7 @@ export class InvitationRepository {
 		const [invitation] = await db<TeamInvitation[]>`
 			INSERT INTO team_invitations (team_id, email, role, token, invited_by, expires_at)
 			VALUES (${data.team_id}, ${data.email}, ${data.role}, ${data.token}, ${data.invited_by}, ${data.expires_at})
-			RETURNING *
+			RETURNING id, team_id, email, role, token, invited_by, expires_at, accepted_at, created_at
 		`
 		return invitation
 	}
@@ -22,7 +22,8 @@ export class InvitationRepository {
 	// Find valid invitation by token (not accepted, not expired)
 	async findByToken(token: string): Promise<TeamInvitation | null> {
 		const [invitation] = await db<TeamInvitation[]>`
-			SELECT * FROM team_invitations
+			SELECT id, team_id, email, role, token, invited_by, expires_at, accepted_at, created_at
+			FROM team_invitations
 			WHERE token = ${token}
 			AND accepted_at IS NULL
 			AND expires_at > CURRENT_TIMESTAMP
@@ -33,7 +34,8 @@ export class InvitationRepository {
 	// Find all pending invitations for a team
 	async findPendingByTeam(teamId: number): Promise<TeamInvitation[]> {
 		return await db<TeamInvitation[]>`
-			SELECT * FROM team_invitations
+			SELECT id, team_id, email, role, token, invited_by, expires_at, accepted_at, created_at
+			FROM team_invitations
 			WHERE team_id = ${teamId}
 			AND accepted_at IS NULL
 			AND expires_at > CURRENT_TIMESTAMP
