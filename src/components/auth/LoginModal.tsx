@@ -8,14 +8,17 @@ type AuthMode = 'login' | 'register'
 // Email validation regex
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
+// Minimum password length requirement
+const MIN_PASSWORD_LENGTH = 6
+
 // Validates email format
 function isValidEmail(email: string): boolean {
 	return EMAIL_REGEX.test(email)
 }
 
-// Validates password strength (min 6 chars)
+// Validates password strength
 function isValidPassword(password: string): boolean {
-	return password.length >= 6
+	return password.length >= MIN_PASSWORD_LENGTH
 }
 
 // Modal for user login and registration
@@ -42,7 +45,7 @@ export function LoginModal() {
 			}
 
 			if (!isValidPassword(password)) {
-				setValidationError('Password must be at least 6 characters')
+				setValidationError(`Password must be at least ${MIN_PASSWORD_LENGTH} characters`)
 				return false
 			}
 
