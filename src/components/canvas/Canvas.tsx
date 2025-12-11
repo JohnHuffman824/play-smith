@@ -126,15 +126,6 @@ export function Canvas({
     useState(false)
   const [isHoveringDrawing, setIsHoveringDrawing] =
     useState(false)
-  const [players, setPlayers] = useState<
-    Array<{
-      id: string
-      x: number
-      y: number
-      label: string
-      color: string
-    }>
-  >(initialPlayers ?? [])
   const [showLabelDialog, setShowLabelDialog] = useState(false)
   const [selectedPlayerId, setSelectedPlayerId] = useState<
     string | null
@@ -144,8 +135,8 @@ export function Canvas({
   >(null)
   const [labelDialogPosition, setLabelDialogPosition] =
     useState({ x: 0, y: 0 })
-	const { state, setDrawings } = usePlayContext()
-	const { drawings } = state
+	const { state, setDrawings, dispatch } = usePlayContext()
+	const { drawings, players } = state
 	const [canvasDimensions, setCanvasDimensions] = useState({
 		width: 0,
 		height: 0,
@@ -238,14 +229,14 @@ export function Canvas({
 
 			if (!previousSnapshot) {
 				setDrawings([])
-				setPlayers([])
+				dispatch({ type: 'SET_PLAYERS', players: [] })
 				setLinemanPositions(computeInitialLinemanPositions())
 				setHistory([])
 				return
 			}
 
 			setDrawings(previousSnapshot.drawings)
-			setPlayers(previousSnapshot.players)
+			dispatch({ type: 'SET_PLAYERS', players: previousSnapshot.players })
 			setLinemanPositions(previousSnapshot.linemanPositions)
 
 			setHistory((prev) => prev.slice(0, -2))
@@ -253,19 +244,19 @@ export function Canvas({
 
 		eventBus.on('canvas:undo', handleUndo)
 		return () => eventBus.off('canvas:undo', handleUndo)
-	}, [history, hashAlignment])
+	}, [history, dispatch, hashAlignment])
 
 	// Handle clear canvas event (drawings + players + linemen)
 	useEffect(() => {
 		function handleClear() {
 			setDrawings([])
-			setPlayers([])
+			dispatch({ type: 'SET_PLAYERS', players: [] })
 			setLinemanPositions(computeInitialLinemanPositions())
 		}
 
 		eventBus.on('canvas:clear', handleClear)
 		return () => eventBus.off('canvas:clear', handleClear)
-	}, [setDrawings, hashAlignment])
+	}, [setDrawings, dispatch, hashAlignment])
 
 	// Report selection changes to parent
 	useEffect(() => {
@@ -434,7 +425,7 @@ export function Canvas({
 			color: drawingState.color,
 		}
 
-		setPlayers((prev) => [...prev, newPlayer])
+		dispatch({ type: 'ADD_PLAYER', player: newPlayer })
 		setSelectedPlayerId(newPlayer.id)
 		setLabelDialogPosition({ x: e.clientX, y: e.clientY })
 		setShowLabelDialog(true)
@@ -447,9 +438,7 @@ export function Canvas({
 	) {
 		// Just move the player without moving linked drawings
 		// Used when drawing is being moved and player should follow
-		setPlayers((prev) =>
-			prev.map((p) => (p.id == id ? { ...p, x, y } : p)),
-		)
+		dispatch({ type: 'UPDATE_PLAYER', id, updates: { x, y } })
 	}
 
   function handlePlayerPositionChange(
@@ -464,9 +453,7 @@ export function Canvas({
 		const deltaY = y - player.y
 
 		// Update player position
-		setPlayers((prev) =>
-			prev.map((p) => (p.id == id ? { ...p, x, y } : p)),
-		)
+		dispatch({ type: 'UPDATE_PLAYER', id, updates: { x, y } })
 
 		// Move any linked drawings by the same delta
 		const linkedDrawings = drawings.filter((d) => d.playerId == id)
@@ -506,26 +493,20 @@ export function Canvas({
 
   function handlePlayerLabelChange(label: string) {
     if (selectedPlayerId) {
-      setPlayers((prev) =>
-        prev.map((p) =>
-          p.id == selectedPlayerId ? { ...p, label } : p,
-        ),
-      )
+      dispatch({ type: 'UPDATE_PLAYER', id: selectedPlayerId, updates: { label } })
     }
   }
 
   function handlePlayerDelete() {
     if (selectedPlayerId) {
-      setPlayers((prev) =>
-        prev.filter((p) => p.id != selectedPlayerId),
-      )
+      dispatch({ type: 'DELETE_PLAYER', id: selectedPlayerId })
       setShowLabelDialog(false)
       setSelectedPlayerId(null)
     }
   }
 
   function handlePlayerDeleteById(id: string) {
-    setPlayers((prev) => prev.filter((p) => p.id != id))
+    dispatch({ type: 'DELETE_PLAYER', id })
     // Reset hover state when deleting a player to show circular cursor again
     setIsHoveringDeletable(false)
     // If the deleted player was selected, close the dialog

@@ -1,7 +1,7 @@
-import { afterEach, describe, test, expect } afterEach } from 'bun:test'
-import { afterEach, cleanup, render, screen } from '@testing-library/react'
-import { afterEach, SVGCanvas } from './SVGCanvas'
-import { afterEach, FieldCoordinateSystem } from '../../utils/coordinates'
+import { afterEach, describe, test, expect } from 'bun:test'
+import { cleanup, render, screen } from '@testing-library/react'
+import { SVGCanvas } from './SVGCanvas'
+import { FieldCoordinateSystem } from '../../utils/coordinates'
 import type { Drawing } from '../../types/drawing.types'
 
 describe('SVGCanvas - Control Node Visibility', () => {

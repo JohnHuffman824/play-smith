@@ -1,6 +1,6 @@
-import { afterEach, describe, test, expect } afterEach } from 'bun:test'
-import { afterEach, cleanup, render } from '@testing-library/react'
-import { afterEach, Player } from './Player'
+import { afterEach, describe, test, expect } from 'bun:test'
+import { cleanup, render } from '@testing-library/react'
+import { Player } from './Player'
 
 /**
  * TDD RED: Tests for player text color visibility

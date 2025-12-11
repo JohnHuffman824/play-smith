@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Toolbar } from '../components/toolbar/Toolbar'
 import { Canvas } from '../components/canvas/Canvas'
@@ -59,6 +59,24 @@ function PlayEditorContent() {
 
 	const [selectedObjectIds, setSelectedObjectIds] = useState<string[]>([])
 
+	/**
+	 * Unified delete method for removing selected objects.
+	 * Used by both keyboard shortcuts and SelectionOverlay delete button.
+	 *
+	 * Deletes all objects (drawings and players) with matching IDs.
+	 */
+	const deleteSelectedObjects = useCallback((objectIds: string[]) => {
+		// Delete all selected objects
+		for (const id of objectIds) {
+			// Try to delete as drawing first
+			deleteDrawing(id)
+			// Also dispatch player deletion
+			dispatch({ type: 'DELETE_PLAYER', id })
+		}
+		// Clear selection after deletion
+		setSelectedObjectIds([])
+	}, [deleteDrawing, dispatch])
+
 	// Set up keyboard shortcuts
 	useKeyboardShortcuts({ setDrawingState })
 
@@ -80,8 +98,6 @@ function PlayEditorContent() {
 				eventBus.emit('canvas:save-complete', { success: false, error: 'No play ID' })
 				return
 			}
-
-			console.log('Saving play with players:', playState.players)
 
 			try {
 				const response = await fetch(`/api/plays/${playId}`, {
@@ -134,8 +150,6 @@ function PlayEditorContent() {
 				const data = await response.json()
 				const play = data.play
 
-				console.log('Loading play - players from API:', play.players)
-
 				// Set teamId from play response (via playbook join)
 				if (play.teamId) {
 					setTeamId(play.teamId)
@@ -148,10 +162,7 @@ function PlayEditorContent() {
 					dispatch({ type: 'SET_HASH_ALIGNMENT', alignment: play.hashAlignment })
 				}
 				if (play.players?.length > 0) {
-					console.log('Setting players:', play.players)
 					setPlayers(play.players)
-				} else {
-					console.log('No players to load')
 				}
 				if (play.drawings?.length > 0) {
 					dispatch({ type: 'SET_DRAWINGS', drawings: play.drawings })
@@ -179,22 +190,15 @@ function PlayEditorContent() {
 		})
 	}, [conceptState.appliedConcepts])
 
-	// Listen for delete selection event
+	// Listen for delete selection event (Delete/Backspace keyboard shortcut)
 	useEffect(() => {
 		function handleDeleteSelection() {
-			// Delete all selected objects
-			for (const id of selectedObjectIds) {
-				// Try to delete as drawing first
-				deleteDrawing(id)
-				// Also dispatch player deletion
-				dispatch({ type: 'DELETE_PLAYER', id })
-			}
-			setSelectedObjectIds([])
+			deleteSelectedObjects(selectedObjectIds)
 		}
 
 		eventBus.on('selection:delete', handleDeleteSelection)
 		return () => eventBus.off('selection:delete', handleDeleteSelection)
-	}, [selectedObjectIds, deleteDrawing, dispatch])
+	}, [selectedObjectIds, deleteSelectedObjects])
 
 	function handleBackToPlaybook() {
 		if (playbookId) {
@@ -241,12 +245,12 @@ function PlayEditorContent() {
 		openConceptDialog()
 	}
 
+	/**
+	 * Handler for SelectionOverlay delete button
+	 * Calls the unified deleteSelectedObjects method
+	 */
 	function handleDeleteSelection() {
-		for (const id of selectedObjectIds) {
-			deleteDrawing(id)
-			dispatch({ type: 'DELETE_PLAYER', id })
-		}
-		setSelectedObjectIds([])
+		deleteSelectedObjects(selectedObjectIds)
 	}
 
 	function handleDuplicateSelection() {

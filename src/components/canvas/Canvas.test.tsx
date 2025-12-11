@@ -1,8 +1,8 @@
-import { afterEach, describe, test, expect } afterEach } from 'bun:test'
-import { afterEach, cleanup, render, fireEvent } from '@testing-library/react'
-import { afterEach, Canvas } from './Canvas'
-import { afterEach, PlayProvider } from '../../contexts/PlayContext'
-import { afterEach, ThemeProvider } from '../../contexts/ThemeContext'
+import { afterEach, describe, test, expect } from 'bun:test'
+import { cleanup, render, fireEvent } from '@testing-library/react'
+import { Canvas } from './Canvas'
+import { PlayProvider, usePlayContext } from '../../contexts/PlayContext'
+import { ThemeProvider } from '../../contexts/ThemeContext'
 import type { DrawingState } from '../../types/play.types'
 
 function renderCanvas(drawingState: DrawingState) {
@@ -151,5 +151,81 @@ describe('Canvas - Add Player Tool Cursor', () => {
 
 		// TODO: After implementing the feature, change this to:
 		// expect(circleCursor).toBeUndefined() // Should pass after implementation
+	})
+})
+
+describe('Canvas - Player State Sync with PlayContext', () => {
+	afterEach(() => {
+		cleanup()
+	})
+
+	test('adding player updates PlayContext state', () => {
+		// This test will FAIL initially, proving the bug
+		const addPlayerToolState: DrawingState = {
+			tool: 'addPlayer',
+			color: '#3b82f6',
+			brushSize: 4,
+			eraseSize: 30,
+			lineStyle: 'solid',
+			lineEnd: 'arrow',
+			pathMode: 'sharp',
+			snapThreshold: 15,
+		}
+
+		let contextState: any
+		const TestComponent = () => {
+			const { state } = usePlayContext()
+			contextState = state
+			return null
+		}
+
+		const { container } = render(
+			<ThemeProvider>
+				<PlayProvider>
+					<TestComponent />
+					<Canvas
+						drawingState={addPlayerToolState}
+						hashAlignment="middle"
+						showPlayBar={false}
+						readonly={false}
+						showFieldMarkings={true}
+						containerMode="page"
+					/>
+				</PlayProvider>
+			</ThemeProvider>
+		)
+
+		// Initial state should have no players
+		expect(contextState.players).toEqual([])
+
+		// Find the whiteboard and simulate a click to add a player
+		const whiteboard = container.querySelector('div[class*="rounded-2xl"]') as HTMLElement
+		expect(whiteboard).toBeTruthy()
+
+		// Mock getBoundingClientRect
+		whiteboard.getBoundingClientRect = () => ({
+			left: 0,
+			top: 0,
+			right: 800,
+			bottom: 400,
+			width: 800,
+			height: 400,
+			x: 0,
+			y: 0,
+			toJSON: () => {}
+		})
+
+		// Click on canvas to add a player
+		fireEvent.click(whiteboard, { clientX: 400, clientY: 200 })
+
+		// BUG: This will FAIL because Canvas uses local state, not PlayContext
+		// After fix, PlayContext should have the new player
+		expect(contextState.players.length).toBe(1)
+		expect(contextState.players[0]).toMatchObject({
+			x: expect.any(Number),
+			y: expect.any(Number),
+			label: '',
+			color: '#3b82f6'
+		})
 	})
 })

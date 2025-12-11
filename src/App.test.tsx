@@ -1,8 +1,8 @@
-import { afterEach, describe, test, expect } afterEach } from 'bun:test'
-import { afterEach, cleanup, render, screen } from '@testing-library/react'
-import { afterEach, RouterProvider, createMemoryRouter } from 'react-router-dom'
-import { afterEach, ThemeProvider } from './contexts/ThemeContext'
-import { afterEach, routes } from './router/routes'
+import { afterEach, describe, test, expect } from 'bun:test'
+import { cleanup, render, screen } from '@testing-library/react'
+import { RouterProvider, createMemoryRouter } from 'react-router-dom'
+import { ThemeProvider } from './contexts/ThemeContext'
+import { routes } from './router/routes'
 
 describe('App', () => {
 
