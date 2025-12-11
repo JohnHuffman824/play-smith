@@ -3,11 +3,13 @@ import type { HashAlignment } from '../../../types/field.types'
 
 interface HashDialogProps {
   currentAlignment: HashAlignment
+  linemenAtDefault: boolean
   onAlignmentChange: (alignment: HashAlignment) => void
   onClose: () => void
+  useRelativePosition?: boolean
 }
 
-export function HashDialog({ currentAlignment, onAlignmentChange, onClose }: HashDialogProps) {
+export function HashDialog({ currentAlignment, linemenAtDefault, onAlignmentChange, onClose, useRelativePosition = false }: HashDialogProps) {
   const { theme } = useTheme()
   const alignments: Array<{ value: HashAlignment; label: string }> = [
     { value: 'left', label: 'Left' },
@@ -20,7 +22,7 @@ export function HashDialog({ currentAlignment, onAlignmentChange, onClose }: Has
       {/* Dialog */}
       <div
         data-hash-dialog
-        className={`fixed left-24 top-1/2 -translate-y-1/2 rounded-2xl shadow-2xl p-4 z-50 w-48 ${
+        className={`${useRelativePosition ? '' : 'fixed left-24 top-1/2 -translate-y-1/2'} rounded-2xl shadow-2xl p-4 z-50 w-48 ${
           theme === 'dark' ? 'bg-gray-800' : 'bg-white'
         }`}
         onClick={(e) => e.stopPropagation()}
@@ -30,24 +32,27 @@ export function HashDialog({ currentAlignment, onAlignmentChange, onClose }: Has
             Ball on Hash
           </h3>
           
-          {alignments.map((alignment) => (
-            <button
-              key={alignment.value}
-              onClick={() => {
-                onAlignmentChange(alignment.value)
-                onClose()
-              }}
-              className={`w-full px-4 py-3 rounded-xl text-left transition-all cursor-pointer ${
-                currentAlignment === alignment.value
-                  ? 'bg-blue-500 text-white shadow-md'
-                  : theme === 'dark'
-                    ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                    : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              {alignment.label}
-            </button>
-          ))}
+          {alignments.map((alignment) => {
+            const isSelected = linemenAtDefault && currentAlignment === alignment.value
+            return (
+              <button
+                key={alignment.value}
+                onClick={() => {
+                  onAlignmentChange(alignment.value)
+                  onClose()
+                }}
+                className={`w-full px-4 py-3 rounded-xl text-left transition-all cursor-pointer ${
+                  isSelected
+                    ? 'bg-blue-500 text-white shadow-md'
+                    : theme === 'dark'
+                      ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                {alignment.label}
+              </button>
+            )
+          })}
         </div>
       </div>
     </>

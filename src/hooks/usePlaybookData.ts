@@ -170,6 +170,8 @@ export function usePlaybookData(playbookId: string | undefined): UsePlaybookData
 			throw new Error('You do not have permission to edit this play')
 		}
 		if (response.status === 404) {
+			// Play doesn't exist - refetch to sync UI with database state
+			await fetchData()
 			throw new Error('Play not found')
 		}
 		if (!response.ok) {
@@ -190,6 +192,8 @@ export function usePlaybookData(playbookId: string | undefined): UsePlaybookData
 			throw new Error('You do not have permission to delete this play')
 		}
 		if (response.status === 404) {
+			// Play doesn't exist - refetch to sync UI with database state
+			await fetchData()
 			throw new Error('Play not found')
 		}
 		if (!response.ok) {
@@ -210,6 +214,8 @@ export function usePlaybookData(playbookId: string | undefined): UsePlaybookData
 			throw new Error('You do not have permission to duplicate this play')
 		}
 		if (response.status === 404) {
+			// Play doesn't exist - refetch to sync UI with database state
+			await fetchData()
 			throw new Error('Play not found')
 		}
 		if (!response.ok) {
@@ -280,6 +286,8 @@ export function usePlaybookData(playbookId: string | undefined): UsePlaybookData
 			throw new Error('You do not have permission to delete this section')
 		}
 		if (response.status === 404) {
+			// Section doesn't exist - refetch to sync UI with database state
+			await fetchData()
 			throw new Error('Section not found')
 		}
 		if (!response.ok) {

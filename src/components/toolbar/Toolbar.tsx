@@ -37,6 +37,8 @@ import { useTheme } from '../../contexts/ThemeContext'
 import { EraserIcon } from './icons/EraserIcon'
 import { HashIcon } from './icons/HashIcon'
 import { ColorSwatchIndicator } from './ColorSwatchIndicator'
+import { usePlayContext } from '../../contexts/PlayContext'
+import { areLinemenAtDefaultPositions } from '../../utils/lineman.utils'
 
 interface ToolbarProps {
 	drawingState: DrawingState
@@ -63,6 +65,8 @@ export function Toolbar({
 	onDeletePlay,
 }: ToolbarProps) {
 	const { theme } = useTheme()
+	const { state } = usePlayContext()
+	const players = state.players || []
 	const [showColorPicker, setShowColorPicker] = useState(false)
 	const [showDrawOptions, setShowDrawOptions] = useState(false)
 	const [showEraseDialog, setShowEraseDialog] = useState(false)
@@ -738,6 +742,7 @@ export function Toolbar({
 			{showHashDialog && (
 				<HashDialog
 					currentAlignment={hashAlignment}
+					linemenAtDefault={areLinemenAtDefaultPositions(players, hashAlignment)}
 					onAlignmentChange={setHashAlignment}
 					onClose={() => setShowHashDialog(false)}
 				/>

@@ -2,6 +2,7 @@ import { describe, test, expect, beforeEach, afterEach } from 'bun:test'
 import { cleanup, render } from '@testing-library/react'
 import { Toolbar } from '../../../src/components/toolbar/Toolbar'
 import { ThemeProvider } from '../../../src/contexts/ThemeContext'
+import { PlayProvider } from '../../../src/contexts/PlayContext'
 import type { DrawingState } from '../../../src/types/play.types'
 import type { HashAlignment } from '../../../src/types/field.types'
 
@@ -48,16 +49,18 @@ describe('Toolbar - Responsive Layout', () => {
 	}>) {
 		return render(
 			<ThemeProvider>
-				<Toolbar
-					drawingState={mockDrawingState}
-					setDrawingState={mockSetDrawingState}
-					hashAlignment="middle"
-					setHashAlignment={mockSetHashAlignment}
-					showPlayBar={true}
-					setShowPlayBar={mockSetShowPlayBar}
-					playId={overrides?.playId}
-					onDeletePlay={overrides?.onDeletePlay}
-				/>
+				<PlayProvider>
+					<Toolbar
+						drawingState={mockDrawingState}
+						setDrawingState={mockSetDrawingState}
+						hashAlignment="middle"
+						setHashAlignment={mockSetHashAlignment}
+						showPlayBar={true}
+						setShowPlayBar={mockSetShowPlayBar}
+						playId={overrides?.playId}
+						onDeletePlay={overrides?.onDeletePlay}
+					/>
+				</PlayProvider>
 			</ThemeProvider>
 		)
 	}

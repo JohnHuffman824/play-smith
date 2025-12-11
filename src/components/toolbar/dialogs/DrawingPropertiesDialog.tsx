@@ -102,7 +102,7 @@ export function DrawingPropertiesDialog({
 							className={`h-10 rounded-lg transition-all cursor-pointer ${
 								style.color === color
 									? 'ring-2 ring-blue-500 ring-offset-2'
-									: 'hover:scale-105'
+									: `hover:scale-105 border ${theme === 'dark' ? 'border-gray-600' : 'border-gray-300'}`
 							}`}
 							style={{ backgroundColor: color }}
 							title={color}

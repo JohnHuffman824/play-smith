@@ -2,6 +2,7 @@ import { describe, test, expect, afterEach } from 'bun:test'
 import { cleanup, render, fireEvent } from '@testing-library/react'
 import { ConceptToolbar } from '../../../src/components/concepts/ConceptToolbar'
 import { ThemeProvider } from '../../../src/contexts/ThemeContext'
+import { PlayProvider } from '../../../src/contexts/PlayContext'
 
 describe('ConceptToolbar - Add Player Tool', () => {
 	afterEach(() => {
@@ -15,26 +16,28 @@ describe('ConceptToolbar - Add Player Tool', () => {
 		const mockOnToolChange = overrides?.onToolChange ?? (() => {})
 		return render(
 			<ThemeProvider>
-				<ConceptToolbar
-					selectedTool={overrides?.selectedTool ?? 'select'}
-					onToolChange={mockOnToolChange}
-					color="#000000"
-					onColorChange={() => {}}
-					hashAlignment="middle"
-					onHashAlignmentChange={() => {}}
-					showColorPicker={false}
-					onShowColorPickerChange={() => {}}
-					showDrawOptions={false}
-					onShowDrawOptionsChange={() => {}}
-					lineStyle="solid"
-					lineEnd="arrow"
-					brushSize={3}
-					pathMode="sharp"
-					onLineStyleChange={() => {}}
-					onLineEndChange={() => {}}
-					onBrushSizeChange={() => {}}
-					onPathModeChange={() => {}}
-				/>
+				<PlayProvider>
+					<ConceptToolbar
+						selectedTool={overrides?.selectedTool ?? 'select'}
+						onToolChange={mockOnToolChange}
+						color="#000000"
+						onColorChange={() => {}}
+						hashAlignment="middle"
+						onHashAlignmentChange={() => {}}
+						showColorPicker={false}
+						onShowColorPickerChange={() => {}}
+						showDrawOptions={false}
+						onShowDrawOptionsChange={() => {}}
+						lineStyle="solid"
+						lineEnd="arrow"
+						brushSize={3}
+						pathMode="sharp"
+						onLineStyleChange={() => {}}
+						onLineEndChange={() => {}}
+						onBrushSizeChange={() => {}}
+						onPathModeChange={() => {}}
+					/>
+				</PlayProvider>
 			</ThemeProvider>
 		)
 	}
@@ -68,28 +71,30 @@ describe('ConceptToolbar - Draw Options Integration', () => {
 		let showDrawOptions = false
 		const { container, rerender } = render(
 			<ThemeProvider>
-				<ConceptToolbar
-					selectedTool="draw"
-					onToolChange={() => {}}
-					color="#000000"
-					onColorChange={() => {}}
-					hashAlignment="middle"
-					onHashAlignmentChange={() => {}}
-					showColorPicker={false}
-					onShowColorPickerChange={() => {}}
-					showDrawOptions={showDrawOptions}
-					onShowDrawOptionsChange={(show) => {
-						showDrawOptions = show
-					}}
-					lineStyle="solid"
-					lineEnd="arrow"
-					brushSize={3}
-					pathMode="sharp"
-					onLineStyleChange={() => {}}
-					onLineEndChange={() => {}}
-					onBrushSizeChange={() => {}}
-					onPathModeChange={() => {}}
-				/>
+				<PlayProvider>
+					<ConceptToolbar
+						selectedTool="draw"
+						onToolChange={() => {}}
+						color="#000000"
+						onColorChange={() => {}}
+						hashAlignment="middle"
+						onHashAlignmentChange={() => {}}
+						showColorPicker={false}
+						onShowColorPickerChange={() => {}}
+						showDrawOptions={showDrawOptions}
+						onShowDrawOptionsChange={(show) => {
+							showDrawOptions = show
+						}}
+						lineStyle="solid"
+						lineEnd="arrow"
+						brushSize={3}
+						pathMode="sharp"
+						onLineStyleChange={() => {}}
+						onLineEndChange={() => {}}
+						onBrushSizeChange={() => {}}
+						onPathModeChange={() => {}}
+					/>
+				</PlayProvider>
 			</ThemeProvider>
 		)
 
@@ -107,28 +112,30 @@ describe('ConceptToolbar - Draw Options Integration', () => {
 		// Re-render with updated state
 		rerender(
 			<ThemeProvider>
-				<ConceptToolbar
-					selectedTool="draw"
-					onToolChange={() => {}}
-					color="#000000"
-					onColorChange={() => {}}
-					hashAlignment="middle"
-					onHashAlignmentChange={() => {}}
-					showColorPicker={false}
-					onShowColorPickerChange={() => {}}
-					showDrawOptions={showDrawOptions}
-					onShowDrawOptionsChange={(show) => {
-						showDrawOptions = show
-					}}
-					lineStyle="solid"
-					lineEnd="arrow"
-					brushSize={3}
-					pathMode="sharp"
-					onLineStyleChange={() => {}}
-					onLineEndChange={() => {}}
-					onBrushSizeChange={() => {}}
-					onPathModeChange={() => {}}
-				/>
+				<PlayProvider>
+					<ConceptToolbar
+						selectedTool="draw"
+						onToolChange={() => {}}
+						color="#000000"
+						onColorChange={() => {}}
+						hashAlignment="middle"
+						onHashAlignmentChange={() => {}}
+						showColorPicker={false}
+						onShowColorPickerChange={() => {}}
+						showDrawOptions={showDrawOptions}
+						onShowDrawOptionsChange={(show) => {
+							showDrawOptions = show
+						}}
+						lineStyle="solid"
+						lineEnd="arrow"
+						brushSize={3}
+						pathMode="sharp"
+						onLineStyleChange={() => {}}
+						onLineEndChange={() => {}}
+						onBrushSizeChange={() => {}}
+						onPathModeChange={() => {}}
+					/>
+				</PlayProvider>
 			</ThemeProvider>
 		)
 

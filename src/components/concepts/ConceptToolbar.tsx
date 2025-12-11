@@ -16,6 +16,8 @@ import { EraserIcon } from '../toolbar/icons/EraserIcon'
 import { HashIcon } from '../toolbar/icons/HashIcon'
 import { ColorSwatchIndicator } from '../toolbar/ColorSwatchIndicator'
 import { useTheme } from '../../contexts/ThemeContext'
+import { usePlayContext } from '../../contexts/PlayContext'
+import { areLinemenAtDefaultPositions } from '../../utils/lineman.utils'
 
 interface ConceptToolbarProps {
 	selectedTool: Tool
@@ -64,6 +66,8 @@ export function ConceptToolbar({
 	onPathModeChange
 }: ConceptToolbarProps) {
 	const { theme } = useTheme()
+	const { state } = usePlayContext()
+	const players = state.players || []
 	const [showHashDialog, setShowHashDialog] = useState(false)
 
 	return (
@@ -110,6 +114,7 @@ export function ConceptToolbar({
 							onBrushSizeChange={onBrushSizeChange}
 							onPathModeChange={onPathModeChange}
 							onClose={() => onShowDrawOptionsChange(false)}
+						useRelativePosition={true}
 						/>
 					</div>
 				)}
@@ -162,11 +167,13 @@ export function ConceptToolbar({
 					<div className="absolute left-full ml-2 top-0 z-50">
 						<HashDialog
 							currentAlignment={hashAlignment}
+							linemenAtDefault={areLinemenAtDefaultPositions(players, hashAlignment)}
 							onAlignmentChange={alignment => {
 								onHashAlignmentChange(alignment)
 								setShowHashDialog(false)
 							}}
 							onClose={() => setShowHashDialog(false)}
+							useRelativePosition={true}
 						/>
 					</div>
 				)}

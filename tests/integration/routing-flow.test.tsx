@@ -5,6 +5,7 @@ import { createMemoryRouter, RouterProvider } from 'react-router-dom'
 import { routes } from '../../src/router/routes'
 import { AuthProvider } from '../../src/contexts/AuthContext'
 import { ThemeProvider } from '../../src/contexts/ThemeContext'
+import { TeamProvider } from '../../src/contexts/TeamContext'
 import { QueryProvider } from '../../src/providers/QueryProvider'
 
 // Save the original fetch before any tests run
@@ -16,7 +17,9 @@ function renderWithProviders(router: ReturnType<typeof createMemoryRouter>) {
 		<QueryProvider>
 			<ThemeProvider>
 				<AuthProvider>
-					<RouterProvider router={router} />
+					<TeamProvider>
+						<RouterProvider router={router} />
+					</TeamProvider>
 				</AuthProvider>
 			</ThemeProvider>
 		</QueryProvider>

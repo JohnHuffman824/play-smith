@@ -9,6 +9,7 @@ interface ColorPickerDialogProps {
     left?: string
     top?: string
   }
+  useRelativePosition?: boolean
 }
 
 const presetColors = [
@@ -26,17 +27,19 @@ const presetColors = [
   { name: 'Gray', value: '#6B7280' },
 ]
 
-export function ColorPickerDialog({ currentColor, onColorChange, onClose, position }: ColorPickerDialogProps) {
+export function ColorPickerDialog({ currentColor, onColorChange, onClose, position, useRelativePosition = false }: ColorPickerDialogProps) {
   const { theme } = useTheme()
 
-  const positionClasses = position
-    ? `${position.left || 'left-24'} ${position.top || 'top-72'}`
-    : 'left-24 top-72'
+  const positionClasses = useRelativePosition
+    ? ''
+    : position
+      ? `${position.left || 'left-24'} ${position.top || 'top-72'}`
+      : 'left-24 top-72'
 
   return (
     <div
       data-color-dialog
-      className={`absolute ${positionClasses} w-64 rounded-2xl shadow-2xl border p-4 z-50 ${
+      className={`${useRelativePosition ? '' : `absolute ${positionClasses}`} w-64 rounded-2xl shadow-2xl border p-4 z-50 ${
       theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
     }`}>
       <div className="flex items-center justify-between mb-4">

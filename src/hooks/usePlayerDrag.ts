@@ -5,6 +5,7 @@
 
 import { useState, useEffect, useRef, RefObject } from 'react'
 import { FieldCoordinateSystem } from '../utils/coordinates'
+import { applyLOSSnap } from '../utils/los-snap.utils'
 
 interface UsePlayerDragOptions<T extends string | number> {
 	id: T
@@ -39,6 +40,12 @@ export function usePlayerDrag<T extends string | number>({
 	const [position, setPosition] = useState({ x: 0, y: 0 })
 	const [isDragging, setIsDragging] = useState(false)
 	const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
+	const positionRef = useRef(position)
+
+	// Keep ref in sync with position state
+	useEffect(() => {
+		positionRef.current = position
+	}, [position])
 
 	useEffect(() => {
 		const handleMouseMove = (e: MouseEvent) => {
@@ -58,6 +65,13 @@ export function usePlayerDrag<T extends string | number>({
 		}
 
 		const handleMouseUp = () => {
+			// Apply LOS snap on release
+			const currentPos = positionRef.current
+			const snapped = applyLOSSnap(currentPos.x, currentPos.y)
+			if (snapped.snapped) {
+				setPosition({ x: snapped.x, y: snapped.y })
+				onPositionChange(id, snapped.x, snapped.y)
+			}
 			setIsDragging(false)
 		}
 

@@ -233,38 +233,38 @@ export function ConceptDialog({
 
 				{/* Canvas Area */}
 				<div className="flex-1 flex min-h-0 relative">
-					{/* Left Toolbar */}
-					<ConceptToolbar
-						selectedTool={selectedTool}
-						onToolChange={tool => {
-							setSelectedTool(tool)
-							if (tool === 'draw') {
-								setShowDrawOptions(true)
-							} else {
-								setShowDrawOptions(false)
-							}
-						}}
-						color={color}
-						onColorChange={setColor}
-						hashAlignment={hashAlignment}
-						onHashAlignmentChange={setHashAlignment}
-						showColorPicker={showColorPicker}
-						onShowColorPickerChange={setShowColorPicker}
-						showDrawOptions={showDrawOptions}
-						onShowDrawOptionsChange={setShowDrawOptions}
-						lineStyle={lineStyle}
-						lineEnd={lineEnd}
-						brushSize={brushSize}
-						pathMode={pathMode}
-						onLineStyleChange={setLineStyle}
-						onLineEndChange={setLineEnd}
-						onBrushSizeChange={setBrushSize}
-						onPathModeChange={setPathMode}
-					/>
+					<PlayProvider>
+						{/* Left Toolbar */}
+						<ConceptToolbar
+							selectedTool={selectedTool}
+							onToolChange={tool => {
+								setSelectedTool(tool)
+								if (tool === 'draw') {
+									setShowDrawOptions(true)
+								} else {
+									setShowDrawOptions(false)
+								}
+							}}
+							color={color}
+							onColorChange={setColor}
+							hashAlignment={hashAlignment}
+							onHashAlignmentChange={setHashAlignment}
+							showColorPicker={showColorPicker}
+							onShowColorPickerChange={setShowColorPicker}
+							showDrawOptions={showDrawOptions}
+							onShowDrawOptionsChange={setShowDrawOptions}
+							lineStyle={lineStyle}
+							lineEnd={lineEnd}
+							brushSize={brushSize}
+							pathMode={pathMode}
+							onLineStyleChange={setLineStyle}
+							onLineEndChange={setLineEnd}
+							onBrushSizeChange={setBrushSize}
+							onPathModeChange={setPathMode}
+						/>
 
-					{/* Canvas */}
-					<div ref={canvasContainerRef} className="flex-1 flex flex-col overflow-hidden pr-6" style={{ minHeight: 0 }}>
-						<PlayProvider>
+						{/* Canvas */}
+						<div ref={canvasContainerRef} className="flex-1 flex flex-col pr-6 p-1" style={{ minHeight: 0 }}>
 							<Canvas
 								drawingState={{
 									tool: selectedTool,
@@ -281,8 +281,8 @@ export function ConceptDialog({
 							containerMode="fill"
 								showFieldMarkings={true}
 							/>
-						</PlayProvider>
-					</div>
+						</div>
+					</PlayProvider>
 
 					{/* Color Picker Dialog */}
 					{showColorPicker && (
@@ -291,6 +291,7 @@ export function ConceptDialog({
 							onColorChange={setColor}
 							onClose={() => setShowColorPicker(false)}
 							position={{ left: 'left-28', top: 'top-24' }}
+							useRelativePosition={true}
 						/>
 					)}
 				</div>

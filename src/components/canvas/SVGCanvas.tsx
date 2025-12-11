@@ -547,6 +547,7 @@ export function SVGCanvas({
 				isActive={activeTool === 'draw'}
 				autoCorrect={autoCorrect}
 				onCommit={handleCommit}
+				players={players}
 			/>
 
 		{activeTool === 'draw' && lastDrawnDrawingId && isOverCanvas && (

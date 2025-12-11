@@ -4,6 +4,8 @@ import type { PathStyle, Drawing } from '../../types/drawing.types'
 import { processSharpPath } from '../../utils/sharp-path.utils'
 import { processSmoothPath } from '../../utils/smooth-path.utils'
 import type { Coordinate } from '../../types/field.types'
+import { findPlayerSnapTarget, type PlayerForSnap } from '../../utils/drawing.utils'
+import { PLAYER_RADIUS_FEET } from '../../constants/field.constants'
 
 interface FreehandCaptureProps {
 	coordSystem: FieldCoordinateSystem
@@ -11,6 +13,7 @@ interface FreehandCaptureProps {
 	isActive: boolean
 	autoCorrect: boolean
 	onCommit: (drawing: Drawing) => void
+	players?: PlayerForSnap[]
 }
 
 /**
@@ -22,6 +25,7 @@ export function FreehandCapture({
 	isActive,
 	autoCorrect,
 	onCommit,
+	players,
 }: FreehandCaptureProps) {
 	const canvasRef = useRef<HTMLCanvasElement | null>(null)
 	const [isDrawing, setIsDrawing] = useState(false)
@@ -104,12 +108,48 @@ export function FreehandCapture({
 			? processSmoothPath(captured)
 			: processSharpPath(captured)
 
+		// Check for player snap on start and end points
+		let playerId: string | undefined
+		let linkedPointId: string | undefined
+
+		if (players && players.length > 0) {
+			const pointIds = Object.keys(points)
+			const startPointId = pointIds[0]
+			const endPointId = pointIds[pointIds.length - 1]
+			const startPoint = points[startPointId]
+			const endPoint = points[endPointId]
+
+			// Check start point first (prioritize)
+			if (startPoint) {
+				const startSnap = findPlayerSnapTarget(startPoint, players, PLAYER_RADIUS_FEET)
+				if (startSnap) {
+					playerId = startSnap.playerId
+					linkedPointId = startPointId
+					// Move start point to player center
+					points[startPointId] = { ...startPoint, x: startSnap.point.x, y: startSnap.point.y }
+				}
+			}
+
+			// Check end point if start didn't snap and end is different from start
+			if (!playerId && endPoint && endPointId !== startPointId) {
+				const endSnap = findPlayerSnapTarget(endPoint, players, PLAYER_RADIUS_FEET)
+				if (endSnap) {
+					playerId = endSnap.playerId
+					linkedPointId = endPointId
+					// Move end point to player center
+					points[endPointId] = { ...endPoint, x: endSnap.point.x, y: endSnap.point.y }
+				}
+			}
+		}
+
 		const drawing: Drawing = {
 			id: `drawing-${Date.now()}`,
 			points,
 			segments,
 			style,
 			annotations: [],
+			// Include player link if found
+			...(playerId && linkedPointId ? { playerId, linkedPointId } : {}),
 		}
 
 		onCommit(drawing)

@@ -6,6 +6,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ThemeProvider } from '../../../src/contexts/ThemeContext'
 import { AuthProvider } from '../../../src/contexts/AuthContext'
+import { TeamProvider } from '../../../src/contexts/TeamContext'
 
 // Mock the API query modules
 vi.mock('../../../src/api/queries/playbookQueries', () => ({
@@ -34,11 +35,13 @@ function renderPlaybookManager(queryClient: QueryClient) {
 	return render(
 		<ThemeProvider>
 			<AuthProvider>
-				<BrowserRouter>
-					<QueryClientProvider client={queryClient}>
-						<PlaybookManagerPage />
-					</QueryClientProvider>
-				</BrowserRouter>
+				<TeamProvider>
+					<BrowserRouter>
+						<QueryClientProvider client={queryClient}>
+							<PlaybookManagerPage />
+						</QueryClientProvider>
+					</BrowserRouter>
+				</TeamProvider>
 			</AuthProvider>
 		</ThemeProvider>
 	)

@@ -78,3 +78,29 @@ export function repositionLinemenForHash(
 		}
 	})
 }
+
+/**
+ * Check if all linemen are at their default positions for the given hash alignment
+ * Returns true if all linemen are positioned correctly, false otherwise
+ */
+export function areLinemenAtDefaultPositions(
+	players: Player[],
+	hashAlignment: HashAlignment
+): boolean {
+	const centerX = getCenterXForHash(hashAlignment)
+	const linemen = players.filter(p => p.isLineman)
+
+	for (const player of linemen) {
+		const labelIndex = LINEMAN_LABELS.indexOf(player.label)
+		if (labelIndex === -1) continue
+
+		const expectedX = centerX + (labelIndex - 2) * SPACING_CENTER_TO_CENTER
+		const expectedY = LINEMAN_Y
+
+		// Use small tolerance for floating point comparison
+		if (Math.abs(player.x - expectedX) > 0.1 || Math.abs(player.y - expectedY) > 0.1) {
+			return false
+		}
+	}
+	return true
+}

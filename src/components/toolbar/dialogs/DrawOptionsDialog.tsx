@@ -11,6 +11,7 @@ interface DrawOptionsDialogProps {
   onBrushSizeChange: (size: number) => void
   onPathModeChange: (mode: 'sharp' | 'curve') => void
   onClose: () => void
+  useRelativePosition?: boolean
 }
 
 const brushSizes = [
@@ -30,13 +31,14 @@ export function DrawOptionsDialog({
   onBrushSizeChange,
   onPathModeChange,
   onClose,
+  useRelativePosition = false,
 }: DrawOptionsDialogProps) {
   const { theme } = useTheme()
   
   return (
-    <div 
+    <div
       data-draw-dialog
-      className={`absolute left-24 top-32 w-64 rounded-2xl shadow-2xl border p-4 z-50 ${
+      className={`${useRelativePosition ? '' : 'absolute left-24 top-32'} w-64 rounded-2xl shadow-2xl border p-4 z-50 ${
       theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
     }`}>
       <div className="flex items-center justify-between mb-4">
