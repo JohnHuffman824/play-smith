@@ -199,6 +199,69 @@ const lineOpacity = theme === 'dark' ? 0.6 : 0.4;
 
 ---
 
+## Input Field Styling
+
+### Convention: Always Use CSS Variables
+
+All input fields MUST use CSS variables for theme-aware styling:
+
+```tsx
+// CORRECT - Uses CSS variables
+className="bg-input-background text-foreground placeholder:text-muted-foreground border-input"
+
+// INCORRECT - Hardcoded colors
+className="bg-gray-50 text-gray-900"
+
+// INCORRECT - JavaScript conditional
+className={theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}
+```
+
+### Preferred: Use the shared Input component
+
+```tsx
+import { Input } from '@/components/ui/input'
+
+<Input
+  type="text"
+  value={value}
+  onChange={(e) => setValue(e.target.value)}
+  placeholder="Enter text..."
+/>
+```
+
+### CSS Variables for Inputs
+
+| Variable | Light Mode | Dark Mode | Usage |
+|----------|-----------|-----------|-------|
+| `--input-background` | `#f3f3f5` | `#374151` | Input background |
+| `--input` | `transparent` | `oklch(0.269 0 0)` | Border color |
+| `--foreground` | Near black | Off-white | Text color |
+| `--muted-foreground` | `#717182` | `oklch(0.708 0 0)` | Placeholder text |
+
+### Input Styling Classes
+
+```css
+/* Standard input styling */
+.input-field {
+  @apply bg-input-background text-foreground
+         placeholder:text-muted-foreground
+         border border-input rounded-md
+         focus:ring-2 focus:ring-ring/20;
+}
+```
+
+### Dark Mode Input Appearance
+
+In dark mode, inputs should have:
+- **Background:** Dark gray (`#374151` / gray-700) - NOT pure white
+- **Text:** Light/white (`text-foreground`) - readable against dark background
+- **Placeholder:** Muted gray (`text-muted-foreground`)
+- **Border:** Subtle (`border-input`)
+
+This reduces eye strain and maintains consistency with the Apple-inspired dark theme.
+
+---
+
 ## Border Radius System
 
 PlaySmith uses generous rounded corners throughout:
