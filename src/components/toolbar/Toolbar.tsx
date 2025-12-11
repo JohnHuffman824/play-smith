@@ -66,6 +66,9 @@ export function Toolbar({
 	const [showDrawingDialog, setShowDrawingDialog] = useState(false)
 	const [showClearConfirm, setShowClearConfirm] =
 		useState(false)
+	const [showDeletePlayConfirm, setShowDeletePlayConfirm] =
+		useState(false)
+	const [isDeleting, setIsDeleting] = useState(false)
 	const [showHashDialog, setShowHashDialog] = useState(false)
 	const [showSettingsDialog, setShowSettingsDialog] =
 		useState(false)
@@ -332,6 +335,29 @@ export function Toolbar({
 	function confirmClearPlay() {
 		eventBus.emit('canvas:clear')
 		setShowClearConfirm(false)
+	}
+
+	function handleDeletePlay() {
+		setShowDeletePlayConfirm(true)
+	}
+
+	async function confirmDeletePlay() {
+		if (!onDeletePlay) return
+
+		setIsDeleting(true)
+		try {
+			await onDeletePlay()
+		} catch (error) {
+			console.error('Failed to delete play:', error)
+			alert(
+				error instanceof Error
+					? error.message
+					: 'Failed to delete play'
+			)
+		} finally {
+			setIsDeleting(false)
+			setShowDeletePlayConfirm(false)
+		}
 	}
 
 	return (
