@@ -254,6 +254,78 @@ export function SVGCanvas({
 			}),
 		)
 
+		// Snap detection for linking to players during whole-drawing drag
+		// Skip if drawing is already linked to a player
+		if (movedDrawing?.playerId) {
+			setWholeDrawingSnapTarget(null)
+		} else if (movedDrawing && players && players.length > 0) {
+			// Build updated drawing with new point positions
+			const updatedDrawing = {
+				...movedDrawing,
+				points: Object.fromEntries(
+					Object.entries(movedDrawing.points).map(([id, point]) => [
+						id,
+						{ ...point, x: point.x + deltaX, y: point.y + deltaY }
+					])
+				),
+			}
+
+			const startPoint = getDrawingStartPoint(updatedDrawing)
+			const endPoint = getDrawingEndPoint(updatedDrawing)
+			const threshold = PLAYER_RADIUS_FEET
+
+			let bestTarget: {
+				playerId: string
+				pointId: string
+				playerPosition: { x: number; y: number }
+				distance: number
+			} | null = null
+
+			// Check start point
+			if (startPoint) {
+				const snap = findPlayerSnapTarget(
+					{ x: startPoint.x, y: startPoint.y },
+					players,
+					threshold
+				)
+				if (snap && (!bestTarget || snap.distance < bestTarget.distance)) {
+					bestTarget = {
+						playerId: snap.playerId,
+						pointId: startPoint.id,
+						playerPosition: snap.point,
+						distance: snap.distance,
+					}
+				}
+			}
+
+			// Check end point
+			if (endPoint && endPoint.id !== startPoint?.id) {
+				const snap = findPlayerSnapTarget(
+					{ x: endPoint.x, y: endPoint.y },
+					players,
+					threshold
+				)
+				if (snap && (!bestTarget || snap.distance < bestTarget.distance)) {
+					bestTarget = {
+						playerId: snap.playerId,
+						pointId: endPoint.id,
+						playerPosition: snap.point,
+						distance: snap.distance,
+					}
+				}
+			}
+
+			setWholeDrawingSnapTarget(
+				bestTarget
+					? {
+							playerId: bestTarget.playerId,
+							pointId: bestTarget.pointId,
+							playerPosition: bestTarget.playerPosition,
+					  }
+					: null
+			)
+		}
+
 		setDrawingDragState({
 			drawingId: drawingDragState.drawingId,
 			startFeet: currentFeet,
