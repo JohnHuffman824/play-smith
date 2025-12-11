@@ -24,6 +24,23 @@ export interface TeamMember {
 	joined_at: Date
 }
 
+export interface TeamInvitation {
+	id: number
+	team_id: number
+	email: string
+	role: 'owner' | 'editor' | 'viewer'
+	token: string
+	invited_by: number
+	expires_at: Date
+	accepted_at: Date | null
+	created_at: Date
+}
+
+export interface TeamMemberWithUser extends TeamMember {
+	user_email: string
+	user_name: string
+}
+
 export interface Playbook {
 	id: number
 	team_id: number | null

@@ -7,6 +7,7 @@ import { Toolbar } from '../components/playbook-manager/Toolbar'
 import { PlaybookCard } from '../components/playbook-manager/PlaybookCard'
 import { Modal } from '../components/playbook-manager/Modal'
 import { SettingsDialog } from '../components/playbook-manager/SettingsDialog'
+import { ManageTeamsDialog } from '../components/playbook-manager/ManageTeamsDialog'
 
 export function PlaybookManagerPage() {
 	const navigate = useNavigate()
@@ -29,6 +30,7 @@ export function PlaybookManagerPage() {
 	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 	const [showNewPlaybookModal, setShowNewPlaybookModal] = useState(false)
 	const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+	const [showManageTeamsDialog, setShowManageTeamsDialog] = useState(false)
 	const [newPlaybookName, setNewPlaybookName] = useState('')
 
 	const personalPlaybooks = useMemo(
@@ -88,7 +90,7 @@ export function PlaybookManagerPage() {
 	}
 
 	const handleManageTeams = () => {
-		// TODO: Implement team management
+		setShowManageTeamsDialog(true)
 	}
 
 	const handleShare = (id: number) => {
@@ -269,6 +271,12 @@ export function PlaybookManagerPage() {
 			<SettingsDialog
 				isOpen={showSettingsDialog}
 				onClose={() => setShowSettingsDialog(false)}
+			/>
+
+			{/* Manage Teams Dialog */}
+			<ManageTeamsDialog
+				isOpen={showManageTeamsDialog}
+				onClose={() => setShowManageTeamsDialog(false)}
 			/>
 		</div>
 	)

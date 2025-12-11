@@ -73,7 +73,29 @@ const server = serve({
 
     // Team API endpoints
     '/api/teams': {
-      GET: teamsAPI.list
+      GET: teamsAPI.list,
+      POST: teamsAPI.create
+    },
+    '/api/teams/:id': {
+      GET: teamsAPI.get,
+      PATCH: teamsAPI.update,
+      DELETE: teamsAPI.delete
+    },
+    '/api/teams/:id/members': {
+      GET: teamsAPI.getMembers
+    },
+    '/api/teams/:id/members/:userId': {
+      PATCH: teamsAPI.updateMemberRole,
+      DELETE: teamsAPI.removeMember
+    },
+    '/api/teams/:id/invitations': {
+      POST: teamsAPI.createInvitation
+    },
+    '/api/teams/:id/invitations/:invitationId': {
+      DELETE: teamsAPI.deleteInvitation
+    },
+    '/api/invitations/accept': {
+      POST: teamsAPI.acceptInvitation
     },
 
     // Formation API endpoints
