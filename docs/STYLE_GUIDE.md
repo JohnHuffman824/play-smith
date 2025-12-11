@@ -484,6 +484,138 @@ className="line-clamp-1"
 className="line-clamp-2"
 ```
 
+### Responsive Vertical Toolbars
+
+#### ⚠️ Common Mistakes
+
+**MISTAKE 1: Using `flex-row flex-wrap`**
+
+```tsx
+// ❌ WRONG - Creates horizontal toolbar that wraps to rows
+<div className="flex flex-row flex-wrap">
+  {buttons}
+</div>
+```
+
+This makes the toolbar horizontal-first, wrapping to new rows instead of columns.
+
+**MISTAKE 2: Using `flex-col flex-wrap` for uneven distribution**
+
+```tsx
+// ❌ WRONG - Wraps unevenly (e.g., 14 buttons in first column, 1 in second)
+<div className="flex flex-col flex-wrap h-full">
+  {buttons}
+</div>
+```
+
+Flex-wrap overflows naturally, causing uneven distribution across columns.
+
+**MISTAKE 3: Inconsistent padding**
+
+```tsx
+// ❌ WRONG - py-6 (24px) doesn't match gap-3 (12px)
+<div className="flex flex-col gap-3 py-6">
+  {buttons}
+</div>
+```
+
+Different values for gaps and padding create visual inconsistency.
+
+#### ✅ Correct Implementation
+
+Use **CSS Grid with dynamic column calculation** for even distribution:
+
+```tsx
+const [columnCount, setColumnCount] = useState(1)
+const [rowsPerColumn, setRowsPerColumn] = useState(13)
+
+useEffect(() => {
+  const calculateLayout = () => {
+    const BUTTON_SIZE = 56  // w-14 h-14 in pixels
+    const GAP = 12          // gap-3
+    const PADDING = 12      // p-3
+    const TOTAL_BUTTONS = 13
+
+    // Use window height as the stable constraint (NOT self-measurement)
+    const availableHeight = window.innerHeight - (2 * PADDING)
+
+    // Calculate how many buttons fit in one column
+    const buttonsPerColumn = Math.floor(
+      (availableHeight + GAP) / (BUTTON_SIZE + GAP)
+    )
+
+    if (buttonsPerColumn >= TOTAL_BUTTONS) {
+      // All buttons fit in one column
+      setColumnCount(1)
+      setRowsPerColumn(TOTAL_BUTTONS)
+      return
+    }
+
+    if (buttonsPerColumn <= 0) {
+      // Fallback for very small screens
+      setColumnCount(1)
+      setRowsPerColumn(TOTAL_BUTTONS)
+      return
+    }
+
+    // Calculate columns needed for even distribution
+    const neededColumns = Math.ceil(TOTAL_BUTTONS / buttonsPerColumn)
+
+    // Calculate rows for even distribution
+    const rows = Math.ceil(TOTAL_BUTTONS / neededColumns)
+
+    setColumnCount(neededColumns)
+    setRowsPerColumn(rows)
+  }
+
+  calculateLayout()
+
+  // Use window resize listener (NOT ResizeObserver on self)
+  window.addEventListener('resize', calculateLayout)
+  return () => window.removeEventListener('resize', calculateLayout)
+}, [])
+
+// In JSX:
+<div
+  className="h-full border-r bg-card"
+  style={{
+    display: 'grid',
+    gridTemplateColumns: `repeat(${columnCount}, 56px)`,
+    gridTemplateRows: `repeat(${rowsPerColumn}, 56px)`,  // CRITICAL - must set both!
+    gridAutoFlow: 'column',
+    gap: '12px',
+    padding: '12px',
+    alignContent: 'center',     // Centers buttons vertically
+    justifyContent: 'start',    // Aligns columns to the left
+    minWidth: '80px',
+    width: 'auto',
+  }}
+>
+  {buttons}
+</div>
+```
+
+**Key principles:**
+- Use **CSS Grid** with `gridAutoFlow: 'column'` to fill vertically
+- **CRITICAL**: Set BOTH `gridTemplateColumns` AND `gridTemplateRows` - without rows, all items go horizontal
+- Calculate columns AND rows dynamically based on available height
+- Use `window.innerHeight` (not self-measurement) to avoid circular references
+- Use `window.addEventListener('resize')` to recalculate on window resize
+- Buttons distribute evenly (12 buttons → 6 per column when 2 columns)
+- Consistent spacing: same value for gap and padding (12px)
+- `alignContent: 'center'` - centers the button group vertically while maintaining spacing between buttons
+
+**Why both templates are required:**
+- `gridTemplateColumns: repeat(2, 56px)` - defines 2 columns of 56px width each
+- `gridTemplateRows: repeat(7, 56px)` - defines 7 rows of 56px height each
+- Without `gridTemplateRows`, Grid creates only 1 implicit row and all items go horizontal
+- With `gridAutoFlow: column`, items fill down the rows, then move to next column
+
+**Distribution examples:**
+- 13 buttons, tall window → 1 column, 13 rows
+- 13 buttons, medium window → 2 columns, 7 rows (7 + 6 distribution)
+- 13 buttons, short window → 3 columns, 5 rows (5 + 5 + 3 distribution)
+
 ---
 
 ## 6. Border Radius System

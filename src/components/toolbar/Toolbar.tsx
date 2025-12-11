@@ -68,8 +68,8 @@ export function Toolbar({
 	const [isSaving, setIsSaving] = useState(false)
 	const [showSuccess, setShowSuccess] = useState(false)
 	const [columnCount, setColumnCount] = useState(1)
+	const [rowsPerColumn, setRowsPerColumn] = useState(13)
 	const drawDialogRef = useRef<HTMLDivElement>(null)
-	const toolbarRef = useRef<HTMLDivElement>(null)
 	const baseButtonClass = [
 		'w-14 h-14 rounded-xl flex items-center justify-center',
 		'transition-all cursor-pointer',
@@ -198,41 +198,49 @@ export function Toolbar({
 		return () => eventBus.off('dialog:closeAll', handleCloseAllDialogsEvent)
 	}, [])
 
-	// Calculate optimal column count based on available height
+	// Calculate optimal column count and rows based on available height
 	useEffect(() => {
-		const calculateColumns = () => {
-			if (!toolbarRef.current) return
-
+		const calculateLayout = () => {
 			const BUTTON_SIZE = 56 // 14 * 4 (w-14 h-14 in pixels)
 			const GAP = 12
 			const PADDING = 12
-			const TOTAL_BUTTONS = 15 // Count of all toolbar buttons
+			const TOTAL_BUTTONS = 13 // Count of all toolbar buttons
 
-			const containerHeight = toolbarRef.current.clientHeight
-			const availableHeight = containerHeight - (2 * PADDING)
+			// Use window height as the stable constraint
+			const availableHeight = window.innerHeight - (2 * PADDING)
 
 			// Calculate how many buttons fit in one column
 			const buttonsPerColumn = Math.floor((availableHeight + GAP) / (BUTTON_SIZE + GAP))
 
-			if (buttonsPerColumn <= 0) {
+			if (buttonsPerColumn >= TOTAL_BUTTONS) {
+				// All buttons fit in one column
 				setColumnCount(1)
+				setRowsPerColumn(TOTAL_BUTTONS)
 				return
 			}
 
-			// Calculate how many columns we need
+			if (buttonsPerColumn <= 0) {
+				// Fallback for very small screens
+				setColumnCount(1)
+				setRowsPerColumn(TOTAL_BUTTONS)
+				return
+			}
+
+			// Calculate columns needed for even distribution
 			const neededColumns = Math.ceil(TOTAL_BUTTONS / buttonsPerColumn)
+
+			// Calculate rows for even distribution
+			const rows = Math.ceil(TOTAL_BUTTONS / neededColumns)
+
 			setColumnCount(neededColumns)
+			setRowsPerColumn(rows)
 		}
 
-		calculateColumns()
+		calculateLayout()
 
 		// Recalculate on window resize
-		const resizeObserver = new ResizeObserver(calculateColumns)
-		if (toolbarRef.current) {
-			resizeObserver.observe(toolbarRef.current)
-		}
-
-		return () => resizeObserver.disconnect()
+		window.addEventListener('resize', calculateLayout)
+		return () => window.removeEventListener('resize', calculateLayout)
 	}, [])
 
 	function toolButtonClass(isActive: boolean) {
@@ -325,8 +333,7 @@ export function Toolbar({
 	return (
 		<>
 			<div
-				ref={toolbarRef}
-				className={`w-auto h-full border-r ${
+				className={`h-full border-r ${
 					theme == 'dark'
 						? 'bg-gray-800 border-gray-700'
 						: 'bg-white border-gray-200'
@@ -334,11 +341,14 @@ export function Toolbar({
 				style={{
 					display: 'grid',
 					gridTemplateColumns: `repeat(${columnCount}, 56px)`,
+					gridTemplateRows: `repeat(${rowsPerColumn}, 56px)`,
 					gridAutoFlow: 'column',
 					gap: '12px',
 					padding: '12px',
-					alignContent: 'start',
-					justifyContent: 'center',
+					alignContent: 'center',
+					justifyContent: 'start',
+					minWidth: '80px',
+					width: 'auto',
 				}}
 			>
 				{/* Select Tool */}
