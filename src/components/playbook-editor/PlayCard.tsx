@@ -73,7 +73,6 @@ function PlayCardThumbnail({
   playType,
   onOpen
 }: PlayCardThumbnailProps) {
-  console.log(`PlayCard "${name}" - drawings:`, drawings, 'length:', drawings?.length)
   const badgeClass = playType == PLAY_TYPE_PASS
     ? PLAY_TYPE_BADGE_PASS
     : PLAY_TYPE_BADGE_RUN
