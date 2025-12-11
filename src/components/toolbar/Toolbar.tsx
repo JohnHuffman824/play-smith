@@ -679,6 +679,21 @@ export function Toolbar({
 				/>
 			)}
 
+			{showDeletePlayConfirm && (
+				<ConfirmDialog
+					title='Delete Play?'
+					message={
+						'Are you sure you want to permanently delete ' +
+						'this play? This action cannot be undone.'
+					}
+					confirmLabel='Delete'
+					cancelLabel='Cancel'
+					onConfirm={confirmDeletePlay}
+					onCancel={() => setShowDeletePlayConfirm(false)}
+					variant='danger'
+				/>
+			)}
+
 			{showHashDialog && (
 				<HashDialog
 					currentAlignment={hashAlignment}
