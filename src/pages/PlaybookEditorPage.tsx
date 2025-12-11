@@ -81,13 +81,7 @@ export function PlaybookEditorPage() {
 	// Navigation handlers
 	const handleBack = () => navigate('/playbooks')
 	const handleOpenPlay = (playId: string) => {
-		// Include teamId in URL for PlayEditorPage
-		const teamId = playbook?.team_id || team?.id
-		if (teamId) {
-			navigate(`/playbooks/${playbookId}/plays/${playId}?teamId=${teamId}`)
-		} else {
-			navigate(`/playbooks/${playbookId}/plays/${playId}`)
-		}
+		navigate(`/playbooks/${playbookId}/play/${playId}`)
 	}
 	const handleImport = () => {
 	}

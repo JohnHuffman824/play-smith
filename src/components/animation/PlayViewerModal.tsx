@@ -107,7 +107,7 @@ function PlayViewerContent({
 	}, [onClose])
 
 	const handleEdit = useCallback(() => {
-		navigate(`/playbooks/${playbookId}/plays/${currentMetadata.id}`)
+		navigate(`/playbooks/${playbookId}/play/${currentMetadata.id}`)
 	}, [navigate, playbookId, currentMetadata.id])
 
 	const displayName =

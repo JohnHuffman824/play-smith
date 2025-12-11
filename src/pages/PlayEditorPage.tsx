@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { Toolbar } from '../components/toolbar/Toolbar'
 import { Canvas } from '../components/canvas/Canvas'
 import { PlayHeader } from '../components/plays/PlayHeader'
@@ -26,8 +26,7 @@ function PlayEditorContent() {
 		playbookId?: string
 		playId?: string
 	}>()
-	const [searchParams] = useSearchParams()
-	const teamId = searchParams.get('teamId')
+	const [teamId, setTeamId] = useState<string | null>(null)
 	const navigate = useNavigate()
 
 	const {

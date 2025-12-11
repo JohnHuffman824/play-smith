@@ -38,7 +38,7 @@ export const routes: RouteObject[] = [
 		errorElement: <ErrorPage />
 	},
 	{
-		path: '/playbooks/:playbookId/plays/:playId',
+		path: '/playbooks/:playbookId/play/:playId',
 		element: (
 			<ProtectedRoute>
 				<PlayEditorPage />

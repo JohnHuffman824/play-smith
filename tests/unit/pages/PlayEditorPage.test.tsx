@@ -1,4 +1,4 @@
-import { describe, test, expect } from 'bun:test'
+import { describe, test, expect, mock } from 'bun:test'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { PlayEditorPage } from '../../../src/pages/PlayEditorPage'
@@ -24,7 +24,7 @@ function renderPlayEditor(route: string) {
 		<MemoryRouter initialEntries={[route]}>
 			<Routes>
 				<Route
-					path='/playbooks/:playbookId/plays/:playId'
+					path='/playbooks/:playbookId/play/:playId'
 					element={
 						<QueryProvider>
 							<ThemeProvider>
@@ -42,7 +42,7 @@ function renderPlayEditor(route: string) {
 
 describe('PlayEditorPage - URL Params', () => {
 	test('should extract playId from URL params', () => {
-		renderPlayEditor('/playbooks/1/plays/42')
+		renderPlayEditor('/playbooks/1/play/42')
 
 		// The page should render without the "Team ID is required" error
 		expect(screen.queryByText('Team ID is required')).toBeNull()
