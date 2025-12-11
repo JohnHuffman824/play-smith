@@ -49,6 +49,9 @@ global.KeyboardEvent = window.KeyboardEvent as any
 // Polyfill MouseEvent for tests
 global.MouseEvent = window.MouseEvent as any
 
+// Polyfill DocumentFragment for tests
+global.DocumentFragment = window.DocumentFragment as any
+
 // Polyfill localStorage for tests
 const localStorageMock = {
 	getItem: (key: string) => null,

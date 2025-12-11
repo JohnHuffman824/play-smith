@@ -9,6 +9,7 @@ import {
 import type { Tool } from '../../types/play.types'
 import type { HashAlignment } from '../../types/play.types'
 import { HashDialog } from '../toolbar/dialogs/HashDialog'
+import { DrawOptionsDialog } from '../toolbar/dialogs/DrawOptionsDialog'
 import { Tooltip } from '../toolbar/Tooltip'
 import { ToolButton } from '../toolbar/ToolButton'
 import { EraserIcon } from '../toolbar/icons/EraserIcon'
@@ -25,6 +26,16 @@ interface ConceptToolbarProps {
 	onHashAlignmentChange: (alignment: HashAlignment) => void
 	showColorPicker: boolean
 	onShowColorPickerChange: (show: boolean) => void
+	showDrawOptions: boolean
+	onShowDrawOptionsChange: (show: boolean) => void
+	lineStyle: 'solid' | 'dashed'
+	lineEnd: 'none' | 'arrow' | 'tShape'
+	brushSize: number
+	pathMode: 'sharp' | 'curve'
+	onLineStyleChange: (style: 'solid' | 'dashed') => void
+	onLineEndChange: (end: 'none' | 'arrow' | 'tShape') => void
+	onBrushSizeChange: (size: number) => void
+	onPathModeChange: (mode: 'sharp' | 'curve') => void
 }
 
 const TOOLS = [
@@ -41,7 +52,17 @@ export function ConceptToolbar({
 	hashAlignment,
 	onHashAlignmentChange,
 	showColorPicker,
-	onShowColorPickerChange
+	onShowColorPickerChange,
+	showDrawOptions,
+	onShowDrawOptionsChange,
+	lineStyle,
+	lineEnd,
+	brushSize,
+	pathMode,
+	onLineStyleChange,
+	onLineEndChange,
+	onBrushSizeChange,
+	onPathModeChange
 }: ConceptToolbarProps) {
 	const { theme } = useTheme()
 	const [showHashDialog, setShowHashDialog] = useState(false)
@@ -57,10 +78,38 @@ export function ConceptToolbar({
 						icon={<Icon size={22} />}
 						label={tool.label}
 						isSelected={selectedTool === tool.id}
-						onClick={() => onToolChange(tool.id)}
+						onClick={() => {
+					if (tool.id === 'draw') {
+						if (selectedTool === 'draw') {
+							onShowDrawOptionsChange(!showDrawOptions)
+						} else {
+							onToolChange(tool.id)
+							onShowDrawOptionsChange(true)
+						}
+					} else {
+						onToolChange(tool.id)
+					}
+				}}
 					/>
 				)
 			})}
+
+		{/* Draw Options Dialog */}
+		{showDrawOptions && selectedTool === 'draw' && (
+			<div className="absolute left-[80px] top-[calc(50%-80px)] z-50">
+				<DrawOptionsDialog
+					lineStyle={lineStyle}
+					lineEnd={lineEnd}
+					brushSize={brushSize}
+					pathMode={pathMode}
+					onLineStyleChange={onLineStyleChange}
+					onLineEndChange={onLineEndChange}
+					onBrushSizeChange={onBrushSizeChange}
+					onPathModeChange={onPathModeChange}
+					onClose={() => onShowDrawOptionsChange(false)}
+				/>
+			</div>
+		)}
 
 			{/* Erase Tool */}
 			<ToolButton

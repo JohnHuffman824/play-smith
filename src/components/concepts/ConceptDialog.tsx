@@ -13,6 +13,7 @@ import { PlayProvider } from '../../contexts/PlayContext'
 import type { Tool } from '../../types/play.types'
 import { generateThumbnail } from '../../utils/thumbnail'
 import { ColorPickerDialog } from '../toolbar/dialogs/ColorPickerDialog'
+import { DrawOptionsDialog } from '../toolbar/dialogs/DrawOptionsDialog'
 import {
 	Select,
 	SelectContent,
@@ -54,6 +55,11 @@ export function ConceptDialog({
 	const [nameError, setNameError] = useState('')
 	const [touched, setTouched] = useState(false)
 	const [showColorPicker, setShowColorPicker] = useState(false)
+	const [showDrawOptions, setShowDrawOptions] = useState(false)
+	const [lineStyle, setLineStyle] = useState<'solid' | 'dashed'>('solid')
+	const [lineEnd, setLineEnd] = useState<'none' | 'arrow' | 'tShape'>('arrow')
+	const [brushSize, setBrushSize] = useState(3)
+	const [pathMode, setPathMode] = useState<'sharp' | 'curve'>('sharp')
 	const canvasContainerRef = useRef<HTMLDivElement>(null)
 
 	useEffect(() => {
@@ -177,9 +183,6 @@ export function ConceptDialog({
 								{nameError}
 							</p>
 						)}
-						<p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-							{name.length}/100 characters
-						</p>
 					</div>
 
 					<div>
@@ -230,26 +233,43 @@ export function ConceptDialog({
 					{/* Left Toolbar */}
 					<ConceptToolbar
 						selectedTool={selectedTool}
-						onToolChange={setSelectedTool}
+						onToolChange={(tool) => {
+						setSelectedTool(tool)
+						if (tool === 'draw') {
+							setShowDrawOptions(true)
+						} else {
+							setShowDrawOptions(false)
+						}
+					}}
 						color={color}
 						onColorChange={setColor}
 						hashAlignment={hashAlignment}
 						onHashAlignmentChange={setHashAlignment}
 						showColorPicker={showColorPicker}
 						onShowColorPickerChange={setShowColorPicker}
+						showDrawOptions={showDrawOptions}
+						onShowDrawOptionsChange={setShowDrawOptions}
+						lineStyle={lineStyle}
+						lineEnd={lineEnd}
+						brushSize={brushSize}
+						pathMode={pathMode}
+						onLineStyleChange={setLineStyle}
+						onLineEndChange={setLineEnd}
+						onBrushSizeChange={setBrushSize}
+						onPathModeChange={setPathMode}
 					/>
 
 					{/* Canvas */}
-					<div ref={canvasContainerRef} className="flex-1 flex flex-col overflow-hidden" style={{ minHeight: 0 }}>
+					<div ref={canvasContainerRef} className="flex-1 flex flex-col overflow-hidden pr-6" style={{ minHeight: 0 }}>
 						<PlayProvider>
 							<Canvas
 								drawingState={{
 									tool: selectedTool,
 									color,
-									brushSize: 3,
-									lineStyle: 'solid',
-									lineEnd: 'arrow',
-									pathMode: 'sharp',
+									brushSize,
+									lineStyle,
+									lineEnd,
+									pathMode,
 									eraseSize: 40,
 									snapThreshold: 20
 								}}
