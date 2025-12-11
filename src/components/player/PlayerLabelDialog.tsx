@@ -185,11 +185,7 @@ export function PlayerLabelDialog({
             value={customLabel}
             onChange={(e) => setCustomLabel(e.target.value)}
             onKeyDown={handleKeyDown}
-            className={`h-10 px-3 rounded-lg transition-all outline-none ${
-              theme === 'dark'
-                ? 'bg-gray-700 text-gray-300 placeholder-gray-500 focus:bg-gray-600 border border-gray-600'
-                : 'bg-gray-100 text-gray-700 placeholder-gray-400 focus:bg-gray-200 border border-gray-200'
-            }`}
+            className="h-10 px-3 rounded-lg transition-all outline-none bg-input-background text-foreground placeholder:text-muted-foreground border border-input focus:ring-2 focus:ring-ring/20"
             style={{ width: hasLinkedDrawing ? '96px' : '136px' }}
             maxLength={3}
           />
