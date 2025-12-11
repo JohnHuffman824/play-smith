@@ -13,7 +13,7 @@ export class SessionRepository {
 		const [session] = await db<Session[]>`
 			INSERT INTO sessions (user_id, token, expires_at)
 			VALUES (${userId}, ${token}, ${expiresAt})
-			RETURNING *
+			RETURNING id, user_id, token, expires_at, created_at
 		`
 
 		if (!session) {
@@ -25,7 +25,8 @@ export class SessionRepository {
 	// Finds a valid (non-expired) session by token
 	async findValidByToken(token: string): Promise<Session | null> {
 		const [session] = await db<Session[]>`
-			SELECT * FROM sessions
+			SELECT id, user_id, token, expires_at, created_at
+			FROM sessions
 			WHERE token = ${token}
 			AND expires_at > CURRENT_TIMESTAMP
 		`
