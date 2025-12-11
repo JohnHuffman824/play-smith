@@ -4,7 +4,7 @@
 * Eliminates props drilling through multiple component levels
 */
 
-import { createContext, useContext, useReducer, useCallback, useMemo } from 'react'
+import { createContext, useContext, useReducer, useCallback, useMemo, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import type { DrawingState, PlayCard, Tool } from '../types/play.types'
 import type { HashAlignment } from '../types/field.types'
@@ -410,19 +410,24 @@ function playReducer(state: PlayState, action: PlayAction): PlayState {
 	}
 }
 
+const DRAW_COLOR_STORAGE_KEY = 'playsmith-draw-color'
+
 /**
 * Provides play context and actions to descendants.
 */
 export function PlayProvider({ children }: { children: ReactNode }) {
 	const { theme } = useTheme()
 
+	// Check localStorage for saved color, fallback to theme default
+	const savedColor = localStorage.getItem(DRAW_COLOR_STORAGE_KEY)
+	const defaultColor = savedColor || (theme === 'dark' ? '#FFFFFF' : '#000000')
+
 	// Create theme-aware initial state
 	const themeAwareInitialState: PlayState = {
 		...initialState,
 		drawingState: {
 			...initialState.drawingState,
-			// Use white in dark mode, black in light mode
-			color: theme === 'dark' ? '#FFFFFF' : '#000000',
+			color: defaultColor,
 		},
 	}
 
@@ -501,6 +506,13 @@ export function PlayProvider({ children }: { children: ReactNode }) {
 	const applyConceptGroup = useCallback((conceptGroup: ConceptGroup) => {
 		dispatch({ type: 'APPLY_CONCEPT_GROUP', conceptGroup })
 	}, [])
+
+	// Save draw color to localStorage when it changes
+	useEffect(() => {
+		if (state.drawingState.color) {
+			localStorage.setItem(DRAW_COLOR_STORAGE_KEY, state.drawingState.color)
+		}
+	}, [state.drawingState.color])
 
 	// Memoize the context value to prevent unnecessary re-renders
 	const value = useMemo<PlayContextType>(() => ({
