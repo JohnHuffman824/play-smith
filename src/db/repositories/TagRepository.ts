@@ -4,13 +4,17 @@ import type { Tag, PlayTag, PlaybookTag } from '../types'
 export class TagRepository {
 	async getPresetTags(): Promise<Tag[]> {
 		return await db<Tag[]>`
-			SELECT * FROM tags WHERE is_preset = true ORDER BY name
+			SELECT id, team_id, name, color, is_preset, created_by, created_at, updated_at
+			FROM tags
+			WHERE is_preset = true
+			ORDER BY name
 		`
 	}
 
 	async getTeamTags(teamId: number): Promise<Tag[]> {
 		return await db<Tag[]>`
-			SELECT * FROM tags
+			SELECT id, team_id, name, color, is_preset, created_by, created_at, updated_at
+			FROM tags
 			WHERE is_preset = true OR team_id = ${teamId}
 			ORDER BY is_preset DESC, name
 		`
@@ -20,7 +24,7 @@ export class TagRepository {
 		const [tag] = await db<Tag[]>`
 			INSERT INTO tags (team_id, name, color, is_preset, created_by)
 			VALUES (${data.team_id}, ${data.name}, ${data.color}, false, ${data.created_by})
-			RETURNING *
+			RETURNING id, team_id, name, color, is_preset, created_by, created_at, updated_at
 		`
 		return tag
 	}
@@ -32,7 +36,7 @@ export class TagRepository {
 				color = COALESCE(${data.color ?? null}, color),
 				updated_at = CURRENT_TIMESTAMP
 			WHERE id = ${id} AND is_preset = false
-			RETURNING *
+			RETURNING id, team_id, name, color, is_preset, created_by, created_at, updated_at
 		`
 		return tag ?? null
 	}
@@ -44,7 +48,8 @@ export class TagRepository {
 
 	async getPlayTags(playId: number): Promise<Tag[]> {
 		return await db<Tag[]>`
-			SELECT t.* FROM tags t
+			SELECT t.id, t.team_id, t.name, t.color, t.is_preset, t.created_by, t.created_at, t.updated_at
+			FROM tags t
 			JOIN play_tags pt ON pt.tag_id = t.id
 			WHERE pt.play_id = ${playId}
 			ORDER BY t.name
@@ -63,7 +68,8 @@ export class TagRepository {
 
 	async getPlaybookTags(playbookId: number): Promise<Tag[]> {
 		return await db<Tag[]>`
-			SELECT t.* FROM tags t
+			SELECT t.id, t.team_id, t.name, t.color, t.is_preset, t.created_by, t.created_at, t.updated_at
+			FROM tags t
 			JOIN playbook_tags pbt ON pbt.tag_id = t.id
 			WHERE pbt.playbook_id = ${playbookId}
 			ORDER BY t.name
