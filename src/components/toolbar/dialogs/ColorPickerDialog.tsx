@@ -61,11 +61,7 @@ export function ColorPickerDialog({ currentColor, onColorChange, onClose }: Colo
             type="text"
             value={currentColor}
             onChange={(e) => onColorChange(e.target.value)}
-            className={`flex-1 px-3 py-2 rounded-lg border text-sm ${
-              theme === 'dark' 
-                ? 'bg-gray-700 border-gray-600 text-gray-100' 
-                : 'bg-white border-gray-200 text-gray-900'
-            }`}
+            className="flex-1 px-3 py-2 rounded-lg border text-sm bg-input-background text-foreground border-input placeholder:text-muted-foreground"
             placeholder="#000000"
           />
         </div>
