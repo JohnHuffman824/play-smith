@@ -5,14 +5,16 @@ export class PresetRouteRepository {
 	async getAll(teamId?: number): Promise<PresetRoute[]> {
 		if (teamId) {
 			return await db<PresetRoute[]>`
-				SELECT * FROM preset_routes
+				SELECT id, team_id, name, route_number, drawing_template, created_by, created_at, updated_at
+				FROM preset_routes
 				WHERE team_id IS NULL OR team_id = ${teamId}
 				ORDER BY route_number NULLS LAST, name
 			`
 		}
 
 		return await db<PresetRoute[]>`
-			SELECT * FROM preset_routes
+			SELECT id, team_id, name, route_number, drawing_template, created_by, created_at, updated_at
+			FROM preset_routes
 			WHERE team_id IS NULL
 			ORDER BY route_number NULLS LAST, name
 		`
@@ -36,7 +38,7 @@ export class PresetRouteRepository {
 				${JSON.stringify(data.drawing_template)},
 				${data.created_by}
 			)
-			RETURNING *
+			RETURNING id, team_id, name, route_number, drawing_template, created_by, created_at, updated_at
 		`
 
 		if (!route) {
