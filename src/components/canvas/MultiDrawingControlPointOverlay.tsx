@@ -47,6 +47,12 @@ interface MultiDrawingControlPointOverlayProps {
 	) => void
 	onDeletePoint?: (drawingId: string, pointId: string) => void
 	onAddPoint?: (drawingId: string, segmentIndex: number, position: Coordinate) => void
+	onPathContextMenuHandlerRef?: React.MutableRefObject<((
+		drawingId: string,
+		segmentIndex: number,
+		insertPosition: Coordinate,
+		pixelPosition: { x: number; y: number }
+	) => void) | null>
 }
 
 interface MultiDragState {
@@ -210,6 +216,7 @@ export function MultiDrawingControlPointOverlay({
 	onLinkToPlayer,
 	onDeletePoint,
 	onAddPoint,
+	onPathContextMenuHandlerRef,
 }: MultiDrawingControlPointOverlayProps) {
 	const [dragState, setDragState] = useState<MultiDragState | null>(null)
 	const [snapTarget, setSnapTarget] = useState<SnapTarget | null>(null)
@@ -355,6 +362,18 @@ export function MultiDrawingControlPointOverlay({
 			window.removeEventListener('contextmenu', handleClickOutside)
 		}
 	}, [contextMenuState, addPopupState])
+
+	// Expose path context menu handler to parent via ref
+	useEffect(() => {
+		if (onPathContextMenuHandlerRef) {
+			onPathContextMenuHandlerRef.current = handlePathContextMenu
+		}
+		return () => {
+			if (onPathContextMenuHandlerRef) {
+				onPathContextMenuHandlerRef.current = null
+			}
+		}
+	}, [onPathContextMenuHandlerRef])
 
 	// Start drag for a specific drawing's point
 	function startDrag(drawingId: string, pointId: string) {
