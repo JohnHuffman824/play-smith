@@ -26,7 +26,7 @@ export function PlayCardsSection({
 		<div
 			className={`border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'} relative`}
 			style={{
-				height: showPlayBar ? '320px' : '0px',
+				height: showPlayBar ? '380px' : '0px',
 				overflow: 'hidden',
 				zIndex: 0,
 				transition: 'height 800ms ease-in-out',
@@ -34,7 +34,7 @@ export function PlayCardsSection({
 		>
 			{/* Only render content when visible for performance */}
 			{showPlayBar && (
-				<div className="h-[320px] px-4 py-4">
+				<div className="h-[380px] px-4 py-4">
 					<div
 						ref={scrollContainerRef}
 						className="flex gap-4 h-full overflow-x-auto overflow-y-hidden pb-2"
@@ -43,7 +43,7 @@ export function PlayCardsSection({
 						{plays.map((play) => (
 							<div
 								key={play.id}
-								className="flex-shrink-0 w-64 [&>div]:border-gray-200 dark:[&>div]:border-gray-700"
+								className="flex-shrink-0 w-64 [&>div]:!border-gray-200 dark:[&>div]:!border-gray-700"
 							>
 								<PlayCard
 									{...play}
@@ -59,7 +59,7 @@ export function PlayCardsSection({
 						{/* Add Play button */}
 						<button
 							onClick={onAddPlay}
-							className={`flex-shrink-0 w-64 h-[280px] rounded-xl border-2 border-dashed
+							className={`flex-shrink-0 w-64 h-[320px] rounded-xl border-2 border-dashed
 								transition-all flex flex-col items-center justify-center gap-2 cursor-pointer
 								${theme === 'dark'
 									? 'bg-gray-800/50 border-gray-600 hover:border-blue-400 hover:bg-gray-700 text-gray-400 hover:text-blue-400'
