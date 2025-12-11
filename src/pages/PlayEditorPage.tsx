@@ -73,19 +73,40 @@ function PlayEditorContent() {
 
 	// Listen for save event from toolbar
 	useEffect(() => {
-		function handleSave() {
-			// TODO: Implement actual save to API when ready
-			// For now, just emit save-complete immediately
-
-			// Simulate async save operation
-			setTimeout(() => {
+		async function handleSave() {
+			if (!playId) {
+				console.error('No play ID - cannot save')
 				eventBus.emit('canvas:save-complete')
-			}, 500)
+				return
+			}
+
+			try {
+				const response = await fetch(`/api/plays/${playId}`, {
+					method: 'PUT',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						name: playState.play || 'Untitled Play',
+						custom_players: playState.players,
+						custom_drawings: playState.drawings,
+						hash_position: playState.hashAlignment,
+					}),
+				})
+
+				if (!response.ok) {
+					console.error('Save failed:', await response.json())
+				} else {
+					console.log('Play saved successfully')
+				}
+				eventBus.emit('canvas:save-complete')
+			} catch (error) {
+				console.error('Save error:', error)
+				eventBus.emit('canvas:save-complete')
+			}
 		}
 
 		eventBus.on('canvas:save', handleSave)
 		return () => eventBus.off('canvas:save', handleSave)
-	}, [])
+	}, [playId, playState.players, playState.drawings, playState.play, playState.hashAlignment])
 
 	// Apply selected concepts to canvas
 	useEffect(() => {
