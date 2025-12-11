@@ -23,7 +23,7 @@ interface UsePlaybooksDataReturn {
 	refetch: () => Promise<void>
 }
 
-export function usePlaybooksData(): UsePlaybooksDataReturn {
+export function usePlaybooksData(currentTeamId: number | null = null): UsePlaybooksDataReturn {
 	const navigate = useNavigate()
 	const queryClient = useQueryClient()
 
@@ -53,8 +53,10 @@ export function usePlaybooksData(): UsePlaybooksDataReturn {
 	// Derived state - split into personal and team playbooks
 	const { personalPlaybooks, teamPlaybooks } = useMemo(() => ({
 		personalPlaybooks: playbooks.filter(pb => pb.team_id === null),
-		teamPlaybooks: playbooks.filter(pb => pb.team_id !== null)
-	}), [playbooks])
+		teamPlaybooks: currentTeamId
+			? playbooks.filter(pb => pb.team_id === currentTeamId)
+			: playbooks.filter(pb => pb.team_id !== null)
+	}), [playbooks, currentTeamId])
 
 	// CREATE MUTATION
 	const createMutation = useMutation({

@@ -20,7 +20,7 @@ export function PlaybookManagerPage() {
 		createPlaybook,
 		updatePlaybook,
 		deletePlaybook
-	} = usePlaybooksData()
+	} = usePlaybooksData(currentTeamId)
 	const { teams, currentTeamId, switchTeam, isLoading: teamsLoading } = useTeamsData()
 
 	const isLoading = playbooksLoading || teamsLoading
