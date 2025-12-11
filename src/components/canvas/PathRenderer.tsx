@@ -17,6 +17,7 @@ import {
 	isPointNearControlPoint,
 	getSegmentPoints,
 	getPoint,
+	findClosestSegmentPosition,
 } from '../../utils/drawing.utils'
 
 // Chaikin smoothing for render-time curve smoothing
@@ -95,6 +96,12 @@ interface PathRendererProps {
 	onDelete?: (id: string) => void
 	onDragStart?: (drawingId: string, feetX: number, feetY: number) => void
 	onHover?: (isHovered: boolean) => void
+	onPathContextMenu?: (
+		drawingId: string,
+		segmentIndex: number,
+		insertPosition: Coordinate,
+		pixelPosition: { x: number; y: number }
+	) => void
 }
 
 /**
@@ -111,6 +118,7 @@ export function PathRenderer({
 	onDelete,
 	onDragStart,
 	onHover,
+	onPathContextMenu,
 }: PathRendererProps) {
 	const mouseDownPosRef = useRef<{ x: number; y: number } | null>(null)
 	const DRAG_THRESHOLD = 5
@@ -262,6 +270,30 @@ export function PathRenderer({
 				style={{ ...eraseHover, ...selectStyle }}
 				pointerEvents='stroke'
 				onPointerDown={handlePointerDown}
+				onContextMenu={(e) => {
+					if (!onPathContextMenu) return
+					e.preventDefault()
+					e.stopPropagation()
+
+					// Get click position in feet
+					const svg = e.currentTarget.ownerSVGElement
+					if (!svg) return
+					const rect = svg.getBoundingClientRect()
+					const pixelX = e.clientX - rect.left
+					const pixelY = e.clientY - rect.top
+					const feetPos = coordSystem.pixelsToFeet(pixelX, pixelY)
+
+					// Find which segment was clicked
+					const result = findClosestSegmentPosition(drawing, feetPos, coordSystem)
+					if (result && result.distance < 15) { // 15px threshold
+						onPathContextMenu(
+							drawing.id,
+							result.segmentIndex,
+							result.insertPosition,
+							{ x: pixelX, y: pixelY }
+						)
+					}
+				}}
 			/>
 			{ending}
 			{drawing.playerId && linkedPixel && (
