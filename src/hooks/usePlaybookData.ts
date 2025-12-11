@@ -2,6 +2,15 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { Drawing } from '@/types/drawing.types'
 
+export interface Player {
+	id: string
+	x: number
+	y: number
+	label: string
+	color: string
+	isLineman?: boolean
+}
+
 export interface Play {
 	id: string
 	name: string
@@ -14,6 +23,7 @@ export interface Play {
 	tagObjects?: { id: number; name: string; color: string }[]
 	lastModified: string
 	drawings?: Drawing[]
+	players?: Player[]
 }
 
 export interface Section {
@@ -56,7 +66,8 @@ export function usePlaybookData(playbookId: string | undefined): UsePlaybookData
 			tags: (apiPlay.tags || []).map((t: any) => typeof t === 'string' ? t : t.name),
 			tagObjects: apiPlay.tags || [],
 			lastModified: apiPlay.updated_at ? new Date(apiPlay.updated_at).toLocaleDateString() : new Date().toLocaleDateString(),
-			drawings: apiPlay.drawings || []
+			drawings: apiPlay.drawings || [],
+			players: apiPlay.players || []
 		}
 	}, [])
 

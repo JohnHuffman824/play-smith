@@ -27,6 +27,15 @@ import { formatDateDayMonthYear } from '@/utils/date.utils'
 import { PlayThumbnailSVG } from './PlayThumbnailSVG'
 import type { Drawing } from '@/types/drawing.types'
 
+export interface Player {
+  id: string
+  x: number
+  y: number
+  label: string
+  color: string
+  isLineman?: boolean
+}
+
 type PlayCardProps = {
   id: string
   name: string
@@ -37,6 +46,7 @@ type PlayCardProps = {
   lastModified: string
   thumbnail?: string
   drawings?: Drawing[]
+  players?: Player[]
   personnel?: string
   selected?: boolean
   onSelect?: (id: string) => void
@@ -50,6 +60,7 @@ type PlayCardProps = {
 type PlayCardThumbnailProps = {
   thumbnail?: string
   drawings?: Drawing[]
+  players?: Player[]
   name: string
   playType: string
   onOpen: () => void
@@ -69,6 +80,7 @@ function getTagColor(tag: string | { name: string; color: string }) {
 function PlayCardThumbnail({
   thumbnail,
   drawings,
+  players,
   name,
   playType,
   onOpen
@@ -86,7 +98,7 @@ function PlayCardThumbnail({
           transition-colors duration-200"
       >
         {drawings && drawings.length > 0 ? (
-          <PlayThumbnailSVG drawings={drawings} className="w-full h-full" />
+          <PlayThumbnailSVG drawings={drawings} players={players} className="w-full h-full" />
         ) : thumbnail ? (
           <img
             src={thumbnail}
@@ -202,6 +214,7 @@ export function PlayCard({
   lastModified,
   thumbnail,
   drawings,
+  players,
   personnel,
   selected = false,
   onSelect,
@@ -222,6 +235,7 @@ export function PlayCard({
       <PlayCardThumbnail
         thumbnail={thumbnail}
         drawings={drawings}
+        players={players}
         name={name}
         playType={playType}
         onOpen={() => onOpen(id)}
