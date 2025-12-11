@@ -177,3 +177,28 @@ export interface PresetRoute {
 	created_at: Date
 	updated_at: Date
 }
+
+export interface Tag {
+	id: number
+	team_id: number | null
+	name: string
+	color: string
+	is_preset: boolean
+	created_by: number | null
+	created_at: Date
+	updated_at: Date
+}
+
+export interface PlayTag {
+	id: number
+	play_id: number
+	tag_id: number
+	created_at: Date
+}
+
+export interface PlaybookTag {
+	id: number
+	playbook_id: number
+	tag_id: number
+	created_at: Date
+}
