@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { usePlayContext } from '../../contexts/PlayContext'
 import { flipCanvasHorizontally } from '../../utils/flip.utils'
 
@@ -8,19 +8,23 @@ interface FlipControllerProps {
 
 export function FlipController({ onFlipReady }: FlipControllerProps) {
 	const { state, setPlayers, setDrawings } = usePlayContext()
+	const stateRef = useRef(state)
+
+	// Keep ref updated with current state
+	stateRef.current = state
 
 	useEffect(() => {
 		const flipCanvas = () => {
+			// Access current state from ref, not stale closure
 			const { players, drawings } = flipCanvasHorizontally(
-				state.players,
-				state.drawings
+				stateRef.current.players,
+				stateRef.current.drawings
 			)
 			setPlayers(players)
 			setDrawings(drawings)
 		}
 		onFlipReady(flipCanvas)
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []) // Only run once on mount
+	}, [onFlipReady, setPlayers, setDrawings])
 
-	return null // This component renders nothing
+	return null
 }
