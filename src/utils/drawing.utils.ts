@@ -335,3 +335,69 @@ export function getDrawingEndPoint(drawing: Drawing): ControlPoint | null {
 	return drawing.points[lastPointId] ?? null
 }
 
+/**
+ * Get ordered list of point IDs by traversing segments.
+ */
+function getOrderedPointIds(drawing: Drawing): string[] {
+	if (drawing.segments.length === 0) {
+		return Object.keys(drawing.points)
+	}
+
+	const orderedIds: string[] = []
+	const seen = new Set<string>()
+
+	for (const segment of drawing.segments) {
+		for (const pointId of segment.pointIds) {
+			if (!seen.has(pointId)) {
+				orderedIds.push(pointId)
+				seen.add(pointId)
+			}
+		}
+	}
+
+	return orderedIds
+}
+
+/**
+ * Delete a point from a drawing, updating segments accordingly.
+ * Returns null if the drawing should be deleted entirely (fewer than 2 points remaining).
+ */
+export function deletePointFromDrawing(
+	drawing: Drawing,
+	pointIdToDelete: string
+): Drawing | null {
+	const pointIds = Object.keys(drawing.points)
+
+	// If deleting would leave fewer than 2 points, return null to signal deletion
+	if (pointIds.length <= 2) {
+		return null
+	}
+
+	// Create new points pool without the deleted point
+	const newPoints: Record<string, ControlPoint> = {}
+	for (const [id, point] of Object.entries(drawing.points)) {
+		if (id !== pointIdToDelete) {
+			newPoints[id] = point
+		}
+	}
+
+	// Get ordered list of remaining point IDs by traversing segments
+	const orderedPointIds = getOrderedPointIds(drawing)
+	const remainingOrderedPoints = orderedPointIds.filter(id => id !== pointIdToDelete)
+
+	// Rebuild segments as simple lines connecting remaining points in order
+	const rebuiltSegments: PathSegment[] = []
+	for (let i = 0; i < remainingOrderedPoints.length - 1; i++) {
+		rebuiltSegments.push({
+			type: 'line',
+			pointIds: [remainingOrderedPoints[i]!, remainingOrderedPoints[i + 1]!]
+		})
+	}
+
+	return {
+		...drawing,
+		points: newPoints,
+		segments: rebuiltSegments
+	}
+}
+
