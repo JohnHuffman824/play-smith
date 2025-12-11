@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { X, Plus, Users, Settings2, Trash2, UserPlus, Crown, Edit2, Shield, Eye, Mail, ChevronLeft } from 'lucide-react'
 import { Button } from '../ui/button'
+import { Input } from '../ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { Separator } from '../ui/separator'
 import {
@@ -301,7 +302,7 @@ export function ManageTeamsDialog({ isOpen, onClose }: ManageTeamsDialogProps) {
 							<div className="space-y-4">
 								<div>
 									<label className="block text-sm font-medium mb-2">Team Name</label>
-									<input
+									<Input
 										type="text"
 										value={teamName}
 										onChange={(e) => setTeamName(e.target.value)}
@@ -311,7 +312,6 @@ export function ManageTeamsDialog({ isOpen, onClose }: ManageTeamsDialogProps) {
 											}
 										}}
 										placeholder="Enter team name..."
-										className="w-full px-4 py-2.5 bg-input rounded-lg border-0 outline-none focus:ring-2 focus:ring-ring/20"
 										autoFocus
 									/>
 								</div>
@@ -334,12 +334,11 @@ export function ManageTeamsDialog({ isOpen, onClose }: ManageTeamsDialogProps) {
 							<div className="space-y-4">
 								<div>
 									<label className="block text-sm font-medium mb-2">Team Name</label>
-									<input
+									<Input
 										type="text"
 										value={teamName}
 										onChange={(e) => setTeamName(e.target.value)}
 										placeholder="Enter team name..."
-										className="w-full px-4 py-2.5 bg-input rounded-lg border-0 outline-none focus:ring-2 focus:ring-ring/20"
 										autoFocus
 									/>
 								</div>
@@ -468,12 +467,12 @@ export function ManageTeamsDialog({ isOpen, onClose }: ManageTeamsDialogProps) {
 										<Separator />
 										<h3 className="text-sm font-medium mb-3 mt-6">Invite Member</h3>
 										<div className="flex gap-2">
-											<input
+											<Input
 												type="email"
 												value={inviteEmail}
 												onChange={(e) => setInviteEmail(e.target.value)}
 												placeholder="Email address"
-												className="flex-1 px-4 py-2 bg-input rounded-lg border-0 outline-none focus:ring-2 focus:ring-ring/20"
+												className="flex-1"
 											/>
 											<Select value={inviteRole} onValueChange={(value) => setInviteRole(value as 'editor' | 'viewer')}>
 												<SelectTrigger className="w-[120px]">
