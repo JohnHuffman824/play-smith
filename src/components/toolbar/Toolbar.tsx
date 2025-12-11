@@ -67,7 +67,9 @@ export function Toolbar({
 		useState(false)
 	const [isSaving, setIsSaving] = useState(false)
 	const [showSuccess, setShowSuccess] = useState(false)
+	const [columnCount, setColumnCount] = useState(1)
 	const drawDialogRef = useRef<HTMLDivElement>(null)
+	const toolbarRef = useRef<HTMLDivElement>(null)
 	const baseButtonClass = [
 		'w-14 h-14 rounded-xl flex items-center justify-center',
 		'transition-all cursor-pointer',
@@ -196,6 +198,43 @@ export function Toolbar({
 		return () => eventBus.off('dialog:closeAll', handleCloseAllDialogsEvent)
 	}, [])
 
+	// Calculate optimal column count based on available height
+	useEffect(() => {
+		const calculateColumns = () => {
+			if (!toolbarRef.current) return
+
+			const BUTTON_SIZE = 56 // 14 * 4 (w-14 h-14 in pixels)
+			const GAP = 12
+			const PADDING = 12
+			const TOTAL_BUTTONS = 15 // Count of all toolbar buttons
+
+			const containerHeight = toolbarRef.current.clientHeight
+			const availableHeight = containerHeight - (2 * PADDING)
+
+			// Calculate how many buttons fit in one column
+			const buttonsPerColumn = Math.floor((availableHeight + GAP) / (BUTTON_SIZE + GAP))
+
+			if (buttonsPerColumn <= 0) {
+				setColumnCount(1)
+				return
+			}
+
+			// Calculate how many columns we need
+			const neededColumns = Math.ceil(TOTAL_BUTTONS / buttonsPerColumn)
+			setColumnCount(neededColumns)
+		}
+
+		calculateColumns()
+
+		// Recalculate on window resize
+		const resizeObserver = new ResizeObserver(calculateColumns)
+		if (toolbarRef.current) {
+			resizeObserver.observe(toolbarRef.current)
+		}
+
+		return () => resizeObserver.disconnect()
+	}, [])
+
 	function toolButtonClass(isActive: boolean) {
 		const activeClass = 'bg-blue-500 text-white shadow-lg scale-105'
 		const variant = isActive
@@ -286,12 +325,21 @@ export function Toolbar({
 	return (
 		<>
 			<div
-				className={`w-20 h-full border-r flex flex-col items-center py-6 ${
+				ref={toolbarRef}
+				className={`w-auto h-full border-r ${
 					theme == 'dark'
 						? 'bg-gray-800 border-gray-700'
 						: 'bg-white border-gray-200'
 				}`}
-				style={{ gap: '12px' }}
+				style={{
+					display: 'grid',
+					gridTemplateColumns: `repeat(${columnCount}, 56px)`,
+					gridAutoFlow: 'column',
+					gap: '12px',
+					padding: '12px',
+					alignContent: 'start',
+					justifyContent: 'center',
+				}}
 			>
 				{/* Select Tool */}
 				<Tooltip content='Select (S)'>
