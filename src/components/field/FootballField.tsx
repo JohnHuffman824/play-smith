@@ -201,6 +201,7 @@ export function FootballField({ className, onDimensionsChange }: FootballFieldPr
         position: 'absolute',
         top: 0,
         left: 0,
+        borderRadius: 'inherit',
       }}
     >
       {dimensions.width > 0 && dimensions.height > 0 && (
