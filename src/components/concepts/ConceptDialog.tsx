@@ -19,6 +19,7 @@ import {
 	SelectTrigger,
 	SelectValue
 } from '../ui/select'
+import { Input } from '../ui/input'
 
 interface ConceptDialogProps {
 	isOpen: boolean
@@ -160,20 +161,14 @@ export function ConceptDialog({
 						<label className="block text-sm font-medium mb-1">
 							Concept Name
 						</label>
-						<input
+						<Input
 							type="text"
 							value={name}
 							onChange={e => handleNameChange(e.target.value)}
 							placeholder="e.g., Mesh, Spacing, Y-Cross"
 							maxLength={100}
-							className={`
-								w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-900
-								focus:ring-2 focus:ring-blue-500
-								${nameError && touched
-									? 'border-red-500 dark:border-red-500'
-									: 'border-gray-300 dark:border-gray-600'
-								}
-							`}
+							className={nameError && touched ? 'border-destructive' : ''}
+							aria-invalid={nameError && touched}
 						/>
 						{nameError && touched && (
 							<p className="mt-1 text-sm text-red-600 dark:text-red-400">
