@@ -66,6 +66,7 @@ function PlayEditorContent() {
 	const { tags: availableTags, createTag } = useTagsData(teamId)
 	const [selectedTags, setSelectedTags] = useState<Tag[]>([])
 	const [showTagDialog, setShowTagDialog] = useState(false)
+	const [isPlayLoaded, setIsPlayLoaded] = useState(false)
 
 	/**
 	 * Unified delete method for removing selected objects.
@@ -151,6 +152,9 @@ function PlayEditorContent() {
 
 	// Load play data on mount - also sets teamId for concept data
 	useEffect(() => {
+		// Reset loading state when playId changes
+		setIsPlayLoaded(false)
+
 		async function loadPlay() {
 			if (!playId) return
 
@@ -193,8 +197,13 @@ function PlayEditorContent() {
 					const tagsData = await tagsRes.json()
 					setSelectedTags(tagsData.tags || [])
 				}
+
+				// Mark play as loaded after all data is fetched
+				setIsPlayLoaded(true)
 			} catch (error) {
 				console.error('Load error:', error)
+				// Still mark as loaded even on error to avoid infinite loading
+				setIsPlayLoaded(true)
 			}
 		}
 
@@ -301,6 +310,20 @@ function PlayEditorContent() {
 				<p className="text-red-500">
 					Playbook ID and Play ID are required
 				</p>
+			</div>
+		)
+	}
+
+	// Show loading screen until play data and concepts are fully loaded
+	if (!isPlayLoaded || conceptsLoading) {
+		return (
+			<div className={`flex items-center justify-center h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+				<div className="text-center">
+					<div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+					<p className={theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}>
+						Loading play...
+					</p>
+				</div>
 			</div>
 		)
 	}
