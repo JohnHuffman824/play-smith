@@ -606,7 +606,7 @@ export function Canvas({
 		: 'flex-1 flex items-start justify-center px-8 py-4 overflow-hidden relative'
 
 	const whiteboardClasses = [
-		'w-full bg-white rounded-2xl shadow-lg relative',
+		'w-full rounded-2xl relative',
 		'border-2 border-gray-300',
 	].join(' ')
 

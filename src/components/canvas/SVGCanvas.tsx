@@ -5,7 +5,7 @@ import { ControlPointOverlay } from './ControlPointOverlay'
 import { MultiDrawingControlPointOverlay } from './MultiDrawingControlPointOverlay'
 import { FreehandCapture } from './FreehandCapture'
 import { DrawingPropertiesDialog } from '../toolbar/dialogs/DrawingPropertiesDialog'
-import type { PathStyle, Drawing } from '../../types/drawing.types'
+import type { PathStyle, Drawing, ControlPoint } from '../../types/drawing.types'
 import { pointToLineDistance } from '../../utils/canvas.utils'
 import type { Coordinate } from '../../types/field.types'
 import {
@@ -21,18 +21,20 @@ import { PLAYER_RADIUS_FEET } from '../../constants/field.constants'
 // Constants
 const NODE_PROXIMITY_THRESHOLD = 20
 
+type Player = {
+	id: string
+	x: number
+	y: number
+	label: string
+	color: string
+}
+
 interface SVGCanvasProps {
 	width: number
 	height: number
 	coordSystem: FieldCoordinateSystem
 	drawings: Drawing[]
-	players?: Array<{
-		id: string
-		x: number
-		y: number
-		label: string
-		color: string
-	}>
+	players?: Player[]
 	onChange: (drawings: Drawing[]) => void
 	activeTool: 'draw' | 'select' | 'erase'
 	autoCorrect: boolean
@@ -147,7 +149,7 @@ export function SVGCanvas({
 		// All segments referencing it will automatically use the new position
 		onChange(
 			drawings.map((drawing) => {
-				if (drawing.id != drawingId) return drawing
+				if (drawing.id !== drawingId) return drawing
 				return {
 					...drawing,
 					points: {
@@ -165,8 +167,8 @@ export function SVGCanvas({
 		targetDrawingId: string,
 		targetPointId: string,
 	) {
-		const source = drawings.find((item) => item.id == sourceDrawingId)
-		const target = drawings.find((item) => item.id == targetDrawingId)
+		const source = drawings.find((item) => item.id === sourceDrawingId)
+		const target = drawings.find((item) => item.id === targetDrawingId)
 
 		if (!source || !target) {
 			return
@@ -181,7 +183,7 @@ export function SVGCanvas({
 			)
 
 			const remaining = drawings.filter(
-				(item) => item.id != sourceDrawingId && item.id != targetDrawingId,
+				(item) => item.id !== sourceDrawingId && item.id !== targetDrawingId,
 			)
 
 			onChange([...remaining, merged])
@@ -225,12 +227,12 @@ export function SVGCanvas({
 
 		// Find the drawing being moved
 		const movedDrawing = drawings.find(
-			(d) => d.id == drawingDragState.drawingId,
+			(d) => d.id === drawingDragState.drawingId,
 		)
 
 		// If drawing is linked to a player, move the player too
 		if (movedDrawing?.playerId && onMovePlayer && players) {
-			const player = players.find((p) => p.id == movedDrawing.playerId)
+			const player = players.find((p) => p.id === movedDrawing.playerId)
 			if (player) {
 				onMovePlayer(
 					player.id,
@@ -242,9 +244,9 @@ export function SVGCanvas({
 
 		onChange(
 			drawings.map((drawing) => {
-				if (drawing.id != drawingDragState.drawingId) return drawing
+				if (drawing.id !== drawingDragState.drawingId) return drawing
 				// Update all points in the shared pool
-				const updatedPoints: Record<string, import('../../types/drawing.types').ControlPoint> = {}
+				const updatedPoints: Record<string, ControlPoint> = {}
 				for (const [id, point] of Object.entries(drawing.points)) {
 					updatedPoints[id] = {
 						...point,
@@ -351,7 +353,7 @@ export function SVGCanvas({
 				const deltaY = wholeDrawingSnapTarget.playerPosition.y - linkedPoint.y
 
 				// Move ALL points in the drawing by this delta to maintain shape
-				const updatedPoints: Record<string, import('../../types/drawing.types').ControlPoint> = {}
+				const updatedPoints: Record<string, ControlPoint> = {}
 				for (const [id, point] of Object.entries(drawing.points)) {
 					updatedPoints[id] = {
 						...point,
@@ -432,7 +434,7 @@ export function SVGCanvas({
 				onPointerMove={handleDrawingDragMove}
 				onPointerUp={(e) => handleDrawingDragEnd(e)}
 				onPointerDown={(e) => {
-					if (activeTool == 'erase') {
+					if (activeTool === 'erase') {
 					const rect = (e.currentTarget as SVGSVGElement).getBoundingClientRect()
 					const click: Coordinate = {
 						x: e.clientX - rect.left,
@@ -456,12 +458,12 @@ export function SVGCanvas({
 					})
 					if (hit && onDeleteDrawing) {
 						onDeleteDrawing(hit.id)
-						setSelectedDrawingId((prev) => (prev == hit.id ? null : prev))
+						setSelectedDrawingId((prev) => (prev === hit.id ? null : prev))
 						setLastDrawnDrawingId((prev) =>
-							prev == hit.id ? null : prev,
+							prev === hit.id ? null : prev,
 						)
 					}
-				} else if (activeTool == 'select' && e.target === e.currentTarget) {
+				} else if (activeTool === 'select' && e.target === e.currentTarget) {
 					// Clicking empty space in select mode clears selection
 					setSelectedDrawingId(null)
 					onSelectionChange?.(null)
@@ -503,7 +505,7 @@ export function SVGCanvas({
 			{activeTool !== 'select' && selectedDrawingIds.length > 0 && (
 				<ControlPointOverlay
 					drawing={
-						drawings.find((item) => selectedDrawingIds.includes(item.id)) ?? null
+						drawings.find((item) => selectedDrawingIds.includes(item.id))
 					}
 					drawings={drawings}
 					players={players}
@@ -527,11 +529,11 @@ export function SVGCanvas({
 						wholeDrawingSnapTarget.playerPosition.y
 					).y}
 					r={PLAYER_RADIUS_FEET * coordSystem.scale + 6}
-					fill="rgba(59,130,246,0.2)"
-					stroke="#3b82f6"
+					fill='rgba(59,130,246,0.2)'
+					stroke='#3b82f6'
 					strokeWidth={3}
-					pointerEvents="none"
-					className="animate-pulse"
+					pointerEvents='none'
+					className='animate-pulse'
 					style={{
 						filter: 'drop-shadow(0 0 6px rgba(59,130,246,0.6))',
 					}}
@@ -542,12 +544,12 @@ export function SVGCanvas({
 			<FreehandCapture
 				coordSystem={coordSystem}
 				style={defaultStyle}
-				isActive={activeTool == 'draw'}
+				isActive={activeTool === 'draw'}
 				autoCorrect={autoCorrect}
 				onCommit={handleCommit}
 			/>
 
-		{activeTool == 'draw' && lastDrawnDrawingId && isOverCanvas && (
+		{activeTool === 'draw' && lastDrawnDrawingId && isOverCanvas && (
 			<div className='absolute top-0 left-0 w-full h-full pointer-events-none'>
 				<svg
 					width={width}
@@ -556,8 +558,7 @@ export function SVGCanvas({
 				>
 					<ControlPointOverlay
 						drawing={
-							drawings.find((item) => item.id == lastDrawnDrawingId) ??
-								null
+							drawings.find((item) => item.id === lastDrawnDrawingId)
 						}
 						drawings={drawings}
 						players={players}
