@@ -7,7 +7,7 @@ export class TeamRepository {
 		const [team] = await db<Team[]>`
 			INSERT INTO teams (name)
 			VALUES (${data.name})
-			RETURNING *
+			RETURNING id, name, created_at, updated_at
 		`
 
 		return team
@@ -16,7 +16,9 @@ export class TeamRepository {
 	// Retrieves team by id or null when missing
 	async findById(id: number): Promise<Team | null> {
 		const [team] = await db<Team[]>`
-			SELECT * FROM teams WHERE id = ${id}
+			SELECT id, name, created_at, updated_at
+			FROM teams
+			WHERE id = ${id}
 		`
 
 		return team ?? null
@@ -31,7 +33,7 @@ export class TeamRepository {
 		const [member] = await db<TeamMember[]>`
 			INSERT INTO team_members (team_id, user_id, role)
 			VALUES (${data.team_id}, ${data.user_id}, ${data.role})
-			RETURNING *
+			RETURNING id, team_id, user_id, role, joined_at
 		`
 
 		return member
@@ -40,14 +42,16 @@ export class TeamRepository {
 	// Lists all members for the given team
 	async getMembers(teamId: number): Promise<TeamMember[]> {
 		return await db<TeamMember[]>`
-			SELECT * FROM team_members WHERE team_id = ${teamId}
+			SELECT id, team_id, user_id, role, joined_at
+			FROM team_members
+			WHERE team_id = ${teamId}
 		`
 	}
 
 	// Lists teams a user belongs to ordered by join date
 	async getUserTeams(userId: number): Promise<Team[]> {
 		return await db<Team[]>`
-			SELECT t.*
+			SELECT t.id, t.name, t.created_at, t.updated_at
 			FROM teams t
 			INNER JOIN team_members tm ON t.id = tm.team_id
 			WHERE tm.user_id = ${userId}
@@ -69,7 +73,7 @@ export class TeamRepository {
 			UPDATE teams
 			SET name = ${data.name}, updated_at = CURRENT_TIMESTAMP
 			WHERE id = ${id}
-			RETURNING *
+			RETURNING id, name, created_at, updated_at
 		`
 		return team
 	}
@@ -83,7 +87,7 @@ export class TeamRepository {
 	async getMembersWithUsers(teamId: number): Promise<TeamMemberWithUser[]> {
 		return await db<TeamMemberWithUser[]>`
 			SELECT
-				tm.*,
+				tm.id, tm.team_id, tm.user_id, tm.role, tm.joined_at,
 				u.email as user_email,
 				u.name as user_name
 			FROM team_members tm
@@ -131,7 +135,7 @@ export class TeamRepository {
 	// Get teams with user's role included
 	async getUserTeamsWithRole(userId: number): Promise<(Team & { role: 'owner' | 'editor' | 'viewer' })[]> {
 		return await db<(Team & { role: 'owner' | 'editor' | 'viewer' })[]>`
-			SELECT t.*, tm.role
+			SELECT t.id, t.name, t.created_at, t.updated_at, tm.role
 			FROM teams t
 			INNER JOIN team_members tm ON t.id = tm.team_id
 			WHERE tm.user_id = ${userId}
