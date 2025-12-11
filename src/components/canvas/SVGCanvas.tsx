@@ -276,6 +276,13 @@ export function SVGCanvas({
 			const endPoint = getDrawingEndPoint(updatedDrawing)
 			const threshold = PLAYER_RADIUS_FEET
 
+			console.log('Snap detection:', {
+				startPoint: startPoint ? { id: startPoint.id, x: startPoint.x, y: startPoint.y } : null,
+				endPoint: endPoint ? { id: endPoint.id, x: endPoint.x, y: endPoint.y } : null,
+				players: players.map(p => ({ id: p.id, x: p.x, y: p.y })),
+				threshold
+			})
+
 			let bestTarget: {
 				playerId: string
 				pointId: string
@@ -290,6 +297,7 @@ export function SVGCanvas({
 					players,
 					threshold
 				)
+				console.log('Start point snap:', snap)
 				if (snap && (!bestTarget || snap.distance < bestTarget.distance)) {
 					bestTarget = {
 						playerId: snap.playerId,
@@ -307,6 +315,7 @@ export function SVGCanvas({
 					players,
 					threshold
 				)
+				console.log('End point snap:', snap)
 				if (snap && (!bestTarget || snap.distance < bestTarget.distance)) {
 					bestTarget = {
 						playerId: snap.playerId,
@@ -316,6 +325,8 @@ export function SVGCanvas({
 					}
 				}
 			}
+
+			console.log('Best target:', bestTarget)
 
 			setWholeDrawingSnapTarget(
 				bestTarget
