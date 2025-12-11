@@ -29,7 +29,7 @@ interface ConceptToolbarProps {
 
 const TOOLS = [
 	{ id: 'select' as Tool, icon: MousePointer, label: 'Select (V)' },
-	{ id: 'add-player' as Tool, icon: UserPlus, label: 'Add Player (P)' },
+	{ id: 'addPlayer' as Tool, icon: UserPlus, label: 'Add Player (P)' },
 	{ id: 'draw' as Tool, icon: Pencil, label: 'Draw (D)' }
 ]
 
