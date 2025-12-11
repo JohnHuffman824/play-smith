@@ -183,6 +183,9 @@ export function ConceptDialog({
 								{nameError}
 							</p>
 						)}
+						<p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+							{name.length}/100
+						</p>
 					</div>
 
 					<div>
@@ -233,14 +236,14 @@ export function ConceptDialog({
 					{/* Left Toolbar */}
 					<ConceptToolbar
 						selectedTool={selectedTool}
-						onToolChange={(tool) => {
-						setSelectedTool(tool)
-						if (tool === 'draw') {
-							setShowDrawOptions(true)
-						} else {
-							setShowDrawOptions(false)
-						}
-					}}
+						onToolChange={tool => {
+							setSelectedTool(tool)
+							if (tool === 'draw') {
+								setShowDrawOptions(true)
+							} else {
+								setShowDrawOptions(false)
+							}
+						}}
 						color={color}
 						onColorChange={setColor}
 						hashAlignment={hashAlignment}

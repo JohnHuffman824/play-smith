@@ -40,8 +40,7 @@ interface ConceptToolbarProps {
 
 const TOOLS = [
 	{ id: 'select' as Tool, icon: MousePointer, label: 'Select (V)' },
-	{ id: 'addPlayer' as Tool, icon: UserPlus, label: 'Add Player (P)' },
-	{ id: 'draw' as Tool, icon: Pencil, label: 'Draw (D)' }
+	{ id: 'addPlayer' as Tool, icon: UserPlus, label: 'Add Player (P)' }
 ]
 
 export function ConceptToolbar({
@@ -78,38 +77,43 @@ export function ConceptToolbar({
 						icon={<Icon size={22} />}
 						label={tool.label}
 						isSelected={selectedTool === tool.id}
-						onClick={() => {
-					if (tool.id === 'draw') {
-						if (selectedTool === 'draw') {
-							onShowDrawOptionsChange(!showDrawOptions)
-						} else {
-							onToolChange(tool.id)
-							onShowDrawOptionsChange(true)
-						}
-					} else {
-						onToolChange(tool.id)
-					}
-				}}
+						onClick={() => onToolChange(tool.id)}
 					/>
 				)
 			})}
 
-		{/* Draw Options Dialog */}
-		{showDrawOptions && selectedTool === 'draw' && (
-			<div className="absolute left-[80px] top-[calc(50%-80px)] z-50">
-				<DrawOptionsDialog
-					lineStyle={lineStyle}
-					lineEnd={lineEnd}
-					brushSize={brushSize}
-					pathMode={pathMode}
-					onLineStyleChange={onLineStyleChange}
-					onLineEndChange={onLineEndChange}
-					onBrushSizeChange={onBrushSizeChange}
-					onPathModeChange={onPathModeChange}
-					onClose={() => onShowDrawOptionsChange(false)}
+			{/* Draw Tool with Options Dialog */}
+			<div className="relative">
+				<ToolButton
+					icon={<Pencil size={22} />}
+					label="Draw (D)"
+					isSelected={selectedTool === 'draw'}
+					onClick={() => {
+						if (selectedTool === 'draw') {
+							onShowDrawOptionsChange(!showDrawOptions)
+						} else {
+							onToolChange('draw')
+							onShowDrawOptionsChange(true)
+						}
+					}}
 				/>
+
+				{showDrawOptions && selectedTool === 'draw' && (
+					<div className="absolute left-full ml-2 top-0 z-50">
+						<DrawOptionsDialog
+							lineStyle={lineStyle}
+							lineEnd={lineEnd}
+							brushSize={brushSize}
+							pathMode={pathMode}
+							onLineStyleChange={onLineStyleChange}
+							onLineEndChange={onLineEndChange}
+							onBrushSizeChange={onBrushSizeChange}
+							onPathModeChange={onPathModeChange}
+							onClose={() => onShowDrawOptionsChange(false)}
+						/>
+					</div>
+				)}
 			</div>
-		)}
 
 			{/* Erase Tool */}
 			<ToolButton
