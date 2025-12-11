@@ -183,9 +183,6 @@ export function ConceptDialog({
 								{nameError}
 							</p>
 						)}
-						<p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-							{name.length}/100
-						</p>
 					</div>
 
 					<div>
@@ -264,7 +261,7 @@ export function ConceptDialog({
 						/>
 
 						{/* Canvas */}
-						<div ref={canvasContainerRef} className="relative flex-1 overflow-hidden pl-1 pr-8 py-1">
+						<div ref={canvasContainerRef} className="flex-1 flex flex-col pr-8 rounded-2xl border-2 border-gray-300 dark:border-gray-600">
 							<Canvas
 								drawingState={{
 									tool: selectedTool,
