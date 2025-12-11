@@ -42,6 +42,13 @@
     "@types/bun": "latest",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@typescript-eslint/eslint-plugin": "^8.49.0",
+    "@typescript-eslint/parser": "^8.49.0",
+    "eslint": "^9.39.1",
     "happy-dom": "^20.0.11"
+  },
+  "module": "src/index.ts",
+  "peerDependencies": {
+    "typescript": "^5"
   }
 }
