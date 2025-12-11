@@ -183,6 +183,11 @@ export const playsAPI = {
 				p.defensive_formation_id,
 				p.updated_at,
 				(
+					SELECT COALESCE(json_agg(json_build_object('id', t.id, 'name', t.name, 'color', t.color)), '[]'::json)
+					FROM tags t JOIN play_tags pt ON pt.tag_id = t.id
+					WHERE pt.play_id = p.id
+				) as tags,
+				(
 					SELECT json_agg(cpa.drawing_data)
 					FROM concept_applications ca
 					JOIN concept_player_assignments cpa ON cpa.concept_id = ca.concept_id
