@@ -47,7 +47,7 @@ export function ConceptToolbar({
 	const [showHashDialog, setShowHashDialog] = useState(false)
 
 	return (
-		<div className="w-20 h-full flex flex-col items-center justify-start py-6 bg-white dark:bg-gray-800" style={{ gap: '12px' }}>
+		<div className="w-20 h-full flex flex-col items-center justify-center bg-white dark:bg-gray-800" style={{ gap: '12px' }}>
 			{/* Tools */}
 			{TOOLS.map(tool => {
 				const Icon = tool.icon

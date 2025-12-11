@@ -40,6 +40,8 @@ interface CanvasProps {
 	drawingState: DrawingState
 	hashAlignment: HashAlignment
 	showPlayBar: boolean
+	containerMode?: 'viewport' | 'fill'
+	showFieldMarkings?: boolean
 }
 
 // Helper to dispatch fill events
@@ -94,6 +96,8 @@ export function Canvas({
   drawingState,
   hashAlignment,
   showPlayBar,
+  containerMode = 'viewport',
+  showFieldMarkings = false,
 }: CanvasProps) {
   const whiteboardRef = useRef<HTMLDivElement>(null);
   const [linemanPositions, setLinemanPositions] = useState<
@@ -597,10 +601,9 @@ export function Canvas({
 	const scale = coordSystem.scale
 	const playerCursorDiameter = PLAYER_RADIUS_FEET * 2 * scale
 
-	const containerClasses = [
-		'flex-1 flex items-start justify-center px-8 py-4',
-		'overflow-hidden relative',
-	].join(' ')
+	const containerClasses = containerMode === 'fill'
+		? 'flex-1 flex items-start justify-center overflow-hidden relative'
+		: 'flex-1 flex items-start justify-center px-8 py-4 overflow-hidden relative'
 
 	const whiteboardClasses = [
 		'w-full bg-white rounded-2xl shadow-lg relative',
@@ -618,10 +621,12 @@ export function Canvas({
 				className={whiteboardClasses}
 				style={{
 					cursor: getCursorStyle(),
-					height: showPlayBar
-						? 'calc(100vh - 302px)'
-						: 'calc(100vh - 122px)',
-					transition: 'height 800ms ease-in-out',
+					height: containerMode === 'fill'
+						? '100%'
+						: showPlayBar
+							? 'calc(100vh - 302px)'
+							: 'calc(100vh - 122px)',
+					transition: containerMode === 'fill' ? undefined : 'height 800ms ease-in-out',
 					overflow: 'hidden',
 				}}
 				onMouseMove={handleMouseMove}
