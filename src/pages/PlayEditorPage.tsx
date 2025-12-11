@@ -25,6 +25,23 @@ import {
 	DIALOG_MODE_EDIT
 } from '../constants/concept.constants'
 
+const SAVE_DELAY_MS = 100
+const DEFAULT_PLAY_NAME = 'New Play'
+
+interface ApiPlay {
+	id: number
+	name: string
+	section_id: number | null
+	formation_id: number | null
+	personnel_id: number | null
+	play_type: string
+	defensive_formation_id: number | null
+	tags: Array<string | { name: string; color: string }>
+	updated_at: string
+	drawings: unknown[]
+	players: unknown[]
+}
+
 function PlayEditorContent() {
 	const { theme } = useTheme()
 	const { playbookId, playId } = useParams<{
@@ -222,17 +239,29 @@ function PlayEditorContent() {
 				if (!response.ok) return
 
 				const data = await response.json()
-				const plays = (data.plays || []).map((apiPlay: any): Play => ({
+				const plays = (data.plays || []).map((apiPlay: ApiPlay): Play => ({
 					id: String(apiPlay.id),
 					name: apiPlay.name || '',
-					section_id: apiPlay.section_id ? String(apiPlay.section_id) : null,
-					formation: apiPlay.formation_id ? String(apiPlay.formation_id) : '',
-					personnel: apiPlay.personnel_id ? String(apiPlay.personnel_id) : undefined,
+					section_id: apiPlay.section_id
+						? String(apiPlay.section_id)
+						: null,
+					formation: apiPlay.formation_id
+						? String(apiPlay.formation_id)
+						: '',
+					personnel: apiPlay.personnel_id
+						? String(apiPlay.personnel_id)
+						: undefined,
 					playType: apiPlay.play_type || '',
-					defensiveFormation: apiPlay.defensive_formation_id ? String(apiPlay.defensive_formation_id) : '',
-					tags: (apiPlay.tags || []).map((t: any) => typeof t === 'string' ? t : t.name),
+					defensiveFormation: apiPlay.defensive_formation_id
+						? String(apiPlay.defensive_formation_id)
+						: '',
+					tags: (apiPlay.tags || []).map((t) =>
+						typeof t === 'string' ? t : t.name
+					),
 					tagObjects: apiPlay.tags || [],
-					lastModified: apiPlay.updated_at ? new Date(apiPlay.updated_at).toLocaleDateString() : new Date().toLocaleDateString(),
+					lastModified: apiPlay.updated_at
+						? new Date(apiPlay.updated_at).toLocaleDateString()
+						: new Date().toLocaleDateString(),
 					drawings: apiPlay.drawings || [],
 					players: apiPlay.players || []
 				}))
@@ -298,20 +327,35 @@ function PlayEditorContent() {
 			eventBus.emit('canvas:save')
 
 			// Wait a moment for save to complete
-			await new Promise(resolve => setTimeout(resolve, 100))
+			await new Promise(resolve =>
+				setTimeout(resolve, SAVE_DELAY_MS)
+			)
 
 			// Create new play
-			const response = await fetch(`/api/playbooks/${playbookId}/plays`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ name: 'New Play' })
-			})
+			const response = await fetch(
+				`/api/playbooks/${playbookId}/plays`,
+				{
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ name: DEFAULT_PLAY_NAME })
+				}
+			)
 
-			if (response.ok) {
-				const data = await response.json()
-				// Navigate to new play
-				navigate(`/playbooks/${playbookId}/plays/${data.play.id}`)
+			if (!response.ok) {
+				const errorData = await response.json()
+				console.error('Failed to create play:', errorData)
+				return
 			}
+
+			const data = await response.json()
+			const newPlayId = data.play?.id
+
+			if (!newPlayId) {
+				console.error('No play ID in response')
+				return
+			}
+
+			navigate(`/playbooks/${playbookId}/play/${newPlayId}`)
 		} catch (error) {
 			console.error('Failed to create play:', error)
 		}
@@ -426,7 +470,7 @@ function PlayEditorContent() {
 					plays={playbookPlays}
 					currentPlayId={playId}
 					showPlayBar={playState.showPlayBar}
-					onOpenPlay={(id) => navigate(`/playbooks/${playbookId}/plays/${id}`)}
+					onOpenPlay={(id) => navigate(`/playbooks/${playbookId}/play/${id}`)}
 					onAddPlay={handleAddPlay}
 				/>
 

@@ -30,6 +30,11 @@ import { Pencil, PaintBucket } from 'lucide-react'
 import { calculateUnlinkPosition } from '../../utils/drawing.utils'
 import { applyLOSSnap } from '../../utils/los-snap.utils'
 
+const HEADER_TOOLBAR_HEIGHT = 122
+const PLAY_BAR_HEIGHT = 300
+const CANVAS_HEIGHT_WITH_PLAY_BAR = HEADER_TOOLBAR_HEIGHT + PLAY_BAR_HEIGHT
+const ANIMATION_DURATION_MS = 800
+
 interface CanvasProps {
 	drawingState: DrawingState
 	hashAlignment: HashAlignment
@@ -545,9 +550,11 @@ export function Canvas({
 					height: containerMode === 'fill'
 						? '100%'
 						: showPlayBar
-							? 'calc(100vh - 302px)'
-							: 'calc(100vh - 122px)',
-					transition: containerMode === 'fill' ? undefined : 'height 800ms ease-in-out',
+							? `calc(100vh - ${CANVAS_HEIGHT_WITH_PLAY_BAR}px)`
+							: `calc(100vh - ${HEADER_TOOLBAR_HEIGHT}px)`,
+					transition: containerMode === 'fill'
+					? undefined
+					: `height ${ANIMATION_DURATION_MS}ms ease-in-out`,
 					overflow: 'hidden',
 				}}
 				onMouseMove={handleMouseMove}

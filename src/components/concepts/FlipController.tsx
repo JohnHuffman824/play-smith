@@ -19,7 +19,8 @@ export function FlipController({ onFlipReady }: FlipControllerProps) {
 			setDrawings(drawings)
 		}
 		onFlipReady(flipCanvas)
-	}, [state.players, state.drawings, setPlayers, setDrawings, onFlipReady])
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []) // Only run once on mount
 
 	return null // This component renders nothing
 }

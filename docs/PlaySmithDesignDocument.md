@@ -95,9 +95,18 @@ yardage, long yardage, third down, redzone, etc.).
 ### Play Cards Section
 
 - Located below the whiteboard
-- Scrollable left to right
-- Each card is a rounded rectangle showing the play with a label at the bottom
-- An "Add" button appears at the far right to create new plays
+- Shows all plays in the current playbook (excluding the currently open play)
+- Uses the same PlayCard components as the Playbook Manager page
+- Scrollable horizontally (no vertical scroll)
+- An "Add Play" button appears at the far right (283px height to match cards)
+- Clicking "Add Play" auto-saves the current play then creates a new one
+
+**Technical Implementation:**
+- Container height: 340px when visible, 0px when hidden
+- Canvas height adjusts via `calc(100vh - Xpx)` where X includes the play bar height
+- Animation: 800ms ease-in-out transition on height
+- Delayed unmount: Content stays rendered during hide animation (800ms delay) for smooth visual transition
+- Performance: Content unmounts after animation completes to reduce computational load
 
 ### Default Elements
 
