@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Mail, Lock, Eye, EyeOff, User } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
+import { Input } from '../ui/input'
 
 type AuthMode = 'login' | 'register'
 
@@ -153,17 +154,13 @@ export function LoginModal() {
 										className="absolute left-4 top-1/2
 											-translate-y-1/2 w-5 h-5 text-gray-400"
 									/>
-									<input
+									<Input
 										id="name"
 										type="text"
 										value={name}
 										onChange={e => setName(e.target.value)}
 										placeholder="Your name"
-										className="w-full pl-12 pr-4 py-3.5 bg-gray-50
-											border border-gray-200 rounded-2xl
-											focus:outline-none focus:ring-2
-											focus:ring-blue-500 focus:border-transparent
-											transition-all placeholder:opacity-40"
+										className="h-12 pl-12 pr-4 rounded-2xl"
 										required={!isLogin}
 									/>
 								</div>
@@ -183,17 +180,13 @@ export function LoginModal() {
 									className="absolute left-4 top-1/2 -translate-y-1/2
 										w-5 h-5 text-gray-400"
 								/>
-								<input
+								<Input
 									id="email"
-									type="text"
+									type="email"
 									value={email}
 									onChange={e => setEmail(e.target.value)}
 									placeholder={isLogin ? 'JohnDoe@gmail.com' : 'coach@example.com'}
-									className="w-full pl-12 pr-4 py-3.5 bg-gray-50
-										border border-gray-200 rounded-2xl focus:outline-none
-										focus:ring-2 focus:ring-blue-500
-										focus:border-transparent transition-all
-										placeholder:opacity-40"
+									className="h-12 pl-12 pr-4 rounded-2xl"
 									required
 								/>
 							</div>
@@ -212,17 +205,13 @@ export function LoginModal() {
 									className="absolute left-4 top-1/2 -translate-y-1/2
 										w-5 h-5 text-gray-400"
 								/>
-								<input
+								<Input
 									id="password"
 									type={showPassword ? 'text' : 'password'}
 									value={password}
 									onChange={e => setPassword(e.target.value)}
 									placeholder="Enter your password"
-									className="w-full pl-12 pr-12 py-3.5 bg-gray-50
-										border border-gray-200 rounded-2xl focus:outline-none
-										focus:ring-2 focus:ring-blue-500
-										focus:border-transparent transition-all
-										placeholder:opacity-40"
+									className="h-12 pl-12 pr-12 rounded-2xl"
 									required
 								/>
 								<button
