@@ -264,7 +264,7 @@ export function ConceptDialog({
 						/>
 
 						{/* Canvas */}
-						<div ref={canvasContainerRef} className="relative flex-1">
+						<div ref={canvasContainerRef} className="relative flex-1 overflow-hidden pl-1 pr-8 py-1">
 							<Canvas
 								drawingState={{
 									tool: selectedTool,
@@ -278,6 +278,7 @@ export function ConceptDialog({
 								}}
 								hashAlignment={hashAlignment}
 								showPlayBar={false}
+								containerMode="fill"
 								showFieldMarkings={true}
 							/>
 						</div>

@@ -6,7 +6,7 @@
 
 import { createContext, useContext, useReducer, useCallback, useMemo, useEffect } from 'react'
 import type { ReactNode } from 'react'
-import type { DrawingState, PlayCard, Tool } from '../types/play.types'
+import type { DrawingState, Tool } from '../types/play.types'
 import type { HashAlignment } from '../types/field.types'
 import type { Drawing } from '../types/drawing.types'
 import type { Formation, BaseConcept, ConceptGroup } from '../types/concept.types'
@@ -27,7 +27,6 @@ interface PlayState {
 	formation: string
 	play: string
 	defensiveFormation: string
-	playCards: PlayCard[]
 	hashAlignment: HashAlignment
 	showPlayBar: boolean
 	players: Player[]
@@ -40,8 +39,6 @@ type PlayAction =
 	| { type: 'SET_FORMATION'; formation: string }
 	| { type: 'SET_PLAY'; play: string }
 	| { type: 'SET_DEFENSIVE_FORMATION'; defensiveFormation: string }
-	| { type: 'ADD_PLAY_CARD'; card: PlayCard }
-	| { type: 'DELETE_PLAY_CARD'; id: string }
 	| { type: 'SET_HASH_ALIGNMENT'; alignment: HashAlignment }
 	| { type: 'REPOSITION_LINEMEN_FOR_HASH'; alignment: HashAlignment }
 	| { type: 'TOGGLE_PLAY_BAR' }

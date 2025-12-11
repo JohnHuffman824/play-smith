@@ -14,6 +14,7 @@ import { ConceptProvider, useConcept } from '../contexts/ConceptContext'
 import { useConceptData } from '../hooks/useConceptData'
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
 import { useTagsData, type Tag } from '../hooks/useTagsData'
+import type { Play } from '../hooks/usePlaybookData'
 import { eventBus } from '../services/EventBus'
 import { createDefaultLinemen } from '../utils/lineman.utils'
 import {
@@ -67,6 +68,7 @@ function PlayEditorContent() {
 	const [selectedTags, setSelectedTags] = useState<Tag[]>([])
 	const [showTagDialog, setShowTagDialog] = useState(false)
 	const [isPlayLoaded, setIsPlayLoaded] = useState(false)
+	const [playbookPlays, setPlaybookPlays] = useState<Play[]>([])
 
 	/**
 	 * Unified delete method for removing selected objects.
@@ -209,6 +211,39 @@ function PlayEditorContent() {
 
 		loadPlay()
 	}, [playId]) // eslint-disable-line react-hooks/exhaustive-deps
+
+	// Fetch all plays in the playbook for the play bar
+	useEffect(() => {
+		async function fetchPlaybookPlays() {
+			if (!playbookId) return
+
+			try {
+				const response = await fetch(`/api/playbooks/${playbookId}/plays`)
+				if (!response.ok) return
+
+				const data = await response.json()
+				const plays = (data.plays || []).map((apiPlay: any): Play => ({
+					id: String(apiPlay.id),
+					name: apiPlay.name || '',
+					section_id: apiPlay.section_id ? String(apiPlay.section_id) : null,
+					formation: apiPlay.formation_id ? String(apiPlay.formation_id) : '',
+					personnel: apiPlay.personnel_id ? String(apiPlay.personnel_id) : undefined,
+					playType: apiPlay.play_type || '',
+					defensiveFormation: apiPlay.defensive_formation_id ? String(apiPlay.defensive_formation_id) : '',
+					tags: (apiPlay.tags || []).map((t: any) => typeof t === 'string' ? t : t.name),
+					tagObjects: apiPlay.tags || [],
+					lastModified: apiPlay.updated_at ? new Date(apiPlay.updated_at).toLocaleDateString() : new Date().toLocaleDateString(),
+					drawings: apiPlay.drawings || [],
+					players: apiPlay.players || []
+				}))
+				setPlaybookPlays(plays)
+			} catch (error) {
+				console.error('Failed to fetch playbook plays:', error)
+			}
+		}
+
+		fetchPlaybookPlays()
+	}, [playbookId])
 
 	// Apply selected concepts to canvas
 	useEffect(() => {
@@ -361,10 +396,10 @@ function PlayEditorContent() {
 					/>
 				</div>
 				<PlayCardsSection
-					playCards={playState.playCards}
-					onAddCard={() => {}}
-					onDeleteCard={() => {}}
+					plays={playbookPlays}
+					currentPlayId={playId}
 					showPlayBar={playState.showPlayBar}
+					onOpenPlay={(id) => navigate(`/playbooks/${playbookId}/plays/${id}`)}
 				/>
 
 				{/* Selection Overlay */}
