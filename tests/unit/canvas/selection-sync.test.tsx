@@ -28,6 +28,8 @@ function createTestDrawing(id: string): Drawing {
 	}
 }
 
+// Skipped: These tests require canvas.getContext which happy-dom doesn't support
+// Would need jsdom or a browser environment to run these tests
 describe.skip('Selection-Delete Synchronization', () => {
 
 	afterEach(() => {

@@ -611,7 +611,7 @@ export function Canvas({
 	].join(' ')
 
 	const cursorOverlayClasses =
-		'absolute top-0 left-0 w-full h-full pointer-events-none'
+		'absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden'
 
 	return (
 		<div className={containerClasses}>
@@ -638,7 +638,7 @@ export function Canvas({
 				<FootballField />
 
 				{/* SVG layer for structured drawings */}
-				<div className='absolute top-0 left-0 w-full h-full pointer-events-auto'>
+				<div className='absolute top-0 left-0 w-full h-full pointer-events-auto overflow-hidden' style={{ borderRadius: 'inherit' }}>
 					<SVGCanvas
 						width={canvasDimensions.width}
 						height={canvasDimensions.height}
@@ -671,6 +671,7 @@ export function Canvas({
 					style={{
 						cursor: getCursorStyle(),
 						pointerEvents: 'none',
+						borderRadius: 'inherit',
 					}}
 				>
           {/* Custom Pencil Cursor - only visible when draw tool is active */}
@@ -762,8 +763,8 @@ export function Canvas({
             )}
 
           <div
-            className="absolute top-0 left-0 w-full h-full"
-            style={{ pointerEvents: 'none' }}
+            className="absolute top-0 left-0 w-full h-full overflow-hidden"
+            style={{ pointerEvents: 'none', borderRadius: 'inherit' }}
           >
             {linemanPositions.map((pos) => (
               <Lineman
@@ -782,11 +783,12 @@ export function Canvas({
             ))}
           </div>
 
-					<div className={cursorOverlayClasses}>
+					<div className={cursorOverlayClasses} style={{ borderRadius: 'inherit' }}>
 						<div
-							className='absolute top-0 left-0 w-full h-full'
+							className='absolute top-0 left-0 w-full h-full overflow-hidden'
 							style={{
 								pointerEvents: 'none',
+								borderRadius: 'inherit',
 							}}
 						>
               {players.map((player) => (
