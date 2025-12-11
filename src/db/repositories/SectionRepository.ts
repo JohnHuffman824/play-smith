@@ -16,7 +16,7 @@ export class SectionRepository {
 				${name},
 				${displayOrder}
 			)
-			RETURNING *
+			RETURNING id, playbook_id, name, display_order, created_at, updated_at
 		`
 
 		return section
@@ -25,7 +25,9 @@ export class SectionRepository {
 	// Fetches a section by id or null when missing
 	async findById(id: number): Promise<Section | null> {
 		const [section] = await db<Section[]>`
-			SELECT * FROM sections WHERE id = ${id}
+			SELECT id, playbook_id, name, display_order, created_at, updated_at
+			FROM sections
+			WHERE id = ${id}
 		`
 
 		return section ?? null
@@ -34,7 +36,8 @@ export class SectionRepository {
 	// Lists sections for a playbook ordered by display_order
 	async findByPlaybookId(playbookId: number): Promise<Section[]> {
 		return await db<Section[]>`
-			SELECT * FROM sections
+			SELECT id, playbook_id, name, display_order, created_at, updated_at
+			FROM sections
 			WHERE playbook_id = ${playbookId}
 			ORDER BY display_order ASC
 		`
@@ -50,14 +53,28 @@ export class SectionRepository {
 			return section
 		}
 
-		const [section] = await db<Section[]>`
+		// Build dynamic UPDATE
+		const updates: string[] = []
+		const values: any[] = []
+
+		if (data.name !== undefined) {
+			updates.push('name')
+			values.push(data.name)
+		}
+		if (data.display_order !== undefined) {
+			updates.push('display_order')
+			values.push(data.display_order)
+		}
+
+		const setClause = updates.map((col, i) => `${col} = $${i + 1}`).join(', ')
+		const query = `
 			UPDATE sections
-			SET
-				name = COALESCE(${data.name ?? null}, name),
-				display_order = COALESCE(${data.display_order ?? null}, display_order)
-			WHERE id = ${id}
-			RETURNING *
+			SET ${setClause}
+			WHERE id = $${updates.length + 1}
+			RETURNING id, playbook_id, name, display_order, created_at, updated_at
 		`
+
+		const [section] = await db.unsafe(query, [...values, id])
 
 		if (!section) {
 			throw new Error(`Section with id ${id} not found`)
@@ -73,23 +90,22 @@ export class SectionRepository {
 
 	// Batch updates display_order for multiple sections
 	async reorder(playbookId: number, sectionOrders: { id: number; display_order: number }[]): Promise<void> {
-		// First, set all sections to temporary negative values to avoid unique constraint conflicts
-		for (const { id } of sectionOrders) {
-			const tempOrder = -id
-			await db`
-				UPDATE sections
-				SET display_order = ${tempOrder}
-				WHERE id = ${id} AND playbook_id = ${playbookId}
-			`
-		}
+		if (sectionOrders.length === 0) return
 
-		// Then update to the final display_order values
-		for (const { id, display_order } of sectionOrders) {
-			await db`
-				UPDATE sections
-				SET display_order = ${display_order}
-				WHERE id = ${id} AND playbook_id = ${playbookId}
-			`
-		}
+		// Use a single UPDATE with CASE to avoid N+1 queries
+		const ids = sectionOrders.map(s => s.id)
+		const whenClauses = sectionOrders.map((s, i) => `WHEN $${i * 2 + 1} THEN $${i * 2 + 2}`).join(' ')
+		const params = sectionOrders.flatMap(s => [s.id, s.display_order])
+
+		const query = `
+			UPDATE sections
+			SET display_order = CASE id
+				${whenClauses}
+			END
+			WHERE id = ANY($${params.length + 1}::bigint[])
+			AND playbook_id = $${params.length + 2}
+		`
+
+		await db.unsafe(query, [...params, ids, playbookId])
 	}
 }

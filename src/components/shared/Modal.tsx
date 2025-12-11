@@ -1,5 +1,6 @@
 import { X } from 'lucide-react'
 import { useEffect } from 'react'
+import { Button } from '@/components/ui/button'
 
 interface ModalProps {
   isOpen: boolean
@@ -40,18 +41,19 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
         className="relative bg-popover border border-border rounded-xl 
           shadow-2xl w-full max-w-md mx-4 max-h-[90vh] overflow-auto"
       >
-        <div 
-          className="flex items-center justify-between px-6 py-4 
+        <div
+          className="flex items-center justify-between px-6 py-4
             border-b border-border"
         >
           <h2>{title}</h2>
-          <button
+          <Button
             onClick={onClose}
-            className="p-1 hover:bg-accent rounded-lg 
-              transition-all duration-200"
+            variant="ghost"
+            size="icon"
+            className="h-auto w-auto p-1"
           >
             <X className="w-5 h-5" />
-          </button>
+          </Button>
         </div>
 
         <div className="px-6 py-4">{children}</div>

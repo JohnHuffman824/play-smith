@@ -44,6 +44,7 @@ interface CanvasProps {
 	height?: number | string
 	readonly?: boolean
 	showFieldMarkings?: boolean
+	containerMode?: 'page' | 'fill'
 	onSelectionChange?: (ids: string[]) => void
 	initialPlayers?: Array<{ x: number; y: number; label: string; color: string }>
 	initialDrawings?: Drawing[]
@@ -105,6 +106,7 @@ export function Canvas({
   height,
   readonly = false,
   showFieldMarkings = true,
+  containerMode = 'page',
   onSelectionChange,
   initialPlayers,
   initialDrawings,
@@ -160,6 +162,7 @@ export function Canvas({
 		strokeWidth: strokeFeet,
 		lineStyle: drawingState.lineStyle,
 		lineEnd: drawingState.lineEnd,
+		pathMode: drawingState.pathMode,
 	}
 
 	function computeInitialLinemanPositions() {
@@ -615,8 +618,9 @@ export function Canvas({
 	const playerCursorDiameter = PLAYER_RADIUS_FEET * 2 * scale
 
 	const containerClasses = [
-		'flex-1 flex items-start justify-center px-8 py-4',
-		'overflow-hidden relative',
+		containerMode === 'fill'
+			? 'flex-1 flex items-start justify-center overflow-hidden relative'
+			: 'flex-1 flex items-start justify-center px-8 py-4 overflow-hidden relative',
 	].join(' ')
 
 	const whiteboardClasses = [
@@ -635,7 +639,7 @@ export function Canvas({
 				className={whiteboardClasses}
 				style={{
 					cursor: getCursorStyle(),
-					height: showPlayBar
+					height: containerMode === 'fill' ? '100%' : showPlayBar
 						? 'calc(100vh - 302px)'
 						: 'calc(100vh - 122px)',
 					transition: 'height 800ms ease-in-out',

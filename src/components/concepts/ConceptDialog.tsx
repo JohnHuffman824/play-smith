@@ -1,11 +1,24 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { X, FlipHorizontal } from 'lucide-react'
-import type { BaseConcept, TargetingMode, BallPosition, PlayDirection } from '../../types/concept.types'
+import type {
+	BaseConcept,
+	TargetingMode,
+	BallPosition,
+	PlayDirection
+} from '../../types/concept.types'
 import { Canvas } from '../canvas/Canvas'
 import { ConceptToolbar } from './ConceptToolbar'
 import { TargetingTooltip } from './TargetingTooltip'
 import { PlayProvider } from '../../contexts/PlayContext'
 import type { Tool } from '../../types/play.types'
+import { generateThumbnail } from '../../utils/thumbnail'
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue
+} from '../ui/select'
 
 interface ConceptDialogProps {
 	isOpen: boolean
@@ -34,7 +47,11 @@ export function ConceptDialog({
 	const [playDirection, setPlayDirection] = useState<PlayDirection>('na')
 	const [selectedTool, setSelectedTool] = useState<Tool>('select')
 	const [color, setColor] = useState('#000000')
+	const [hashAlignment, setHashAlignment] = useState<'left' | 'center' | 'right'>('center')
 	const [isSaving, setIsSaving] = useState(false)
+	const [nameError, setNameError] = useState('')
+	const [touched, setTouched] = useState(false)
+	const canvasContainerRef = useRef<HTMLDivElement>(null)
 
 	useEffect(() => {
 		if (isOpen && concept && mode === 'edit') {
@@ -44,6 +61,8 @@ export function ConceptDialog({
 			setTargetingMode(concept.targeting_mode)
 			setBallPosition(concept.ball_position)
 			setPlayDirection(concept.play_direction)
+			setNameError('')
+			setTouched(false)
 		} else if (isOpen && mode === 'create') {
 			setName('')
 			setDescription('')
@@ -51,19 +70,59 @@ export function ConceptDialog({
 			setTargetingMode('absolute_role')
 			setBallPosition('center')
 			setPlayDirection('na')
+			setNameError('')
+			setTouched(false)
 		}
 	}, [isOpen, concept, mode])
+
+	// Validate name whenever it changes
+	useEffect(() => {
+		if (!touched) return
+
+		const trimmedName = name.trim()
+		if (trimmedName.length === 0) {
+			setNameError('Concept name is required')
+		} else if (trimmedName.length > 100) {
+			setNameError('Name must be 100 characters or less')
+		} else {
+			setNameError('')
+		}
+	}, [name, touched])
 
 	if (!isOpen) return null
 
 	async function handleSave() {
-		if (!name.trim()) return
+		const trimmedName = name.trim()
+
+		// Validate before save
+		if (!trimmedName) {
+			setNameError('Concept name is required')
+			setTouched(true)
+			return
+		}
+		if (trimmedName.length > 100) {
+			setNameError('Name must be 100 characters or less')
+			setTouched(true)
+			return
+		}
 
 		setIsSaving(true)
 		try {
+			// Generate thumbnail from canvas
+			let thumbnail: string | null = null
+			if (canvasContainerRef.current) {
+				try {
+					thumbnail = await generateThumbnail(canvasContainerRef.current)
+				} catch (error) {
+					console.warn('Failed to generate thumbnail:', error)
+					// Continue without thumbnail
+				}
+			}
+
 			const conceptData: Partial<BaseConcept> = {
-				name: name.trim(),
+				name: trimmedName,
 				description: description.trim() || null,
+				thumbnail,
 				targeting_mode: targetingMode,
 				ball_position: ballPosition,
 				play_direction: playDirection,
@@ -79,32 +138,24 @@ export function ConceptDialog({
 		}
 	}
 
+	function handleNameChange(value: string) {
+		setName(value)
+		if (!touched) {
+			setTouched(true)
+		}
+	}
+
+	const isFormValid = name.trim().length > 0 && name.trim().length <= 100
+
 	function handleFlip() {
 		// TODO: Implement flip logic - mirror all drawings horizontally
-		console.log('Flip concept')
 	}
 
 	return (
 		<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
 			<div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-[90vw] h-[90vh] flex flex-col">
-				{/* Header */}
-				<div className="flex items-center justify-between px-6 py-4 border-b border-gray-300 dark:border-gray-600">
-					<h2 className="text-xl font-semibold">
-						{mode === 'create' && 'Create New Concept'}
-						{mode === 'edit' && 'Edit Concept'}
-						{mode === 'save-as' && 'Save Selection as Concept'}
-					</h2>
-					<button
-						onClick={onClose}
-						className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-						aria-label="Close dialog"
-					>
-						<X className="w-5 h-5" />
-					</button>
-				</div>
-
 				{/* Name and Scope */}
-				<div className="px-6 py-4 border-b border-gray-300 dark:border-gray-600 flex items-center gap-4">
+				<div className="px-6 py-4 border-b border-gray-300 dark:border-gray-600 flex items-start gap-4">
 					<div className="flex-1">
 						<label className="block text-sm font-medium mb-1">
 							Concept Name
@@ -112,10 +163,26 @@ export function ConceptDialog({
 						<input
 							type="text"
 							value={name}
-							onChange={e => setName(e.target.value)}
+							onChange={e => handleNameChange(e.target.value)}
 							placeholder="e.g., Mesh, Spacing, Y-Cross"
-							className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 focus:ring-2 focus:ring-blue-500"
+							maxLength={100}
+							className={`
+								w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-900
+								focus:ring-2 focus:ring-blue-500
+								${nameError && touched
+									? 'border-red-500 dark:border-red-500'
+									: 'border-gray-300 dark:border-gray-600'
+								}
+							`}
 						/>
+						{nameError && touched && (
+							<p className="mt-1 text-sm text-red-600 dark:text-red-400">
+								{nameError}
+							</p>
+						)}
+						<p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+							{name.length}/100 characters
+						</p>
 					</div>
 
 					<div>
@@ -126,7 +193,7 @@ export function ConceptDialog({
 							<button
 								onClick={() => setScope('team')}
 								className={`
-									px-4 py-2 rounded-md text-sm font-medium transition-colors
+									px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer
 									${scope === 'team'
 										? 'bg-blue-500 text-white'
 										: 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
@@ -144,13 +211,21 @@ export function ConceptDialog({
 										? 'bg-blue-500 text-white'
 										: 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
 									}
-									${!playbookId ? 'opacity-50 cursor-not-allowed' : ''}
+									${!playbookId ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
 								`}
 							>
 								Playbook
 							</button>
 						</div>
 					</div>
+
+					<button
+						onClick={onClose}
+						className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors cursor-pointer ml-auto"
+						aria-label="Close dialog"
+					>
+						<X className="w-5 h-5" />
+					</button>
 				</div>
 
 				{/* Canvas Area */}
@@ -161,10 +236,12 @@ export function ConceptDialog({
 						onToolChange={setSelectedTool}
 						color={color}
 						onColorChange={setColor}
+						hashAlignment={hashAlignment}
+						onHashAlignmentChange={setHashAlignment}
 					/>
 
 					{/* Canvas */}
-					<div className="flex-1 overflow-hidden">
+					<div ref={canvasContainerRef} className="flex-1 flex flex-col overflow-hidden" style={{ minHeight: 0 }}>
 						<PlayProvider>
 							<Canvas
 								drawingState={{
@@ -173,13 +250,13 @@ export function ConceptDialog({
 									brushSize: 3,
 									lineStyle: 'solid',
 									lineEnd: 'arrow',
+									pathMode: 'sharp',
 									eraseSize: 40,
 									snapThreshold: 20
 								}}
-								hashAlignment="center"
+								hashAlignment={hashAlignment}
 								showPlayBar={false}
-								width="100%"
-								height="100%"
+							containerMode="fill"
 								showFieldMarkings={true}
 							/>
 						</PlayProvider>
@@ -192,33 +269,21 @@ export function ConceptDialog({
 						{/* Targeting Mode */}
 						<div className="flex items-center gap-2">
 							<label className="text-sm font-medium">
-								Targeting:
+								Target Type:
 							</label>
-							<select
+							<Select
 								value={targetingMode}
-								onChange={e => setTargetingMode(e.target.value as TargetingMode)}
-								className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-sm"
+								onValueChange={v => setTargetingMode(v as TargetingMode)}
 							>
-								<option value="absolute_role">Absolute Role</option>
-								<option value="relative_selector">Relative Selector</option>
-							</select>
+								<SelectTrigger className="w-[140px]">
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="absolute_role">Absolute</SelectItem>
+									<SelectItem value="relative_selector">Relative</SelectItem>
+								</SelectContent>
+							</Select>
 							<TargetingTooltip />
-						</div>
-
-						{/* Ball Position */}
-						<div className="flex items-center gap-2">
-							<label className="text-sm font-medium">
-								Ball:
-							</label>
-							<select
-								value={ballPosition}
-								onChange={e => setBallPosition(e.target.value as BallPosition)}
-								className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-sm"
-							>
-								<option value="left">Left Hash</option>
-								<option value="center">Center</option>
-								<option value="right">Right Hash</option>
-							</select>
 						</div>
 
 						{/* Play Direction */}
@@ -226,21 +291,25 @@ export function ConceptDialog({
 							<label className="text-sm font-medium">
 								Direction:
 							</label>
-							<select
+							<Select
 								value={playDirection}
-								onChange={e => setPlayDirection(e.target.value as PlayDirection)}
-								className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-sm"
+								onValueChange={v => setPlayDirection(v as PlayDirection)}
 							>
-								<option value="na">N/A</option>
-								<option value="left">Left</option>
-								<option value="right">Right</option>
-							</select>
+								<SelectTrigger className="w-[100px]">
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="na">N/A</SelectItem>
+									<SelectItem value="left">Left</SelectItem>
+									<SelectItem value="right">Right</SelectItem>
+								</SelectContent>
+							</Select>
 						</div>
 
 						{/* Flip Button */}
 						<button
 							onClick={handleFlip}
-							className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-2"
+							className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-2 cursor-pointer"
 							title="Flip concept horizontally"
 						>
 							<FlipHorizontal className="w-4 h-4" />
@@ -252,14 +321,14 @@ export function ConceptDialog({
 					<div className="flex items-center gap-2">
 						<button
 							onClick={onClose}
-							className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+							className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
 						>
 							Cancel
 						</button>
 						<button
 							onClick={handleSave}
-							disabled={!name.trim() || isSaving}
-							className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+							disabled={!isFormValid || isSaving}
+							className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
 						>
 							{isSaving ? 'Saving...' : mode === 'edit' ? 'Update' : 'Create'}
 						</button>

@@ -64,11 +64,20 @@ export function SearchDropdown({
 							onClick={() => handleSelect('formation', result.id, result.name)}
 							className="w-full px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
 						>
-							<div className="flex items-center justify-between">
-								<span className="text-sm font-medium">{result.name}</span>
-								<span className="text-xs px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
-									Formation
-								</span>
+							<div className="flex items-center gap-3">
+								{result.thumbnail && (
+									<img
+										src={result.thumbnail}
+										alt={result.name}
+										className="w-12 h-9 object-cover rounded border border-gray-200 dark:border-gray-600 flex-shrink-0"
+									/>
+								)}
+								<div className="flex items-center justify-between flex-1 min-w-0">
+									<span className="text-sm font-medium truncate">{result.name}</span>
+									<span className="text-xs px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded ml-2 flex-shrink-0">
+										Formation
+									</span>
+								</div>
 							</div>
 						</button>
 					))}
@@ -86,11 +95,20 @@ export function SearchDropdown({
 							onClick={() => handleSelect('concept', result.id, result.name)}
 							className="w-full px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
 						>
-							<div className="flex items-center justify-between">
-								<span className="text-sm font-medium">{result.name}</span>
-								<span className="text-xs px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded">
-									Concept
-								</span>
+							<div className="flex items-center gap-3">
+								{result.thumbnail && (
+									<img
+										src={result.thumbnail}
+										alt={result.name}
+										className="w-12 h-9 object-cover rounded border border-gray-200 dark:border-gray-600 flex-shrink-0"
+									/>
+								)}
+								<div className="flex items-center justify-between flex-1 min-w-0">
+									<span className="text-sm font-medium truncate">{result.name}</span>
+									<span className="text-xs px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded ml-2 flex-shrink-0">
+										Concept
+									</span>
+								</div>
 							</div>
 						</button>
 					))}
@@ -108,11 +126,20 @@ export function SearchDropdown({
 							onClick={() => handleSelect('concept_group', result.id, result.name)}
 							className="w-full px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
 						>
-							<div className="flex items-center justify-between">
-								<span className="text-sm font-medium">{result.name}</span>
-								<span className="text-xs px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded">
-									Group
-								</span>
+							<div className="flex items-center gap-3">
+								{result.thumbnail && (
+									<img
+										src={result.thumbnail}
+										alt={result.name}
+										className="w-12 h-9 object-cover rounded border border-gray-200 dark:border-gray-600 flex-shrink-0"
+									/>
+								)}
+								<div className="flex items-center justify-between flex-1 min-w-0">
+									<span className="text-sm font-medium truncate">{result.name}</span>
+									<span className="text-xs px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded ml-2 flex-shrink-0">
+										Group
+									</span>
+								</div>
 							</div>
 						</button>
 					))}

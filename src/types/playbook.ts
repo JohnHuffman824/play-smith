@@ -45,7 +45,7 @@ export interface PlaybookDetails {
 	id: number
 	name: string
 	description: string | null
-	team_id: number
+	team_id: number | null
 	created_at: string
 	updated_at: string
 }

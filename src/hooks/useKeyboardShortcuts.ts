@@ -48,52 +48,43 @@ export function useKeyboardShortcuts({
 			switch (key) {
 				case 's':
 					event.preventDefault()
-					console.log('[shortcut] select')
 					setDrawingState(prev => ({ ...prev, tool: 'select' }))
 					eventBus.emit('dialog:closeAll')
 					break
 				case 'a':
 					event.preventDefault()
-					console.log('[shortcut] addPlayer')
 					setDrawingState(prev => ({ ...prev, tool: 'addPlayer' }))
 					eventBus.emit('player:add', {})
 					eventBus.emit('dialog:closeAll')
 					break
 				case 'd':
 					event.preventDefault()
-					console.log('[shortcut] draw')
 					eventBus.emit('dialog:openDraw')
 					break
 				case 'e':
 					event.preventDefault()
-					console.log('[shortcut] erase')
 					setDrawingState(prev => ({ ...prev, tool: 'erase' }))
 					eventBus.emit('dialog:closeAll')
 					break
 				case 'c':
 					event.preventDefault()
-					console.log('[shortcut] color')
 					eventBus.emit('dialog:openColorPicker')
 					break
 				case 'f':
 					event.preventDefault()
-					console.log('[shortcut] fill')
 					setDrawingState(prev => ({ ...prev, tool: 'fill' }))
 					eventBus.emit('dialog:closeAll')
 					break
 				case 'r':
 					event.preventDefault()
-					console.log('[shortcut] drawing')
 					eventBus.emit('dialog:openDrawing')
 					break
 				case 'h':
 					event.preventDefault()
-					console.log('[shortcut] hash')
 					eventBus.emit('dialog:openHash')
 					break
 				case 'g':
 					event.preventDefault()
-					console.log('[shortcut] addComponent')
 					setDrawingState(prev => ({ ...prev, tool: 'addComponent' }))
 					eventBus.emit('component:add')
 					eventBus.emit('dialog:closeAll')

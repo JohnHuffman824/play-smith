@@ -27,7 +27,7 @@ INSERT INTO preset_routes (team_id, name, route_number, drawing_template, create
 	NULL,
 	'Flat',
 	1,
-	'{"id":"route-1-flat","points":{"p1":{"id":"p1","x":0,"y":0,"type":"start"},"p2":{"id":"p2","x":5,"y":0,"type":"end"}},"segments":[{"type":"line","pointIds":["p1","p2"]}],"style":{"color":"#000000","strokeWidth":2,"lineStyle":"solid","lineEnd":"arrow"},"annotations":[]}'::jsonb,
+	'{"id":"route-1-flat","points":{"p1":{"id":"p1","x":0,"y":0,"type":"start"},"p2":{"id":"p2","x":5,"y":0,"type":"end"}},"segments":[{"type":"line","pointIds":["p1","p2"]}],"style":{"color":"#000000","strokeWidth":2,"lineStyle":"solid","lineEnd":"arrow","pathMode":"sharp"},"annotations":[]}'::jsonb,
 	NULL
 );
 
@@ -36,7 +36,7 @@ INSERT INTO preset_routes (team_id, name, route_number, drawing_template, create
 	NULL,
 	'Slant',
 	2,
-	'{"id":"route-2-slant","points":{"p1":{"id":"p1","x":0,"y":0,"type":"start"},"p2":{"id":"p2","x":3,"y":-5,"type":"end"}},"segments":[{"type":"line","pointIds":["p1","p2"]}],"style":{"color":"#000000","strokeWidth":2,"lineStyle":"solid","lineEnd":"arrow"},"annotations":[]}'::jsonb,
+	'{"id":"route-2-slant","points":{"p1":{"id":"p1","x":0,"y":0,"type":"start"},"p2":{"id":"p2","x":3,"y":-5,"type":"end"}},"segments":[{"type":"line","pointIds":["p1","p2"]}],"style":{"color":"#000000","strokeWidth":2,"lineStyle":"solid","lineEnd":"arrow","pathMode":"sharp"},"annotations":[]}'::jsonb,
 	NULL
 );
 
@@ -45,7 +45,7 @@ INSERT INTO preset_routes (team_id, name, route_number, drawing_template, create
 	NULL,
 	'Comeback',
 	3,
-	'{"id":"route-3-comeback","points":{"p1":{"id":"p1","x":0,"y":0,"type":"start"},"p2":{"id":"p2","x":0,"y":-12,"type":"corner"},"p3":{"id":"p3","x":2,"y":-12,"type":"end"}},"segments":[{"type":"line","pointIds":["p1","p2"]},{"type":"line","pointIds":["p2","p3"]}],"style":{"color":"#000000","strokeWidth":2,"lineStyle":"solid","lineEnd":"arrow"},"annotations":[]}'::jsonb,
+	'{"id":"route-3-comeback","points":{"p1":{"id":"p1","x":0,"y":0,"type":"start"},"p2":{"id":"p2","x":0,"y":-12,"type":"corner"},"p3":{"id":"p3","x":2,"y":-12,"type":"end"}},"segments":[{"type":"line","pointIds":["p1","p2"]},{"type":"line","pointIds":["p2","p3"]}],"style":{"color":"#000000","strokeWidth":2,"lineStyle":"solid","lineEnd":"arrow","pathMode":"sharp"},"annotations":[]}'::jsonb,
 	NULL
 );
 
@@ -54,7 +54,7 @@ INSERT INTO preset_routes (team_id, name, route_number, drawing_template, create
 	NULL,
 	'Curl',
 	4,
-	'{"id":"route-4-curl","points":{"p1":{"id":"p1","x":0,"y":0,"type":"start"},"p2":{"id":"p2","x":0,"y":-10,"type":"corner"},"p3":{"id":"p3","x":0,"y":-8,"type":"end"}},"segments":[{"type":"line","pointIds":["p1","p2"]},{"type":"line","pointIds":["p2","p3"]}],"style":{"color":"#000000","strokeWidth":2,"lineStyle":"solid","lineEnd":"arrow"},"annotations":[]}'::jsonb,
+	'{"id":"route-4-curl","points":{"p1":{"id":"p1","x":0,"y":0,"type":"start"},"p2":{"id":"p2","x":0,"y":-10,"type":"corner"},"p3":{"id":"p3","x":0,"y":-8,"type":"end"}},"segments":[{"type":"line","pointIds":["p1","p2"]},{"type":"line","pointIds":["p2","p3"]}],"style":{"color":"#000000","strokeWidth":2,"lineStyle":"solid","lineEnd":"arrow","pathMode":"sharp"},"annotations":[]}'::jsonb,
 	NULL
 );
 
@@ -63,7 +63,7 @@ INSERT INTO preset_routes (team_id, name, route_number, drawing_template, create
 	NULL,
 	'Out',
 	5,
-	'{"id":"route-5-out","points":{"p1":{"id":"p1","x":0,"y":0,"type":"start"},"p2":{"id":"p2","x":0,"y":-10,"type":"corner"},"p3":{"id":"p3","x":5,"y":-10,"type":"end"}},"segments":[{"type":"line","pointIds":["p1","p2"]},{"type":"line","pointIds":["p2","p3"]}],"style":{"color":"#000000","strokeWidth":2,"lineStyle":"solid","lineEnd":"arrow"},"annotations":[]}'::jsonb,
+	'{"id":"route-5-out","points":{"p1":{"id":"p1","x":0,"y":0,"type":"start"},"p2":{"id":"p2","x":0,"y":-10,"type":"corner"},"p3":{"id":"p3","x":5,"y":-10,"type":"end"}},"segments":[{"type":"line","pointIds":["p1","p2"]},{"type":"line","pointIds":["p2","p3"]}],"style":{"color":"#000000","strokeWidth":2,"lineStyle":"solid","lineEnd":"arrow","pathMode":"sharp"},"annotations":[]}'::jsonb,
 	NULL
 );
 
@@ -72,7 +72,7 @@ INSERT INTO preset_routes (team_id, name, route_number, drawing_template, create
 	NULL,
 	'In',
 	6,
-	'{"id":"route-6-in","points":{"p1":{"id":"p1","x":0,"y":0,"type":"start"},"p2":{"id":"p2","x":0,"y":-10,"type":"corner"},"p3":{"id":"p3","x":-5,"y":-10,"type":"end"}},"segments":[{"type":"line","pointIds":["p1","p2"]},{"type":"line","pointIds":["p2","p3"]}],"style":{"color":"#000000","strokeWidth":2,"lineStyle":"solid","lineEnd":"arrow"},"annotations":[]}'::jsonb,
+	'{"id":"route-6-in","points":{"p1":{"id":"p1","x":0,"y":0,"type":"start"},"p2":{"id":"p2","x":0,"y":-10,"type":"corner"},"p3":{"id":"p3","x":-5,"y":-10,"type":"end"}},"segments":[{"type":"line","pointIds":["p1","p2"]},{"type":"line","pointIds":["p2","p3"]}],"style":{"color":"#000000","strokeWidth":2,"lineStyle":"solid","lineEnd":"arrow","pathMode":"sharp"},"annotations":[]}'::jsonb,
 	NULL
 );
 
@@ -81,7 +81,7 @@ INSERT INTO preset_routes (team_id, name, route_number, drawing_template, create
 	NULL,
 	'Corner',
 	7,
-	'{"id":"route-7-corner","points":{"p1":{"id":"p1","x":0,"y":0,"type":"start"},"p2":{"id":"p2","x":0,"y":-12,"type":"corner"},"p3":{"id":"p3","x":8,"y":-20,"type":"end"}},"segments":[{"type":"line","pointIds":["p1","p2"]},{"type":"line","pointIds":["p2","p3"]}],"style":{"color":"#000000","strokeWidth":2,"lineStyle":"solid","lineEnd":"arrow"},"annotations":[]}'::jsonb,
+	'{"id":"route-7-corner","points":{"p1":{"id":"p1","x":0,"y":0,"type":"start"},"p2":{"id":"p2","x":0,"y":-12,"type":"corner"},"p3":{"id":"p3","x":8,"y":-20,"type":"end"}},"segments":[{"type":"line","pointIds":["p1","p2"]},{"type":"line","pointIds":["p2","p3"]}],"style":{"color":"#000000","strokeWidth":2,"lineStyle":"solid","lineEnd":"arrow","pathMode":"sharp"},"annotations":[]}'::jsonb,
 	NULL
 );
 
@@ -90,7 +90,7 @@ INSERT INTO preset_routes (team_id, name, route_number, drawing_template, create
 	NULL,
 	'Post',
 	8,
-	'{"id":"route-8-post","points":{"p1":{"id":"p1","x":0,"y":0,"type":"start"},"p2":{"id":"p2","x":0,"y":-12,"type":"corner"},"p3":{"id":"p3","x":-8,"y":-20,"type":"end"}},"segments":[{"type":"line","pointIds":["p1","p2"]},{"type":"line","pointIds":["p2","p3"]}],"style":{"color":"#000000","strokeWidth":2,"lineStyle":"solid","lineEnd":"arrow"},"annotations":[]}'::jsonb,
+	'{"id":"route-8-post","points":{"p1":{"id":"p1","x":0,"y":0,"type":"start"},"p2":{"id":"p2","x":0,"y":-12,"type":"corner"},"p3":{"id":"p3","x":-8,"y":-20,"type":"end"}},"segments":[{"type":"line","pointIds":["p1","p2"]},{"type":"line","pointIds":["p2","p3"]}],"style":{"color":"#000000","strokeWidth":2,"lineStyle":"solid","lineEnd":"arrow","pathMode":"sharp"},"annotations":[]}'::jsonb,
 	NULL
 );
 
@@ -99,6 +99,6 @@ INSERT INTO preset_routes (team_id, name, route_number, drawing_template, create
 	NULL,
 	'Go',
 	9,
-	'{"id":"route-9-go","points":{"p1":{"id":"p1","x":0,"y":0,"type":"start"},"p2":{"id":"p2","x":0,"y":-20,"type":"end"}},"segments":[{"type":"line","pointIds":["p1","p2"]}],"style":{"color":"#000000","strokeWidth":2,"lineStyle":"solid","lineEnd":"arrow"},"annotations":[]}'::jsonb,
+	'{"id":"route-9-go","points":{"p1":{"id":"p1","x":0,"y":0,"type":"start"},"p2":{"id":"p2","x":0,"y":-20,"type":"end"}},"segments":[{"type":"line","pointIds":["p1","p2"]}],"style":{"color":"#000000","strokeWidth":2,"lineStyle":"solid","lineEnd":"arrow","pathMode":"sharp"},"annotations":[]}'::jsonb,
 	NULL
 );

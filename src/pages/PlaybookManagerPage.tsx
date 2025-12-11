@@ -1,7 +1,7 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { usePlaybook } from '../contexts/PlaybookContext'
-import { useTeam } from '../contexts/TeamContext'
+import { usePlaybooksData } from '../hooks/usePlaybooksData'
+import { useTeamsData } from '../hooks/useTeamsData'
 import { Sidebar } from '../components/playbook-manager/Sidebar'
 import { Toolbar } from '../components/playbook-manager/Toolbar'
 import { PlaybookCard } from '../components/playbook-manager/PlaybookCard'
@@ -11,14 +11,18 @@ import { SettingsDialog } from '../components/playbook-manager/SettingsDialog'
 export function PlaybookManagerPage() {
 	const navigate = useNavigate()
 	const {
-		playbooks,
-		isLoading,
-		error,
+		personalPlaybooks: allPersonalPlaybooks,
+		teamPlaybooks: allTeamPlaybooks,
+		isLoading: playbooksLoading,
+		error: playbooksError,
 		createPlaybook,
 		updatePlaybook,
 		deletePlaybook
-	} = usePlaybook()
-	const { teams, currentTeamId, switchTeam } = useTeam()
+	} = usePlaybooksData()
+	const { teams, currentTeamId, switchTeam, isLoading: teamsLoading } = useTeamsData()
+
+	const isLoading = playbooksLoading || teamsLoading
+	const error = playbooksError
 
 	const [activeSection, setActiveSection] = useState('all')
 	const [searchQuery, setSearchQuery] = useState('')
@@ -27,20 +31,29 @@ export function PlaybookManagerPage() {
 	const [showSettingsDialog, setShowSettingsDialog] = useState(false)
 	const [newPlaybookName, setNewPlaybookName] = useState('')
 
-	const filteredPlaybooks = useMemo(() => {
-		return playbooks.filter(pb =>
+	const personalPlaybooks = useMemo(
+		() => allPersonalPlaybooks.filter(pb =>
 			pb.name.toLowerCase().includes(searchQuery.toLowerCase())
-		)
-	}, [playbooks, searchQuery])
+		),
+		[allPersonalPlaybooks, searchQuery]
+	)
+
+	const teamPlaybooks = useMemo(
+		() => allTeamPlaybooks.filter(pb =>
+			pb.name.toLowerCase().includes(searchQuery.toLowerCase())
+		),
+		[allTeamPlaybooks, searchQuery]
+	)
 
 	const handleCreatePlaybook = async () => {
-		if (newPlaybookName.trim() && currentTeamId) {
-			const newPlaybook = await createPlaybook(newPlaybookName, currentTeamId)
-			setNewPlaybookName('')
-			setShowNewPlaybookModal(false)
-			// Navigate to the newly created playbook
-			navigate(`/playbooks/${newPlaybook.id}`)
-		}
+		if (!newPlaybookName.trim()) return
+
+		// Use current team or default to first available team (user's "My Team")
+		const teamId = currentTeamId ?? teams[0]?.id ?? null
+		const newPlaybook = await createPlaybook(newPlaybookName.trim(), teamId)
+		setNewPlaybookName('')
+		setShowNewPlaybookModal(false)
+		navigate(`/playbooks/${newPlaybook.id}`)
 	}
 
 	const handleRename = async (id: number, newName: string) => {
@@ -53,28 +66,21 @@ export function PlaybookManagerPage() {
 
 	const handleDuplicate = async (id: number) => {
 		const original = playbooks.find(pb => pb.id === id)
-		if (original && currentTeamId) {
-			await createPlaybook(
-				`${original.name} (Copy)`,
-				currentTeamId,
-				original.description || undefined
-			)
+		if (original) {
+			await createPlaybook(`${original.name} (Copy)`, original.team_id, original.description || undefined)
 		}
 	}
 
 	const handleNewFolder = () => {
 		// TODO: Implement folder creation
-		console.log('Create new folder')
 	}
 
 	const handleImport = () => {
 		// TODO: Implement import functionality
-		console.log('Import playbooks')
 	}
 
 	const handleExport = () => {
 		// TODO: Implement export functionality
-		console.log('Export playbooks')
 	}
 
 	const handleSettings = () => {
@@ -83,18 +89,28 @@ export function PlaybookManagerPage() {
 
 	const handleManageTeams = () => {
 		// TODO: Implement team management
-		console.log('Manage teams')
 	}
 
 	const handleShare = (id: number) => {
 		// TODO: Implement share functionality
-		console.log('Share playbook:', id)
 	}
 
 	const handleExportPlaybook = (id: number) => {
 		// TODO: Implement single playbook export
-		console.log('Export playbook:', id)
 	}
+
+	const handleRenamePrompt = useCallback((id: number, currentName: string) => {
+		const newName = prompt('Rename playbook:', currentName)
+		if (newName?.trim()) {
+			handleRename(id, newName.trim())
+		}
+	}, [])
+
+	const handleDeletePrompt = useCallback((id: number, name: string) => {
+		if (confirm(`Delete "${name}"?`)) {
+			handleDelete(id)
+		}
+	}, [])
 
 	if (isLoading) {
 		return (
@@ -139,34 +155,56 @@ export function PlaybookManagerPage() {
 
 				{/* Content */}
 				<div className="flex-1 overflow-auto p-6">
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-						{filteredPlaybooks.map(playbook => (
-							<PlaybookCard
-								key={playbook.id}
-								id={playbook.id}
-								name={playbook.name}
-								type="playbook"
-								playCount={0}
-								lastModified={new Date(playbook.updated_at).toLocaleDateString()}
-								onRename={(id) => {
-									const newName = prompt('Rename playbook:', playbook.name)
-									if (newName?.trim()) {
-										handleRename(id, newName.trim())
-									}
-								}}
-								onDelete={(id) => {
-									if (confirm(`Delete "${playbook.name}"?`)) {
-										handleDelete(id)
-									}
-								}}
-								onDuplicate={handleDuplicate}
-								onExport={handleExportPlaybook}
-								onShare={handleShare}
-							/>
-						))}
-					</div>
+					{/* Personal Playbooks Section */}
+					{personalPlaybooks.length > 0 && (
+						<div className="mb-8">
+							<h2 className="text-xl font-semibold mb-4">Personal Playbooks</h2>
+							<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+								{personalPlaybooks.map(playbook => (
+									<PlaybookCard
+										key={playbook.id}
+										id={playbook.id}
+										name={playbook.name}
+										type="playbook"
+										playCount={playbook.play_count}
+										lastModified={new Date(playbook.updated_at).toLocaleDateString()}
+										onRename={() => handleRenamePrompt(playbook.id, playbook.name)}
+										onDelete={() => handleDeletePrompt(playbook.id, playbook.name)}
+										onDuplicate={handleDuplicate}
+										onExport={handleExportPlaybook}
+										onShare={handleShare}
+									/>
+								))}
+							</div>
+						</div>
+					)}
 
-					{filteredPlaybooks.length === 0 && (
+					{/* Team Playbooks Section */}
+					{teamPlaybooks.length > 0 && (
+						<div className="mb-8">
+							<h2 className="text-xl font-semibold mb-4">Team Playbooks</h2>
+							<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+								{teamPlaybooks.map(playbook => (
+									<PlaybookCard
+										key={playbook.id}
+										id={playbook.id}
+										name={playbook.name}
+										type="playbook"
+										playCount={playbook.play_count}
+										lastModified={new Date(playbook.updated_at).toLocaleDateString()}
+										onRename={() => handleRenamePrompt(playbook.id, playbook.name)}
+										onDelete={() => handleDeletePrompt(playbook.id, playbook.name)}
+										onDuplicate={handleDuplicate}
+										onExport={handleExportPlaybook}
+										onShare={handleShare}
+									/>
+								))}
+							</div>
+						</div>
+					)}
+
+					{/* Empty State */}
+					{personalPlaybooks.length === 0 && teamPlaybooks.length === 0 && (
 						<div className="text-center py-16">
 							<p className="text-muted-foreground mb-4">No playbooks found</p>
 							<button

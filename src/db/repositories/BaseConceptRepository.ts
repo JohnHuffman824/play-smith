@@ -14,7 +14,49 @@ type BaseConceptUpdate = {
 	play_direction?: 'left' | 'right' | 'na'
 }
 
+/**
+ * Repository for managing base concept data and player assignments
+ *
+ * Base concepts define reusable route/assignment patterns with two targeting modes:
+ * - Absolute Role: Assigns specific roles (X, Y, Z, etc.)
+ * - Relative Selector: Dynamic role selection (leftmost receiver, etc.)
+ *
+ * Concepts are ranked by frecency (frequency + recency) for intelligent search results.
+ */
 export class BaseConceptRepository {
+	/**
+	 * Creates a new base concept with player assignments
+	 *
+	 * @param data - Concept data including targeting mode and assignments
+	 * @param data.team_id - Team ID (null for system concepts)
+	 * @param data.playbook_id - Playbook ID for scoped concepts (null for team-wide)
+	 * @param data.name - Name of the concept (e.g., "Mesh", "Y-Cross")
+	 * @param data.targeting_mode - Either 'absolute_role' or 'relative_selector'
+	 * @param data.ball_position - Ball hash position ('left', 'center', or 'right')
+	 * @param data.play_direction - Play direction ('left', 'right', or 'na')
+	 * @param data.assignments - Array of player assignments with drawing data
+	 * @returns The created concept with all assignments included
+	 * @throws {Error} If concept creation fails or assignments cannot be inserted
+	 *
+	 * @example
+	 * ```typescript
+	 * const concept = await repo.create({
+	 *   team_id: 1,
+	 *   playbook_id: null,
+	 *   name: "Mesh",
+	 *   targeting_mode: "absolute_role",
+	 *   ball_position: "center",
+	 *   created_by: userId,
+	 *   assignments: [
+	 *     {
+	 *       role: 'x',
+	 *       drawing_data: { type: 'path', points: [...], style: {...} },
+	 *       order_index: 0
+	 *     }
+	 *   ]
+	 * })
+	 * ```
+	 */
 	async create(data: {
 		team_id: number | null
 		playbook_id: number | null

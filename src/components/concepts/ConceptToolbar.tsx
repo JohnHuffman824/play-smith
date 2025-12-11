@@ -1,18 +1,34 @@
-import { MousePointer, UserPlus, Pencil, Eraser, Palette, PaintBucket } from 'lucide-react'
+import { useState } from 'react'
+import {
+	MousePointer,
+	UserPlus,
+	Pencil,
+	Palette,
+	PaintBucket
+} from 'lucide-react'
 import type { Tool } from '../../types/play.types'
+import type { HashAlignment } from '../../types/play.types'
+import { HashDialog } from '../toolbar/dialogs/HashDialog'
+import { Tooltip } from '../toolbar/Tooltip'
+import { ToolButton } from '../toolbar/ToolButton'
+import { EraserIcon } from '../toolbar/icons/EraserIcon'
+import { HashIcon } from '../toolbar/icons/HashIcon'
+import { ColorSwatchIndicator } from '../toolbar/ColorSwatchIndicator'
+import { useTheme } from '../../contexts/ThemeContext'
 
 interface ConceptToolbarProps {
 	selectedTool: Tool
 	onToolChange: (tool: Tool) => void
 	color: string
 	onColorChange: (color: string) => void
+	hashAlignment: HashAlignment
+	onHashAlignmentChange: (alignment: HashAlignment) => void
 }
 
 const TOOLS = [
 	{ id: 'select' as Tool, icon: MousePointer, label: 'Select (V)' },
 	{ id: 'add-player' as Tool, icon: UserPlus, label: 'Add Player (P)' },
-	{ id: 'draw' as Tool, icon: Pencil, label: 'Draw (D)' },
-	{ id: 'erase' as Tool, icon: Eraser, label: 'Erase (E)' }
+	{ id: 'draw' as Tool, icon: Pencil, label: 'Draw (D)' }
 ]
 
 const PRESET_COLORS = [
@@ -30,50 +46,47 @@ export function ConceptToolbar({
 	selectedTool,
 	onToolChange,
 	color,
-	onColorChange
+	onColorChange,
+	hashAlignment,
+	onHashAlignmentChange
 }: ConceptToolbarProps) {
+	const [showHashDialog, setShowHashDialog] = useState(false)
+
 	return (
-		<div className="flex flex-col gap-2 p-2 bg-gray-50 dark:bg-gray-900 border-r border-gray-300 dark:border-gray-600">
+		<div className="w-20 h-full flex flex-col items-center py-6 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700" style={{ gap: '12px' }}>
 			{/* Tools */}
 			{TOOLS.map(tool => {
 				const Icon = tool.icon
-				const isSelected = selectedTool === tool.id
 				return (
-					<button
+					<ToolButton
 						key={tool.id}
+						icon={<Icon size={22} />}
+						label={tool.label}
+						isSelected={selectedTool === tool.id}
 						onClick={() => onToolChange(tool.id)}
-						className={`
-							p-2 rounded transition-colors
-							${isSelected
-								? 'bg-blue-500 text-white'
-								: 'hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-							}
-						`}
-						title={tool.label}
-						aria-label={tool.label}
-					>
-						<Icon className="w-5 h-5" />
-					</button>
+					/>
 				)
 			})}
 
-			<div className="h-px bg-gray-300 dark:bg-gray-600 my-2" />
+			{/* Erase Tool */}
+			<ToolButton
+				icon={<EraserIcon />}
+				label="Erase (E)"
+				isSelected={selectedTool === 'erase'}
+				onClick={() => onToolChange('erase')}
+			/>
 
 			{/* Color Selector */}
 			<div className="relative group">
-				<button
-					className="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-					title="Color"
-					aria-label="Color picker"
-				>
-					<div className="relative">
-						<Palette className="w-5 h-5 text-gray-700 dark:text-gray-300" />
-						<div
-							className="absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white dark:border-gray-900"
-							style={{ backgroundColor: color }}
-						/>
-					</div>
-				</button>
+				<Tooltip content="Color">
+					<button
+						className="w-14 h-14 rounded-xl flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition-all cursor-pointer relative"
+						aria-label="Color picker"
+					>
+						<Palette size={22} className="text-gray-700 dark:text-gray-300" />
+						<ColorSwatchIndicator color={color} />
+					</button>
+				</Tooltip>
 
 				{/* Color Palette Dropdown */}
 				<div className="absolute left-full ml-2 top-0 hidden group-hover:block bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg p-2 z-50">
@@ -110,20 +123,34 @@ export function ConceptToolbar({
 			</div>
 
 			{/* Fill Tool */}
-			<button
+			<ToolButton
+				icon={<PaintBucket size={22} style={{ transform: 'scaleX(-1)' }} />}
+				label="Fill (F)"
+				isSelected={selectedTool === 'fill'}
 				onClick={() => onToolChange('fill')}
-				className={`
-					p-2 rounded transition-colors
-					${selectedTool === 'fill'
-						? 'bg-blue-500 text-white'
-						: 'hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-					}
-				`}
-				title="Fill (F)"
-				aria-label="Fill tool"
-			>
-				<PaintBucket className="w-5 h-5" />
-			</button>
+			/>
+
+			{/* Ball on Hash Button */}
+			<div className="relative">
+				<ToolButton
+					icon={<HashIcon />}
+					label="Ball on Hash (H)"
+					onClick={() => setShowHashDialog(!showHashDialog)}
+					dataAttribute="data-hash-dialog"
+				/>
+
+				{showHashDialog && (
+					<HashDialog
+						isOpen={showHashDialog}
+						onClose={() => setShowHashDialog(false)}
+						hashAlignment={hashAlignment}
+						onHashAlignmentChange={alignment => {
+							onHashAlignmentChange(alignment)
+							setShowHashDialog(false)
+						}}
+					/>
+				)}
+			</div>
 		</div>
 	)
 }

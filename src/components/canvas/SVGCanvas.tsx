@@ -4,10 +4,16 @@ import { PathRenderer } from './PathRenderer'
 import { ControlPointOverlay } from './ControlPointOverlay'
 import { MultiDrawingControlPointOverlay } from './MultiDrawingControlPointOverlay'
 import { FreehandCapture } from './FreehandCapture'
+import { DrawingPropertiesDialog } from '../toolbar/dialogs/DrawingPropertiesDialog'
 import type { PathStyle, Drawing } from '../../types/drawing.types'
 import { pointToLineDistance } from '../../utils/canvas.utils'
 import type { Coordinate } from '../../types/field.types'
 import { mergeDrawings } from '../../utils/drawing.utils'
+import { convertToSharp, extractMainCoordinates } from '../../utils/curve.utils'
+import { processSmoothPath } from '../../utils/smooth-path.utils'
+
+// Constants
+const NODE_PROXIMITY_THRESHOLD = 20
 
 interface SVGCanvasProps {
 	width: number
@@ -71,6 +77,10 @@ export function SVGCanvas({
 	const [drawingDragState, setDrawingDragState] = useState<{
 		drawingId: string
 		startFeet: Coordinate
+	} | null>(null)
+	const [editingDrawing, setEditingDrawing] = useState<{
+		drawing: Drawing
+		position: { x: number; y: number }
 	} | null>(null)
 
 	// Auto-clear lastDrawnDrawingId after 3 seconds
@@ -224,6 +234,40 @@ export function SVGCanvas({
 		setDrawingDragState(null)
 	}
 
+	function handleDrawingDoubleClick(
+		drawingId: string,
+		position: { x: number; y: number },
+	) {
+		const drawing = drawings.find((d) => d.id === drawingId)
+		if (drawing) {
+			setEditingDrawing({ drawing, position })
+		}
+	}
+
+	function handleDrawingStyleUpdate(updates: Partial<PathStyle>) {
+		if (!editingDrawing) return
+
+		const drawing = editingDrawing.drawing
+		let newDrawing = { ...drawing, style: { ...drawing.style, ...updates } }
+
+		// If pathMode changed, convert geometry
+		if (updates.pathMode && updates.pathMode !== drawing.style.pathMode) {
+			if (updates.pathMode === 'curve') {
+				// Convert to smooth using smooth pipeline
+				const coords = extractMainCoordinates(drawing)
+				const { points, segments } = processSmoothPath(coords)
+				newDrawing = { ...newDrawing, points, segments }
+			} else {
+				// Convert to sharp using convertToSharp
+				const { points, segments } = convertToSharp(drawing)
+				newDrawing = { ...newDrawing, points, segments }
+			}
+		}
+
+		onChange(drawings.map((d) => (d.id === drawing.id ? newDrawing : d)))
+		setEditingDrawing({ ...editingDrawing, drawing: newDrawing })
+	}
+
 	return (
 		<div className='absolute top-0 left-0 w-full h-full'>
 			<svg
@@ -274,6 +318,7 @@ export function SVGCanvas({
 					activeTool={activeTool}
 					onDelete={onDeleteDrawing}
 					onDragStart={handleDrawingDragStart}
+					onDoubleClick={handleDrawingDoubleClick}
 				/>
 			))}
 
@@ -284,6 +329,8 @@ export function SVGCanvas({
 					players={players}
 					coordSystem={coordSystem}
 					snapThreshold={snapThreshold}
+					cursorPosition={cursorPosition}
+					proximityThreshold={NODE_PROXIMITY_THRESHOLD}
 					onDragPoint={handleDragPoint}
 					onMerge={handleMerge}
 					onLinkToPlayer={handleLinkToPlayer}
@@ -338,6 +385,15 @@ export function SVGCanvas({
 					/>
 				</svg>
 			</div>
+		)}
+
+		{editingDrawing && (
+			<DrawingPropertiesDialog
+				drawing={editingDrawing.drawing}
+				position={editingDrawing.position}
+				onUpdate={handleDrawingStyleUpdate}
+				onClose={() => setEditingDrawing(null)}
+			/>
 		)}
 		</div>
 	)

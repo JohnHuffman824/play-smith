@@ -1,11 +1,18 @@
-import { describe, test, expect, mock, beforeEach } from 'bun:test'
+import { describe, test, expect, mock, beforeEach, afterEach } from 'bun:test'
 import { renderHook, waitFor } from '@testing-library/react'
 import { useAuth } from './useAuth'
 
 describe('useAuth', () => {
+	const originalFetch = global.fetch
+
 	beforeEach(() => {
 		// Clear all mocks
 		mock.restore()
+	})
+
+	afterEach(() => {
+		// Restore original fetch to prevent pollution
+		global.fetch = originalFetch
 	})
 
 	test('returns loading state initially', () => {

@@ -7,6 +7,7 @@ import {
 	LINE_END_ARROW,
 	LINE_END_NONE,
 	LINE_END_TSHAPE,
+	SELECTION_GLOW_BLUR,
 	TSHAPE_LENGTH_MULTIPLIER,
 } from '../../constants/field.constants'
 import { FieldCoordinateSystem } from '../../utils/coordinates'
@@ -27,6 +28,7 @@ interface PathRendererProps {
 	activeTool?: 'draw' | 'select' | 'erase'
 	onDelete?: (id: string) => void
 	onDragStart?: (drawingId: string, feetX: number, feetY: number) => void
+	onDoubleClick?: (drawingId: string, position: { x: number; y: number }) => void
 }
 
 /**
@@ -41,6 +43,7 @@ export function PathRenderer({
 	activeTool,
 	onDelete,
 	onDragStart,
+	onDoubleClick,
 }: PathRendererProps) {
 	const { d, endPoints } = useMemo(() => {
 		return buildPath(drawing, coordSystem)
@@ -97,6 +100,13 @@ export function PathRenderer({
 		}
 	}
 
+	function handleDoubleClick(event: React.MouseEvent) {
+		if (activeTool == 'select' && onDoubleClick) {
+			event.stopPropagation()
+			onDoubleClick(drawing.id, { x: event.clientX, y: event.clientY })
+		}
+	}
+
 	const eraseHover =
 		activeTool == 'erase'
 			? {
@@ -118,6 +128,27 @@ export function PathRenderer({
 
 	return (
 		<g className={className} onClick={handleClick}>
+			{/* SVG filter for selection glow */}
+			{isSelected && (
+				<defs>
+					<filter
+						id={`glow-${drawing.id}`}
+						x='-50%'
+						y='-50%'
+						width='200%'
+						height='200%'
+					>
+						<feGaussianBlur
+							stdDeviation={SELECTION_GLOW_BLUR}
+							result='coloredBlur'
+						/>
+						<feMerge>
+							<feMergeNode in='coloredBlur' />
+							<feMergeNode in='SourceGraphic' />
+						</feMerge>
+					</filter>
+				</defs>
+			)}
 			{activeTool == 'select' && (
 				<path
 					d={d}
@@ -140,9 +171,11 @@ export function PathRenderer({
 				strokeLinejoin='round'
 				strokeDasharray={lineDash.join(' ')}
 				opacity={isSelected ? 0.9 : 1}
+				filter={isSelected ? `url(#glow-${drawing.id})` : undefined}
 				style={{ ...eraseHover, ...selectStyle }}
 				pointerEvents='stroke'
 				onPointerDown={handlePointerDown}
+				onDoubleClick={handleDoubleClick}
 			/>
 			{ending}
 			{drawing.playerId && linkedPixel && (
@@ -194,14 +227,42 @@ function buildPath(
 			commands.push(`Q ${control.x} ${control.y} ${end.x} ${end.y}`)
 			endPoints.push(end)
 		} else if (segment.type == 'cubic') {
-			if (points.length < 3) continue
-			const c1 = toPixels(points[0]!, coordSystem)
-			const c2 = toPixels(points[1]!, coordSystem)
-			const end = toPixels(points[2]!, coordSystem)
-			commands.push(
-				`C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${end.x} ${end.y}`,
-			)
-			endPoints.push(end)
+			// Handle both NEW and OLD cubic formats
+			if (segment.pointIds.length === 2) {
+				// NEW FORMAT: pointIds = [fromId, toId], handles stored in nodes
+				const fromPoint = drawing.points[segment.pointIds[0]]
+				const toPoint = drawing.points[segment.pointIds[1]]
+				if (!fromPoint || !toPoint) continue
+
+				// Calculate absolute control point positions from relative handles
+				const cp1: Coordinate = {
+					x: fromPoint.x + (fromPoint.handleOut?.x ?? 0),
+					y: fromPoint.y + (fromPoint.handleOut?.y ?? 0),
+				}
+				const cp2: Coordinate = {
+					x: toPoint.x + (toPoint.handleIn?.x ?? 0),
+					y: toPoint.y + (toPoint.handleIn?.y ?? 0),
+				}
+
+				const c1 = toPixels(cp1, coordSystem)
+				const c2 = toPixels(cp2, coordSystem)
+				const end = toPixels(toPoint, coordSystem)
+
+				commands.push(
+					`C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${end.x} ${end.y}`,
+				)
+				endPoints.push(end)
+			} else {
+				// OLD FORMAT: pointIds = [cp1Id, cp2Id, endId] (backward compatibility)
+				if (points.length < 3) continue
+				const c1 = toPixels(points[0]!, coordSystem)
+				const c2 = toPixels(points[1]!, coordSystem)
+				const end = toPixels(points[2]!, coordSystem)
+				commands.push(
+					`C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${end.x} ${end.y}`,
+				)
+				endPoints.push(end)
+			}
 		}
 	}
 

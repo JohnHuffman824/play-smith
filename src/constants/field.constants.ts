@@ -43,6 +43,7 @@ export const DASH_PATTERN_GAP_MULTIPLIER = 2
 export const INITIALIZATION_DELAY_MS = 150
 export const CURSOR_Z_INDEX = 100
 export const MAX_HISTORY_SIZE = 10
+export const SELECTION_GLOW_BLUR = 3
 
 // Tool Names
 export const TOOL_DRAW = 'draw'

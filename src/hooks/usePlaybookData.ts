@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import type { Drawing } from '@/types/drawing.types'
 
 export interface Play {
 	id: string
@@ -11,6 +12,7 @@ export interface Play {
 	defensiveFormation: string
 	tags: string[]
 	lastModified: string
+	drawings?: Drawing[]
 }
 
 export interface Section {
@@ -51,16 +53,29 @@ export function usePlaybookData(playbookId: string | undefined): UsePlaybookData
 			playType: apiPlay.play_type || '',
 			defensiveFormation: apiPlay.defensive_formation_id ? String(apiPlay.defensive_formation_id) : '',
 			tags: [], // Tags not yet implemented in API
-			lastModified: apiPlay.updated_at || new Date().toISOString()
+			lastModified: apiPlay.updated_at || new Date().toISOString(),
+			drawings: apiPlay.drawings || []
 		}
 	}, [])
 
 	// Helper to group plays by section
 	const groupPlaysBySections = useCallback((allPlays: Play[], allSections: Array<{ id: string; name: string }>) => {
-		return allSections.map(section => ({
+		const sections = allSections.map(section => ({
 			...section,
 			plays: allPlays.filter(play => play.section_id === section.id)
 		}))
+
+		// Add unsectioned plays as a default section if they exist
+		const unsectionedPlays = allPlays.filter(play => play.section_id === null)
+		if (unsectionedPlays.length > 0) {
+			sections.unshift({
+				id: '__unsectioned__',
+				name: 'Plays',
+				plays: unsectionedPlays
+			})
+		}
+
+		return sections
 	}, [])
 
 	// Fetch data

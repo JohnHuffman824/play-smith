@@ -85,6 +85,7 @@ const initialState: PlayState = {
 		brushSize: 3,
 		lineStyle: 'solid',
 		lineEnd: 'none',
+		pathMode: 'sharp',
 		eraseSize: 40,
 		snapThreshold: 20,
 	},

@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { Toolbar } from '../components/toolbar/Toolbar'
 import { Canvas } from '../components/canvas/Canvas'
 import { PlayHeader } from '../components/plays/PlayHeader'
 import { PlayCardsSection } from '../components/plays/PlayCardsSection'
-import { AddConceptSubDialog } from '../components/concepts/AddConceptSubDialog'
 import { ConceptDialog } from '../components/concepts/ConceptDialog'
 import { SelectionOverlay } from '../components/canvas/SelectionOverlay'
 import { useTheme } from '../contexts/ThemeContext'
@@ -13,10 +12,19 @@ import { ConceptProvider, useConcept } from '../contexts/ConceptContext'
 import { useConceptData } from '../hooks/useConceptData'
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
 import { eventBus } from '../services/EventBus'
+import {
+	CHIP_TYPE_FORMATION,
+	CHIP_TYPE_CONCEPT,
+	CHIP_TYPE_CONCEPT_GROUP,
+	DIALOG_MODE_CREATE,
+	DIALOG_MODE_EDIT
+} from '../constants/concept.constants'
 
 function PlayEditorContent() {
 	const { theme } = useTheme()
-	const { teamId, playbookId } = useParams<{ teamId: string; playbookId?: string }>()
+	const { playbookId } = useParams<{ playbookId?: string }>()
+	const [searchParams] = useSearchParams()
+	const teamId = searchParams.get('teamId')
 	const navigate = useNavigate()
 
 	const {
@@ -44,7 +52,6 @@ function PlayEditorContent() {
 		isLoading: conceptsLoading
 	} = useConceptData(teamId, playbookId)
 
-	const [showAddConceptDialog, setShowAddConceptDialog] = useState(false)
 	const [selectedObjectIds, setSelectedObjectIds] = useState<string[]>([])
 
 	// Set up keyboard shortcuts
@@ -53,21 +60,37 @@ function PlayEditorContent() {
 	// Listen for component:add event from toolbar
 	useEffect(() => {
 		function handleAddComponent() {
-			setShowAddConceptDialog(true)
+			openConceptDialog()
 		}
 
 		eventBus.on('component:add', handleAddComponent)
 		return () => eventBus.off('component:add', handleAddComponent)
+	}, [openConceptDialog])
+
+	// Listen for save event from toolbar
+	useEffect(() => {
+		function handleSave() {
+			// TODO: Implement actual save to API when ready
+			// For now, just emit save-complete immediately
+
+			// Simulate async save operation
+			setTimeout(() => {
+				eventBus.emit('canvas:save-complete')
+			}, 500)
+		}
+
+		eventBus.on('canvas:save', handleSave)
+		return () => eventBus.off('canvas:save', handleSave)
 	}, [])
 
 	// Apply selected concepts to canvas
 	useEffect(() => {
 		conceptState.appliedConcepts.forEach(chip => {
-			if (chip.type === 'formation' && chip.entity) {
+			if (chip.type === CHIP_TYPE_FORMATION && chip.entity) {
 				applyFormation(chip.entity as any)
-			} else if (chip.type === 'concept' && chip.entity) {
+			} else if (chip.type === CHIP_TYPE_CONCEPT && chip.entity) {
 				applyConcept(chip.entity as any)
-			} else if (chip.type === 'concept_group' && chip.entity) {
+			} else if (chip.type === CHIP_TYPE_CONCEPT_GROUP && chip.entity) {
 				applyConceptGroup(chip.entity as any)
 			}
 		})
@@ -79,25 +102,6 @@ function PlayEditorContent() {
 		} else if (teamId) {
 			navigate(`/teams/${teamId}/playbooks`)
 		}
-	}
-
-	function handleSelectFormation(formation: any) {
-		applyFormation(formation)
-		setShowAddConceptDialog(false)
-	}
-
-	function handleSelectConcept(concept: any) {
-		applyConcept(concept)
-		setShowAddConceptDialog(false)
-	}
-
-	function handleSelectGroup(group: any) {
-		applyConceptGroup(group)
-		setShowAddConceptDialog(false)
-	}
-
-	function handleCreateNewConcept() {
-		openConceptDialog()
 	}
 
 	async function handleSaveConcept(conceptData: any) {
@@ -170,24 +174,12 @@ function PlayEditorContent() {
 				/>
 			</div>
 
-			{/* Create Concept Dialog */}
-			<AddConceptSubDialog
-				isOpen={showAddConceptDialog}
-				onClose={() => setShowAddConceptDialog(false)}
-				formations={formations}
-				concepts={concepts}
-				conceptGroups={conceptGroups}
-				onSelectFormation={handleSelectFormation}
-				onSelectConcept={handleSelectConcept}
-				onSelectGroup={handleSelectGroup}
-				onCreateNew={handleCreateNewConcept}
-			/>
 
 			{/* Concept Dialog */}
 			<ConceptDialog
 				isOpen={conceptState.isConceptDialogOpen}
 				onClose={closeConceptDialog}
-				mode={conceptState.editingConceptId ? 'edit' : 'create'}
+				mode={conceptState.editingConceptId ? DIALOG_MODE_EDIT : DIALOG_MODE_CREATE}
 				concept={
 					conceptState.editingConceptId
 						? concepts.find(c => c.id === conceptState.editingConceptId)

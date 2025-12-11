@@ -1,12 +1,141 @@
-import { TeamRepository } from '../db/repositories/TeamRepository'
-import { PlaybookRepository } from '../db/repositories/PlaybookRepository'
 import { getSessionUser } from './middleware/auth'
 import { db } from '../db/connection'
+import { checkPlaybookAccess } from './utils/checkPlaybookAccess'
 
-const teamRepo = new TeamRepository()
-const playbookRepo = new PlaybookRepository()
+type FormationPosition = {
+	id: number
+	role: string
+	position_x: string | number
+	position_y: string | number
+}
+
+type ConceptApplication = {
+	concept_id: number | null
+	concept_group_id: number | null
+	order_index: number
+}
+
+type GroupConcept = {
+	concept_id: number
+}
+
+type ConceptAssignment = {
+	id: number
+	concept_id: number
+	role: string | null
+	drawing_data: Record<string, unknown> | null
+	order_index: number
+}
+
+type PlayerData = {
+	id: string
+	x: number
+	y: number
+	label: string
+	color: string
+}
 
 export const playsAPI = {
+	/**
+	 * Get full play data including players and drawings for animation.
+	 */
+	get: async (req: Request) => {
+		const userId = await getSessionUser(req)
+		if (!userId) {
+			return Response.json({ error: 'Unauthorized' }, { status: 401 })
+		}
+
+		const playId = parseInt(req.params.playId)
+		if (isNaN(playId)) {
+			return Response.json({ error: 'Invalid play ID' }, { status: 400 })
+		}
+
+		const [play] = await db`SELECT * FROM plays WHERE id = ${playId}`
+		if (!play) {
+			return Response.json({ error: 'Play not found' }, { status: 404 })
+		}
+
+		const { hasAccess } = await checkPlaybookAccess(play.playbook_id, userId)
+		if (!hasAccess) {
+			return Response.json({ error: 'Access denied' }, { status: 403 })
+		}
+
+		let players: PlayerData[] = []
+
+		if (play.formation_id) {
+			const positions: FormationPosition[] = await db`
+				SELECT id, role, position_x, position_y
+				FROM formation_player_positions
+				WHERE formation_id = ${play.formation_id}
+			`
+			players = positions.map((pos) => ({
+				id: `player-${pos.role}-${pos.id}`,
+				x: Number(pos.position_x),
+				y: Number(pos.position_y),
+				label: pos.role,
+				color: '#000000',
+			}))
+		}
+
+		const conceptApplications: ConceptApplication[] = await db`
+			SELECT ca.concept_id, ca.concept_group_id, ca.order_index
+			FROM concept_applications ca
+			WHERE ca.play_id = ${playId}
+			ORDER BY ca.order_index
+		`
+
+		const directConceptIds = conceptApplications
+			.filter((ca) => ca.concept_id !== null)
+			.map((ca) => ca.concept_id as number)
+
+		const conceptGroupIds = conceptApplications
+			.filter((ca) => ca.concept_group_id !== null)
+			.map((ca) => ca.concept_group_id as number)
+
+		let groupConceptIds: number[] = []
+		if (conceptGroupIds.length > 0) {
+			const groupConcepts: GroupConcept[] = await db`
+				SELECT concept_id
+				FROM concept_group_concepts
+				WHERE concept_group_id = ANY(${conceptGroupIds})
+			`
+			groupConceptIds = groupConcepts.map((gc) => gc.concept_id)
+		}
+
+		const allConceptIds = [...directConceptIds, ...groupConceptIds]
+
+		let drawings: Record<string, unknown>[] = []
+		if (allConceptIds.length > 0) {
+			const assignments: ConceptAssignment[] = await db`
+				SELECT id, concept_id, role, drawing_data, order_index
+				FROM concept_player_assignments
+				WHERE concept_id = ANY(${allConceptIds})
+				ORDER BY order_index
+			`
+
+			drawings = assignments
+				.filter((a) => a.drawing_data !== null)
+				.map((a) => {
+					const drawingData = a.drawing_data as Record<string, unknown>
+					const linkedPlayer = players.find((p) => p.label === a.role)
+					return {
+						...drawingData,
+						id: drawingData.id ?? `drawing-${a.id}`,
+						playerId: linkedPlayer?.id ?? null,
+					}
+				})
+		}
+
+		return Response.json({
+			play: {
+				id: String(play.id),
+				name: play.name || 'Untitled Play',
+				players,
+				drawings,
+			},
+		})
+	},
+
 	list: async (req: Request) => {
 		const userId = await getSessionUser(req)
 		if (!userId) {
@@ -18,34 +147,32 @@ export const playsAPI = {
 			return Response.json({ error: 'Invalid playbook ID' }, { status: 400 })
 		}
 
-		// Check playbook exists
-		const playbook = await playbookRepo.findById(playbookId)
-		if (!playbook) {
-			return Response.json({ error: 'Playbook not found' }, { status: 404 })
-		}
-
-		// Check user has access to this playbook's team
-		const teams = await teamRepo.getUserTeams(userId)
-		const hasAccess = teams.some(team => team.id === playbook.team_id)
+		const { hasAccess } = await checkPlaybookAccess(playbookId, userId)
 
 		if (!hasAccess) {
 			return Response.json({ error: 'Access denied' }, { status: 403 })
 		}
 
-		// Get lightweight plays (no geometry or notes)
+		// Get plays with drawing data from applied concepts
 		const plays = await db`
 			SELECT
-				id,
-				name,
-				section_id,
-				play_type,
-				formation_id,
-				personnel_id,
-				defensive_formation_id,
-				updated_at
-			FROM plays
-			WHERE playbook_id = ${playbookId}
-			ORDER BY display_order ASC
+				p.id,
+				p.name,
+				p.section_id,
+				p.play_type,
+				p.formation_id,
+				p.personnel_id,
+				p.defensive_formation_id,
+				p.updated_at,
+				(
+					SELECT json_agg(cpa.drawing_data)
+					FROM concept_applications ca
+					JOIN concept_player_assignments cpa ON cpa.concept_id = ca.concept_id
+					WHERE ca.play_id = p.id AND cpa.drawing_data IS NOT NULL
+				) as drawings
+			FROM plays p
+			WHERE p.playbook_id = ${playbookId}
+			ORDER BY p.display_order ASC
 		`
 
 		return Response.json({ plays })
@@ -62,15 +189,7 @@ export const playsAPI = {
 			return Response.json({ error: 'Invalid playbook ID' }, { status: 400 })
 		}
 
-		// Check playbook exists
-		const playbook = await playbookRepo.findById(playbookId)
-		if (!playbook) {
-			return Response.json({ error: 'Playbook not found' }, { status: 404 })
-		}
-
-		// Check user has access to this playbook's team
-		const teams = await teamRepo.getUserTeams(userId)
-		const hasAccess = teams.some(team => team.id === playbook.team_id)
+		const { hasAccess } = await checkPlaybookAccess(playbookId, userId)
 
 		if (!hasAccess) {
 			return Response.json({ error: 'Access denied' }, { status: 403 })
@@ -117,38 +236,57 @@ export const playsAPI = {
 		}
 
 		// Get play and check it exists
-		const [play] = await db`SELECT * FROM plays WHERE id = ${playId}`
+		const [play] = await db`
+			SELECT id, playbook_id
+			FROM plays
+			WHERE id = ${playId}
+		`
 		if (!play) {
 			return Response.json({ error: 'Play not found' }, { status: 404 })
 		}
 
-		// Check playbook exists
-		const playbook = await playbookRepo.findById(play.playbook_id)
-		if (!playbook) {
-			return Response.json({ error: 'Playbook not found' }, { status: 404 })
-		}
-
-		// Check user has access to this playbook's team
-		const teams = await teamRepo.getUserTeams(userId)
-		const hasAccess = teams.some(team => team.id === playbook.team_id)
+		const { hasAccess } = await checkPlaybookAccess(play.playbook_id, userId)
 
 		if (!hasAccess) {
 			return Response.json({ error: 'Access denied' }, { status: 403 })
 		}
 
 		const body = await req.json()
-		const { name, section_id, play_type } = body
 
-		// Update play
-		const [updated] = await db`
+		// Build dynamic UPDATE based on provided fields
+		const updates: string[] = []
+		const values: any[] = []
+
+		if (body.name !== undefined) {
+			updates.push('name')
+			values.push(body.name)
+		}
+		if (body.section_id !== undefined) {
+			updates.push('section_id')
+			values.push(body.section_id)
+		}
+		if (body.play_type !== undefined) {
+			updates.push('play_type')
+			values.push(body.play_type)
+		}
+
+		if (updates.length === 0) {
+			return Response.json({ error: 'No fields to update' }, { status: 400 })
+		}
+
+		// Build UPDATE query dynamically
+		const setClause = updates.map((col, i) => `${col} = $${i + 1}`).join(', ')
+		const query = `
 			UPDATE plays
-			SET
-				name = COALESCE(${name ?? null}, name),
-				section_id = COALESCE(${section_id ?? null}, section_id),
-				play_type = COALESCE(${play_type ?? null}, play_type)
-			WHERE id = ${playId}
-			RETURNING *
+			SET ${setClause}
+			WHERE id = $${updates.length + 1}
+			RETURNING id, playbook_id, name, section_id, play_type,
+					  formation_id, personnel_id, defensive_formation_id,
+					  hash_position, notes, display_order, created_by,
+					  created_at, updated_at
 		`
+
+		const [updated] = await db.unsafe(query, [...values, playId])
 
 		return Response.json({ play: updated })
 	},
@@ -164,21 +302,19 @@ export const playsAPI = {
 			return Response.json({ error: 'Invalid play ID' }, { status: 400 })
 		}
 
-		// Get play and check it exists
-		const [play] = await db`SELECT * FROM plays WHERE id = ${playId}`
+		// Get play to duplicate
+		const [play] = await db`
+			SELECT id, playbook_id, name, section_id, play_type,
+				   formation_id, personnel_id, defensive_formation_id,
+				   hash_position, notes
+			FROM plays
+			WHERE id = ${playId}
+		`
 		if (!play) {
 			return Response.json({ error: 'Play not found' }, { status: 404 })
 		}
 
-		// Check playbook exists
-		const playbook = await playbookRepo.findById(play.playbook_id)
-		if (!playbook) {
-			return Response.json({ error: 'Playbook not found' }, { status: 404 })
-		}
-
-		// Check user has access to this playbook's team
-		const teams = await teamRepo.getUserTeams(userId)
-		const hasAccess = teams.some(team => team.id === playbook.team_id)
+		const { hasAccess } = await checkPlaybookAccess(play.playbook_id, userId)
 
 		if (!hasAccess) {
 			return Response.json({ error: 'Access denied' }, { status: 403 })
@@ -238,20 +374,16 @@ export const playsAPI = {
 		}
 
 		// Get play and check it exists
-		const [play] = await db`SELECT * FROM plays WHERE id = ${playId}`
+		const [play] = await db`
+			SELECT id, playbook_id
+			FROM plays
+			WHERE id = ${playId}
+		`
 		if (!play) {
 			return Response.json({ error: 'Play not found' }, { status: 404 })
 		}
 
-		// Check playbook exists
-		const playbook = await playbookRepo.findById(play.playbook_id)
-		if (!playbook) {
-			return Response.json({ error: 'Playbook not found' }, { status: 404 })
-		}
-
-		// Check user has access to this playbook's team
-		const teams = await teamRepo.getUserTeams(userId)
-		const hasAccess = teams.some(team => team.id === playbook.team_id)
+		const { hasAccess } = await checkPlaybookAccess(play.playbook_id, userId)
 
 		if (!hasAccess) {
 			return Response.json({ error: 'Access denied' }, { status: 403 })

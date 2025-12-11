@@ -1,0 +1,108 @@
+/**
+ * AnimatedPlayer - Renders a player marker during animation playback.
+ * A simplified, non-interactive version of Player for animation display.
+ */
+
+import { useMemo } from 'react'
+import { cn } from '../ui/utils'
+import type { Coordinate } from '../../types/field.types'
+import type { FieldCoordinateSystem } from '../../utils/coordinates'
+import { PLAYER_RADIUS_FEET } from '../../constants/field.constants'
+
+type AnimatedPlayerProps = {
+	id: string
+	position: Coordinate
+	coordSystem: FieldCoordinateSystem
+	label: string
+	color?: string
+	showLabel?: boolean
+	opacity?: number
+	isGhost?: boolean
+}
+
+export function AnimatedPlayer({
+	id,
+	position,
+	coordSystem,
+	label,
+	color = '#3b82f6',
+	showLabel = true,
+	opacity = 1,
+	isGhost = false,
+}: AnimatedPlayerProps) {
+	const pixelPosition = useMemo(() => {
+		return coordSystem.feetToPixels(position.x, position.y)
+	}, [position.x, position.y, coordSystem])
+
+	const pixelRadius = useMemo(() => {
+		return PLAYER_RADIUS_FEET * coordSystem.scale
+	}, [coordSystem.scale])
+
+	const size = pixelRadius * 2
+
+	return (
+		<div
+			data-player-id={id}
+			className={cn(
+				'absolute flex items-center justify-center',
+				'pointer-events-none rounded-full',
+				'will-change-[left,top]'
+			)}
+			style={{
+				left: pixelPosition.x - pixelRadius,
+				top: pixelPosition.y - pixelRadius,
+				width: size,
+				height: size,
+				backgroundColor: isGhost ? 'transparent' : color,
+				border: `2px ${isGhost ? 'dashed' : 'solid'} ${color}`,
+				opacity: isGhost ? 0.3 : opacity,
+			}}
+		>
+			{showLabel && !isGhost && (
+				<span
+					className={cn(
+						'select-none text-[10px] font-bold text-white',
+						'drop-shadow-[0_0_2px_rgba(0,0,0,0.5)]'
+					)}
+				>
+					{label}
+				</span>
+			)}
+		</div>
+	)
+}
+
+type PlayerState = {
+	playerId: string
+	currentPosition: Coordinate
+	label?: string
+	color?: string
+}
+
+type AnimatedPlayerGroupProps = {
+	players: PlayerState[]
+	coordSystem: FieldCoordinateSystem
+	showLabels?: boolean
+}
+
+export function AnimatedPlayerGroup({
+	players,
+	coordSystem,
+	showLabels = true,
+}: AnimatedPlayerGroupProps) {
+	return (
+		<>
+			{players.map((player) => (
+				<AnimatedPlayer
+					key={player.playerId}
+					id={player.playerId}
+					position={player.currentPosition}
+					coordSystem={coordSystem}
+					label={player.label ?? player.playerId}
+					color={player.color ?? '#3b82f6'}
+					showLabel={showLabels}
+				/>
+			))}
+		</>
+	)
+}

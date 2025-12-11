@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { PlaybookEditorToolbar } from './PlaybookEditorToolbar'
 import { PlayCard } from './PlayCard'
 import { PlayListView } from './PlayListView'
 import { Modal } from '@/components/shared/Modal'
 import { SettingsDialog } from '@/components/shared/SettingsDialog'
 import { ShareDialog } from '@/components/shared/ShareDialog'
+import { PlayViewerModal } from '@/components/animation/PlayViewerModal'
 import { ThemeProvider, useTheme } from '@/contexts/ThemeContext'
 import { usePlaybookData } from '@/hooks/usePlaybookData'
 import {
@@ -32,6 +33,8 @@ import type { Play, Section } from './types'
 interface PlaybookEditorProps {
   playbookId?: string
   playbookName?: string
+  teamId?: string
+  teamName?: string
   onBack?: () => void
   onOpenPlay?: (playId: string) => void
   onImport?: () => void
@@ -52,6 +55,8 @@ function formatDate(date: Date): string {
 function PlaybookEditorContent({
   playbookId,
   playbookName = DEFAULT_PLAYBOOK_NAME,
+  teamId,
+  teamName,
   onBack,
   onOpenPlay,
   onImport,
@@ -80,6 +85,8 @@ function PlaybookEditorContent({
   const [deletePlayId, setDeletePlayId] = useState<string | null>(null)
   const [selectedPlays, setSelectedPlays] = useState<Set<string>>(new Set())
   const [activeSectionFilter, setActiveSectionFilter] = useState<string | null>(null)
+  const [showPlayViewer, setShowPlayViewer] = useState(false)
+  const [viewingPlayId, setViewingPlayId] = useState<string | null>(null)
 
   const {
     sections,
@@ -190,6 +197,16 @@ function PlaybookEditorContent({
     }
   }
 
+  function handleAnimatePlay(playId: string) {
+    setViewingPlayId(playId)
+    setShowPlayViewer(true)
+  }
+
+  function handleClosePlayViewer() {
+    setShowPlayViewer(false)
+    setViewingPlayId(null)
+  }
+
   function handleRenamePlay(playId: string) {
     const play = allPlays.find((p) => p.id == playId)
     if (!play) return
@@ -258,7 +275,6 @@ function PlaybookEditorContent({
   function handleShare(
     recipients: Array<{ email: string; role: 'viewer' | 'collaborator' }>
   ) {
-    console.log('Sharing playbook with:', recipients)
   }
 
   function togglePlaySelection(playId: string) {
@@ -311,7 +327,14 @@ function PlaybookEditorContent({
                 <ArrowLeft className="w-5 h-5" />
               </button>
               <div>
-                <h1 className="mb-1">{playbookName}</h1>
+                <div className="flex items-baseline gap-3 mb-1">
+                  <h1>{playbookName}</h1>
+                  {teamName && (
+                    <span className="text-sm text-muted-foreground">
+                      {teamName}
+                    </span>
+                  )}
+                </div>
                 <p className="text-muted-foreground">
                   {totalPlays} play{totalPlays != 1 ? 's' : ''} across{' '}
                   {sections.length} section{sections.length != 1 ? 's' : ''}
@@ -441,6 +464,7 @@ function PlaybookEditorContent({
                             selected={selectedPlays.has(play.id)}
                             onSelect={() => togglePlaySelection(play.id)}
                             onOpen={handleOpenPlay}
+                            onAnimate={handleAnimatePlay}
                             onRename={handleRenamePlay}
                             onDelete={handleDeletePlay}
                             onDuplicate={handleDuplicatePlay}
@@ -649,6 +673,21 @@ function PlaybookEditorContent({
           </div>
         </div>
       </Modal>
+
+      {/* Play Animation Viewer Modal */}
+      {showPlayViewer && viewingPlayId && playbookId && (
+        <PlayViewerModal
+          isOpen={showPlayViewer}
+          onClose={handleClosePlayViewer}
+          playbookId={playbookId}
+          initialPlayId={viewingPlayId}
+          plays={allPlays.map(play => ({
+            id: play.id,
+            name: play.name,
+          }))}
+          canEdit={true}
+        />
+      )}
     </div>
   )
 }

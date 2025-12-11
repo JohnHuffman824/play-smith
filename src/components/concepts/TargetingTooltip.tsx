@@ -30,7 +30,7 @@ export function TargetingTooltip() {
 			</button>
 
 			{isOpen && (
-				<div className="absolute left-0 top-full mt-2 w-80 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg p-4 z-50">
+				<div className="absolute left-0 bottom-full mb-2 w-80 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg p-4 z-50">
 					<h4 className="font-semibold text-sm mb-3">Targeting Modes</h4>
 
 					<div className="space-y-3 text-xs">

@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach, vi } from 'bun:test'
-import { render, screen } from '@testing-library/react'
+import { render, screen, cleanup } from '@testing-library/react'
 import { ThemeProvider, useTheme } from './ThemeContext'
 import { act } from 'react'
 
@@ -36,6 +36,9 @@ function TestComponent() {
 
 describe('ThemeContext', () => {
 	beforeEach(() => {
+		// Clean up rendered components from previous tests
+		cleanup()
+
 		// Clean up document state between tests
 		document.documentElement.classList.remove('dark')
 
@@ -50,11 +53,13 @@ describe('ThemeContext', () => {
 	})
 
 	test('provides default values', () => {
-		render(
-			<ThemeProvider>
-				<TestComponent />
-			</ThemeProvider>
-		)
+		act(() => {
+			render(
+				<ThemeProvider>
+					<TestComponent />
+				</ThemeProvider>
+			)
+		})
 
 		expect(screen.getByTestId('theme').textContent).toBe('light')
 		expect(screen.getByTestId('position-naming').textContent).toBe('traditional')
@@ -62,11 +67,13 @@ describe('ThemeContext', () => {
 	})
 
 	test('allows updating theme', () => {
-		render(
-			<ThemeProvider>
-				<TestComponent />
-			</ThemeProvider>
-		)
+		act(() => {
+			render(
+				<ThemeProvider>
+					<TestComponent />
+				</ThemeProvider>
+			)
+		})
 
 		act(() => {
 			screen.getByText('Set Dark').click()
@@ -76,11 +83,13 @@ describe('ThemeContext', () => {
 	})
 
 	test('allows updating position naming', () => {
-		render(
-			<ThemeProvider>
-				<TestComponent />
-			</ThemeProvider>
-		)
+		act(() => {
+			render(
+				<ThemeProvider>
+					<TestComponent />
+				</ThemeProvider>
+			)
+		})
 
 		act(() => {
 			screen.getByText('Set Modern').click()
@@ -90,11 +99,13 @@ describe('ThemeContext', () => {
 	})
 
 	test('allows updating field level', () => {
-		render(
-			<ThemeProvider>
-				<TestComponent />
-			</ThemeProvider>
-		)
+		act(() => {
+			render(
+				<ThemeProvider>
+					<TestComponent />
+				</ThemeProvider>
+			)
+		})
 
 		act(() => {
 			screen.getByText('Set College').click()
@@ -107,11 +118,13 @@ describe('ThemeContext', () => {
 		const mockSetItem = vi.fn()
 		global.localStorage.setItem = mockSetItem
 
-		render(
-			<ThemeProvider>
-				<TestComponent />
-			</ThemeProvider>
-		)
+		act(() => {
+			render(
+				<ThemeProvider>
+					<TestComponent />
+				</ThemeProvider>
+			)
+		})
 
 		act(() => {
 			screen.getByText('Set Dark').click()
@@ -129,11 +142,13 @@ describe('ThemeContext', () => {
 		})
 		global.localStorage.getItem = mockGetItem
 
-		render(
-			<ThemeProvider>
-				<TestComponent />
-			</ThemeProvider>
-		)
+		act(() => {
+			render(
+				<ThemeProvider>
+					<TestComponent />
+				</ThemeProvider>
+			)
+		})
 
 		expect(screen.getByTestId('theme').textContent).toBe('dark')
 		expect(screen.getByTestId('position-naming').textContent).toBe('modern')
@@ -141,11 +156,13 @@ describe('ThemeContext', () => {
 	})
 
 	test('applies dark class to document element', () => {
-		render(
-			<ThemeProvider>
-				<TestComponent />
-			</ThemeProvider>
-		)
+		act(() => {
+			render(
+				<ThemeProvider>
+					<TestComponent />
+				</ThemeProvider>
+			)
+		})
 
 		expect(document.documentElement.classList.contains('dark')).toBe(false)
 

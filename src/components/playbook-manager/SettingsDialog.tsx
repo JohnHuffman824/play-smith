@@ -2,6 +2,7 @@ import { X } from 'lucide-react'
 import { useTheme } from '../../contexts/ThemeContext'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { Separator } from '../ui/separator'
+import { Button } from '../ui/button'
 import { useState } from 'react'
 
 interface SettingsDialogProps {
@@ -31,13 +32,15 @@ export function SettingsDialog({ isOpen, onClose }: SettingsDialogProps) {
 			<div className="relative bg-background rounded-lg shadow-xl max-w-2xl w-full mx-4 p-6">
 				<div className="flex items-center justify-between mb-6">
 					<h2 className="text-2xl font-semibold">Settings</h2>
-					<button
+					<Button
 						onClick={onClose}
-						className="p-2 hover:bg-accent rounded-lg transition-colors"
+						variant="ghost"
+						size="icon"
+						className="h-auto w-auto p-2"
 						aria-label="Close settings"
 					>
 						<X className="w-5 h-5" />
-					</button>
+					</Button>
 				</div>
 
 				<div className="space-y-6">
@@ -175,18 +178,18 @@ export function SettingsDialog({ isOpen, onClose }: SettingsDialogProps) {
 
 				{/* Footer */}
 				<div className="mt-6 pt-6 border-t border-border flex justify-end gap-2">
-					<button
+					<Button
 						onClick={onClose}
-						className="px-4 py-2 hover:bg-accent rounded-lg transition-colors"
+						variant="ghost"
 					>
 						Cancel
-					</button>
-					<button
+					</Button>
+					<Button
 						onClick={onClose}
-						className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity"
+						variant="default"
 					>
 						Save Changes
-					</button>
+					</Button>
 				</div>
 			</div>
 		</div>
