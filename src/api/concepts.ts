@@ -29,8 +29,19 @@ export const conceptsAPI = {
 		const url = new URL(req.url)
 		const playbookId = url.searchParams.get('playbookId')
 		const playbookIdNum = playbookId ? parseInt(playbookId) : null
+		const isMotion = url.searchParams.get('is_motion')
+		const isModifier = url.searchParams.get('is_modifier')
 
-		const concepts = await conceptRepo.getTeamConcepts(teamId, playbookIdNum)
+		let concepts = await conceptRepo.getTeamConcepts(teamId, playbookIdNum)
+
+		// Filter by flags if requested
+		if (isMotion === 'true') {
+			concepts = concepts.filter(c => c.is_motion)
+		}
+		if (isModifier === 'true') {
+			concepts = concepts.filter(c => c.is_modifier)
+		}
+
 		return Response.json({ concepts })
 	},
 
@@ -116,7 +127,9 @@ export const conceptsAPI = {
 			ball_position,
 			play_direction,
 			playbook_id,
-			assignments
+			assignments,
+			is_motion,
+			is_modifier
 		} = body
 
 		if (!name || !targeting_mode || !assignments || !Array.isArray(assignments)) {
@@ -141,6 +154,8 @@ export const conceptsAPI = {
 			targeting_mode,
 			ball_position,
 			play_direction,
+			is_motion: is_motion ?? false,
+			is_modifier: is_modifier ?? false,
 			created_by: userId,
 			assignments
 		})
@@ -180,12 +195,22 @@ export const conceptsAPI = {
 			targeting_mode,
 			ball_position,
 			play_direction,
-			assignments
+			assignments,
+			is_motion,
+			is_modifier
 		} = body
 
 		const updated = await conceptRepo.update(
 			conceptId,
-			{ name, description, targeting_mode, ball_position, play_direction },
+			{
+				name,
+				description,
+				targeting_mode,
+				ball_position,
+				play_direction,
+				is_motion,
+				is_modifier
+			},
 			assignments
 		)
 
