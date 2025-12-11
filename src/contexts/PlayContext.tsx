@@ -18,6 +18,7 @@ interface Player {
 	y: number
 	label: string
 	color: string
+	isLineman?: boolean
 }
 
 interface PlayState {
