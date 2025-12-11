@@ -8,6 +8,7 @@ import { PlaybookCard } from '../components/playbook-manager/PlaybookCard'
 import { Modal } from '../components/playbook-manager/Modal'
 import { SettingsDialog } from '../components/playbook-manager/SettingsDialog'
 import { ManageTeamsDialog } from '../components/playbook-manager/ManageTeamsDialog'
+import { Input } from '../components/ui/input'
 
 export function PlaybookManagerPage() {
 	const navigate = useNavigate()
@@ -232,7 +233,7 @@ export function PlaybookManagerPage() {
 				<div className="space-y-4">
 					<div>
 						<label className="block mb-2">Playbook Name</label>
-						<input
+						<Input
 							type="text"
 							value={newPlaybookName}
 							onChange={e => setNewPlaybookName(e.target.value)}
@@ -242,7 +243,6 @@ export function PlaybookManagerPage() {
 								}
 							}}
 							placeholder="Enter playbook name..."
-							className="w-full px-4 py-2.5 bg-input rounded-lg border-0 outline-none focus:ring-2 focus:ring-ring/20"
 							autoFocus
 						/>
 					</div>
