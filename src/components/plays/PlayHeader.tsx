@@ -12,7 +12,7 @@ export function PlayHeader({
 	onBackToPlaybook
 }: PlayHeaderProps) {
 	return (
-		<div className="px-8 pt-6 pb-4">
+		<div className="px-8 pt-6 pb-1">
 			<div className="flex gap-4 items-center">
 				<div className="flex-1">
 					<UnifiedSearchBar

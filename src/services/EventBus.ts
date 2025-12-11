@@ -43,7 +43,10 @@ export type EventMap = {
 	'drawing:add': { drawing: unknown }
 	'drawing:delete': { id: string }
 	'drawing:update': { id: string; drawing: Partial<Drawing> }
-	
+
+	// Selection operations
+	'selection:delete': void
+
 	// System events
 	'system:resize': void
 

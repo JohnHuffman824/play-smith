@@ -335,10 +335,6 @@ function PlaybookEditorContent({
                     </span>
                   )}
                 </div>
-                <p className="text-muted-foreground">
-                  {totalPlays} play{totalPlays != 1 ? 's' : ''} across{' '}
-                  {sections.length} section{sections.length != 1 ? 's' : ''}
-                </p>
               </div>
               
               <div className="w-px self-stretch bg-border ml-2" />

@@ -89,6 +89,11 @@ export function useKeyboardShortcuts({
 					eventBus.emit('component:add')
 					eventBus.emit('dialog:closeAll')
 					break
+				case 'delete':
+				case 'backspace':
+					event.preventDefault()
+					eventBus.emit('selection:delete')
+					break
 			}
 		}
 
@@ -125,6 +130,7 @@ export function getAllShortcuts(): Record<string, string> {
 		'R': 'Drawing tool',
 		'H': 'Hash alignment',
 		'G': 'Add component',
+		'Delete/⌫': 'Delete selected',
 		'⌘Z': 'Undo',
 	}
 }

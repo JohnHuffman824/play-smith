@@ -137,6 +137,9 @@ export function Canvas({
   const [selectedPlayerId, setSelectedPlayerId] = useState<
     string | null
   >(null)
+  const [selectedDrawingIdFromSVG, setSelectedDrawingIdFromSVG] = useState<
+    string | null
+  >(null)
   const [labelDialogPosition, setLabelDialogPosition] =
     useState({ x: 0, y: 0 })
 	const { state, setDrawings } = usePlayContext()
@@ -261,6 +264,20 @@ export function Canvas({
 		eventBus.on('canvas:clear', handleClear)
 		return () => eventBus.off('canvas:clear', handleClear)
 	}, [setDrawings, hashAlignment])
+
+	// Report selection changes to parent
+	useEffect(() => {
+		if (onSelectionChange) {
+			const selectedIds: string[] = []
+			if (selectedPlayerId) {
+				selectedIds.push(selectedPlayerId)
+			}
+			if (selectedDrawingIdFromSVG) {
+				selectedIds.push(selectedDrawingIdFromSVG)
+			}
+			onSelectionChange(selectedIds)
+		}
+	}, [selectedPlayerId, selectedDrawingIdFromSVG, onSelectionChange])
 
 	// Initialize linemen positions from container size
 	useEffect(() => {
@@ -674,10 +691,17 @@ export function Canvas({
 						autoCorrect={true}
 						defaultStyle={defaultPathStyle}
 						snapThreshold={drawingState.snapThreshold}
+						selectedDrawingIds={selectedDrawingIdFromSVG ? [selectedDrawingIdFromSVG] : []}
 						onLinkDrawingToPlayer={handleLinkDrawingToPlayer}
 						onMovePlayer={handleMovePlayerOnly}
 						isOverCanvas={isOverCanvas}
 						cursorPosition={cursorPosition}
+						onSelectionChange={(id) => {
+							setSelectedDrawingIdFromSVG(id)
+							if (id) {
+								setSelectedPlayerId(null)
+							}
+						}}
 					/>
 				</div>
 
