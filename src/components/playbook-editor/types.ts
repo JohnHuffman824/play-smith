@@ -3,20 +3,23 @@
  * These are temporary local types used by the Figma-exported UI
  */
 
-export interface Play {
-  id: string
-  name: string
-  formation: string
-  playType: string
-  defensiveFormation: string
-  tags: string[]
-  lastModified: string
-  thumbnail?: string
-  personnel?: string
+import type { Drawing } from '@/types/drawing.types'
+
+export type Play = {
+	id: string
+	name: string
+	formation: string
+	playType: string
+	defensiveFormation: string
+	tags: string[]
+	lastModified: string
+	thumbnail?: string
+	drawings?: Drawing[]
+	personnel?: string
 }
 
-export interface Section {
-  id: string
-  name: string
-  plays: Play[]
+export type Section = {
+	id: string
+	name: string
+	plays: Play[]
 }

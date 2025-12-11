@@ -241,7 +241,7 @@ export function ConceptDialog({
 					/>
 
 					{/* Canvas */}
-					<div ref={canvasContainerRef} className="flex-1 overflow-hidden">
+					<div ref={canvasContainerRef} className="flex-1 flex flex-col overflow-hidden" style={{ minHeight: 0 }}>
 						<PlayProvider>
 							<Canvas
 								drawingState={{
@@ -256,8 +256,7 @@ export function ConceptDialog({
 								}}
 								hashAlignment={hashAlignment}
 								showPlayBar={false}
-								width="100%"
-								height="100%"
+							containerMode="fill"
 								showFieldMarkings={true}
 							/>
 						</PlayProvider>

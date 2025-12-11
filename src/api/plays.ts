@@ -23,20 +23,26 @@ export const playsAPI = {
 			return Response.json({ error: 'Access denied' }, { status: 403 })
 		}
 
-		// Get lightweight plays (no geometry or notes)
+		// Get plays with drawing data from applied concepts
 		const plays = await db`
 			SELECT
-				id,
-				name,
-				section_id,
-				play_type,
-				formation_id,
-				personnel_id,
-				defensive_formation_id,
-				updated_at
-			FROM plays
-			WHERE playbook_id = ${playbookId}
-			ORDER BY display_order ASC
+				p.id,
+				p.name,
+				p.section_id,
+				p.play_type,
+				p.formation_id,
+				p.personnel_id,
+				p.defensive_formation_id,
+				p.updated_at,
+				(
+					SELECT json_agg(cpa.drawing_data)
+					FROM concept_applications ca
+					JOIN concept_player_assignments cpa ON cpa.concept_id = ca.concept_id
+					WHERE ca.play_id = p.id AND cpa.drawing_data IS NOT NULL
+				) as drawings
+			FROM plays p
+			WHERE p.playbook_id = ${playbookId}
+			ORDER BY p.display_order ASC
 		`
 
 		return Response.json({ plays })

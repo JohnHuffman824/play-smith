@@ -21,6 +21,9 @@ import {
   TAG_COLORS,
   DEFAULT_TAG_COLOR,
 } from './constants/playbook'
+import { formatDateDayMonthYear } from '@/utils/date.utils'
+import { PlayThumbnailSVG } from './PlayThumbnailSVG'
+import type { Drawing } from '@/types/drawing.types'
 
 type PlayCardProps = {
   id: string
@@ -31,6 +34,7 @@ type PlayCardProps = {
   tags: string[]
   lastModified: string
   thumbnail?: string
+  drawings?: Drawing[]
   personnel?: string
   selected?: boolean
   onSelect?: (id: string) => void
@@ -42,6 +46,7 @@ type PlayCardProps = {
 
 type PlayCardThumbnailProps = {
   thumbnail?: string
+  drawings?: Drawing[]
   name: string
   playType: string
   onOpen: () => void
@@ -57,27 +62,32 @@ function getTagColor(tag: string) {
 
 function PlayCardThumbnail({
   thumbnail,
+  drawings,
   name,
   playType,
   onOpen
 }: PlayCardThumbnailProps) {
-  const badgeClass = playType == PLAY_TYPE_PASS 
-    ? PLAY_TYPE_BADGE_PASS 
+  console.log(`PlayCard "${name}" - drawings:`, drawings, 'length:', drawings?.length)
+
+  const badgeClass = playType == PLAY_TYPE_PASS
+    ? PLAY_TYPE_BADGE_PASS
     : PLAY_TYPE_BADGE_RUN
 
   return (
     <div className="relative">
       <div
         onClick={onOpen}
-        className="aspect-video bg-muted flex items-center 
-          justify-center cursor-pointer hover:bg-accent 
+        className="aspect-video bg-muted flex items-center
+          justify-center cursor-pointer hover:bg-accent
           transition-colors duration-200"
       >
-        {thumbnail ? (
-          <img 
-            src={thumbnail} 
-            alt={name} 
-            className="w-full h-full object-cover" 
+        {drawings && drawings.length > 0 ? (
+          <PlayThumbnailSVG drawings={drawings} className="w-full h-full" />
+        ) : thumbnail ? (
+          <img
+            src={thumbnail}
+            alt={name}
+            className="w-full h-full object-cover"
           />
         ) : (
           <div className="text-center p-6">
@@ -133,14 +143,16 @@ function PlayCardThumbnail({
         )}
       </div>
 
-      <div className="absolute top-2 right-2">
-        <span
-          className={`px-2.5 py-1 rounded-md text-xs shadow-sm 
-            backdrop-blur-sm ${badgeClass}`}
-        >
-          {playType}
-        </span>
-      </div>
+      {playType && (
+        <div className="absolute top-2 right-2">
+          <span
+            className={`px-2.5 py-1 rounded-md text-xs shadow-sm
+              backdrop-blur-sm ${badgeClass}`}
+          >
+            {playType}
+          </span>
+        </div>
+      )}
     </div>
   )
 }
@@ -184,6 +196,7 @@ export function PlayCard({
   tags,
   lastModified,
   thumbnail,
+  drawings,
   personnel,
   selected = false,
   onSelect,
@@ -202,6 +215,7 @@ export function PlayCard({
     <div className={cardClass}>
       <PlayCardThumbnail
         thumbnail={thumbnail}
+        drawings={drawings}
         name={name}
         playType={playType}
         onOpen={() => onOpen(id)}
@@ -292,7 +306,7 @@ export function PlayCard({
         <PlayCardTags tags={tags} />
 
         <div className="pt-2 border-t border-border">
-          <p className="text-muted-foreground">{lastModified}</p>
+          <p className="text-muted-foreground">{formatDateDayMonthYear(lastModified)}</p>
         </div>
       </div>
     </div>

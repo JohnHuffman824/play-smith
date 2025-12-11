@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import type { Drawing } from '@/types/drawing.types'
 
 export interface Play {
 	id: string
@@ -11,6 +12,7 @@ export interface Play {
 	defensiveFormation: string
 	tags: string[]
 	lastModified: string
+	drawings?: Drawing[]
 }
 
 export interface Section {
@@ -51,7 +53,8 @@ export function usePlaybookData(playbookId: string | undefined): UsePlaybookData
 			playType: apiPlay.play_type || '',
 			defensiveFormation: apiPlay.defensive_formation_id ? String(apiPlay.defensive_formation_id) : '',
 			tags: [], // Tags not yet implemented in API
-			lastModified: apiPlay.updated_at || new Date().toISOString()
+			lastModified: apiPlay.updated_at || new Date().toISOString(),
+			drawings: apiPlay.drawings || []
 		}
 	}, [])
 

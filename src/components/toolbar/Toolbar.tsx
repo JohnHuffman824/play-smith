@@ -15,6 +15,7 @@ import {
 	Save,
 	Check,
 	UserPlus,
+	Loader2,
 } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import type { DrawingState, Tool } from '../../types/play.types'
@@ -30,7 +31,9 @@ import { HashDialog } from './dialogs/HashDialog'
 import { SettingsDialog } from './dialogs/SettingsDialog'
 import { Tooltip } from './Tooltip'
 import { useTheme } from '../../contexts/ThemeContext'
-import svgPaths from '../../imports/eraser-icon.svg'
+import { EraserIcon } from './icons/EraserIcon'
+import { HashIcon } from './icons/HashIcon'
+import { ColorSwatchIndicator } from './ColorSwatchIndicator'
 
 interface ToolbarProps {
 	drawingState: DrawingState
@@ -76,13 +79,22 @@ export function Toolbar({
 		'absolute -right-1 -top-1 w-3 h-3 bg-green-500',
 		'rounded-full border-2 border-white',
 	].join(' ')
-	const paletteSwatchClass = [
-		'absolute -right-1 -bottom-1 w-4 h-4 rounded-full',
-		'border-2 shadow-sm',
-	].join(' ')
 
 	function handleSnapThresholdChange(value: number) {
 		setDrawingState({ ...drawingState, snapThreshold: value })
+	}
+
+	/**
+	 * Close all toolbar dialogs except the clear confirmation modal.
+	 * Call this before opening any dialog to ensure only one is open at a time.
+	 */
+	function closeAllDialogs() {
+		setShowColorPicker(false)
+		setShowDrawOptions(false)
+		setShowEraseDialog(false)
+		setShowDrawingDialog(false)
+		setShowHashDialog(false)
+		setShowSettingsDialog(false)
 	}
 
 	// Auto-close dialogs when cursor moves away
@@ -136,10 +148,8 @@ export function Toolbar({
 	useEffect(() => {
 		const handleColorPickerTrigger = () => {
 			// Close all other dialogs first
-			setShowDrawOptions(false)
-			setShowDrawingDialog(false)
-			setShowHashDialog(false)
-			
+			closeAllDialogs()
+
 			// Toggle color picker
 			setShowColorPicker(prev => !prev)
 		}
@@ -152,10 +162,8 @@ export function Toolbar({
 	useEffect(() => {
 		const handleRouteToolTrigger = () => {
 			// Close all other dialogs first
-		setShowColorPicker(false)
-		setShowDrawOptions(false)
-		setShowHashDialog(false)
-			
+			closeAllDialogs()
+
 			// Toggle drawing dialog
 			setShowDrawingDialog(prev => !prev)
 		}
@@ -168,10 +176,8 @@ export function Toolbar({
 	useEffect(() => {
 		const handleHashDialogTrigger = () => {
 			// Close all other dialogs first
-			setShowColorPicker(false)
-			setShowDrawOptions(false)
-			setShowDrawingDialog(false)
-			
+			closeAllDialogs()
+
 			// Toggle hash dialog
 			setShowHashDialog(prev => !prev)
 		}
@@ -182,15 +188,12 @@ export function Toolbar({
 
 	// Listen for close all dialogs event
 	useEffect(() => {
-		const handleCloseAllDialogs = () => {
-			setShowColorPicker(false)
-			setShowDrawOptions(false)
-			setShowDrawingDialog(false)
-			setShowHashDialog(false)
+		const handleCloseAllDialogsEvent = () => {
+			closeAllDialogs()
 		}
 
-		eventBus.on('dialog:closeAll', handleCloseAllDialogs)
-		return () => eventBus.off('dialog:closeAll', handleCloseAllDialogs)
+		eventBus.on('dialog:closeAll', handleCloseAllDialogsEvent)
+		return () => eventBus.off('dialog:closeAll', handleCloseAllDialogsEvent)
 	}, [])
 
 	function toolButtonClass(isActive: boolean) {
@@ -220,9 +223,7 @@ export function Toolbar({
 
 	function handleToolChange(tool: Tool) {
 		// Close all dialogs when switching tools
-		setShowColorPicker(false)
-		setShowDrawOptions(false)
-		setShowDrawingDialog(false)
+		closeAllDialogs()
 
 		if (tool == 'color') {
 			setShowColorPicker(true)
@@ -338,6 +339,9 @@ export function Toolbar({
 				<Tooltip content='Erase (E)'>
 					<button
 						onClick={() => {
+							// Close all dialogs first
+							closeAllDialogs()
+
 							// If already on erase tool, toggle the dialog
 							if (drawingState.tool == 'erase') {
 								setShowEraseDialog(!showEraseDialog)
@@ -351,23 +355,7 @@ export function Toolbar({
 							drawingState.tool == 'erase',
 						)}
 					>
-						<svg
-							width='22'
-							height='22'
-							viewBox='0 0 235 235'
-							fill='none'
-							stroke='currentColor'
-							strokeWidth='21.3333'
-							strokeLinecap='round'
-							strokeLinejoin='round'
-						>
-							<path
-								clipRule='evenodd'
-								d={svgPaths.p28898e00}
-								fillRule='evenodd'
-							/>
-							<path d={svgPaths.p3a238100} />
-						</svg>
+						<EraserIcon />
 					</button>
 				</Tooltip>
 
@@ -380,14 +368,7 @@ export function Toolbar({
 						} relative`}
 					>
 						<Palette size={22} />
-						<div
-							className={`${paletteSwatchClass} ${
-								theme == 'dark'
-									? 'border-gray-800'
-									: 'border-white'
-							}`}
-							style={{ backgroundColor: drawingState.color }}
-						/>
+						<ColorSwatchIndicator color={drawingState.color} />
 					</button>
 				</Tooltip>
 
@@ -429,24 +410,13 @@ export function Toolbar({
 				{/* Hash Marker Tool */}
 				<Tooltip content='Ball on Hash (H)'>
 					<button
-						onClick={() => setShowHashDialog(!showHashDialog)}
+						onClick={() => {
+							closeAllDialogs()
+							setShowHashDialog(!showHashDialog)
+						}}
 						className={toolButtonClass(showHashDialog)}
 					>
-						<svg
-							width='22'
-							height='22'
-							viewBox='0 0 24 24'
-							fill='none'
-							stroke='currentColor'
-							strokeWidth='2'
-							strokeLinecap='round'
-							strokeLinejoin='round'
-						>
-							{/* Three solid horizontal lines stacked vertically */}
-							<line x1='4' y1='7' x2='20' y2='7' />
-							<line x1='4' y1='12' x2='20' y2='12' />
-							<line x1='4' y1='17' x2='20' y2='17' />
-						</svg>
+						<HashIcon />
 					</button>
 				</Tooltip>
 
@@ -486,9 +456,10 @@ export function Toolbar({
 				{/* Settings Button */}
 				<Tooltip content='Settings'>
 					<button
-						onClick={() =>
+						onClick={() => {
+							closeAllDialogs()
 							setShowSettingsDialog(!showSettingsDialog)
-						}
+						}}
 						className={neutralButtonClass(lightToggleClass)}
 					>
 						<Settings size={22} />

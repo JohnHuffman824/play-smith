@@ -1,16 +1,19 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import type { ReactNode } from 'react'
+
+const FIVE_MINUTES_MS = 5 * 60 * 1000
+const TEN_MINUTES_MS = 10 * 60 * 1000
+const SINGLE_RETRY = 1
 
 const queryClient = new QueryClient({
 	defaultOptions: {
 		queries: {
 			// Stale time: 5 minutes (formations/concepts don't change often)
-			staleTime: 5 * 60 * 1000,
+			staleTime: FIVE_MINUTES_MS,
 			// Cache time: 10 minutes
-			gcTime: 10 * 60 * 1000,
+			gcTime: TEN_MINUTES_MS,
 			// Retry failed requests once
-			retry: 1,
+			retry: SINGLE_RETRY,
 			// Refetch on window focus for fresh data
 			refetchOnWindowFocus: true,
 			// Don't refetch on mount if data is fresh
@@ -18,12 +21,12 @@ const queryClient = new QueryClient({
 		},
 		mutations: {
 			// Retry failed mutations once
-			retry: 1
+			retry: SINGLE_RETRY
 		}
 	}
 })
 
-interface QueryProviderProps {
+type QueryProviderProps = {
 	children: ReactNode
 }
 
@@ -31,10 +34,6 @@ export function QueryProvider({ children }: QueryProviderProps) {
 	return (
 		<QueryClientProvider client={queryClient}>
 			{children}
-			{/* DevTools disabled - uncomment to enable in development */}
-			{/* {process.env.NODE_ENV === 'development' && (
-				<ReactQueryDevtools initialIsOpen={false} />
-			)} */}
 		</QueryClientProvider>
 	)
 }

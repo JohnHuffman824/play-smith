@@ -9,7 +9,8 @@ import type { PathStyle, Drawing } from '../../types/drawing.types'
 import { pointToLineDistance } from '../../utils/canvas.utils'
 import type { Coordinate } from '../../types/field.types'
 import { mergeDrawings } from '../../utils/drawing.utils'
-import { smoothPathToCurves, convertToSharp, extractMainCoordinates } from '../../utils/curve.utils'
+import { convertToSharp, extractMainCoordinates } from '../../utils/curve.utils'
+import { processSmoothPath } from '../../utils/smooth-path.utils'
 
 // Constants
 const NODE_PROXIMITY_THRESHOLD = 20
@@ -252,9 +253,9 @@ export function SVGCanvas({
 		// If pathMode changed, convert geometry
 		if (updates.pathMode && updates.pathMode !== drawing.style.pathMode) {
 			if (updates.pathMode === 'curve') {
-				// Convert to curves using smoothPathToCurves
+				// Convert to smooth using smooth pipeline
 				const coords = extractMainCoordinates(drawing)
-				const { points, segments } = smoothPathToCurves(coords)
+				const { points, segments } = processSmoothPath(coords)
 				newDrawing = { ...newDrawing, points, segments }
 			} else {
 				// Convert to sharp using convertToSharp
