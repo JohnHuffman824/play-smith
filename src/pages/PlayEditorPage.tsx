@@ -15,6 +15,7 @@ import { useConceptData } from '../hooks/useConceptData'
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
 import { useTagsData, type Tag } from '../hooks/useTagsData'
 import { eventBus } from '../services/EventBus'
+import { createDefaultLinemen } from '../utils/lineman.utils'
 import {
 	CHIP_TYPE_FORMATION,
 	CHIP_TYPE_CONCEPT,
@@ -176,6 +177,11 @@ function PlayEditorContent() {
 				}
 				if (play.players?.length > 0) {
 					setPlayers(play.players)
+				} else {
+					// Initialize default linemen for new (empty) plays
+					const hashAlignment = play.hashAlignment || 'middle'
+					const defaultLinemen = createDefaultLinemen(hashAlignment)
+					setPlayers(defaultLinemen)
 				}
 				if (play.drawings?.length > 0) {
 					dispatch({ type: 'SET_DRAWINGS', drawings: play.drawings })
