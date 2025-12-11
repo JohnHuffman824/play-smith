@@ -276,13 +276,6 @@ export function SVGCanvas({
 			const endPoint = getDrawingEndPoint(updatedDrawing)
 			const threshold = PLAYER_RADIUS_FEET
 
-			console.log('Snap detection:', {
-				startPoint: startPoint ? { id: startPoint.id, x: startPoint.x, y: startPoint.y } : null,
-				endPoint: endPoint ? { id: endPoint.id, x: endPoint.x, y: endPoint.y } : null,
-				players: players.map(p => ({ id: p.id, x: p.x, y: p.y })),
-				threshold
-			})
-
 			let bestTarget: {
 				playerId: string
 				pointId: string
@@ -297,7 +290,6 @@ export function SVGCanvas({
 					players,
 					threshold
 				)
-				console.log('Start point snap:', snap)
 				if (snap && (!bestTarget || snap.distance < bestTarget.distance)) {
 					bestTarget = {
 						playerId: snap.playerId,
@@ -315,7 +307,6 @@ export function SVGCanvas({
 					players,
 					threshold
 				)
-				console.log('End point snap:', snap)
 				if (snap && (!bestTarget || snap.distance < bestTarget.distance)) {
 					bestTarget = {
 						playerId: snap.playerId,
@@ -325,8 +316,6 @@ export function SVGCanvas({
 					}
 				}
 			}
-
-			console.log('Best target:', bestTarget)
 
 			setWholeDrawingSnapTarget(
 				bestTarget
@@ -496,33 +485,27 @@ export function SVGCanvas({
 			)}
 
 			{/* Player snap indicator during whole-drawing drag */}
-			{drawingDragState && wholeDrawingSnapTarget && (() => {
-				const pos = coordSystem.feetToPixels(
-					wholeDrawingSnapTarget.playerPosition.x,
-					wholeDrawingSnapTarget.playerPosition.y
-				)
-				console.log('Rendering snap indicator:', {
-					drawingDragState: !!drawingDragState,
-					wholeDrawingSnapTarget,
-					pixelPos: pos,
-					radius: PLAYER_RADIUS_FEET * coordSystem.scale + 6
-				})
-				return (
-					<circle
-						cx={pos.x}
-						cy={pos.y}
-						r={PLAYER_RADIUS_FEET * coordSystem.scale + 6}
-						fill="rgba(59,130,246,0.2)"
-						stroke="#3b82f6"
-						strokeWidth={3}
-						pointerEvents="none"
-						className="animate-pulse"
-						style={{
-							filter: 'drop-shadow(0 0 6px rgba(59,130,246,0.6))',
-						}}
-					/>
-				)
-			})()}
+			{drawingDragState && wholeDrawingSnapTarget && (
+				<circle
+					cx={coordSystem.feetToPixels(
+						wholeDrawingSnapTarget.playerPosition.x,
+						wholeDrawingSnapTarget.playerPosition.y
+					).x}
+					cy={coordSystem.feetToPixels(
+						wholeDrawingSnapTarget.playerPosition.x,
+						wholeDrawingSnapTarget.playerPosition.y
+					).y}
+					r={PLAYER_RADIUS_FEET * coordSystem.scale + 6}
+					fill="rgba(59,130,246,0.2)"
+					stroke="#3b82f6"
+					strokeWidth={3}
+					pointerEvents="none"
+					className="animate-pulse"
+					style={{
+						filter: 'drop-shadow(0 0 6px rgba(59,130,246,0.6))',
+					}}
+				/>
+			)}
 			</svg>
 
 			<FreehandCapture

@@ -75,7 +75,6 @@ export function Toolbar({
 	const [showHashDialog, setShowHashDialog] = useState(false)
 	const [showSettingsDialog, setShowSettingsDialog] =
 		useState(false)
-	const [showTagOverlay, setShowTagOverlay] = useState(false)
 	const [isSaving, setIsSaving] = useState(false)
 	const [showSuccess, setShowSuccess] = useState(false)
 	const [showError, setShowError] = useState(false)
@@ -109,7 +108,6 @@ export function Toolbar({
 		setShowDrawingDialog(false)
 		setShowHashDialog(false)
 		setShowSettingsDialog(false)
-		setShowTagOverlay(false)
 	}
 
 	// Auto-close dialogs when cursor moves away
@@ -147,12 +145,6 @@ export function Toolbar({
 		isOpen: showEraseDialog,
 		onClose: () => setShowEraseDialog(false),
 		dataAttribute: 'data-erase-dialog',
-	})
-
-	useDialogAutoClose({
-		isOpen: showTagOverlay,
-		onClose: () => setShowTagOverlay(false),
-		dataAttribute: 'data-tag-overlay',
 	})
 
 	// Listen for keyboard shortcut event
@@ -325,8 +317,7 @@ export function Toolbar({
 
 	function handleToggleTags() {
 		closeAllDialogs()
-		setShowTagOverlay(!showTagOverlay)
-		eventBus.emit('tags:toggle', { isOpen: !showTagOverlay })
+		eventBus.emit('tags:openDialog')
 	}
 
 	function handleSavePlay() {
@@ -554,7 +545,7 @@ export function Toolbar({
 				<Tooltip content='Tags (T)'>
 					<button
 						onClick={handleToggleTags}
-						className={toolButtonClass(showTagOverlay)}
+						className={neutralButtonClass(lightToggleClass)}
 					>
 						<Tag size={22} />
 					</button>

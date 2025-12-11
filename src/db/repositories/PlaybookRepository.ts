@@ -62,7 +62,7 @@ export class PlaybookRepository {
 		return await db<Playbook[]>`
 			SELECT * FROM playbooks
 			WHERE team_id IS NULL AND created_by = ${userId}
-			ORDER BY updated_at DESC
+			ORDER BY updated_at DESC, id DESC
 		`
 	}
 

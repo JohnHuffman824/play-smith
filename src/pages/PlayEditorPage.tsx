@@ -6,7 +6,8 @@ import { PlayHeader } from '../components/plays/PlayHeader'
 import { PlayCardsSection } from '../components/plays/PlayCardsSection'
 import { ConceptDialog } from '../components/concepts/ConceptDialog'
 import { SelectionOverlay } from '../components/canvas/SelectionOverlay'
-import { TagOverlay } from '../components/tags/TagOverlay'
+import { SelectedTagsOverlay } from '../components/tags/SelectedTagsOverlay'
+import { TagDialog } from '../components/tags/TagDialog'
 import { useTheme } from '../contexts/ThemeContext'
 import { PlayProvider, usePlayContext } from '../contexts/PlayContext'
 import { ConceptProvider, useConcept } from '../contexts/ConceptContext'
@@ -63,7 +64,7 @@ function PlayEditorContent() {
 
 	const { tags: availableTags, createTag } = useTagsData(teamId)
 	const [selectedTags, setSelectedTags] = useState<Tag[]>([])
-	const [showTagOverlay, setShowTagOverlay] = useState(false)
+	const [showTagDialog, setShowTagDialog] = useState(false)
 
 	/**
 	 * Unified delete method for removing selected objects.
@@ -221,14 +222,14 @@ function PlayEditorContent() {
 		return () => eventBus.off('selection:delete', handleDeleteSelection)
 	}, [selectedObjectIds, deleteSelectedObjects])
 
-	// Listen for tags:toggle event from toolbar
+	// Listen for tags:openDialog event from toolbar
 	useEffect(() => {
-		function handleTagsToggle(data: { isOpen: boolean }) {
-			setShowTagOverlay(data.isOpen)
+		function handleOpenTagDialog() {
+			setShowTagDialog(true)
 		}
 
-		eventBus.on('tags:toggle', handleTagsToggle)
-		return () => eventBus.off('tags:toggle', handleTagsToggle)
+		eventBus.on('tags:openDialog', handleOpenTagDialog)
+		return () => eventBus.off('tags:openDialog', handleOpenTagDialog)
 	}, [])
 
 	function handleBackToPlaybook() {
@@ -237,6 +238,10 @@ function PlayEditorContent() {
 		} else if (teamId) {
 			navigate(`/teams/${teamId}/playbooks`)
 		}
+	}
+
+	function handleRemoveTag(tagId: number) {
+		setSelectedTags(prev => prev.filter(t => t.id !== tagId))
 	}
 
 	async function handleDeletePlay() {
@@ -337,16 +342,23 @@ function PlayEditorContent() {
 					onDuplicate={handleDuplicateSelection}
 				/>
 
-				{/* Tag Overlay */}
-				<TagOverlay
-					isOpen={showTagOverlay}
-					onClose={() => setShowTagOverlay(false)}
-					availableTags={availableTags}
-					selectedTags={selectedTags}
-					onTagsChange={ids => setSelectedTags(availableTags.filter(t => ids.includes(t.id)))}
-					onCreateTag={createTag}
+				{/* Selected Tags Overlay */}
+				<SelectedTagsOverlay
+					tags={selectedTags}
+					onRemoveTag={handleRemoveTag}
 				/>
 			</div>
+
+
+			{/* Tag Dialog */}
+			<TagDialog
+				isOpen={showTagDialog}
+				onClose={() => setShowTagDialog(false)}
+				availableTags={availableTags}
+				selectedTagIds={selectedTags.map(t => t.id)}
+				onTagsChange={ids => setSelectedTags(availableTags.filter(t => ids.includes(t.id)))}
+				onCreateTag={createTag}
+			/>
 
 
 			{/* Concept Dialog */}

@@ -28,8 +28,17 @@ describe('PlaybookRepository', () => {
 	})
 
 	afterAll(async () => {
+		// Delete in correct order to avoid foreign key constraints
+		// Delete all playbooks for the user (not just testPlaybookId)
+		if (testUserId) {
+			await db`DELETE FROM playbooks WHERE created_by = ${testUserId}`
+		}
 		if (testPlaybookId) {
 			await db`DELETE FROM playbooks WHERE id = ${testPlaybookId}`
+		}
+		// Delete sessions for the user
+		if (testUserId) {
+			await db`DELETE FROM sessions WHERE user_id = ${testUserId}`
 		}
 		if (testTeamId) {
 			await db`DELETE FROM teams WHERE id = ${testTeamId}`
@@ -142,15 +151,15 @@ describe('PlaybookRepository', () => {
 	})
 
 	test('personal playbooks are ordered by most recent first', async () => {
-		// Create multiple personal playbooks with slight delays
+		// Create multiple personal playbooks with delays to ensure different timestamps
 		const playbook1 = await playbookRepo.create({
 			team_id: null,
 			name: 'First Playbook',
 			created_by: testUserId,
 		})
 
-		// Add a small delay to ensure different timestamps
-		await new Promise((resolve) => setTimeout(resolve, 10))
+		// Add delay to ensure different timestamps (SQLite CURRENT_TIMESTAMP resolution)
+		await new Promise((resolve) => setTimeout(resolve, 50))
 
 		const playbook2 = await playbookRepo.create({
 			team_id: null,
@@ -158,7 +167,7 @@ describe('PlaybookRepository', () => {
 			created_by: testUserId,
 		})
 
-		await new Promise((resolve) => setTimeout(resolve, 10))
+		await new Promise((resolve) => setTimeout(resolve, 50))
 
 		const playbook3 = await playbookRepo.create({
 			team_id: null,

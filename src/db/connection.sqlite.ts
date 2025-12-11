@@ -420,8 +420,55 @@ export const db = Object.assign(
 			// PostgreSQL uses $1, $2, etc. - convert to SQLite's ?
 			let sqliteQuery = query.replace(/\$(\d+)/g, '?')
 
+			// Remove PostgreSQL type casts before processing arrays
+			sqliteQuery = sqliteQuery.replace(/::bigint\[\]/gi, '')
+			sqliteQuery = sqliteQuery.replace(/= ANY\(/gi, 'IN (')
+
 			// Convert Date objects to ISO strings
-			const processedParams = params.map(p => p instanceof Date ? p.toISOString() : p)
+			// Handle arrays for ANY() operator by flattening them
+			const processedParams: any[] = []
+			for (const p of params) {
+				if (p instanceof Date) {
+					processedParams.push(p.toISOString())
+				} else if (Array.isArray(p)) {
+					// Flatten array for IN (...) clause
+					for (const item of p) {
+						processedParams.push(item)
+					}
+				} else {
+					processedParams.push(p)
+				}
+			}
+
+			// Now replace placeholders with correct number for flattened arrays
+			// Count how many placeholders we need
+			let placeholderIndex = 0
+			sqliteQuery = sqliteQuery.replace(/\?/g, () => {
+				placeholderIndex++
+				return '?'
+			})
+
+			// Handle IN clause with array expansion
+			// Find "IN (?)" patterns and expand based on array length
+			const finalParams: any[] = []
+			let paramIndex = 0
+			sqliteQuery = sqliteQuery.replace(/\?/g, () => {
+				if (paramIndex < params.length) {
+					const param = params[paramIndex]
+					if (Array.isArray(param)) {
+						// Replace single ? with ?, ?, ? for array length
+						const placeholders = param.map(() => '?').join(', ')
+						param.forEach(item => finalParams.push(item))
+						paramIndex++
+						return placeholders
+					} else {
+						finalParams.push(param instanceof Date ? param.toISOString() : param)
+						paramIndex++
+						return '?'
+					}
+				}
+				return '?'
+			})
 
 			// Helper function to parse date fields in results
 			const parseDateFields = (obj: any): any => {
@@ -448,20 +495,20 @@ export const db = Object.assign(
 
 				if (isReturning) {
 					const stmt = sqlite.prepare(sqliteQuery)
-					const result = stmt.all(...processedParams)
+					const result = stmt.all(...finalParams)
 					// Parse date fields in all result rows
 					const parsedResult = result.map(parseDateFields)
 					return Promise.resolve(parsedResult)
 				} else {
 					const stmt = sqlite.prepare(sqliteQuery)
-					const info = stmt.run(...processedParams)
+					const info = stmt.run(...finalParams)
 					// Return count of affected rows for compatibility with PostgreSQL
 					return Promise.resolve({ count: info.changes } as any)
 				}
 			} catch (error) {
 				console.error('SQLite unsafe query error:', error)
 				console.error('Query:', sqliteQuery)
-				console.error('Params:', processedParams)
+				console.error('Params:', finalParams)
 				return Promise.reject(error)
 			}
 		}
