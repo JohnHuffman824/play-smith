@@ -1,4 +1,5 @@
 import { useRef } from 'react'
+import { Plus } from 'lucide-react'
 import { useTheme } from '../../contexts/ThemeContext'
 import { PlayCard } from '../playbook-editor/PlayCard'
 import type { Play } from '../../hooks/usePlaybookData'
@@ -8,22 +9,24 @@ interface PlayCardsSectionProps {
 	currentPlayId?: string
 	showPlayBar: boolean
 	onOpenPlay: (id: string) => void
+	onAddPlay: () => void
 }
 
 export function PlayCardsSection({
 	plays,
 	currentPlayId,
 	showPlayBar,
-	onOpenPlay
+	onOpenPlay,
+	onAddPlay
 }: PlayCardsSectionProps) {
 	const { theme } = useTheme()
 	const scrollContainerRef = useRef<HTMLDivElement>(null)
 
 	return (
 		<div
-			className={`border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} relative`}
+			className={`border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'} relative`}
 			style={{
-				height: showPlayBar ? '220px' : '0px',
+				height: showPlayBar ? '280px' : '0px',
 				overflow: 'hidden',
 				zIndex: 0,
 				transition: 'height 800ms ease-in-out',
@@ -31,7 +34,7 @@ export function PlayCardsSection({
 		>
 			{/* Only render content when visible for performance */}
 			{showPlayBar && (
-				<div className="h-[220px] px-4 py-3">
+				<div className="h-[280px] px-4 py-4">
 					<div
 						ref={scrollContainerRef}
 						className="flex gap-4 h-full overflow-x-auto overflow-y-hidden pb-2"
@@ -53,6 +56,22 @@ export function PlayCardsSection({
 								/>
 							</div>
 						))}
+						{/* Add Play button */}
+						<button
+							onClick={onAddPlay}
+							className={`flex-shrink-0 w-64 h-[248px] rounded-xl border-2 border-dashed
+								transition-all flex flex-col items-center justify-center gap-2 cursor-pointer
+								${theme === 'dark'
+									? 'bg-gray-800/50 border-gray-600 hover:border-blue-400 hover:bg-gray-700 text-gray-400 hover:text-blue-400'
+									: 'bg-gray-50 border-gray-300 hover:border-blue-400 hover:bg-blue-50 text-gray-400 hover:text-blue-500'
+								}`}
+						>
+							<div className={`w-12 h-12 rounded-xl flex items-center justify-center
+								${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`}>
+								<Plus size={24} />
+							</div>
+							<span className="text-sm font-medium">Add Play</span>
+						</button>
 						{plays.length === 0 && (
 							<div className={`flex items-center justify-center w-full ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
 								No plays in this playbook

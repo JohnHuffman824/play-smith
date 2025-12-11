@@ -290,6 +290,33 @@ function PlayEditorContent() {
 		setSelectedTags(prev => prev.filter(t => t.id !== tagId))
 	}
 
+	async function handleAddPlay() {
+		if (!playbookId) return
+
+		try {
+			// Save current play first
+			eventBus.emit('canvas:save')
+
+			// Wait a moment for save to complete
+			await new Promise(resolve => setTimeout(resolve, 100))
+
+			// Create new play
+			const response = await fetch(`/api/playbooks/${playbookId}/plays`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ name: 'New Play' })
+			})
+
+			if (response.ok) {
+				const data = await response.json()
+				// Navigate to new play
+				navigate(`/playbooks/${playbookId}/plays/${data.play.id}`)
+			}
+		} catch (error) {
+			console.error('Failed to create play:', error)
+		}
+	}
+
 	async function handleDeletePlay() {
 		if (!playId) return
 
@@ -400,6 +427,7 @@ function PlayEditorContent() {
 					currentPlayId={playId}
 					showPlayBar={playState.showPlayBar}
 					onOpenPlay={(id) => navigate(`/playbooks/${playbookId}/plays/${id}`)}
+					onAddPlay={handleAddPlay}
 				/>
 
 				{/* Selection Overlay */}
