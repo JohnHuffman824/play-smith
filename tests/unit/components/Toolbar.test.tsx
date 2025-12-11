@@ -37,7 +37,10 @@ describe('Toolbar - Responsive Layout', () => {
 	const mockSetHashAlignment = () => {}
 	const mockSetShowPlayBar = () => {}
 
-	function renderToolbar() {
+	function renderToolbar(overrides?: Partial<{
+		playId: string
+		onDeletePlay: () => Promise<void>
+	}>) {
 		return render(
 			<ThemeProvider>
 				<Toolbar
@@ -47,6 +50,8 @@ describe('Toolbar - Responsive Layout', () => {
 					setHashAlignment={mockSetHashAlignment}
 					showPlayBar={true}
 					setShowPlayBar={mockSetShowPlayBar}
+					playId={overrides?.playId}
+					onDeletePlay={overrides?.onDeletePlay}
 				/>
 			</ThemeProvider>
 		)
@@ -144,7 +149,7 @@ describe('Toolbar - Responsive Layout', () => {
 	test('should calculate rows per column for even distribution', () => {
 		// Set a window height that would require 2 columns
 		// Each button is 56px + 12px gap = 68px
-		// With 13 buttons, we want 7 in first column, 6 in second
+		// With 14 buttons, we want 7 in each column
 		// So we need gridTemplateRows to be repeat(7, 56px) for 2 columns
 		Object.defineProperty(window, 'innerHeight', {
 			writable: true,
@@ -160,5 +165,28 @@ describe('Toolbar - Responsive Layout', () => {
 		// Should have gridTemplateRows set with a repeat() function
 		expect(toolbar.style.gridTemplateRows).toContain('repeat(')
 		expect(toolbar.style.gridTemplateRows).toContain('56px')
+	})
+
+	test('should have 14 buttons total', () => {
+		const { container } = renderToolbar()
+		const buttons = container.querySelectorAll('button')
+
+		expect(buttons.length).toBe(14)
+	})
+
+	test('should disable Delete Play button when playId is not provided', () => {
+		const { container } = renderToolbar()
+		const buttons = container.querySelectorAll('button')
+		const deleteButton = buttons[buttons.length - 1] // Last button
+
+		expect(deleteButton.disabled).toBe(true)
+	})
+
+	test('should enable Delete Play button when playId is provided', () => {
+		const { container } = renderToolbar({ playId: '123' })
+		const buttons = container.querySelectorAll('button')
+		const deleteButton = buttons[buttons.length - 1] // Last button
+
+		expect(deleteButton.disabled).toBe(false)
 	})
 })
