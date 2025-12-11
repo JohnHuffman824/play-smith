@@ -12,6 +12,7 @@ import { Input } from '../components/ui/input'
 
 export function PlaybookManagerPage() {
 	const navigate = useNavigate()
+	const { teams, currentTeamId, switchTeam, isLoading: teamsLoading } = useTeamsData()
 	const {
 		personalPlaybooks: allPersonalPlaybooks,
 		teamPlaybooks: allTeamPlaybooks,
@@ -21,7 +22,6 @@ export function PlaybookManagerPage() {
 		updatePlaybook,
 		deletePlaybook
 	} = usePlaybooksData(currentTeamId)
-	const { teams, currentTeamId, switchTeam, isLoading: teamsLoading } = useTeamsData()
 
 	const isLoading = playbooksLoading || teamsLoading
 	const error = playbooksError
