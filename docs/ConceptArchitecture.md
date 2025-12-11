@@ -1,7 +1,7 @@
 # Concept Architecture - Formations and Custom Concepts
 
-**Status:** Brainstorming in progress
-**Date:** 2025-12-09
+**Status:** Design Complete (Brainstorming Phase)
+**Date:** 2025-12-11 (Updated from 2025-12-09)
 
 ## Overview
 
@@ -70,6 +70,33 @@ Play Smith needs a comprehensive, modular system for coaches to define their pla
 
 ---
 
+## UI Concept Types
+
+Play Smith organizes concepts into three UI types for intuitive saving, searching, and filtering:
+
+### 1. Formation
+- Player positions only (no routes or assignments)
+- Examples: "I-Form", "Twins Right", "Spread"
+- Stored in `formations` table
+
+### 2. Concept
+- Routes, blocking schemes, motions, modifiers
+- Examples: "X Post", "Backside Slant", "Power Blocking", "Jet Motion", "Tight"
+- Stored in `base_concepts` table
+- Can have special flags for behavior:
+  - `is_motion: boolean` - Pre-snap player movement
+  - `is_modifier: boolean` - Formation position adjustments
+
+### 3. Concept Group
+- Bundles of formation + multiple concepts
+- Examples: "Roger" (Twins Right + Slice + Lookie), "X Slant" (X role + Slant route)
+- Stored in `concept_groups` table
+- Can be saved (named) or temporary (auto-composed)
+
+**Purpose:** These types help coaches organize their playbook and make search/filtering more intuitive. For example, a dropdown can show "Show only Formations" vs "Show only Routes".
+
+---
+
 ## Player Roles and Terminology
 
 ### Preset Roles
@@ -103,52 +130,77 @@ PlayHeader has three separate text inputs:
 
 ### Behavior
 
+#### Guided Flow
+1. **Formation required first** - Search bar starts with prompt "Select a formation"
+2. **Formation locked** - Once formation selected, it becomes first chip
+3. **Open-ended after** - After formation, coach can type anything: routes, modifiers, motions, concept groups
+4. **Real-time application** - Each chip applies to canvas **immediately on selection**
+
+#### Search Features
 1. **Autocomplete dropdown** - Shows matching formations/concepts as you type
    - **Categorized results:** Sections for "Formations", "Base Concepts", "Concept Groups"
    - **Metadata display:** Shows tags, usage count, and type icons for each result
    - **Scrollable:** Shows top 10-15 results with scroll for more
 2. **Visual chips/bubbles** - Selected items appear as distinct chips in the search bar
    - **Type-specific styling:** Different colors/icons for Formations (blue), Base Concepts (green), Concept Groups (purple)
-   - **Reorderable:** Drag chips to change application order
+   - **Reorderable:** Drag chips to change application order (except formation, which stays first)
    - **Removable:** X button appears on hover to remove individual chips
-3. **Auto-population** - Selecting a formation/concept immediately updates the canvas
-4. **Plain text fallback** - Unmatched text appears as regular text (can save as concept later)
-5. **Progressive enhancement** - Coach can later convert plain text into saved concepts
+   - **Unsaved indicator:** Asterisk `*` shows auto-composed concepts (e.g., `[X Slant]*`)
+3. **Plain text fallback** - Unmatched text appears as regular text (can save as concept later)
+4. **Progressive enhancement** - Coach can later convert plain text into saved concepts
 
-### Smart Parsing (On-the-Fly Composition)
+### Smart Parsing (Hybrid Approach)
 
-The unified search bar intelligently parses role + concept patterns and auto-composes them.
+The unified search bar uses a **hybrid approach** for concept matching and composition:
 
-**Pattern Recognition:**
+**Priority Order:**
+1. **Saved concept exists** → Use the saved version with its defined targeting
+2. **Role + Template pattern** → Auto-compose on-the-fly (e.g., "X" + "Slant")
+3. **No match** → Prompt to create new concept
+
+**Pattern Recognition Example:**
 
 ```
 Coach types: "X Post"
-� System recognizes:
-   - "X" = player role
-   - "Post" = preset route concept (from route tree)
-� Auto-composes: Apply "Post" route to "X" player
-� Creates temporary concept on-the-fly
-� Appears as: [X Post]
+
+Option A: "X Post" exists as saved concept
+→ Use saved version (applies with saved targeting/drawing)
+
+Option B: "X Post" doesn't exist, but "X" is a role and "Post" is preset template
+→ Auto-compose: X role + Post template
+→ Apply to canvas
+→ Show as: [X Post]* (asterisk = unsaved)
+→ Coach can save later
+
+Option C: No match at all
+→ Show: "No match - create new concept?"
 ```
 
-**How it works:**
-1. Tokenize input: Split on spaces
-2. Check each token against:
-   - Known player roles (X, Y, Z, RB, etc.)
-   - Known concepts (formations, base concepts, preset routes)
-3. If pattern matches `<role> <concept>`, compose automatically
-4. Apply composition to canvas
-5. Coach can optionally save composition as named concept
+**Composition Rules:**
+1. Tokenize input on spaces
+2. Check for saved concept with exact name match first
+3. If no match, check for `<role/selector> + <preset template>` pattern:
+   - Known player roles: X, Y, Z, RB, etc.
+   - Known relative selectors: Backside, Playside, Weak, Strong, etc.
+   - Preset route templates: Slant, Post, Corner, Flat, etc. (1-9 route tree)
+4. Auto-compose if pattern matches
+5. Otherwise, prompt for creation
 
-**Examples:**
-- `"X Post"` � X receiver runs post route
-- `"RB Flat"` � Running back runs flat route
-- `"Y Corner"` � Y receiver runs corner route
+**Route Targeting:**
+Routes must have a **target** (saved with the concept):
+- **Role-based**: "X Slant" (targets role X)
+- **Position-based**: "Backside Slant" (targets backside receiver via relative selector)
 
-**Route Tree as Position-Agnostic Concepts:**
-- All routes from route tree (1-Flat, 2-Slant, ... 9-Go) are treated as position-agnostic concepts
-- Can be applied to any player role via smart parsing
+When coach types just "Slant":
+- If saved "Slant" exists with targeting → use it
+- Otherwise → prompt "Apply to which player/position?"
+
+**Preset Route Templates:**
+- System provides route tree (1-Flat, 2-Slant, ... 9-Go) as templates
+- Templates are **role-agnostic** - designed for composition
 - Stored in `preset_routes` table (seeded on setup)
+- Coach types "X Slant" → composes X + Slant template
+- Coach can save custom versions with different targeting
 
 ---
 
@@ -551,6 +603,105 @@ Play direction: Not specified
 
 ---
 
+## Formation Modifiers
+
+Formation modifiers adjust player positions within an existing formation.
+
+### Examples
+- **"Tight"** - Moves inside receiver closer to formation (3 yards toward center)
+- **"Nasty"** - Brings slot receiver tight to the line
+- **"Wide"** - Pushes outside receiver wider (splits increase)
+
+### Storage
+- Stored as concepts with `is_modifier: true` flag
+- Contains position adjustment rules (deltas or relative selector transformations)
+
+### Smart Defaults + Overrides
+Modifiers use **smart defaults** that work across most formations, with **per-formation overrides** for edge cases.
+
+**Default Rule Example:**
+- "Tight" = "Move inside-most receiver 3 yards toward center"
+- Works in Twins, Trips, Spread, etc.
+
+**Formation Override Example:**
+- "Tight" in Doubles formation = move Y receiver (specific override)
+- "Tight" in Twins formation = move X receiver (different override)
+
+**Database Table:** `modifier_formation_overrides` links modifier → formation → specific rules
+
+### Application
+1. Coach types "Tight" in search bar
+2. System applies default rule to current formation
+3. If override exists for this formation, uses override instead
+4. Player positions update on canvas
+
+---
+
+## Motions
+
+Motions are pre-snap player movements that occur before the ball is snapped.
+
+### Examples
+- **"Jet"** - Z receiver motions across formation from right to left
+- **"Orbit"** - RB motions behind QB across formation
+- **"Return"** - Receiver motions back to original side
+
+### Storage
+- Stored as concepts with `is_motion: true` flag
+- Contains:
+  - Player role or relative selector (who moves)
+  - Motion path drawing (using same Drawing system as routes)
+  - End position (where player ends up pre-snap)
+
+### Behavior
+- Applied to canvas like other concepts
+- Displayed as motion path (dotted line or animated)
+- Animation system knows to run motion **pre-snap**, before routes execute
+- After motion completes, formation positions update for relative selectors
+
+### Edge Cases
+**Motion + Relative Selectors:**
+- Formation: Trips Right (3 receivers right, 1 left)
+- Motion: Z motions from right to left
+- Post-motion: Now 2 receivers left, 2 right
+- Concept: "Leftmost 2 receivers run Go routes"
+- System re-evaluates selectors **after motion** to find correct players
+
+---
+
+## Formation Onboarding
+
+When creating a new playbook, coaches are prompted to set up formations first.
+
+### Onboarding Flow
+1. **New playbook created** → Formation setup dialog appears
+2. **Show formation sources:**
+   - **System Defaults** - ~10-15 common formations (I-Form, Shotgun, Spread, Twins, Trips, Empty, etc.)
+   - **Team Library** - Formations from other playbooks (if returning coach)
+3. **Coach selects** - Can import defaults, copy from team library, or create from scratch
+4. **Formations locked in** - Becomes the foundation for this playbook
+
+### Default Formation System
+**Phase 1:** Ship with one generic/common formation system
+- Standard formations used across multiple offensive schemes
+- Examples: I-Form, Shotgun, Spread, Twins, Trips, Empty, etc.
+
+### Future Enhancement
+**Formation Packs by Popular Systems:**
+- Air Raid pack (5-wide formations, empty sets, tempo-focused)
+- West Coast pack (traditional pro sets, motion-heavy)
+- Spread pack (shotgun variations, read option formations)
+- Pro-Style pack (I-Form, strong formations, play-action sets)
+
+Coaches can select which "pack" to start with based on their offensive philosophy.
+
+**Database Consideration:**
+- Add `formation_pack_id` to formations table (optional)
+- Seed packs as system-level formation groups
+- Allow coaches to mix packs or create custom
+
+---
+
 ## UI Integration and Workflows
 
 ### Overview
@@ -891,9 +1042,29 @@ interface CanvasProps {
 ### Conflict Prevention Rules
 
 1. **No duplicate player assignments** - Two concepts cannot both affect the same player
-2. **First-in wins** - If conflict detected, first concept is applied, second is blocked
+2. **Confirm before replacing** - If conflict detected, confirm with coach before replacing existing assignment
 3. **Error indication** - Show clear error icon/message explaining the conflict
 4. **Validation before application** - System checks all composition rules before applying concepts to canvas
+
+### Conflict Handling Flow
+
+When same player gets two route assignments:
+
+**Example:**
+```
+Coach has: [Twins Right] [X Slant]
+Coach types: "X Post"
+```
+
+**System Response:**
+1. Detects X already has Slant assigned
+2. Shows confirmation dialog: **"X already has Slant assigned. Replace with Post?"**
+3. Options:
+   - **Replace** - Remove "X Slant", add "X Post"
+   - **Cancel** - Keep "X Slant", don't add "X Post"
+4. Quick, non-blocking confirmation (not annoying)
+
+**Rationale:** Prevents accidental loss of work while staying out of the way.
 
 ### Example Conflict
 
@@ -1099,6 +1270,8 @@ CREATE TABLE base_concepts (
   targeting_mode TEXT NOT NULL CHECK (targeting_mode IN ('absolute_role', 'relative_selector', 'conditional_rules')),
   ball_position TEXT NOT NULL DEFAULT 'center' CHECK (ball_position IN ('left', 'center', 'right')),
   play_direction TEXT NOT NULL DEFAULT 'na' CHECK (play_direction IN ('left', 'right', 'na')),
+  is_motion BOOLEAN NOT NULL DEFAULT false, -- Pre-snap player movement
+  is_modifier BOOLEAN NOT NULL DEFAULT false, -- Formation position adjustments
   created_by UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -1120,6 +1293,8 @@ CREATE INDEX idx_base_concepts_usage ON base_concepts(usage_count DESC, last_use
 - `targeting_mode` - Determines how players are targeted (absolute/relative/conditional)
 - `ball_position` - For mirroring concepts (left/right/center)
 - `play_direction` - For directional concepts (playside/backside)
+- `is_motion` - TRUE if this concept represents pre-snap player movement
+- `is_modifier` - TRUE if this concept adjusts formation player positions
 - `usage_count`, `last_used_at` - For frecency-based search ranking
 
 **Scope resolution:**
@@ -1253,6 +1428,47 @@ CREATE INDEX idx_targeting_rules_order ON concept_targeting_rules(concept_id, ru
   }
 }
 ```
+
+---
+
+### Table: `modifier_formation_overrides`
+
+Stores formation-specific override rules for modifiers.
+
+```sql
+CREATE TABLE modifier_formation_overrides (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  modifier_concept_id UUID NOT NULL REFERENCES base_concepts(id) ON DELETE CASCADE,
+  formation_id UUID NOT NULL REFERENCES formations(id) ON DELETE CASCADE,
+  override_rules JSONB NOT NULL, -- {role: "Y", delta_x: -3, delta_y: 0} or relative selector
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+
+  CONSTRAINT modifier_override_unique UNIQUE (modifier_concept_id, formation_id)
+);
+
+CREATE INDEX idx_modifier_overrides_modifier ON modifier_formation_overrides(modifier_concept_id);
+CREATE INDEX idx_modifier_overrides_formation ON modifier_formation_overrides(formation_id);
+```
+
+**Purpose:** Allows formation-specific behavior for modifiers when the default rule doesn't work.
+
+**Fields:**
+- `modifier_concept_id` - References the modifier concept (has `is_modifier: true`)
+- `formation_id` - Specific formation this override applies to
+- `override_rules` - JSONB with:
+  - Role-based: `{role: "Y", delta_x: -3, delta_y: 0}` (move Y receiver 3 yards left)
+  - Selector-based: `{selector: "inside_receiver", delta_x: -3, delta_y: 0}`
+
+**Example:**
+```json
+{
+  "modifier_concept_id": "uuid-tight-modifier",
+  "formation_id": "uuid-doubles-formation",
+  "override_rules": {"role": "Y", "delta_x": -3, "delta_y": 0}
+}
+```
+
+When "Tight" modifier applied to Doubles formation, moves Y receiver instead of default behavior.
 
 ---
 
@@ -1436,10 +1652,12 @@ CREATE INDEX idx_preset_routes_number ON preset_routes(route_number);
 ```
 formations
 ├── formation_player_positions (1:N)
+└── modifier_formation_overrides (1:N) [formation-specific modifier rules]
 
 base_concepts
 ├── concept_player_assignments (1:N) [absolute_role or relative_selector modes]
 ├── concept_targeting_rules (1:N) [conditional_rules mode only]
+├── modifier_formation_overrides (1:N) [when is_modifier=true]
 └── concept_applications (1:N) [usage tracking]
 
 concept_groups
