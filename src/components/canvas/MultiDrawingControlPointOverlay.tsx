@@ -7,6 +7,7 @@ import { findSnapTarget, findPlayerSnapTarget } from '../../utils/drawing.utils'
 import type { SnapTarget, PlayerSnapTarget } from '../../utils/drawing.utils'
 import { PLAYER_RADIUS_FEET } from '../../constants/field.constants'
 import { pointToLineDistance } from '../../utils/canvas.utils'
+import { NodeDeletePopup } from './NodeDeletePopup'
 
 // Constants for proximity filtering
 const BEZIER_SAMPLE_POINTS = 10
@@ -43,6 +44,7 @@ interface MultiDrawingControlPointOverlayProps {
 		pointId: string,
 		playerId: string,
 	) => void
+	onDeletePoint?: (drawingId: string, pointId: string) => void
 }
 
 interface MultiDragState {
@@ -204,12 +206,18 @@ export function MultiDrawingControlPointOverlay({
 	onDragPoint,
 	onMerge,
 	onLinkToPlayer,
+	onDeletePoint,
 }: MultiDrawingControlPointOverlayProps) {
 	const [dragState, setDragState] = useState<MultiDragState | null>(null)
 	const [snapTarget, setSnapTarget] = useState<SnapTarget | null>(null)
 	const [playerSnapTarget, setPlayerSnapTarget] = useState<
 		PlayerSnapTarget | null
 	>(null)
+	const [contextMenuState, setContextMenuState] = useState<{
+		drawingId: string
+		pointId: string
+		pixelPosition: { x: number; y: number }
+	} | null>(null)
 	const overlayRef = useRef<SVGGElement | null>(null)
 
 	// Use refs to avoid stale closure issues in handlePointerUp
@@ -317,6 +325,27 @@ export function MultiDrawingControlPointOverlay({
 		return () => window.removeEventListener('pointermove', handlePointerMove)
 	}, [dragState, handlePointerMove])
 
+	// Close popup on click outside
+	useEffect(() => {
+		if (!contextMenuState) return
+
+		function handleClickOutside(e: MouseEvent) {
+			setContextMenuState(null)
+		}
+
+		// Use setTimeout to avoid immediately closing from the same event
+		const timeout = setTimeout(() => {
+			window.addEventListener('click', handleClickOutside)
+			window.addEventListener('contextmenu', handleClickOutside)
+		}, 0)
+
+		return () => {
+			clearTimeout(timeout)
+			window.removeEventListener('click', handleClickOutside)
+			window.removeEventListener('contextmenu', handleClickOutside)
+		}
+	}, [contextMenuState])
+
 	// Start drag for a specific drawing's point
 	function startDrag(drawingId: string, pointId: string) {
 		return (event: React.PointerEvent) => {
@@ -325,6 +354,35 @@ export function MultiDrawingControlPointOverlay({
 			setDragState(newDragState)
 			dragStateRef.current = newDragState
 		}
+	}
+
+	// Handle right-click context menu for delete
+	function handleContextMenu(
+		drawingId: string,
+		pointId: string,
+		pixelX: number,
+		pixelY: number
+	) {
+		return (event: React.MouseEvent) => {
+			event.preventDefault()
+			event.stopPropagation()
+			setContextMenuState({
+				drawingId,
+				pointId,
+				pixelPosition: { x: pixelX, y: pixelY }
+			})
+		}
+	}
+
+	function handleDeleteFromPopup() {
+		if (contextMenuState && onDeletePoint) {
+			onDeletePoint(contextMenuState.drawingId, contextMenuState.pointId)
+		}
+		setContextMenuState(null)
+	}
+
+	function handleClosePopup() {
+		setContextMenuState(null)
 	}
 
 	// Show nodes for drawings that are EITHER hovered OR selected
@@ -396,6 +454,7 @@ export function MultiDrawingControlPointOverlay({
 						pointerEvents='all'
 						style={{ cursor: dragState ? 'grabbing' : 'grab' }}
 						onPointerDown={startDrag(cp.drawingId, cp.pointId)}
+						onContextMenu={handleContextMenu(cp.drawingId, cp.pointId, pixel.x, pixel.y)}
 					/>
 				)
 			})}
@@ -440,6 +499,26 @@ export function MultiDrawingControlPointOverlay({
 						filter: 'drop-shadow(0 0 6px rgba(59,130,246,0.6))',
 					}}
 				/>
+			)}
+
+			{/* Delete node popup */}
+			{contextMenuState && (
+				<foreignObject
+					x={0}
+					y={0}
+					width="100%"
+					height="100%"
+					pointerEvents="none"
+					style={{ overflow: 'visible' }}
+				>
+					<div style={{ pointerEvents: 'auto' }}>
+						<NodeDeletePopup
+							position={contextMenuState.pixelPosition}
+							onDelete={handleDeleteFromPopup}
+							onClose={handleClosePopup}
+						/>
+					</div>
+				</foreignObject>
 			)}
 		</g>
 	)
