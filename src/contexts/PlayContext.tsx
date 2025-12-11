@@ -95,7 +95,6 @@ const initialState: PlayState = {
 	formation: '',
 	play: '',
 	defensiveFormation: '',
-	playCards: [],
 	hashAlignment: 'middle',
 	showPlayBar: true,
 	players: [],
@@ -110,8 +109,6 @@ type SetDefensiveFormationAction = Extract<
 	PlayAction,
 	{ type: 'SET_DEFENSIVE_FORMATION' }
 >
-type AddPlayCardAction = Extract<PlayAction, { type: 'ADD_PLAY_CARD' }>
-type DeletePlayCardAction = Extract<PlayAction, { type: 'DELETE_PLAY_CARD' }>
 type SetHashAlignmentAction = Extract<
 	PlayAction,
 	{ type: 'SET_HASH_ALIGNMENT' }
@@ -168,23 +165,6 @@ function applySetDefensiveFormation(
 	action: SetDefensiveFormationAction,
 ): PlayState {
 	return { ...state, defensiveFormation: action.defensiveFormation }
-}
-
-function applyAddPlayCard(
-	state: PlayState,
-	action: AddPlayCardAction,
-): PlayState {
-	return { ...state, playCards: [...state.playCards, action.card] }
-}
-
-function applyDeletePlayCard(
-	state: PlayState,
-	action: DeletePlayCardAction,
-): PlayState {
-	return {
-		...state,
-		playCards: state.playCards.filter((card) => card.id != action.id),
-	}
 }
 
 function applySetHashAlignment(
@@ -366,10 +346,6 @@ function playReducer(state: PlayState, action: PlayAction): PlayState {
 			return applySetPlay(state, action)
 		case 'SET_DEFENSIVE_FORMATION':
 			return applySetDefensiveFormation(state, action)
-		case 'ADD_PLAY_CARD':
-			return applyAddPlayCard(state, action)
-		case 'DELETE_PLAY_CARD':
-			return applyDeletePlayCard(state, action)
 		case 'SET_HASH_ALIGNMENT':
 			return applySetHashAlignment(state, action)
 		case 'REPOSITION_LINEMEN_FOR_HASH':
@@ -451,19 +427,6 @@ export function PlayProvider({ children }: { children: ReactNode }) {
 		dispatch({ type: 'SET_DEFENSIVE_FORMATION', defensiveFormation: formation })
 	}, [])
 
-	const addPlayCard = useCallback(() => {
-		const newCard: PlayCard = {
-			id: Date.now().toString(),
-			name: `Play ${state.playCards.length + 1}`,
-			thumbnail: '',
-		}
-		dispatch({ type: 'ADD_PLAY_CARD', card: newCard })
-	}, [state.playCards.length])
-
-	const deletePlayCard = useCallback((id: string) => {
-		dispatch({ type: 'DELETE_PLAY_CARD', id })
-	}, [])
-
 	const setHashAlignment = useCallback((alignment: HashAlignment) => {
 		dispatch({ type: 'REPOSITION_LINEMEN_FOR_HASH', alignment })
 	}, [])
@@ -520,8 +483,6 @@ export function PlayProvider({ children }: { children: ReactNode }) {
 		setFormation,
 		setPlay,
 		setDefensiveFormation,
-		addPlayCard,
-		deletePlayCard,
 		setHashAlignment,
 		setShowPlayBar,
 		setPlayers,
@@ -539,8 +500,6 @@ export function PlayProvider({ children }: { children: ReactNode }) {
 		setFormation,
 		setPlay,
 		setDefensiveFormation,
-		addPlayCard,
-		deletePlayCard,
 		setHashAlignment,
 		setShowPlayBar,
 		setPlayers,
