@@ -28,6 +28,7 @@ import { Player } from '../player/Player'
 import { PlayerLabelDialog } from '../player/PlayerLabelDialog'
 import { Pencil, PaintBucket } from 'lucide-react'
 import { calculateUnlinkPosition } from '../../utils/drawing.utils'
+import { applyLOSSnap } from '../../utils/los-snap.utils'
 
 interface CanvasProps {
 	drawingState: DrawingState
@@ -103,7 +104,8 @@ export function Canvas({
   const [labelDialogPosition, setLabelDialogPosition] =
     useState({ x: 0, y: 0 });
 	const { state, setDrawings, setPlayers, dispatch } = usePlayContext()
-	const { drawings, players } = state
+	const { drawings = [], players: contextPlayers = [] } = state || {}
+	const players = contextPlayers || []
 	const [canvasDimensions, setCanvasDimensions] = useState({
 		width: 0,
 		height: 0,
@@ -297,15 +299,18 @@ export function Canvas({
 
 		const feetCoords = coordSystem.pixelsToFeet(pixelX, pixelY)
 
+		// Apply LOS snapping to initial placement
+		const snappedCoords = applyLOSSnap(feetCoords.x, feetCoords.y)
+
 		const newPlayer = {
 			id: `player-${Date.now()}`,
-			x: feetCoords.x,
-			y: feetCoords.y,
+			x: snappedCoords.x,
+			y: snappedCoords.y,
 			label: '',
 			color: drawingState.color,
 		}
 
-		setPlayers((prev) => [...prev, newPlayer])
+		setPlayers([...players, newPlayer])
 		setSelectedPlayerId(newPlayer.id)
 		setLabelDialogPosition({ x: e.clientX, y: e.clientY })
 		setShowLabelDialog(true)
@@ -318,8 +323,8 @@ export function Canvas({
 	) {
 		// Just move the player without moving linked drawings
 		// Used when drawing is being moved and player should follow
-		setPlayers((prev) =>
-			prev.map((p) => (p.id == id ? { ...p, x, y } : p)),
+		setPlayers(
+			players.map((p) => (p.id == id ? { ...p, x, y } : p))
 		)
 	}
 
@@ -388,18 +393,18 @@ export function Canvas({
 
   function handlePlayerLabelChange(label: string) {
     if (selectedPlayerId) {
-      setPlayers((prev) =>
-        prev.map((p) =>
-          p.id == selectedPlayerId ? { ...p, label } : p,
-        ),
+      setPlayers(
+        players.map((p) =>
+          p.id == selectedPlayerId ? { ...p, label } : p
+        )
       );
     }
   }
 
   function handlePlayerDelete() {
     if (selectedPlayerId) {
-      setPlayers((prev) =>
-        prev.filter((p) => p.id != selectedPlayerId),
+      setPlayers(
+        players.filter((p) => p.id != selectedPlayerId)
       );
       setShowLabelDialog(false);
       setSelectedPlayerId(null);
@@ -410,7 +415,7 @@ export function Canvas({
     const player = players.find((p) => p.id == id)
     if (player?.isLineman) return // Protected from deletion
 
-    setPlayers((prev) => prev.filter((p) => p.id != id));
+    setPlayers(players.filter((p) => p.id != id));
     // Reset hover state when deleting a player to show circular cursor again
     setIsHoveringDeletable(false);
     // If the deleted player was selected, close the dialog
@@ -522,7 +527,7 @@ export function Canvas({
 
 	const whiteboardClasses = [
 		'w-full rounded-2xl relative',
-		'ring-2 ring-inset ring-gray-300',
+		'ring-2 ring-gray-300',
 	].join(' ')
 
 	const cursorOverlayClasses =
