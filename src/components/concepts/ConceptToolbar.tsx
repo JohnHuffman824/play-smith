@@ -18,6 +18,7 @@ import { ColorSwatchIndicator } from '../toolbar/ColorSwatchIndicator'
 import { useTheme } from '../../contexts/ThemeContext'
 import { usePlayContext } from '../../contexts/PlayContext'
 import { areLinemenAtDefaultPositions } from '../../utils/lineman.utils'
+import { useDialogAutoClose } from '../../hooks/useDialogAutoClose'
 
 interface ConceptToolbarProps {
 	selectedTool: Tool
@@ -69,6 +70,13 @@ export function ConceptToolbar({
 	const { state } = usePlayContext()
 	const players = state.players || []
 	const [showHashDialog, setShowHashDialog] = useState(false)
+
+	// Auto-close DrawOptionsDialog when hovering out
+	useDialogAutoClose({
+		isOpen: showDrawOptions,
+		onClose: () => onShowDrawOptionsChange(false),
+		dataAttribute: 'data-draw-dialog',
+	})
 
 	return (
 		<div className="w-20 h-full flex flex-col items-center justify-center bg-white dark:bg-gray-800" style={{ gap: '12px' }}>

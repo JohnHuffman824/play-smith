@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { X, FlipHorizontal } from 'lucide-react'
 import type {
 	BaseConcept,
@@ -63,6 +63,11 @@ export function ConceptDialog({
 	const [pathMode, setPathMode] = useState<'sharp' | 'curve'>('sharp')
 	const [flipCanvas, setFlipCanvas] = useState<(() => void) | null>(null)
 	const canvasContainerRef = useRef<HTMLDivElement>(null)
+
+	// Memoize the callback to prevent FlipController's useEffect from running on every render
+	const handleFlipReady = useCallback((fn: () => void) => {
+		setFlipCanvas(() => fn)
+	}, [])
 
 	useEffect(() => {
 		if (isOpen && concept && mode === 'edit') {
@@ -283,7 +288,7 @@ export function ConceptDialog({
 								showFieldMarkings={true}
 							/>
 						</div>
-						<FlipController onFlipReady={(fn) => setFlipCanvas(() => fn)} />
+						<FlipController onFlipReady={handleFlipReady} />
 					</PlayProvider>
 
 					{/* Color Picker Dialog */}
