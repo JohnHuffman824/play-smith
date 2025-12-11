@@ -287,6 +287,18 @@ export const playsAPI = {
 			updates.push('play_type')
 			values.push(body.play_type)
 		}
+		if (body.custom_players !== undefined) {
+			updates.push('custom_players')
+			values.push(JSON.stringify(body.custom_players))
+		}
+		if (body.custom_drawings !== undefined) {
+			updates.push('custom_drawings')
+			values.push(JSON.stringify(body.custom_drawings))
+		}
+		if (body.hash_position !== undefined) {
+			updates.push('hash_position')
+			values.push(body.hash_position)
+		}
 
 		if (updates.length === 0) {
 			return Response.json({ error: 'No fields to update' }, { status: 400 })
@@ -301,7 +313,7 @@ export const playsAPI = {
 			RETURNING id, playbook_id, name, section_id, play_type,
 					  formation_id, personnel_id, defensive_formation_id,
 					  hash_position, notes, display_order, created_by,
-					  created_at, updated_at
+					  created_at, updated_at, custom_players, custom_drawings
 		`
 
 		const [updated] = await db.unsafe(query, [...values, playId])

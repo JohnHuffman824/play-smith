@@ -489,4 +489,37 @@ describe('Plays API', () => {
 			])
 		)
 	})
+
+	test('PUT /api/plays/:playId saves custom players and drawings', async () => {
+		const [play] = await db`
+			INSERT INTO plays (playbook_id, name, created_by)
+			VALUES (${testPlaybookId}, 'Test Play', ${testUserId})
+			RETURNING id
+		`
+
+		const customPlayers = [
+			{ id: 'p1', x: 100, y: 200, label: 'QB', color: '#0000ff' }
+		]
+		const customDrawings = [
+			{ id: 'd1', segments: [[{x: 100, y: 200}, {x: 150, y: 250}]], color: '#000000' }
+		]
+
+		const response = await fetch(`${baseUrl}/api/plays/${play.id}`, {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json', Cookie: `session=${testSession}` },
+			body: JSON.stringify({ custom_players: customPlayers, custom_drawings: customDrawings })
+		})
+
+		expect(response.status).toBe(200)
+
+		const [saved] = await db`SELECT custom_players, custom_drawings FROM plays WHERE id = ${play.id}`
+		const savedPlayers = typeof saved.custom_players === 'string'
+			? JSON.parse(saved.custom_players)
+			: saved.custom_players
+		const savedDrawings = typeof saved.custom_drawings === 'string'
+			? JSON.parse(saved.custom_drawings)
+			: saved.custom_drawings
+		expect(savedPlayers).toEqual(customPlayers)
+		expect(savedDrawings).toEqual(customDrawings)
+	})
 })
