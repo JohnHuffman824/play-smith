@@ -5,95 +5,65 @@ import type {
 	Coordinate
 } from '@/types/drawing.types'
 
+interface ThumbnailPlayer {
+	id: string
+	x: number
+	y: number
+	label: string
+	color: string
+	isLineman?: boolean
+}
+
 type PlayThumbnailSVGProps = {
 	drawings: Drawing[]
+	players?: ThumbnailPlayer[]
 	className?: string
 }
 
-type BoundingBox = {
-	minX: number
-	maxX: number
-	minY: number
-	maxY: number
-}
+// Field constants for thumbnail rendering
+const FIELD_WIDTH_FEET = 160
+const FIELD_VIEW_HEIGHT_FEET = 60  // Show 60 feet of vertical field
+const FIELD_VIEW_Y_OFFSET = 15     // Start view at Y=15 (shifted down)
+const PLAYER_RADIUS_FEET = 2.0     // Player circle radius
 
 /**
- * Calculate bounding box from all drawing points
+ * Check if drawings have valid points
  */
-function calculateBoundingBox(drawings: Drawing[]): BoundingBox | null {
-	if (drawings.length === 0) return null
-
-	let minX = Infinity
-	let maxX = -Infinity
-	let minY = Infinity
-	let maxY = -Infinity
+function hasValidDrawings(drawings: Drawing[]): boolean {
+	if (drawings.length === 0) return false
 
 	for (const drawing of drawings) {
 		for (const pointId in drawing.points) {
 			const point = drawing.points[pointId]
-			if (!point) continue
-
-			minX = Math.min(minX, point.x)
-			maxX = Math.max(maxX, point.x)
-			minY = Math.min(minY, point.y)
-			maxY = Math.max(maxY, point.y)
-
-			// Also consider handle points for cubic curves
-			if (point.handleIn) {
-				const absX = point.x + point.handleIn.x
-				const absY = point.y + point.handleIn.y
-				minX = Math.min(minX, absX)
-				maxX = Math.max(maxX, absX)
-				minY = Math.min(minY, absY)
-				maxY = Math.max(maxY, absY)
-			}
-			if (point.handleOut) {
-				const absX = point.x + point.handleOut.x
-				const absY = point.y + point.handleOut.y
-				minX = Math.min(minX, absX)
-				maxX = Math.max(maxX, absX)
-				minY = Math.min(minY, absY)
-				maxY = Math.max(maxY, absY)
-			}
+			if (point) return true
 		}
 	}
 
-	// Handle edge case: no points or single point
-	if (!isFinite(minX)) return null
-	if (minX === maxX) maxX = minX + 1
-	if (minY === maxY) maxY = minY + 1
-
-	return { minX, maxX, minY, maxY }
+	return false
 }
 
 /**
  * Transform field coordinates to SVG viewBox coordinates
+ * Field coordinates: Y=0 at bottom, increasing upward
+ * SVG coordinates: Y=0 at top, increasing downward
  */
 function transformPoint(
 	point: Coordinate,
-	bbox: BoundingBox,
 	viewBoxWidth: number,
 	viewBoxHeight: number,
 	padding: number
 ): Coordinate {
-	// Calculate scale to fit within viewBox with padding
-	const fieldWidth = bbox.maxX - bbox.minX
-	const fieldHeight = bbox.maxY - bbox.minY
 	const availableWidth = viewBoxWidth - 2 * padding
-	const availableHeight = viewBoxHeight - 2 * padding
+	const scale = availableWidth / FIELD_WIDTH_FEET
 
-	const scale = Math.min(availableWidth / fieldWidth, availableHeight / fieldHeight)
+	const x = point.x * scale + padding
 
-	// Center the drawing in viewBox
-	const scaledWidth = fieldWidth * scale
-	const scaledHeight = fieldHeight * scale
-	const offsetX = padding + (availableWidth - scaledWidth) / 2
-	const offsetY = padding + (availableHeight - scaledHeight) / 2
+	// Shift Y by offset, then flip
+	// Field Y=15 should map to bottom, Y=75 to top
+	const adjustedY = point.y - FIELD_VIEW_Y_OFFSET
+	const y = (FIELD_VIEW_HEIGHT_FEET - adjustedY) * scale + padding
 
-	return {
-		x: (point.x - bbox.minX) * scale + offsetX,
-		y: (point.y - bbox.minY) * scale + offsetY
-	}
+	return { x, y }
 }
 
 /**
@@ -101,7 +71,6 @@ function transformPoint(
  */
 function buildPathString(
 	drawing: Drawing,
-	bbox: BoundingBox,
 	viewBoxWidth: number,
 	viewBoxHeight: number,
 	padding: number
@@ -122,7 +91,6 @@ function buildPathString(
 		const transform = (p: Coordinate) =>
 			transformPoint(
 				p,
-				bbox,
 				viewBoxWidth,
 				viewBoxHeight,
 				padding
@@ -214,18 +182,16 @@ function buildPathString(
 	return commands.join(' ')
 }
 
-export function PlayThumbnailSVG({ drawings, className }: PlayThumbnailSVGProps) {
-	// Calculate bounding box
-	const bbox = calculateBoundingBox(drawings)
-
-	// If no valid bounding box, return null (no drawings to render)
-	if (!bbox) {
+export function PlayThumbnailSVG({ drawings, players = [], className }: PlayThumbnailSVGProps) {
+	const hasContent = hasValidDrawings(drawings) || players.length > 0
+	if (!hasContent) {
 		return null
 	}
 
-	const viewBoxWidth = 100
+	const viewBoxWidth = 160
 	const viewBoxHeight = 60
 	const padding = 5
+	const scale = (viewBoxWidth - 2 * padding) / FIELD_WIDTH_FEET
 
 	return (
 		<svg
@@ -233,10 +199,32 @@ export function PlayThumbnailSVG({ drawings, className }: PlayThumbnailSVGProps)
 			className={className}
 			preserveAspectRatio="xMidYMid meet"
 		>
+			{/* Render players first (behind drawings) */}
+			{players.map((player) => {
+				const pos = transformPoint(
+					{ x: player.x, y: player.y },
+					viewBoxWidth,
+					viewBoxHeight,
+					padding
+				)
+				const radius = PLAYER_RADIUS_FEET * scale
+				return (
+					<circle
+						key={player.id}
+						cx={pos.x}
+						cy={pos.y}
+						r={radius}
+						fill={player.color}
+						stroke="white"
+						strokeWidth={0.5}
+					/>
+				)
+			})}
+
+			{/* Render drawings on top */}
 			{drawings.map((drawing, index) => {
 				const pathString = buildPathString(
 					drawing,
-					bbox,
 					viewBoxWidth,
 					viewBoxHeight,
 					padding
