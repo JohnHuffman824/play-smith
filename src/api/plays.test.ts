@@ -446,4 +446,47 @@ describe('Plays API', () => {
 		await db`DELETE FROM teams WHERE id = ${otherTeam.id}`
 		await db`DELETE FROM users WHERE id = ${otherUser.id}`
 	})
+
+	test('GET /api/plays/:playId returns custom players, drawings, and teamId', async () => {
+		// Create a play with custom data
+		const [play] = await db`
+			INSERT INTO plays (playbook_id, name, created_by, custom_players, custom_drawings)
+			VALUES (
+				${testPlaybookId},
+				'Custom Play',
+				${testUserId},
+				${JSON.stringify([
+					{ id: 'p1', x: 100, y: 200, label: 'WR', color: '#ff0000' }
+				])},
+				${JSON.stringify([
+					{ id: 'd1', segments: [[{x: 100, y: 200}, {x: 150, y: 250}]], color: '#000000' }
+				])}
+			)
+			RETURNING id
+		`
+
+		const response = await fetch(`${baseUrl}/api/plays/${play.id}`, {
+			headers: { Cookie: `session=${testSession}` }
+		})
+
+		expect(response.status).toBe(200)
+		const data = await response.json()
+
+		// Verify teamId is returned (via playbook join)
+		expect(data.play.teamId).toBeDefined()
+
+		// Verify custom players
+		expect(data.play.players).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({ id: 'p1', x: 100, y: 200, label: 'WR' })
+			])
+		)
+
+		// Verify custom drawings
+		expect(data.play.drawings).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({ id: 'd1', color: '#000000' })
+			])
+		)
+	})
 })

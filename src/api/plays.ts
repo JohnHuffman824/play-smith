@@ -50,7 +50,12 @@ export const playsAPI = {
 			return Response.json({ error: 'Invalid play ID' }, { status: 400 })
 		}
 
-		const [play] = await db`SELECT * FROM plays WHERE id = ${playId}`
+		const [play] = await db`
+			SELECT p.*, pb.team_id
+			FROM plays p
+			JOIN playbooks pb ON p.playbook_id = pb.id
+			WHERE p.id = ${playId}
+		`
 		if (!play) {
 			return Response.json({ error: 'Play not found' }, { status: 404 })
 		}
@@ -76,6 +81,12 @@ export const playsAPI = {
 				color: '#000000',
 			}))
 		}
+
+		// Add custom players (not derived from formations)
+		const customPlayers = (typeof play.custom_players === 'string'
+			? JSON.parse(play.custom_players)
+			: play.custom_players || []) as PlayerData[]
+		players = [...players, ...customPlayers]
 
 		const conceptApplications: ConceptApplication[] = await db`
 			SELECT ca.concept_id, ca.concept_group_id, ca.order_index
@@ -126,10 +137,17 @@ export const playsAPI = {
 				})
 		}
 
+		// Add custom drawings (not derived from concepts)
+		const customDrawings = (typeof play.custom_drawings === 'string'
+			? JSON.parse(play.custom_drawings)
+			: play.custom_drawings || []) as Record<string, unknown>[]
+		drawings = [...drawings, ...customDrawings]
+
 		return Response.json({
 			play: {
 				id: String(play.id),
 				name: play.name || 'Untitled Play',
+				teamId: play.team_id ? String(play.team_id) : null,
 				players,
 				drawings,
 			},

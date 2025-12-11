@@ -72,6 +72,7 @@ export async function startTestServer(): Promise<{
 				POST: playsAPI.create,
 			},
 			'/api/plays/:playId': {
+				GET: playsAPI.get,
 				PUT: playsAPI.update,
 				DELETE: playsAPI.delete,
 			},
