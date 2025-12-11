@@ -11,6 +11,7 @@ export interface Play {
 	playType: string
 	defensiveFormation: string
 	tags: string[]
+	tagObjects?: { id: number; name: string; color: string }[]
 	lastModified: string
 	drawings?: Drawing[]
 }
@@ -52,7 +53,8 @@ export function usePlaybookData(playbookId: string | undefined): UsePlaybookData
 			personnel: apiPlay.personnel_id ? String(apiPlay.personnel_id) : undefined,
 			playType: apiPlay.play_type || '',
 			defensiveFormation: apiPlay.defensive_formation_id ? String(apiPlay.defensive_formation_id) : '',
-			tags: [], // Tags not yet implemented in API
+			tags: (apiPlay.tags || []).map((t: any) => typeof t === 'string' ? t : t.name),
+			tagObjects: apiPlay.tags || [],
 			lastModified: apiPlay.updated_at ? new Date(apiPlay.updated_at).toLocaleDateString() : new Date().toLocaleDateString(),
 			drawings: apiPlay.drawings || []
 		}
