@@ -127,6 +127,7 @@ export function Canvas({
 		strokeWidth: strokeFeet,
 		lineStyle: drawingState.lineStyle,
 		lineEnd: drawingState.lineEnd,
+		pathMode: drawingState.pathMode,
 	}
 
 	// History state for undo functionality
