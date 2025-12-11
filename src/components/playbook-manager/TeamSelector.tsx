@@ -41,7 +41,7 @@ export function TeamSelector({ teams, currentTeamId, onSwitchTeam, onManageTeams
 					<DropdownMenuItem
 						key={team.id}
 						onClick={() => onSwitchTeam(team.id)}
-						className={team.id === currentTeamId ? 'bg-accent/50' : ''}
+						className={`cursor-pointer ${team.id === currentTeamId ? 'bg-accent/50' : ''}`}
 					>
 						<Users className="w-4 h-4" />
 						<span className="flex-1">{team.name}</span>
@@ -51,7 +51,7 @@ export function TeamSelector({ teams, currentTeamId, onSwitchTeam, onManageTeams
 					</DropdownMenuItem>
 				))}
 				<DropdownMenuSeparator />
-				<DropdownMenuItem onClick={() => onManageTeams()}>
+				<DropdownMenuItem onClick={() => onManageTeams()} className="cursor-pointer">
 					<Settings className="w-4 h-4" />
 					Manage Teams
 				</DropdownMenuItem>

@@ -1,12 +1,12 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { useState, useCallback, useEffect } from 'react'
-import type { Team } from '../db/types'
-import { teamKeys, fetchTeams } from '../api/queries/teamQueries'
+import { teamKeys, fetchTeams, type TeamWithRole } from '../api/queries/teamQueries'
 
 interface UseTeamsDataReturn {
-	teams: Team[]
+	teams: TeamWithRole[]
 	currentTeamId: number | null
+	currentTeamRole: 'owner' | 'editor' | 'viewer' | null
 	isLoading: boolean
 	error: string | null
 	switchTeam: (teamId: number) => void
@@ -55,9 +55,12 @@ export function useTeamsData(): UseTeamsDataReturn {
 		await queryClient.invalidateQueries({ queryKey: teamKeys.list() })
 	}, [queryClient])
 
+	const currentTeamRole = teams.find(t => t.id === currentTeamId)?.role || null
+
 	return {
 		teams,
 		currentTeamId,
+		currentTeamRole,
 		isLoading,
 		error: queryError?.message || null,
 		switchTeam,
