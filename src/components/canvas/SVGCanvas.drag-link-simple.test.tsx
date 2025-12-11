@@ -100,13 +100,6 @@ describe('Drawing Snap Detection Logic', () => {
 		const endPoint = getDrawingEndPoint(updatedDrawing)
 		const threshold = PLAYER_RADIUS_FEET
 
-		console.log('Test snap detection:', {
-			startPoint,
-			endPoint,
-			players,
-			threshold
-		})
-
 		let bestTarget: {
 			playerId: string
 			pointId: string
@@ -121,7 +114,6 @@ describe('Drawing Snap Detection Logic', () => {
 				players,
 				threshold
 			)
-			console.log('Start point snap:', snap)
 			if (snap && (!bestTarget || snap.distance < bestTarget.distance)) {
 				bestTarget = {
 					playerId: snap.playerId,
@@ -139,7 +131,6 @@ describe('Drawing Snap Detection Logic', () => {
 				players,
 				threshold
 			)
-			console.log('End point snap:', snap)
 			if (snap && (!bestTarget || snap.distance < bestTarget.distance)) {
 				bestTarget = {
 					playerId: snap.playerId,
@@ -149,8 +140,6 @@ describe('Drawing Snap Detection Logic', () => {
 				}
 			}
 		}
-
-		console.log('Best target:', bestTarget)
 
 		// End point should snap to player
 		expect(bestTarget).toBeDefined()

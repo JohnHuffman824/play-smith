@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 import {
 	ARROW_ANGLE_DEGREES,
 	ARROW_LENGTH_MULTIPLIER,
@@ -112,6 +112,9 @@ export function PathRenderer({
 	onDragStart,
 	onHover,
 }: PathRendererProps) {
+	const mouseDownPosRef = useRef<{ x: number; y: number } | null>(null)
+	const DRAG_THRESHOLD = 5
+
 	const { d, endDirection } = useMemo(() => {
 		return buildPath(drawing, coordSystem)
 	}, [drawing, coordSystem])
@@ -141,6 +144,19 @@ export function PathRenderer({
 			onDelete(drawing.id)
 			return
 		}
+
+		// Check if this was a drag (moved more than threshold)
+		if (mouseDownPosRef.current) {
+			const dx = event.clientX - mouseDownPosRef.current.x
+			const dy = event.clientY - mouseDownPosRef.current.y
+			const distance = Math.sqrt(dx * dx + dy * dy)
+			if (distance > DRAG_THRESHOLD) {
+				mouseDownPosRef.current = null
+				return // Was a drag, don't open dialog
+			}
+		}
+		mouseDownPosRef.current = null
+
 		if (activeTool == 'select' && onSelectWithPosition) {
 			onSelectWithPosition(drawing.id, { x: event.clientX, y: event.clientY })
 		} else if (onSelect) {
@@ -149,6 +165,8 @@ export function PathRenderer({
 	}
 
 	function handlePointerDown(event: React.PointerEvent<SVGPathElement>) {
+		mouseDownPosRef.current = { x: event.clientX, y: event.clientY }
+
 		if (activeTool == 'select') {
 			const svg = event.currentTarget.ownerSVGElement
 			if (!svg) return

@@ -63,8 +63,11 @@ export function Player({
   onHoverChange,
 }: PlayerProps) {
   const playerRef = useRef<HTMLDivElement>(null)
+  const mouseDownPosRef = useRef<{ x: number; y: number } | null>(null)
   const [fillColor, setFillColor] = useState(color)
   const [isHovered, setIsHovered] = useState(false)
+
+  const DRAG_THRESHOLD = 5 // pixels
 
   // Coordinate system for converting between feet and pixels
   const coordSystem = useFieldCoordinates({
@@ -106,6 +109,7 @@ export function Player({
 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.stopPropagation()
+    mouseDownPosRef.current = { x: e.clientX, y: e.clientY }
 
     // If erase tool is active, delete the player instead of dragging
     if (currentTool === 'erase' && onDelete) {
@@ -129,12 +133,24 @@ export function Player({
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation()
-    
+
     // If erase tool is active, the deletion already happened in mouseDown
     if (currentTool === 'erase') {
       return
     }
-    
+
+    // Check if this was a drag (moved more than threshold)
+    if (mouseDownPosRef.current) {
+      const dx = e.clientX - mouseDownPosRef.current.x
+      const dy = e.clientY - mouseDownPosRef.current.y
+      const distance = Math.sqrt(dx * dx + dy * dy)
+      if (distance > DRAG_THRESHOLD) {
+        mouseDownPosRef.current = null
+        return // Was a drag, don't open dialog
+      }
+    }
+    mouseDownPosRef.current = null
+
     if (!isDragging && playerRef.current) {
       const rect = playerRef.current.getBoundingClientRect()
       // Pass viewport coordinates (center of the player circle)

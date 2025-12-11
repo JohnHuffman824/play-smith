@@ -33,8 +33,8 @@ export function ToolButton({
 	const buttonClass = isSelected
 		? 'bg-blue-500 text-white shadow-lg scale-105'
 		: theme === 'dark'
-			? 'hover:bg-gray-700 text-gray-300'
-			: 'hover:bg-gray-200 text-gray-700'
+			? 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+			: 'bg-gray-100 hover:bg-gray-200 text-gray-700'
 
 	return (
 		<Tooltip content={label}>

@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeEach } from 'bun:test'
+import { describe, test, expect, beforeEach, afterEach } from 'bun:test'
 import { cleanup, render, waitFor } from '@testing-library/react'
 import { Canvas } from '../../../src/components/canvas/Canvas'
 import { PlayProvider } from '../../../src/contexts/PlayContext'

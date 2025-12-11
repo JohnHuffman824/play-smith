@@ -1,24 +1,32 @@
 import { describe, test, expect, mock, beforeAll, beforeEach, afterAll, afterEach } from 'bun:test'
-import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, cleanup, act } from '@testing-library/react'
 import { LoginModal } from '../../../src/components/auth/LoginModal'
 import { AuthProvider } from '../../../src/contexts/AuthContext'
 
 const originalFetch = global.fetch
 const mockFetch = mock()
 
-function renderLoginModal() {
-	mockFetch.mockResolvedValue(
+async function renderLoginModal() {
+	// Mock the initial session check that AuthProvider makes on mount
+	mockFetch.mockResolvedValueOnce(
 		new Response(JSON.stringify({ user: null }), {
 			status: 200,
 			headers: { 'Content-Type': 'application/json' }
 		})
 	)
 
-	return render(
+	const result = render(
 		<AuthProvider>
 			<LoginModal />
 		</AuthProvider>
 	)
+
+	// Wait for the initial session check to complete
+	await waitFor(() => {
+		expect(screen.getByLabelText(/Username or Email/i)).toBeDefined()
+	})
+
+	return result
 }
 
 describe('LoginModal', () => {
@@ -37,8 +45,8 @@ describe('LoginModal', () => {
 	afterAll(() => {
 		global.fetch = originalFetch
 	})
-	test('renders login form by default', () => {
-		renderLoginModal()
+	test('renders login form by default', async () => {
+		await renderLoginModal()
 
 		expect(screen.getByText('Play Smith')).toBeDefined()
 		expect(screen.getByLabelText(/Username or Email/i)).toBeDefined()
@@ -46,61 +54,78 @@ describe('LoginModal', () => {
 		expect(screen.getByRole('button', { name: /Sign In/i })).toBeDefined()
 	})
 
-	test('switches to register mode', () => {
-		renderLoginModal()
+	test('switches to register mode', async () => {
+		await renderLoginModal()
 
 		const signUpButton = screen.getByText('Sign up')
 		fireEvent.click(signUpButton)
 
-		expect(screen.getByLabelText(/Name/i)).toBeDefined()
-		expect(screen.getByLabelText(/Email/i)).toBeDefined()
-		expect(screen.getByRole('button', { name: /Create Account/i })).toBeDefined()
+		// Wait for register mode to be active
+		await waitFor(() => {
+			expect(screen.getByLabelText(/Name/i)).toBeDefined()
+			expect(screen.getByLabelText(/Email/i)).toBeDefined()
+			expect(screen.getByRole('button', { name: /Create Account/i })).toBeDefined()
+		})
 	})
 
 	test('shows validation error for invalid email in register mode', async () => {
-		renderLoginModal()
+		await renderLoginModal()
 
 		// Switch to register
 		fireEvent.click(screen.getByText('Sign up'))
 
-		const nameInput = screen.getByLabelText(/Name/i)
-		const emailInput = screen.getByLabelText(/Email/i)
-		const passwordInput = screen.getByPlaceholderText('Enter your password')
-		const submitButton = screen.getByRole('button', { name: /Create Account/i })
+		// Wait for register mode to be active
+		const submitButton = await screen.findByRole('button', { name: /Create Account/i })
 
+		const nameInput = screen.getByLabelText(/Name/i)
+		const emailInput = screen.getByLabelText(/Email/i) as HTMLInputElement
+		const passwordInput = screen.getByPlaceholderText('Enter your password')
+		const form = emailInput.closest('form')!
+
+		// Fill in form with invalid email
 		fireEvent.change(nameInput, { target: { value: 'Test User' } })
 		fireEvent.change(emailInput, { target: { value: 'notanemail' } })
 		fireEvent.change(passwordInput, { target: { value: 'validpassword' } })
-		fireEvent.click(submitButton)
 
+		// Submit form directly to bypass HTML5 validation
+		fireEvent.submit(form)
+
+		// Validation error should appear
 		await waitFor(() => {
 			expect(screen.getByText(/Please enter a valid email address/i)).toBeDefined()
 		})
 	})
 
 	test('shows validation error for weak password', async () => {
-		renderLoginModal()
+		await renderLoginModal()
 
 		// Switch to register
 		fireEvent.click(screen.getByText('Sign up'))
 
-		const nameInput = screen.getByLabelText(/Name/i)
-		const emailInput = screen.getByLabelText(/Email/i)
-		const passwordInput = screen.getByPlaceholderText('Enter your password')
-		const submitButton = screen.getByRole('button', { name: /Create Account/i })
+		// Wait for register mode to be active
+		const submitButton = await screen.findByRole('button', { name: /Create Account/i })
 
+		const nameInput = screen.getByLabelText(/Name/i)
+		const emailInput = screen.getByLabelText(/Email/i) as HTMLInputElement
+		const passwordInput = screen.getByPlaceholderText('Enter your password')
+		const form = emailInput.closest('form')!
+
+		// Fill in form with weak password
 		fireEvent.change(nameInput, { target: { value: 'Test User' } })
 		fireEvent.change(emailInput, { target: { value: 'test@example.com' } })
 		fireEvent.change(passwordInput, { target: { value: '123' } })
-		fireEvent.click(submitButton)
 
+		// Submit form directly to bypass HTML5 validation
+		fireEvent.submit(form)
+
+		// Validation error should appear
 		await waitFor(() => {
 			expect(screen.getByText(/Password must be at least 6 characters/i)).toBeDefined()
 		})
 	})
 
-	test('toggles password visibility', () => {
-		renderLoginModal()
+	test('toggles password visibility', async () => {
+		await renderLoginModal()
 
 		const passwordInput = screen.getByPlaceholderText('Enter your password') as HTMLInputElement
 		const toggleButton = screen.getByRole('button', { name: 'Toggle password visibility' })
@@ -115,51 +140,39 @@ describe('LoginModal', () => {
 	})
 
 	test('submits login form', async () => {
-		renderLoginModal()
+		await renderLoginModal()
 
-		mockFetch.mockResolvedValueOnce({
-			ok: true,
-			json: async () => ({ user: null }),
-		} as Response)
-
+		// Mock successful login response
 		mockFetch.mockResolvedValueOnce({
 			ok: true,
 			json: async () => ({
-				user: { id: 1, email: 'test@example.com', name: 'Test' },
+				user: { id: 1, email: 'admin@example.com', name: 'Admin' },
 			}),
 		} as Response)
 
-		const emailInput = screen.getByLabelText(/Username or Email/i)
+		const emailInput = screen.getByLabelText(/Username or Email/i) as HTMLInputElement
 		const passwordInput = screen.getByPlaceholderText('Enter your password')
-		const submitButton = screen.getByRole('button', { name: /Sign In/i })
+		const form = emailInput.closest('form')!
 
-		fireEvent.change(emailInput, { target: { value: 'admin' } })
-		fireEvent.change(passwordInput, { target: { value: 'admin' } })
-		fireEvent.click(submitButton)
+		fireEvent.change(emailInput, { target: { value: 'admin@example.com' } })
+		fireEvent.change(passwordInput, { target: { value: 'admin123' } })
+
+		// Submit form directly to bypass HTML5 validation
+		fireEvent.submit(form)
 
 		await waitFor(() => {
 			expect(mockFetch).toHaveBeenCalledWith(
 				'/api/auth/login',
 				expect.objectContaining({
 					method: 'POST',
-					body: JSON.stringify({ email: 'admin', password: 'admin' }),
+					body: JSON.stringify({ email: 'admin@example.com', password: 'admin123' }),
 				})
 			)
 		})
 	})
 
 	test('displays error message on failed login', async () => {
-		mockFetch.mockResolvedValueOnce({
-			ok: true,
-			json: async () => ({ user: null }),
-		} as Response)
-
-		renderLoginModal()
-
-		// Wait for initial render to complete
-		await waitFor(() => {
-			expect(screen.getByLabelText(/Username or Email/i)).toBeDefined()
-		})
+		await renderLoginModal()
 
 		// Mock failed login
 		mockFetch.mockResolvedValueOnce({
@@ -178,8 +191,7 @@ describe('LoginModal', () => {
 
 		// Wait for error message to appear
 		await waitFor(() => {
-			const errorMessage = screen.queryByText(/Invalid email or password/i)
-			expect(errorMessage).toBeDefined()
-		}, { timeout: 3000 })
+			expect(screen.getByText(/Invalid email or password/i)).toBeDefined()
+		})
 	})
 })

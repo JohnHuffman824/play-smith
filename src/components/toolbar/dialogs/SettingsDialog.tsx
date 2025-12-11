@@ -24,7 +24,9 @@ export function SettingsDialog({
 	const { theme, setTheme } = useTheme()
 	const [positionNaming, setPositionNaming] = useState<PositionNaming>('XYZABQ')
 	const [fieldLevel, setFieldLevel] = useState<FieldLevel>('College')
-	const [themeMode, setThemeMode] = useState<ThemeMode>('Light Mode')
+	const [themeMode, setThemeMode] = useState<ThemeMode>(
+		theme === 'dark' ? 'Dark Mode' : 'Light Mode'
+	)
 	const containerClass = [
 		'fixed left-24 top-1/2 -translate-y-1/2 rounded-2xl shadow-2xl',
 		'p-6 z-50 w-80',

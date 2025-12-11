@@ -12,6 +12,7 @@ import { TargetingTooltip } from './TargetingTooltip'
 import { PlayProvider } from '../../contexts/PlayContext'
 import type { Tool } from '../../types/play.types'
 import { generateThumbnail } from '../../utils/thumbnail'
+import { ColorPickerDialog } from '../toolbar/dialogs/ColorPickerDialog'
 import {
 	Select,
 	SelectContent,
@@ -52,6 +53,7 @@ export function ConceptDialog({
 	const [isSaving, setIsSaving] = useState(false)
 	const [nameError, setNameError] = useState('')
 	const [touched, setTouched] = useState(false)
+	const [showColorPicker, setShowColorPicker] = useState(false)
 	const canvasContainerRef = useRef<HTMLDivElement>(null)
 
 	useEffect(() => {
@@ -154,9 +156,9 @@ export function ConceptDialog({
 
 	return (
 		<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-			<div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-[90vw] h-[90vh] flex flex-col">
+			<div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-[85vw] h-[85vh] max-w-6xl flex flex-col">
 				{/* Name and Scope */}
-				<div className="px-6 py-4 border-b border-gray-300 dark:border-gray-600 flex items-start gap-4">
+				<div className="px-6 py-4 flex items-start gap-4">
 					<div className="flex-1">
 						<label className="block text-sm font-medium mb-1">
 							Concept Name
@@ -224,7 +226,7 @@ export function ConceptDialog({
 				</div>
 
 				{/* Canvas Area */}
-				<div className="flex-1 flex min-h-0">
+				<div className="flex-1 flex min-h-0 relative">
 					{/* Left Toolbar */}
 					<ConceptToolbar
 						selectedTool={selectedTool}
@@ -233,6 +235,8 @@ export function ConceptDialog({
 						onColorChange={setColor}
 						hashAlignment={hashAlignment}
 						onHashAlignmentChange={setHashAlignment}
+						showColorPicker={showColorPicker}
+						onShowColorPickerChange={setShowColorPicker}
 					/>
 
 					{/* Canvas */}
@@ -256,10 +260,20 @@ export function ConceptDialog({
 							/>
 						</PlayProvider>
 					</div>
+
+					{/* Color Picker Dialog */}
+					{showColorPicker && (
+						<ColorPickerDialog
+							currentColor={color}
+							onColorChange={setColor}
+							onClose={() => setShowColorPicker(false)}
+							position={{ left: 'left-28', top: 'top-24' }}
+						/>
+					)}
 				</div>
 
 				{/* Bottom Controls */}
-				<div className="px-6 py-4 border-t border-gray-300 dark:border-gray-600 flex items-center justify-between">
+				<div className="px-6 py-4 flex items-center justify-between">
 					<div className="flex items-center gap-4">
 						{/* Targeting Mode */}
 						<div className="flex items-center gap-2">

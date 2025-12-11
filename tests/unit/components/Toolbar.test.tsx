@@ -104,7 +104,7 @@ describe('Toolbar - Responsive Layout', () => {
 
 	test('should use multiple columns when window is short', () => {
 		// Set a short window (not enough for all buttons in 1 column)
-		// 13 buttons * 56px + 12 gaps * 12px = 728px + 144px = 872px needed for single column
+		// 15 buttons * 56px + 14 gaps * 12px = 840px + 168px = 1008px needed for single column
 		Object.defineProperty(window, 'innerHeight', {
 			writable: true,
 			configurable: true,
@@ -154,8 +154,8 @@ describe('Toolbar - Responsive Layout', () => {
 	test('should calculate rows per column for even distribution', () => {
 		// Set a window height that would require 2 columns
 		// Each button is 56px + 12px gap = 68px
-		// With 14 buttons, we want 7 in each column
-		// So we need gridTemplateRows to be repeat(7, 56px) for 2 columns
+		// With 15 buttons, we want 8 in column 1 and 7 in column 2
+		// So we need gridTemplateRows to be repeat(8, 56px) for 2 columns
 		Object.defineProperty(window, 'innerHeight', {
 			writable: true,
 			configurable: true,
@@ -172,11 +172,11 @@ describe('Toolbar - Responsive Layout', () => {
 		expect(toolbar.style.gridTemplateRows).toContain('56px')
 	})
 
-	test('should have 14 buttons total', () => {
+	test('should have 15 buttons total', () => {
 		const { container } = renderToolbar()
 		const buttons = container.querySelectorAll('button')
 
-		expect(buttons.length).toBe(14)
+		expect(buttons.length).toBe(15)
 	})
 
 	test('should disable Delete Play button when playId is not provided', () => {

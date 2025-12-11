@@ -5,6 +5,10 @@ interface ColorPickerDialogProps {
   currentColor: string
   onColorChange: (color: string) => void
   onClose: () => void
+  position?: {
+    left?: string
+    top?: string
+  }
 }
 
 const presetColors = [
@@ -22,13 +26,17 @@ const presetColors = [
   { name: 'Gray', value: '#6B7280' },
 ]
 
-export function ColorPickerDialog({ currentColor, onColorChange, onClose }: ColorPickerDialogProps) {
+export function ColorPickerDialog({ currentColor, onColorChange, onClose, position }: ColorPickerDialogProps) {
   const { theme } = useTheme()
-  
+
+  const positionClasses = position
+    ? `${position.left || 'left-24'} ${position.top || 'top-72'}`
+    : 'left-24 top-72'
+
   return (
-    <div 
+    <div
       data-color-dialog
-      className={`absolute left-24 top-72 w-64 rounded-2xl shadow-2xl border p-4 z-50 ${
+      className={`absolute ${positionClasses} w-64 rounded-2xl shadow-2xl border p-4 z-50 ${
       theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
     }`}>
       <div className="flex items-center justify-between mb-4">

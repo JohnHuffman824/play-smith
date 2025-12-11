@@ -100,20 +100,18 @@ describe('Routing Flow Integration', () => {
 	})
 
 	test('authenticated user can access protected routes', async () => {
-		// Mock multiple API calls in sequence
-		mockFetch
-			// First call: auth check
-			.mockResolvedValueOnce(
-				new Response(JSON.stringify({
+		// Mock all API calls with URL-based routing to handle retries and refetches
+		mockFetch.mockImplementation(async (url: string) => {
+			if (url.includes('/api/auth/me')) {
+				return new Response(JSON.stringify({
 					user: { id: 1, email: 'test@example.com', name: 'Test User' }
 				}), {
 					status: 200,
 					headers: { 'Content-Type': 'application/json' }
 				})
-			)
-			// Second call: playbooks list
-			.mockResolvedValueOnce(
-				new Response(JSON.stringify({
+			}
+			if (url.includes('/api/playbooks')) {
+				return new Response(JSON.stringify({
 					playbooks: [
 						{ id: 1, name: 'Test Playbook', team_id: 1 }
 					]
@@ -121,10 +119,9 @@ describe('Routing Flow Integration', () => {
 					status: 200,
 					headers: { 'Content-Type': 'application/json' }
 				})
-			)
-			// Third call: teams list
-			.mockResolvedValueOnce(
-				new Response(JSON.stringify({
+			}
+			if (url.includes('/api/teams')) {
+				return new Response(JSON.stringify({
 					teams: [
 						{ id: 1, name: 'Test Team' }
 					]
@@ -132,7 +129,9 @@ describe('Routing Flow Integration', () => {
 					status: 200,
 					headers: { 'Content-Type': 'application/json' }
 				})
-			)
+			}
+			return new Response('Not found', { status: 404 })
+		})
 
 		const router = createMemoryRouter(routes, {
 			initialEntries: ['/playbooks']

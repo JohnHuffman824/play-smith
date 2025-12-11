@@ -147,6 +147,9 @@ describe('FormationRepository', () => {
 				positions: [{ role: 'x', position_x: 0, position_y: 0, hash_relative: false }]
 			})
 
+			// Add delay to ensure different timestamps (SQLite CURRENT_TIMESTAMP has second-level resolution)
+			await new Promise((resolve) => setTimeout(resolve, 1100))
+
 			await repo.create({
 				team_id: testTeamId,
 				name: 'Formation 2',

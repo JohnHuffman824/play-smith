@@ -364,6 +364,10 @@ export const db = Object.assign(
 			.replace(/CURRENT_TIMESTAMP/gi, "datetime('now')")
 			// Replace PostgreSQL json_agg with SQLite json_group_array
 			.replace(/json_agg\(/gi, "json_group_array(")
+			// Replace PostgreSQL json_build_object with SQLite json_object
+			.replace(/json_build_object\(/gi, "json_object(")
+			// Remove PostgreSQL ::json type casting
+			.replace(/'(\[\])'::json/gi, "'$1'")
 			// Replace PostgreSQL type casting (::type) with SQLite CAST
 		.replace(/::float\b/gi, " * 1.0") // Convert to float by multiplying by 1.0
 			.replace(/\)::int\b/gi, ")") // COALESCE returns int already, no need to cast
@@ -376,13 +380,15 @@ export const db = Object.assign(
 			// Replace PostgreSQL ANY() with SQLite IN()
 			.replace(/=\s*ANY\s*\(/gi, "IN (")
 
-		// Helper function to parse date fields in results
+		// Helper function to parse date and boolean fields in results
 		const parseDateFields = (obj: any): any => {
 			if (!obj || typeof obj !== 'object') return obj
 
 			const dateFields = ['created_at', 'updated_at', 'expires_at', 'joined_at', 'applied_at', 'last_used_at']
+			const booleanFields = ['hash_relative']
 			const result = { ...obj }
 
+			// Parse date fields
 			for (const field of dateFields) {
 				if (field in result && typeof result[field] === 'string') {
 					// Try to parse as Date
@@ -390,6 +396,13 @@ export const db = Object.assign(
 					if (!isNaN(date.getTime())) {
 						result[field] = date
 					}
+				}
+			}
+
+			// Parse boolean fields (SQLite INTEGER 0/1 to JavaScript boolean)
+			for (const field of booleanFields) {
+				if (field in result && typeof result[field] === 'number') {
+					result[field] = result[field] === 1
 				}
 			}
 
@@ -502,13 +515,15 @@ export const db = Object.assign(
 				return '?'
 			})
 
-			// Helper function to parse date fields in results
+			// Helper function to parse date and boolean fields in results
 			const parseDateFields = (obj: any): any => {
 				if (!obj || typeof obj !== 'object') return obj
 
 				const dateFields = ['created_at', 'updated_at', 'expires_at', 'joined_at', 'applied_at', 'last_used_at']
+				const booleanFields = ['hash_relative']
 				const result = { ...obj }
 
+				// Parse date fields
 				for (const field of dateFields) {
 					if (field in result && typeof result[field] === 'string') {
 						// Try to parse as Date
@@ -516,6 +531,13 @@ export const db = Object.assign(
 						if (!isNaN(date.getTime())) {
 							result[field] = date
 						}
+					}
+				}
+
+				// Parse boolean fields (SQLite INTEGER 0/1 to JavaScript boolean)
+				for (const field of booleanFields) {
+					if (field in result && typeof result[field] === 'number') {
+						result[field] = result[field] === 1
 					}
 				}
 

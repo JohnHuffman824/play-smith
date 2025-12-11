@@ -185,7 +185,7 @@ export function LoginModal() {
 								/>
 								<Input
 									id="email"
-									type="email"
+									type={isLogin ? 'text' : 'email'}
 									value={email}
 									onChange={e => setEmail(e.target.value)}
 									placeholder={isLogin ? 'JohnDoe@gmail.com' : 'coach@example.com'}

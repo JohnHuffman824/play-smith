@@ -6,10 +6,13 @@
 import { afterEach, describe, it, expect } from 'bun:test'
 import { cleanup, renderHook, act } from '@testing-library/react'
 import { PlayProvider, usePlayContext } from '../../../src/contexts/PlayContext'
+import { ThemeProvider } from '../../../src/contexts/ThemeContext'
 import { ReactNode } from 'react'
 
 const wrapper = ({ children }: { children: ReactNode }) => (
-	<PlayProvider>{children}</PlayProvider>
+	<ThemeProvider>
+		<PlayProvider>{children}</PlayProvider>
+	</ThemeProvider>
 )
 
 describe('PlayContext', () => {
@@ -21,11 +24,11 @@ describe('PlayContext', () => {
 	describe('initialization', () => {
 		it('should provide initial state', () => {
 			const { result } = renderHook(() => usePlayContext(), { wrapper })
-			
+
 			expect(result.current.state.drawingState.tool).toBe('select')
 			expect(result.current.state.formation).toBe('')
 			expect(result.current.state.playCards).toEqual([])
-			expect(result.current.state.hashAlignment).toBe('center')
+			expect(result.current.state.hashAlignment).toBe('middle')
 			expect(result.current.state.showPlayBar).toBe(true)
 		})
 
@@ -166,9 +169,9 @@ describe('PlayContext', () => {
 
 		it('should support all alignment options', () => {
 			const { result } = renderHook(() => usePlayContext(), { wrapper })
-			
-			const alignments: Array<'center' | 'left' | 'right'> = ['center', 'left', 'right']
-			
+
+			const alignments: Array<'middle' | 'left' | 'right'> = ['middle', 'left', 'right']
+
 			alignments.forEach(alignment => {
 				act(() => {
 					result.current.setHashAlignment(alignment)

@@ -10,6 +10,16 @@ global.navigator = window.navigator as any
 // Configure React Testing Library environment to suppress act() warnings
 ;(global as any).IS_REACT_ACT_ENVIRONMENT = true
 
+// Suppress act() warnings in console
+const originalError = console.error
+console.error = (...args: any[]) => {
+	const message = args[0]
+	if (typeof message === 'string' && message.includes('not wrapped in act(...)')) {
+		return
+	}
+	originalError(...args)
+}
+
 // Polyfill ResizeObserver for tests
 global.ResizeObserver = class ResizeObserver {
 	observe() {}

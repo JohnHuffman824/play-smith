@@ -83,6 +83,7 @@ const DEFAULT_STYLE = {
 				defaultStyle={DEFAULT_STYLE}
 				snapThreshold={10}
 				isOverCanvas={true}
+				selectedDrawingIds={['drawing-1', 'drawing-2']}
 			/>
 		)
 
@@ -144,6 +145,7 @@ const DEFAULT_STYLE = {
 				defaultStyle={DEFAULT_STYLE}
 				snapThreshold={10}
 				isOverCanvas={true}
+				selectedDrawingIds={['drawing-1', 'drawing-2']}
 			/>
 		)
 
@@ -249,6 +251,7 @@ const DEFAULT_STYLE = {
 				defaultStyle={DEFAULT_STYLE}
 				snapThreshold={10}
 				isOverCanvas={true}
+				selectedDrawingIds={['d1', 'd2']}
 			/>
 		)
 
@@ -335,6 +338,7 @@ const DEFAULT_STYLE = {
 				defaultStyle={DEFAULT_STYLE}
 				snapThreshold={10}
 				isOverCanvas={true}
+				selectedDrawingIds={['drawing-1', 'drawing-2']}
 			/>
 		)
 
@@ -416,6 +420,7 @@ const DEFAULT_STYLE = {
 				defaultStyle={DEFAULT_STYLE}
 				snapThreshold={10}
 				isOverCanvas={true}
+				selectedDrawingIds={['d1', 'd2']}
 			/>
 		)
 
@@ -464,6 +469,7 @@ const DEFAULT_STYLE = {
 				defaultStyle={{ color: '#000000', lineWidth: 2, lineStyle: 'solid', lineEnd: 'none' }}
 				snapThreshold={10}
 				isOverCanvas={true}
+				selectedDrawingIds={drawings.map(d => d.id)}
 			/>
 		)
 
@@ -540,6 +546,7 @@ const DEFAULT_STYLE = {
 				defaultStyle={{ color: '#000000', lineWidth: 2, lineStyle: 'solid', lineEnd: 'none' }}
 				snapThreshold={10}
 				isOverCanvas={true}
+				selectedDrawingIds={['d1', 'd2']}
 			/>
 		)
 
@@ -575,6 +582,7 @@ const DEFAULT_STYLE = {
 				defaultStyle={{ color: '#000000', lineWidth: 2, lineStyle: 'solid', lineEnd: 'none' }}
 				snapThreshold={10}
 				isOverCanvas={true}
+				selectedDrawingIds={drawings.map(d => d.id)}
 			/>
 		)
 
@@ -613,6 +621,7 @@ const DEFAULT_STYLE = {
 				defaultStyle={{ color: '#000000', lineWidth: 2, lineStyle: 'solid', lineEnd: 'none' }}
 				snapThreshold={10}
 				isOverCanvas={true}
+				selectedDrawingIds={drawings.map(d => d.id)}
 			/>
 		)
 
