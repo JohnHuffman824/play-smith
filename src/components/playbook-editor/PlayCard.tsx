@@ -21,6 +21,7 @@ import {
   MAX_VISIBLE_TAGS,
   TAG_COLORS,
   DEFAULT_TAG_COLOR,
+  getTagClasses,
 } from './constants/playbook'
 import { formatDateDayMonthYear } from '@/utils/date.utils'
 import { PlayThumbnailSVG } from './PlayThumbnailSVG'
@@ -32,7 +33,7 @@ type PlayCardProps = {
   formation: string
   playType: string
   defensiveFormation: string
-  tags: string[]
+  tags: (string | { name: string; color: string })[]
   lastModified: string
   thumbnail?: string
   drawings?: Drawing[]
@@ -55,11 +56,14 @@ type PlayCardThumbnailProps = {
 }
 
 type PlayCardTagsProps = {
-  tags: string[]
+  tags: (string | { name: string; color: string })[]
 }
 
-function getTagColor(tag: string) {
-  return TAG_COLORS[tag] || DEFAULT_TAG_COLOR
+function getTagColor(tag: string | { name: string; color: string }) {
+  if (typeof tag === 'object' && tag.color) {
+    return getTagClasses(tag.color)
+  }
+  return TAG_COLORS[typeof tag === 'string' ? tag : tag.name] || DEFAULT_TAG_COLOR
 }
 
 function PlayCardThumbnail({
@@ -169,13 +173,14 @@ function PlayCardTags({ tags }: PlayCardTagsProps) {
     <div className="flex flex-wrap gap-1.5 mb-3">
       {visibleTags.map((tag) => {
         const colors = getTagColor(tag)
+        const tagName = typeof tag === 'string' ? tag : tag.name
         return (
           <span
-            key={tag}
-            className={`px-2.5 py-1 rounded-full text-xs 
+            key={tagName}
+            className={`px-2.5 py-1 rounded-full text-xs
               ${colors.bg} ${colors.text}`}
           >
-            {tag}
+            {tagName}
           </span>
         )
       })}

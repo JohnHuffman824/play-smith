@@ -6,11 +6,13 @@ import { PlayHeader } from '../components/plays/PlayHeader'
 import { PlayCardsSection } from '../components/plays/PlayCardsSection'
 import { ConceptDialog } from '../components/concepts/ConceptDialog'
 import { SelectionOverlay } from '../components/canvas/SelectionOverlay'
+import { TagOverlay } from '../components/tags/TagOverlay'
 import { useTheme } from '../contexts/ThemeContext'
 import { PlayProvider, usePlayContext } from '../contexts/PlayContext'
 import { ConceptProvider, useConcept } from '../contexts/ConceptContext'
 import { useConceptData } from '../hooks/useConceptData'
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
+import { useTagsData, type Tag } from '../hooks/useTagsData'
 import { eventBus } from '../services/EventBus'
 import {
 	CHIP_TYPE_FORMATION,
@@ -58,6 +60,10 @@ function PlayEditorContent() {
 	} = useConceptData(teamId, playbookId)
 
 	const [selectedObjectIds, setSelectedObjectIds] = useState<string[]>([])
+
+	const { tags: availableTags, createTag } = useTagsData(teamId)
+	const [selectedTags, setSelectedTags] = useState<Tag[]>([])
+	const [showTagOverlay, setShowTagOverlay] = useState(false)
 
 	/**
 	 * Unified delete method for removing selected objects.
@@ -120,6 +126,14 @@ function PlayEditorContent() {
 					})
 				} else {
 					console.log('Play saved successfully')
+
+					// Save tags
+					await fetch(`/api/plays/${playId}/tags`, {
+						method: 'PUT',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ tag_ids: selectedTags.map(t => t.id) })
+					})
+
 					eventBus.emit('canvas:save-complete', { success: true })
 				}
 			} catch (error) {
@@ -133,7 +147,7 @@ function PlayEditorContent() {
 
 		eventBus.on('canvas:save', handleSave)
 		return () => eventBus.off('canvas:save', handleSave)
-	}, [playId, playState.players, playState.drawings, playState.play, playState.hashAlignment])
+	}, [playId, playState.players, playState.drawings, playState.play, playState.hashAlignment, selectedTags])
 
 	// Load play data on mount - also sets teamId for concept data
 	useEffect(() => {
@@ -168,6 +182,13 @@ function PlayEditorContent() {
 					dispatch({ type: 'SET_DRAWINGS', drawings: play.drawings })
 				}
 
+				// Load tags
+				const tagsRes = await fetch(`/api/plays/${playId}/tags`)
+				if (tagsRes.ok) {
+					const tagsData = await tagsRes.json()
+					setSelectedTags(tagsData.tags || [])
+				}
+
 				console.log('Play loaded successfully')
 			} catch (error) {
 				console.error('Load error:', error)
@@ -199,6 +220,16 @@ function PlayEditorContent() {
 		eventBus.on('selection:delete', handleDeleteSelection)
 		return () => eventBus.off('selection:delete', handleDeleteSelection)
 	}, [selectedObjectIds, deleteSelectedObjects])
+
+	// Listen for tags:toggle event from toolbar
+	useEffect(() => {
+		function handleTagsToggle(data: { isOpen: boolean }) {
+			setShowTagOverlay(data.isOpen)
+		}
+
+		eventBus.on('tags:toggle', handleTagsToggle)
+		return () => eventBus.off('tags:toggle', handleTagsToggle)
+	}, [])
 
 	function handleBackToPlaybook() {
 		if (playbookId) {
@@ -304,6 +335,16 @@ function PlayEditorContent() {
 					onSaveAsConcept={handleSaveSelectionAsConcept}
 					onDelete={handleDeleteSelection}
 					onDuplicate={handleDuplicateSelection}
+				/>
+
+				{/* Tag Overlay */}
+				<TagOverlay
+					isOpen={showTagOverlay}
+					onClose={() => setShowTagOverlay(false)}
+					availableTags={availableTags}
+					selectedTags={selectedTags}
+					onTagsChange={ids => setSelectedTags(availableTags.filter(t => ids.includes(t.id)))}
+					onCreateTag={createTag}
 				/>
 			</div>
 

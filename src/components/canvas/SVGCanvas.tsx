@@ -46,6 +46,7 @@ interface SVGCanvasProps {
 		pointId: string,
 		playerId: string,
 	) => void
+	onPlayerLinked?: (playerId: string, position: { x: number; y: number }) => void
 	onMovePlayer?: (
 		playerId: string,
 		x: number,
@@ -77,6 +78,7 @@ export function SVGCanvas({
 	snapThreshold,
 	selectedDrawingIds = [],
 	onLinkDrawingToPlayer,
+	onPlayerLinked,
 	onMovePlayer,
 	onSelectionChange,
 	onDrawingHoverChange,
@@ -324,6 +326,9 @@ export function SVGCanvas({
 					  }
 					: null
 			)
+		} else {
+			// Clear snap target if no players or conditions not met
+			setWholeDrawingSnapTarget(null)
 		}
 
 		setDrawingDragState({
@@ -332,7 +337,7 @@ export function SVGCanvas({
 		})
 	}
 
-	function handleDrawingDragEnd() {
+	function handleDrawingDragEnd(event?: React.PointerEvent<SVGSVGElement>) {
 		// Link to player if snap target exists
 		if (wholeDrawingSnapTarget && drawingDragState && onLinkDrawingToPlayer) {
 			onLinkDrawingToPlayer(
@@ -340,6 +345,14 @@ export function SVGCanvas({
 				wholeDrawingSnapTarget.pointId,
 				wholeDrawingSnapTarget.playerId,
 			)
+
+			// Show player dialog after linking
+			if (onPlayerLinked && event) {
+				onPlayerLinked(wholeDrawingSnapTarget.playerId, {
+					x: event.clientX,
+					y: event.clientY,
+				})
+			}
 		}
 		setDrawingDragState(null)
 		setWholeDrawingSnapTarget(null)
@@ -386,7 +399,7 @@ export function SVGCanvas({
 				height={height}
 				className='absolute top-0 left-0 w-full h-full pointer-events-auto'
 				onPointerMove={handleDrawingDragMove}
-				onPointerUp={handleDrawingDragEnd}
+				onPointerUp={(e) => handleDrawingDragEnd(e)}
 				onPointerDown={(e) => {
 					if (activeTool == 'erase') {
 					const rect = (e.currentTarget as SVGSVGElement).getBoundingClientRect()

@@ -58,6 +58,7 @@ describe('SVGCanvas - Control Node Visibility', () => {
 				defaultStyle={{ color: '#000000', lineWidth: 2 }}
 				snapThreshold={10}
 				isOverCanvas={true}
+				selectedDrawingIds={['drawing-1', 'drawing-2']}
 			/>
 		)
 
@@ -82,6 +83,7 @@ describe('SVGCanvas - Control Node Visibility', () => {
 				defaultStyle={{ color: '#000000', lineWidth: 2 }}
 				snapThreshold={10}
 				isOverCanvas={true}
+				selectedDrawingIds={['drawing-1', 'drawing-2']}
 			/>
 		)
 
@@ -117,6 +119,7 @@ describe('SVGCanvas - Control Node Visibility', () => {
 				defaultStyle={{ color: '#000000', lineWidth: 2 }}
 				snapThreshold={10}
 				isOverCanvas={true}
+				selectedDrawingIds={['drawing-1', 'drawing-2']}
 			/>
 		)
 

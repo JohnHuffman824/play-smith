@@ -344,6 +344,26 @@ export const db = Object.assign(
 			// Replace PostgreSQL ANY() with SQLite IN()
 			.replace(/=\s*ANY\s*\(/gi, "IN (")
 
+		// Helper function to parse date fields in results
+		const parseDateFields = (obj: any): any => {
+			if (!obj || typeof obj !== 'object') return obj
+
+			const dateFields = ['created_at', 'updated_at', 'expires_at', 'joined_at', 'applied_at', 'last_used_at']
+			const result = { ...obj }
+
+			for (const field of dateFields) {
+				if (field in result && typeof result[field] === 'string') {
+					// Try to parse as Date
+					const date = new Date(result[field])
+					if (!isNaN(date.getTime())) {
+						result[field] = date
+					}
+				}
+			}
+
+			return result
+		}
+
 		// Execute query
 		try {
 			const isSelect = query.trim().toUpperCase().startsWith('SELECT')
@@ -352,16 +372,21 @@ export const db = Object.assign(
 			if (isSelect) {
 				const stmt = sqlite.prepare(query)
 				const results = stmt.all(...params)
-				return Promise.resolve(results)
+				// Parse date fields in all result rows
+				const parsedResults = results.map(parseDateFields)
+				return Promise.resolve(parsedResults)
 			} else if (isReturning) {
 				// Handle INSERT/UPDATE/DELETE with RETURNING
 				const stmt = sqlite.prepare(query)
 				const result = stmt.all(...params)
-				return Promise.resolve(result)
+				// Parse date fields in all result rows
+				const parsedResult = result.map(parseDateFields)
+				return Promise.resolve(parsedResult)
 			} else {
 				const stmt = sqlite.prepare(query)
-				stmt.run(...params)
-				return Promise.resolve([])
+				const info = stmt.run(...params)
+				// Return count of affected rows for compatibility with PostgreSQL
+				return Promise.resolve({ count: info.changes } as any)
 			}
 		} catch (error) {
 			console.error('SQLite query error:', error)
@@ -398,17 +423,40 @@ export const db = Object.assign(
 			// Convert Date objects to ISO strings
 			const processedParams = params.map(p => p instanceof Date ? p.toISOString() : p)
 
+			// Helper function to parse date fields in results
+			const parseDateFields = (obj: any): any => {
+				if (!obj || typeof obj !== 'object') return obj
+
+				const dateFields = ['created_at', 'updated_at', 'expires_at', 'joined_at', 'applied_at', 'last_used_at']
+				const result = { ...obj }
+
+				for (const field of dateFields) {
+					if (field in result && typeof result[field] === 'string') {
+						// Try to parse as Date
+						const date = new Date(result[field])
+						if (!isNaN(date.getTime())) {
+							result[field] = date
+						}
+					}
+				}
+
+				return result
+			}
+
 			try {
 				const isReturning = sqliteQuery.toUpperCase().includes('RETURNING')
 
 				if (isReturning) {
 					const stmt = sqlite.prepare(sqliteQuery)
 					const result = stmt.all(...processedParams)
-					return Promise.resolve(result)
+					// Parse date fields in all result rows
+					const parsedResult = result.map(parseDateFields)
+					return Promise.resolve(parsedResult)
 				} else {
 					const stmt = sqlite.prepare(sqliteQuery)
-					stmt.run(...processedParams)
-					return Promise.resolve([])
+					const info = stmt.run(...processedParams)
+					// Return count of affected rows for compatibility with PostgreSQL
+					return Promise.resolve({ count: info.changes } as any)
 				}
 			} catch (error) {
 				console.error('SQLite unsafe query error:', error)

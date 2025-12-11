@@ -150,20 +150,19 @@ describe('Routing Flow Integration', () => {
 	})
 
 	test('navigation from playbooks to playbook editor', async () => {
-		// Mock multiple API calls in sequence
-		mockFetch
-			// First call: auth check
-			.mockResolvedValueOnce(
-				new Response(JSON.stringify({
+		// Mock fetch with URL-based routing to create fresh Response objects
+		// This avoids "Body already used" errors when responses are consumed multiple times
+		mockFetch.mockImplementation(async (url: string) => {
+			if (url.includes('/api/auth/me')) {
+				return new Response(JSON.stringify({
 					user: { id: 1, email: 'test@example.com', name: 'Test User' }
 				}), {
 					status: 200,
 					headers: { 'Content-Type': 'application/json' }
 				})
-			)
-			// Second call: playbook detail
-			.mockResolvedValueOnce(
-				new Response(JSON.stringify({
+			}
+			if (url.includes('/playbooks/123')) {
+				return new Response(JSON.stringify({
 					playbook: {
 						id: 123,
 						name: 'Test Playbook',
@@ -177,10 +176,9 @@ describe('Routing Flow Integration', () => {
 					status: 200,
 					headers: { 'Content-Type': 'application/json' }
 				})
-			)
-			// Third call: teams list (for the team selector)
-			.mockResolvedValueOnce(
-				new Response(JSON.stringify({
+			}
+			if (url.includes('/api/teams')) {
+				return new Response(JSON.stringify({
 					teams: [
 						{ id: 1, name: 'Test Team' }
 					]
@@ -188,7 +186,9 @@ describe('Routing Flow Integration', () => {
 					status: 200,
 					headers: { 'Content-Type': 'application/json' }
 				})
-			)
+			}
+			return new Response(null, { status: 404 })
+		})
 
 		const router = createMemoryRouter(routes, {
 			initialEntries: ['/playbooks/123']

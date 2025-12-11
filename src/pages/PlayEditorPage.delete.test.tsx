@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ThemeProvider } from '../contexts/ThemeContext'
 import { AuthProvider } from '../contexts/AuthContext'
 import { eventBus } from '../services/EventBus'
+import { act } from 'react'
 
 /**
  * TDD RED: Tests for unified delete functionality
@@ -89,33 +90,37 @@ describe('PlayEditorPage - Unified Delete Functionality', () => {
 		global.fetch = originalFetch
 	})
 
-	function renderPlayEditor() {
+	async function renderPlayEditor() {
 		const queryClient = new QueryClient({
 			defaultOptions: {
 				queries: { retry: false },
 			},
 		})
 
-		return render(
-			<QueryClientProvider client={queryClient}>
-				<AuthProvider>
-					<ThemeProvider>
-						<MemoryRouter initialEntries={['/playbook/test-playbook/play/test-play']}>
-							<Routes>
-								<Route
-									path="/playbook/:playbookId/play/:playId"
-									element={<PlayEditorPage />}
-								/>
-							</Routes>
-						</MemoryRouter>
-					</ThemeProvider>
-				</AuthProvider>
-			</QueryClientProvider>
-		)
+		let result: ReturnType<typeof render>
+		await act(async () => {
+			result = render(
+				<QueryClientProvider client={queryClient}>
+					<AuthProvider>
+						<ThemeProvider>
+							<MemoryRouter initialEntries={['/playbook/test-playbook/play/test-play']}>
+								<Routes>
+									<Route
+										path="/playbook/:playbookId/play/:playId"
+										element={<PlayEditorPage />}
+									/>
+								</Routes>
+							</MemoryRouter>
+						</ThemeProvider>
+					</AuthProvider>
+				</QueryClientProvider>
+			)
+		})
+		return result!
 	}
 
 	test('delete keybind should trigger unified delete method', async () => {
-		const { container } = renderPlayEditor()
+		const { container } = await renderPlayEditor()
 
 		// Simulate keyboard shortcut (Delete key)
 		// This should emit 'selection:delete' event
@@ -135,7 +140,7 @@ describe('PlayEditorPage - Unified Delete Functionality', () => {
 	})
 
 	test('SelectionOverlay delete button should trigger unified delete method', async () => {
-		const { container, getByTitle } = renderPlayEditor()
+		const { container, getByTitle } = await renderPlayEditor()
 
 		// First, we need to select 2+ objects to show the SelectionOverlay
 		// Then click the delete button

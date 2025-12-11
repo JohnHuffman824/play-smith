@@ -676,6 +676,12 @@ export function Canvas({
 						snapThreshold={drawingState.snapThreshold}
 						selectedDrawingIds={selectedDrawingIdFromSVG ? [selectedDrawingIdFromSVG] : []}
 						onLinkDrawingToPlayer={handleLinkDrawingToPlayer}
+						onPlayerLinked={(playerId, position) => {
+							// Show player dialog after linking via drag
+							setSelectedPlayerId(playerId)
+							setLabelDialogPosition(position)
+							setShowLabelDialog(true)
+						}}
 						onMovePlayer={handleMovePlayerOnly}
 						isOverCanvas={isOverCanvas}
 						cursorPosition={cursorPosition}

@@ -18,6 +18,7 @@ import {
 	UserPlus,
 	Loader2,
 	RotateCcw,
+	Tag,
 } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import type { DrawingState, Tool } from '../../types/play.types'
@@ -74,6 +75,7 @@ export function Toolbar({
 	const [showHashDialog, setShowHashDialog] = useState(false)
 	const [showSettingsDialog, setShowSettingsDialog] =
 		useState(false)
+	const [showTagOverlay, setShowTagOverlay] = useState(false)
 	const [isSaving, setIsSaving] = useState(false)
 	const [showSuccess, setShowSuccess] = useState(false)
 	const [showError, setShowError] = useState(false)
@@ -107,6 +109,7 @@ export function Toolbar({
 		setShowDrawingDialog(false)
 		setShowHashDialog(false)
 		setShowSettingsDialog(false)
+		setShowTagOverlay(false)
 	}
 
 	// Auto-close dialogs when cursor moves away
@@ -144,6 +147,12 @@ export function Toolbar({
 		isOpen: showEraseDialog,
 		onClose: () => setShowEraseDialog(false),
 		dataAttribute: 'data-erase-dialog',
+	})
+
+	useDialogAutoClose({
+		isOpen: showTagOverlay,
+		onClose: () => setShowTagOverlay(false),
+		dataAttribute: 'data-tag-overlay',
 	})
 
 	// Listen for keyboard shortcut event
@@ -214,7 +223,7 @@ export function Toolbar({
 			const BUTTON_SIZE = 56 // 14 * 4 (w-14 h-14 in pixels)
 			const GAP = 12
 			const PADDING = 12
-			const TOTAL_BUTTONS = 14 // Count of all toolbar buttons
+			const TOTAL_BUTTONS = 15 // Count of all toolbar buttons
 
 			// Use window height as the stable constraint
 			const availableHeight = window.innerHeight - (2 * PADDING)
@@ -312,6 +321,12 @@ export function Toolbar({
 
 	function handleAddComponent() {
 		eventBus.emit('component:add')
+	}
+
+	function handleToggleTags() {
+		closeAllDialogs()
+		setShowTagOverlay(!showTagOverlay)
+		eventBus.emit('tags:toggle', { isOpen: !showTagOverlay })
 	}
 
 	function handleSavePlay() {
@@ -532,6 +547,16 @@ export function Toolbar({
 						)}
 					>
 						<Plus size={24} />
+					</button>
+				</Tooltip>
+
+				{/* Tags Button */}
+				<Tooltip content='Tags (T)'>
+					<button
+						onClick={handleToggleTags}
+						className={toolButtonClass(showTagOverlay)}
+					>
+						<Tag size={22} />
 					</button>
 				</Tooltip>
 
