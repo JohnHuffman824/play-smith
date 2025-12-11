@@ -214,6 +214,71 @@ function initializeSchema() {
 			FOREIGN KEY (concept_group_id) REFERENCES concept_groups(id) ON DELETE CASCADE
 		)
 	`)
+
+	// Tags tables
+	sqlite.run(`
+		CREATE TABLE IF NOT EXISTS tags (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			team_id INTEGER,
+			name TEXT NOT NULL,
+			color TEXT NOT NULL,
+			is_preset INTEGER NOT NULL DEFAULT 0,
+			created_by INTEGER,
+			created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+			updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+			FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE,
+			FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+			UNIQUE (team_id, name)
+		)
+	`)
+
+	sqlite.run(`CREATE INDEX IF NOT EXISTS idx_tags_team ON tags(team_id)`)
+	sqlite.run(`CREATE INDEX IF NOT EXISTS idx_tags_preset ON tags(is_preset)`)
+
+	// Seed preset tags for SQLite tests
+	sqlite.run(`
+		INSERT OR IGNORE INTO tags (name, color, is_preset, team_id, created_by) VALUES
+			('Short Yardage', '#10B981', 1, NULL, NULL),
+			('Mid Yardage', '#FBBF24', 1, NULL, NULL),
+			('Long Yardage', '#F97316', 1, NULL, NULL),
+			('Redzone', '#EF4444', 1, NULL, NULL),
+			('Goal Line', '#F43F5E', 1, NULL, NULL),
+			('3rd Down', '#3B82F6', 1, NULL, NULL),
+			('Quick Game', '#8B5CF6', 1, NULL, NULL),
+			('Play Action', '#6366F1', 1, NULL, NULL),
+			('RPO', '#14B8A6', 1, NULL, NULL),
+			('Option', '#06B6D4', 1, NULL, NULL)
+	`)
+
+	sqlite.run(`
+		CREATE TABLE IF NOT EXISTS play_tags (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			play_id INTEGER NOT NULL,
+			tag_id INTEGER NOT NULL,
+			created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+			UNIQUE (play_id, tag_id),
+			FOREIGN KEY (play_id) REFERENCES plays(id) ON DELETE CASCADE,
+			FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+		)
+	`)
+
+	sqlite.run(`CREATE INDEX IF NOT EXISTS idx_play_tags_play ON play_tags(play_id)`)
+	sqlite.run(`CREATE INDEX IF NOT EXISTS idx_play_tags_tag ON play_tags(tag_id)`)
+
+	sqlite.run(`
+		CREATE TABLE IF NOT EXISTS playbook_tags (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			playbook_id INTEGER NOT NULL,
+			tag_id INTEGER NOT NULL,
+			created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+			UNIQUE (playbook_id, tag_id),
+			FOREIGN KEY (playbook_id) REFERENCES playbooks(id) ON DELETE CASCADE,
+			FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+		)
+	`)
+
+	sqlite.run(`CREATE INDEX IF NOT EXISTS idx_playbook_tags_playbook ON playbook_tags(playbook_id)`)
+	sqlite.run(`CREATE INDEX IF NOT EXISTS idx_playbook_tags_tag ON playbook_tags(tag_id)`)
 }
 
 // Initialize schema on import
