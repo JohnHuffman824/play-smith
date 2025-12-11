@@ -110,7 +110,7 @@ export function PathRenderer({
 	onDelete,
 	onDragStart,
 }: PathRendererProps) {
-	const { d, endPoints } = useMemo(() => {
+	const { d, endDirection } = useMemo(() => {
 		return buildPath(drawing, coordSystem)
 	}, [drawing, coordSystem])
 
@@ -129,9 +129,8 @@ export function PathRenderer({
 
 	const ending = renderLineEnding(
 		drawing,
-		endPoints,
+		endDirection,
 		strokeWidth,
-		coordSystem,
 		activeTool,
 	)
 
@@ -258,7 +257,7 @@ export function PathRenderer({
 function buildPath(
 	drawing: Drawing,
 	coordSystem: FieldCoordinateSystem,
-): { d: string; endPoints: Coordinate[] } {
+): { d: string; endPoints: Coordinate[]; endDirection?: { angle: number; point: Coordinate } } {
 	const commands: string[] = []
 	const endPoints: Coordinate[] = []
 
@@ -302,7 +301,19 @@ function buildPath(
 		endPoints.push(allPixelPoints[0])
 		endPoints.push(allPixelPoints[allPixelPoints.length - 1])
 
-		return { d: commands.join(' '), endPoints }
+		// Calculate end direction from smoothed path
+		const lastSmoothed = smoothed[smoothed.length - 1]
+		const prevSmoothed = smoothed[smoothed.length - 2]
+		const endAngle = Math.atan2(
+			lastSmoothed.y - prevSmoothed.y,
+			lastSmoothed.x - prevSmoothed.x
+		)
+
+		return {
+			d: commands.join(' '),
+			endPoints,
+			endDirection: { angle: endAngle, point: lastSmoothed }
+		}
 	}
 
 	// Original logic for non-smooth drawings (sharp mode, cubic, quadratic)
@@ -370,43 +381,41 @@ function buildPath(
 		}
 	}
 
-	return { d: commands.join(' '), endPoints }
+	// Calculate end direction from last segment for sharp mode
+	let endDirection: { angle: number; point: Coordinate } | undefined
+	if (drawing.segments.length > 0) {
+		const lastSeg = drawing.segments[drawing.segments.length - 1]
+		const points = getSegmentPoints(drawing, lastSeg!)
+		if (points.length >= 2) {
+			const lastPt = toPixels(points[points.length - 1]!, coordSystem)
+			const prevPt = toPixels(points[points.length - 2]!, coordSystem)
+			const angle = Math.atan2(lastPt.y - prevPt.y, lastPt.x - prevPt.x)
+			endDirection = { angle, point: lastPt }
+		}
+	}
+
+	return { d: commands.join(' '), endPoints, endDirection }
 }
 
 function renderLineEnding(
 	drawing: Drawing,
-	endPoints: Coordinate[],
+	endDirection: { angle: number; point: Coordinate } | undefined,
 	strokeWidth: number,
-	coordSystem: FieldCoordinateSystem,
 	activeTool?: 'draw' | 'select' | 'erase',
 ) {
-	if (drawing.style.lineEnd == LINE_END_NONE) return null
-	if (endPoints.length == 0) return null
+	if (drawing.style.lineEnd === LINE_END_NONE) return null
+	if (!endDirection) return null
 
-	const lastSegment = drawing.segments[drawing.segments.length - 1]
-	if (!lastSegment) return null
-
-	// Resolve point IDs to actual points
-	const points = getSegmentPoints(drawing, lastSegment)
-	const pixelPoints = points.map((p) => toPixels(p, coordSystem))
-	if (pixelPoints.length < 2) return null
-
-	const endPoint = pixelPoints[pixelPoints.length - 1]!
-	const prevPoint = pixelPoints[pixelPoints.length - 2]!
-
-	const angle = Math.atan2(
-		endPoint.y - prevPoint.y,
-		endPoint.x - prevPoint.x,
-	)
+	const { angle, point: endPoint } = endDirection
 
 	const strokeColor =
-		activeTool == 'erase'
+		activeTool === 'erase'
 			? 'rgba(239,68,68,0.9)'
 			: drawing.style.color
 	const strokeW =
-		activeTool == 'erase' ? strokeWidth * 1.15 : strokeWidth
+		activeTool === 'erase' ? strokeWidth * 1.15 : strokeWidth
 
-	if (drawing.style.lineEnd == LINE_END_ARROW) {
+	if (drawing.style.lineEnd === LINE_END_ARROW) {
 		const arrowD = buildArrow(endPoint, angle, strokeWidth)
 		return (
 			<path
@@ -420,7 +429,7 @@ function renderLineEnding(
 		)
 	}
 
-	if (drawing.style.lineEnd == LINE_END_TSHAPE) {
+	if (drawing.style.lineEnd === LINE_END_TSHAPE) {
 		const tD = buildTShape(endPoint, angle, strokeWidth)
 		return (
 			<path
