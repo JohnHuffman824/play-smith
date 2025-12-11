@@ -229,7 +229,7 @@ export function ConceptDialog({
 				</div>
 
 				{/* Canvas Area */}
-				<div className="flex-1 flex min-h-0 relative pr-6 gap-4">
+				<div className="flex-1 flex min-h-0 relative pr-6">
 					<PlayProvider>
 						{/* Left Toolbar */}
 						<ConceptToolbar
