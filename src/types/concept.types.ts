@@ -38,6 +38,8 @@ export interface BaseConcept {
 	targeting_mode: TargetingMode
 	ball_position: BallPosition
 	play_direction: PlayDirection
+	is_motion: boolean
+	is_modifier: boolean
 	created_by: number
 	created_at: Date
 	updated_at: Date
@@ -157,3 +159,30 @@ export interface SelectorDefinition {
 	hasCount: boolean
 	requiresPlayDirection?: boolean
 }
+
+export interface ModifierOverride {
+	id: number
+	modifier_concept_id: number
+	formation_id: number
+	override_rules: {
+		role: string
+		delta_x: number
+		delta_y: number
+	}
+	created_at: Date
+}
+
+export interface ComposedConcept {
+	role: string
+	template_name: string
+	drawing_data: {
+		paths: Array<{
+			points: Array<{ x: number; y: number }>
+			style: 'solid' | 'dashed'
+			end: 'none' | 'arrow' | 'tShape'
+		}>
+	}
+	is_saved: boolean
+}
+
+export type ConceptUIType = 'formation' | 'concept' | 'concept_group'
