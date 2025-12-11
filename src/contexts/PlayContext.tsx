@@ -11,6 +11,7 @@ import type { HashAlignment } from '../types/field.types'
 import type { Drawing } from '../types/drawing.types'
 import type { Formation, BaseConcept, ConceptGroup } from '../types/concept.types'
 import { useTheme } from './ThemeContext'
+import { repositionLinemenForHash } from '../utils/lineman.utils'
 
 interface Player {
 	id: string
@@ -42,6 +43,7 @@ type PlayAction =
 	| { type: 'ADD_PLAY_CARD'; card: PlayCard }
 	| { type: 'DELETE_PLAY_CARD'; id: string }
 	| { type: 'SET_HASH_ALIGNMENT'; alignment: HashAlignment }
+	| { type: 'REPOSITION_LINEMEN_FOR_HASH'; alignment: HashAlignment }
 	| { type: 'TOGGLE_PLAY_BAR' }
 	| { type: 'SET_SHOW_PLAY_BAR'; show: boolean }
 	| { type: 'SET_PLAYERS'; players: Player[] }
@@ -341,6 +343,17 @@ function applyApplyConceptGroup(
 	return newState
 }
 
+function applyRepositionLinemenForHash(
+	state: PlayState,
+	action: { type: 'REPOSITION_LINEMEN_FOR_HASH'; alignment: HashAlignment }
+): PlayState {
+	return {
+		...state,
+		hashAlignment: action.alignment,
+		players: repositionLinemenForHash(state.players, action.alignment),
+	}
+}
+
 /**
 * Reducer handling play state transitions.
 */
@@ -362,6 +375,8 @@ function playReducer(state: PlayState, action: PlayAction): PlayState {
 			return applyDeletePlayCard(state, action)
 		case 'SET_HASH_ALIGNMENT':
 			return applySetHashAlignment(state, action)
+		case 'REPOSITION_LINEMEN_FOR_HASH':
+			return applyRepositionLinemenForHash(state, action)
 		case 'TOGGLE_PLAY_BAR':
 			return applyTogglePlayBar(state)
 		case 'SET_SHOW_PLAY_BAR':
@@ -448,7 +463,7 @@ export function PlayProvider({ children }: { children: ReactNode }) {
 	}, [])
 
 	const setHashAlignment = useCallback((alignment: HashAlignment) => {
-		dispatch({ type: 'SET_HASH_ALIGNMENT', alignment })
+		dispatch({ type: 'REPOSITION_LINEMEN_FOR_HASH', alignment })
 	}, [])
 
 	const setShowPlayBar = useCallback((show: boolean) => {
