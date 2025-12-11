@@ -12,7 +12,8 @@ import {
 	mergeDrawings,
 	getDrawingStartPoint,
 	getDrawingEndPoint,
-	findPlayerSnapTarget
+	findPlayerSnapTarget,
+	deletePointFromDrawing
 } from '../../utils/drawing.utils'
 import { convertToSharp, extractMainCoordinates } from '../../utils/curve.utils'
 import { processSmoothPath } from '../../utils/smooth-path.utils'
@@ -201,6 +202,21 @@ export function SVGCanvas({
 	) {
 		if (onLinkDrawingToPlayer) {
 			onLinkDrawingToPlayer(drawingId, pointId, playerId)
+		}
+	}
+
+	function handleDeletePoint(drawingId: string, pointId: string) {
+		const drawing = drawings.find(d => d.id === drawingId)
+		if (!drawing) return
+
+		const updatedDrawing = deletePointFromDrawing(drawing, pointId)
+
+		if (updatedDrawing === null) {
+			// Drawing should be deleted entirely
+			onChange(drawings.filter(d => d.id !== drawingId))
+		} else {
+			// Update the drawing with the point removed
+			onChange(drawings.map(d => d.id === drawingId ? updatedDrawing : d))
 		}
 	}
 
@@ -498,6 +514,7 @@ export function SVGCanvas({
 					onDragPoint={handleDragPoint}
 					onMerge={handleMerge}
 					onLinkToPlayer={handleLinkToPlayer}
+					onDeletePoint={activeTool === 'select' ? handleDeletePoint : undefined}
 				/>
 			)}
 
