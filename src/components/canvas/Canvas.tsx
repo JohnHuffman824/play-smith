@@ -607,7 +607,7 @@ export function Canvas({
 
 	const whiteboardClasses = [
 		'w-full rounded-2xl relative',
-		'border-2 border-gray-300',
+		'ring-2 ring-inset ring-gray-300',
 	].join(' ')
 
 	const cursorOverlayClasses =

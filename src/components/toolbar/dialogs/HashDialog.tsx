@@ -1,16 +1,17 @@
 import { useTheme } from '../../../contexts/ThemeContext'
+import type { HashAlignment } from '../../../types/field.types'
 
 interface HashDialogProps {
-  currentAlignment: 'center' | 'left' | 'right'
-  onAlignmentChange: (alignment: 'center' | 'left' | 'right') => void
+  currentAlignment: HashAlignment
+  onAlignmentChange: (alignment: HashAlignment) => void
   onClose: () => void
 }
 
 export function HashDialog({ currentAlignment, onAlignmentChange, onClose }: HashDialogProps) {
   const { theme } = useTheme()
-  const alignments: Array<{ value: 'center' | 'left' | 'right'; label: string }> = [
+  const alignments: Array<{ value: HashAlignment; label: string }> = [
     { value: 'left', label: 'Left' },
-    { value: 'center', label: 'Middle' },
+    { value: 'middle', label: 'Middle' },
     { value: 'right', label: 'Right' },
   ]
 

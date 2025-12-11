@@ -55,12 +55,12 @@ export function DrawingPropertiesDialog({
 		<>
 			{/* Transparent backdrop to handle click-away */}
 			<div
-				className='fixed inset-0 z-40'
+				className='fixed inset-0 z-[60]'
 				onClick={onClose}
 			/>
 			<div
 				style={dialogStyle}
-				className={`w-64 rounded-2xl shadow-2xl border p-4 z-50 ${
+				className={`w-64 rounded-2xl shadow-2xl border p-4 z-[70] ${
 					theme === 'dark'
 						? 'bg-gray-800 border-gray-700'
 						: 'bg-white border-gray-200'

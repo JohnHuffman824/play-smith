@@ -106,15 +106,16 @@ export function ConceptToolbar({
 				/>
 
 				{showHashDialog && (
-					<HashDialog
-						isOpen={showHashDialog}
-						onClose={() => setShowHashDialog(false)}
-						hashAlignment={hashAlignment}
-						onHashAlignmentChange={alignment => {
-							onHashAlignmentChange(alignment)
-							setShowHashDialog(false)
-						}}
-					/>
+					<div className="absolute left-full ml-2 top-0 z-50">
+						<HashDialog
+							currentAlignment={hashAlignment}
+							onAlignmentChange={alignment => {
+								onHashAlignmentChange(alignment)
+								setShowHashDialog(false)
+							}}
+							onClose={() => setShowHashDialog(false)}
+						/>
+					</div>
 				)}
 			</div>
 		</div>
