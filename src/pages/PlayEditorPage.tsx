@@ -108,6 +108,50 @@ function PlayEditorContent() {
 		return () => eventBus.off('canvas:save', handleSave)
 	}, [playId, playState.players, playState.drawings, playState.play, playState.hashAlignment])
 
+	// Load play data on mount - also sets teamId for concept data
+	useEffect(() => {
+		async function loadPlay() {
+			if (!playId) return
+
+			try {
+				const response = await fetch(`/api/plays/${playId}`)
+				if (!response.ok) {
+					console.error('Failed to load play')
+					return
+				}
+
+				const data = await response.json()
+				const play = data.play
+
+				// Set teamId from play response (via playbook join)
+				if (play.teamId) {
+					setTeamId(play.teamId)
+				}
+
+				if (play.name) {
+					dispatch({ type: 'SET_PLAY', play: play.name })
+				}
+				if (play.hashAlignment) {
+					dispatch({ type: 'SET_HASH_ALIGNMENT', alignment: play.hashAlignment })
+				}
+				if (play.players?.length > 0) {
+					play.players.forEach((player: any) => {
+						dispatch({ type: 'ADD_PLAYER', player })
+					})
+				}
+				if (play.drawings?.length > 0) {
+					dispatch({ type: 'SET_DRAWINGS', drawings: play.drawings })
+				}
+
+				console.log('Play loaded successfully')
+			} catch (error) {
+				console.error('Load error:', error)
+			}
+		}
+
+		loadPlay()
+	}, [playId, dispatch])
+
 	// Apply selected concepts to canvas
 	useEffect(() => {
 		conceptState.appliedConcepts.forEach(chip => {
