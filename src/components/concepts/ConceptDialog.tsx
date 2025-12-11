@@ -8,6 +8,7 @@ import type {
 } from '../../types/concept.types'
 import { Canvas } from '../canvas/Canvas'
 import { ConceptToolbar } from './ConceptToolbar'
+import { FlipController } from './FlipController'
 import { TargetingTooltip } from './TargetingTooltip'
 import { PlayProvider } from '../../contexts/PlayContext'
 import type { Tool } from '../../types/play.types'
@@ -60,6 +61,7 @@ export function ConceptDialog({
 	const [lineEnd, setLineEnd] = useState<'none' | 'arrow' | 'tShape'>('arrow')
 	const [brushSize, setBrushSize] = useState(3)
 	const [pathMode, setPathMode] = useState<'sharp' | 'curve'>('sharp')
+	const [flipCanvas, setFlipCanvas] = useState<(() => void) | null>(null)
 	const canvasContainerRef = useRef<HTMLDivElement>(null)
 
 	useEffect(() => {
@@ -157,7 +159,9 @@ export function ConceptDialog({
 	const isFormValid = name.trim().length > 0 && name.trim().length <= 100
 
 	function handleFlip() {
-		// TODO: Implement flip logic - mirror all drawings horizontally
+		if (flipCanvas) {
+			flipCanvas()
+		}
 	}
 
 	return (
@@ -279,6 +283,7 @@ export function ConceptDialog({
 								showFieldMarkings={true}
 							/>
 						</div>
+						<FlipController onFlipReady={(fn) => setFlipCanvas(() => fn)} />
 					</PlayProvider>
 
 					{/* Color Picker Dialog */}
