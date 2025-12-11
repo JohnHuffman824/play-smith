@@ -555,6 +555,18 @@ export function Toolbar({
 					</button>
 				</Tooltip>
 
+				{/* Clear Canvas Button */}
+				<Tooltip content='Clear Canvas'>
+					<button
+						onClick={handleClearPlay}
+						className={neutralButtonClass(
+							lightNeutralClass
+						)}
+					>
+						<RotateCcw size={22} />
+					</button>
+				</Tooltip>
+
 				{/* Save Button */}
 				<Tooltip content='Save'>
 					<button
