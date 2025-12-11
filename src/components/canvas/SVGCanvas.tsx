@@ -111,6 +111,17 @@ export function SVGCanvas({
 		onSelectionChange?.(id)
 	}
 
+	function handleSelectWithDialog(id: string, position: { x: number; y: number }) {
+		setSelectedDrawingId(id)
+		setLastDrawnDrawingId(null)
+		onSelectionChange?.(id)
+
+		const drawing = drawings.find((d) => d.id === id)
+		if (drawing) {
+			setEditingDrawing({ drawing, position })
+		}
+	}
+
 	function handleDragPoint(
 		drawingId: string,
 		pointId: string,
@@ -325,11 +336,11 @@ export function SVGCanvas({
 					drawing={drawing}
 					coordSystem={coordSystem}
 					onSelect={handleSelect}
+					onSelectWithPosition={handleSelectWithDialog}
 					isSelected={selectedDrawingIds.includes(drawing.id)}
 					activeTool={activeTool}
 					onDelete={onDeleteDrawing}
 					onDragStart={handleDrawingDragStart}
-					onDoubleClick={handleDrawingDoubleClick}
 				/>
 			))}
 

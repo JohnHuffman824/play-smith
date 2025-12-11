@@ -14,6 +14,7 @@ const DEFAULT_PROXIMITY_THRESHOLD = 20
 
 interface MultiDrawingControlPointOverlayProps {
 	drawings: Drawing[]
+	selectedDrawingIds?: string[]
 	players?: Array<{
 		id: string
 		x: number
@@ -143,21 +144,23 @@ function getDistanceToDrawingPath(
 					minDistance = Math.min(minDistance, dist)
 				}
 			} else {
-				// OLD FORMAT: separate control points
+				// OLD FORMAT: separate control points (4 points: start, cp1, cp2, end)
 				const p0 = drawing.points[pointIds[0]]
 				const cp1 = drawing.points[pointIds[1]]
 				const cp2 = drawing.points[pointIds[2]]
-				if (!p0 || !cp1 || !cp2) continue
+				const p3 = drawing.points[pointIds[3]]
+				if (!p0 || !cp1 || !cp2 || !p3) continue
 
 				const pixel0 = coordSystem.feetToPixels(p0.x, p0.y)
 				const pixelCp1 = coordSystem.feetToPixels(cp1.x, cp1.y)
 				const pixelCp2 = coordSystem.feetToPixels(cp2.x, cp2.y)
+				const pixel3 = coordSystem.feetToPixels(p3.x, p3.y)
 
 				const samples = sampleCubicBezier(
 					pixel0,
 					pixelCp1,
 					pixelCp2,
-					pixelCp2,
+					pixel3,
 					BEZIER_SAMPLE_POINTS
 				)
 
@@ -192,6 +195,7 @@ function getDistanceToDrawingPath(
  */
 export function MultiDrawingControlPointOverlay({
 	drawings,
+	selectedDrawingIds = [],
 	players,
 	coordSystem,
 	snapThreshold,
@@ -323,21 +327,31 @@ export function MultiDrawingControlPointOverlay({
 		}
 	}
 
-	// Filter drawings by proximity to cursor
-	const nearbyDrawings = useMemo(() => {
-		if (!cursorPosition) return drawings
+	// Show nodes for drawings that are EITHER hovered OR selected
+	const drawingsToShowNodes = useMemo(() => {
+		const hoveredDrawingIds = new Set<string>()
 
-		return drawings.filter(drawing => {
-			const distance = getDistanceToDrawingPath(
-				cursorPosition,
-				drawing,
-				coordSystem
-			)
-			return distance <= proximityThreshold
-		})
-	}, [drawings, cursorPosition, coordSystem, proximityThreshold])
+		// Find drawings within proximity threshold (hovered)
+		if (cursorPosition) {
+			for (const drawing of drawings) {
+				const distance = getDistanceToDrawingPath(
+					cursorPosition,
+					drawing,
+					coordSystem
+				)
+				if (distance <= proximityThreshold) {
+					hoveredDrawingIds.add(drawing.id)
+				}
+			}
+		}
 
-	// Collect control points only from nearby drawings
+		// Union: show nodes for drawings that are hovered OR selected
+		return drawings.filter(d =>
+			hoveredDrawingIds.has(d.id) || selectedDrawingIds.includes(d.id)
+		)
+	}, [drawings, cursorPosition, coordSystem, proximityThreshold, selectedDrawingIds])
+
+	// Collect control points only from drawings to show nodes for
 	// No deduplication needed - each drawing's point pool already has unique points!
 	const controlPoints: Array<{
 		drawingId: string
@@ -347,7 +361,7 @@ export function MultiDrawingControlPointOverlay({
 		color: string
 	}> = []
 
-	for (const drawing of nearbyDrawings) {
+	for (const drawing of drawingsToShowNodes) {
 		// Iterate over the point pool directly
 		for (const [pointId, point] of Object.entries(drawing.points)) {
 			// Skip points linked to players
