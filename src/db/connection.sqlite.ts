@@ -147,6 +147,22 @@ function initializeSchema() {
 	`)
 
 	sqlite.run(`
+		CREATE TABLE IF NOT EXISTS formation_player_positions (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			formation_id INTEGER NOT NULL,
+			role TEXT NOT NULL,
+			position_x REAL NOT NULL,
+			position_y REAL NOT NULL,
+			hash_relative INTEGER NOT NULL DEFAULT 0,
+			created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+			UNIQUE (formation_id, role),
+			FOREIGN KEY (formation_id) REFERENCES formations(id) ON DELETE CASCADE
+		)
+	`)
+
+	sqlite.run(`CREATE INDEX IF NOT EXISTS idx_formation_positions_formation ON formation_player_positions(formation_id)`)
+
+	sqlite.run(`
 		CREATE TABLE IF NOT EXISTS base_concepts (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			team_id INTEGER,
@@ -200,6 +216,22 @@ function initializeSchema() {
 			FOREIGN KEY (created_by) REFERENCES users(id)
 		)
 	`)
+
+	sqlite.run(`
+		CREATE TABLE IF NOT EXISTS concept_group_concepts (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			concept_group_id INTEGER NOT NULL,
+			concept_id INTEGER NOT NULL,
+			order_index INTEGER NOT NULL DEFAULT 0,
+			created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+			UNIQUE (concept_group_id, concept_id),
+			FOREIGN KEY (concept_group_id) REFERENCES concept_groups(id) ON DELETE CASCADE,
+			FOREIGN KEY (concept_id) REFERENCES base_concepts(id) ON DELETE CASCADE
+		)
+	`)
+
+	sqlite.run(`CREATE INDEX IF NOT EXISTS idx_group_concepts_group ON concept_group_concepts(concept_group_id)`)
+	sqlite.run(`CREATE INDEX IF NOT EXISTS idx_group_concepts_order ON concept_group_concepts(concept_group_id, order_index)`)
 
 	sqlite.run(`
 		CREATE TABLE IF NOT EXISTS concept_applications (

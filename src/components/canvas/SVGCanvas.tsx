@@ -340,6 +340,37 @@ export function SVGCanvas({
 	function handleDrawingDragEnd(event?: React.PointerEvent<SVGSVGElement>) {
 		// Link to player if snap target exists
 		if (wholeDrawingSnapTarget && drawingDragState && onLinkDrawingToPlayer) {
+			// CRITICAL: Move entire drawing to maintain shape before linking
+			// Find the drawing and the point that will be linked
+			const drawing = drawings.find((d) => d.id === drawingDragState.drawingId)
+			const linkedPoint = drawing?.points[wholeDrawingSnapTarget.pointId]
+
+			if (drawing && linkedPoint) {
+				// Calculate delta from linked point's current position to player position
+				const deltaX = wholeDrawingSnapTarget.playerPosition.x - linkedPoint.x
+				const deltaY = wholeDrawingSnapTarget.playerPosition.y - linkedPoint.y
+
+				// Move ALL points in the drawing by this delta to maintain shape
+				const updatedPoints: Record<string, import('../../types/drawing.types').ControlPoint> = {}
+				for (const [id, point] of Object.entries(drawing.points)) {
+					updatedPoints[id] = {
+						...point,
+						x: point.x + deltaX,
+						y: point.y + deltaY,
+					}
+				}
+
+				// Update the drawing with all points moved
+				onChange(
+					drawings.map((d) =>
+						d.id === drawing.id
+							? { ...d, points: updatedPoints }
+							: d
+					)
+				)
+			}
+
+			// Now link the point to the player (point is already at player position)
 			onLinkDrawingToPlayer(
 				drawingDragState.drawingId,
 				wholeDrawingSnapTarget.pointId,

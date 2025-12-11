@@ -321,12 +321,19 @@ function PlayEditorContent() {
 					playbookId={playbookId}
 					onBackToPlaybook={handleBackToPlaybook}
 				/>
-				<Canvas
-					drawingState={playState.drawingState}
-					hashAlignment={playState.hashAlignment}
-					showPlayBar={playState.showPlayBar}
-					onSelectionChange={setSelectedObjectIds}
-				/>
+				<div className="relative flex-1">
+					<Canvas
+						drawingState={playState.drawingState}
+						hashAlignment={playState.hashAlignment}
+						showPlayBar={playState.showPlayBar}
+						onSelectionChange={setSelectedObjectIds}
+					/>
+					{/* Selected Tags Overlay */}
+					<SelectedTagsOverlay
+						tags={selectedTags}
+						onRemoveTag={handleRemoveTag}
+					/>
+				</div>
 				<PlayCardsSection
 					playCards={playState.playCards}
 					onAddCard={() => {}}
@@ -340,12 +347,6 @@ function PlayEditorContent() {
 					onSaveAsConcept={handleSaveSelectionAsConcept}
 					onDelete={handleDeleteSelection}
 					onDuplicate={handleDuplicateSelection}
-				/>
-
-				{/* Selected Tags Overlay */}
-				<SelectedTagsOverlay
-					tags={selectedTags}
-					onRemoveTag={handleRemoveTag}
 				/>
 			</div>
 
