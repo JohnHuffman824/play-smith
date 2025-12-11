@@ -4,13 +4,22 @@ import { ThemeProvider, useTheme } from './ThemeContext'
 import { act } from 'react'
 
 // Mock localStorage
-const localStorageMock = {
-	getItem: () => null,
-	setItem: () => {},
-	removeItem: () => {},
-	clear: () => {}
-}
-global.localStorage = localStorageMock as Storage
+const createLocalStorageMock = () => ({
+	getItem: vi.fn((key: string) => null),
+	setItem: vi.fn((key: string, value: string) => {}),
+	removeItem: vi.fn((key: string) => {}),
+	clear: vi.fn(() => {}),
+	length: 0,
+	key: vi.fn((index: number) => null)
+})
+
+// Create initial mock
+let localStorageMock = createLocalStorageMock()
+Object.defineProperty(global, 'localStorage', {
+	value: localStorageMock,
+	writable: true,
+	configurable: true
+})
 
 function TestComponent() {
 	const {
@@ -43,13 +52,12 @@ describe('ThemeContext', () => {
 		document.documentElement.classList.remove('dark')
 
 		// Reset localStorage mock
-		const localStorageMock = {
-			getItem: () => null,
-			setItem: () => {},
-			removeItem: () => {},
-			clear: () => {}
-		}
-		global.localStorage = localStorageMock as Storage
+		localStorageMock = createLocalStorageMock()
+		Object.defineProperty(global, 'localStorage', {
+			value: localStorageMock,
+			writable: true,
+			configurable: true
+		})
 	})
 
 	test('provides default values', () => {
@@ -115,9 +123,6 @@ describe('ThemeContext', () => {
 	})
 
 	test('persists theme to localStorage', () => {
-		const mockSetItem = vi.fn()
-		global.localStorage.setItem = mockSetItem
-
 		act(() => {
 			render(
 				<ThemeProvider>
@@ -130,17 +135,16 @@ describe('ThemeContext', () => {
 			screen.getByText('Set Dark').click()
 		})
 
-		expect(mockSetItem).toHaveBeenCalledWith('theme', '"dark"')
+		expect(localStorageMock.setItem).toHaveBeenCalledWith('theme', '"dark"')
 	})
 
 	test('loads initial values from localStorage', () => {
-		const mockGetItem = vi.fn((key: string) => {
+		localStorageMock.getItem = vi.fn((key: string) => {
 			if (key === 'theme') return '"dark"'
 			if (key === 'positionNaming') return '"modern"'
 			if (key === 'fieldLevel') return '"pro"'
 			return null
 		})
-		global.localStorage.getItem = mockGetItem
 
 		act(() => {
 			render(
