@@ -208,7 +208,7 @@ function PlayEditorContent() {
 		}
 
 		loadPlay()
-	}, [playId, dispatch, setPlayers])
+	}, [playId]) // eslint-disable-line react-hooks/exhaustive-deps
 
 	// Apply selected concepts to canvas
 	useEffect(() => {
@@ -315,8 +315,8 @@ function PlayEditorContent() {
 	}
 
 	// Show loading screen until play data is fully loaded
-	// Only wait for concepts if we have a teamId (concepts need teamId to load)
-	if (!isPlayLoaded || (teamId && conceptsLoading)) {
+	// Concepts can load in the background after the canvas appears
+	if (!isPlayLoaded) {
 		return (
 			<div className={`flex items-center justify-center h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
 				<div className="text-center">
