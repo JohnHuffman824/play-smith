@@ -19,16 +19,81 @@ import {
 	getPoint,
 } from '../../utils/drawing.utils'
 
+// Chaikin smoothing for render-time curve smoothing
+const CHAIKIN_ITERATIONS = 3
+
+interface PixelPoint {
+	x: number
+	y: number
+}
+
+function chaikinSubdivide(points: PixelPoint[], preserveEndpoints: boolean = false): PixelPoint[] {
+	if (points.length < 2) return points
+
+	const result: PixelPoint[] = []
+
+	// Preserve first endpoint if requested
+	if (preserveEndpoints) {
+		result.push(points[0])
+	}
+
+	for (let i = 0; i < points.length - 1; i++) {
+		const p0 = points[i]
+		const p1 = points[i + 1]
+
+		// For first/last segments with endpoint preservation, only add one point
+		if (preserveEndpoints && i === 0) {
+			// Only add R point for first segment
+			result.push({
+				x: 0.25 * p0.x + 0.75 * p1.x,
+				y: 0.25 * p0.y + 0.75 * p1.y,
+			})
+		} else if (preserveEndpoints && i === points.length - 2) {
+			// Only add Q point for last segment
+			result.push({
+				x: 0.75 * p0.x + 0.25 * p1.x,
+				y: 0.75 * p0.y + 0.25 * p1.y,
+			})
+		} else {
+			// Normal subdivision for middle segments
+			result.push({
+				x: 0.75 * p0.x + 0.25 * p1.x,
+				y: 0.75 * p0.y + 0.25 * p1.y,
+			})
+			result.push({
+				x: 0.25 * p0.x + 0.75 * p1.x,
+				y: 0.25 * p0.y + 0.75 * p1.y,
+			})
+		}
+	}
+
+	// Preserve last endpoint if requested
+	if (preserveEndpoints) {
+		result.push(points[points.length - 1])
+	}
+
+	return result
+}
+
+function applyChaikin(points: PixelPoint[], iterations: number): PixelPoint[] {
+	let result = points
+	for (let i = 0; i < iterations; i++) {
+		// Preserve endpoints on every iteration to maintain start/end positions
+		result = chaikinSubdivide(result, true)
+	}
+	return result
+}
+
 interface PathRendererProps {
 	drawing: Drawing
 	coordSystem: FieldCoordinateSystem
 	className?: string
 	onSelect?: (id: string) => void
+	onSelectWithPosition?: (id: string, position: { x: number; y: number }) => void
 	isSelected?: boolean
 	activeTool?: 'draw' | 'select' | 'erase'
 	onDelete?: (id: string) => void
 	onDragStart?: (drawingId: string, feetX: number, feetY: number) => void
-	onDoubleClick?: (drawingId: string, position: { x: number; y: number }) => void
 }
 
 /**
@@ -39,11 +104,11 @@ export function PathRenderer({
 	coordSystem,
 	className,
 	onSelect,
+	onSelectWithPosition,
 	isSelected,
 	activeTool,
 	onDelete,
 	onDragStart,
-	onDoubleClick,
 }: PathRendererProps) {
 	const { d, endPoints } = useMemo(() => {
 		return buildPath(drawing, coordSystem)
@@ -70,12 +135,16 @@ export function PathRenderer({
 		activeTool,
 	)
 
-	function handleClick() {
+	function handleClick(event: React.MouseEvent) {
 		if (activeTool == 'erase' && onDelete) {
 			onDelete(drawing.id)
 			return
 		}
-		if (onSelect) onSelect(drawing.id)
+		if (activeTool == 'select' && onSelectWithPosition) {
+			onSelectWithPosition(drawing.id, { x: event.clientX, y: event.clientY })
+		} else if (onSelect) {
+			onSelect(drawing.id)
+		}
 	}
 
 	function handlePointerDown(event: React.PointerEvent<SVGPathElement>) {
@@ -100,12 +169,6 @@ export function PathRenderer({
 		}
 	}
 
-	function handleDoubleClick(event: React.MouseEvent) {
-		if (activeTool == 'select' && onDoubleClick) {
-			event.stopPropagation()
-			onDoubleClick(drawing.id, { x: event.clientX, y: event.clientY })
-		}
-	}
 
 	const eraseHover =
 		activeTool == 'erase'
@@ -175,7 +238,6 @@ export function PathRenderer({
 				style={{ ...eraseHover, ...selectStyle }}
 				pointerEvents='stroke'
 				onPointerDown={handlePointerDown}
-				onDoubleClick={handleDoubleClick}
 			/>
 			{ending}
 			{drawing.playerId && linkedPixel && (
@@ -197,11 +259,53 @@ function buildPath(
 	drawing: Drawing,
 	coordSystem: FieldCoordinateSystem,
 ): { d: string; endPoints: Coordinate[] } {
-	if (drawing.segments.length == 0) return { d: '', endPoints: [] }
-
 	const commands: string[] = []
 	const endPoints: Coordinate[] = []
 
+	if (drawing.segments.length === 0) return { d: '', endPoints: [] }
+
+	// Check if this is a smooth drawing (all line segments from smooth mode)
+	const isAllLineSegments = drawing.segments.every(s => s.type === 'line')
+	const shouldSmooth = isAllLineSegments && drawing.style.pathMode === 'curve'
+
+	if (shouldSmooth) {
+		// Collect all unique points in order for smooth rendering
+		const allPixelPoints: PixelPoint[] = []
+		const seenPoints = new Set<string>()
+
+		for (const segment of drawing.segments) {
+			for (const pointId of segment.pointIds) {
+				if (!seenPoints.has(pointId)) {
+					seenPoints.add(pointId)
+					const point = drawing.points[pointId]
+					if (point) {
+						allPixelPoints.push(toPixels(point, coordSystem))
+					}
+				}
+			}
+		}
+
+		if (allPixelPoints.length < 2) {
+			return { d: '', endPoints: [] }
+		}
+
+		// Apply Chaikin smoothing to pixel coordinates
+		const smoothed = applyChaikin(allPixelPoints, CHAIKIN_ITERATIONS)
+
+		// Build path from smoothed points
+		commands.push(`M ${smoothed[0].x} ${smoothed[0].y}`)
+		for (let i = 1; i < smoothed.length; i++) {
+			commands.push(`L ${smoothed[i].x} ${smoothed[i].y}`)
+		}
+
+		// Return original endpoints for arrow rendering
+		endPoints.push(allPixelPoints[0])
+		endPoints.push(allPixelPoints[allPixelPoints.length - 1])
+
+		return { d: commands.join(' '), endPoints }
+	}
+
+	// Original logic for non-smooth drawings (sharp mode, cubic, quadratic)
 	for (let i = 0; i < drawing.segments.length; i++) {
 		const segment = drawing.segments[i]
 		if (!segment) continue
