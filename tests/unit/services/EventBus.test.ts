@@ -81,16 +81,17 @@ describe('TypedEventBus', () => {
 
 		it('should handle events with different payload types', () => {
 			let playerId: string | undefined
-			let linemanId: number | undefined
-			
-			eventBus.on('player:fill', (data) => { playerId = data.id })
-			eventBus.on('lineman:fill', (data) => { linemanId = data.id })
-			
-			eventBus.emit('player:fill', { id: 'player-1', color: '#000' })
-			eventBus.emit('lineman:fill', { id: 5, color: '#fff' })
-			
+			let playerColor: string | undefined
+
+			eventBus.on('player:fill', (data) => {
+				playerId = data.id
+				playerColor = data.color
+			})
+
+			eventBus.emit('player:fill', { id: 'player-1', color: '#ff0000' })
+
 			expect(playerId).toBe('player-1')
-			expect(linemanId).toBe(5)
+			expect(playerColor).toBe('#ff0000')
 		})
 	})
 

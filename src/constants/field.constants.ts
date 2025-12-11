@@ -59,7 +59,6 @@ export const LINE_END_TSHAPE = 'tShape'
 
 // Event Names
 export const EVENT_CLEAR_CANVAS = 'clearCanvas'
-export const EVENT_FILL_LINEMAN = 'fillLineman'
 export const EVENT_FILL_PLAYER = 'fillPlayer'
 export const EVENT_RESIZE = 'resize'
 

@@ -33,10 +33,7 @@ export type EventMap = {
 	// Player operations
 	'player:add': { x?: number; y?: number }
 	'player:fill': { id: string; color: string }
-	
-	// Lineman operations
-	'lineman:fill': { id: number; color: string }
-	
+
 	// Component operations
 	'component:add': void
 	
