@@ -424,7 +424,7 @@ export function SVGCanvas({
 	}
 
 	return (
-		<div className='absolute top-0 left-0 w-full h-full'>
+		<div className='absolute top-0 left-0 w-full h-full overflow-hidden' style={{ borderRadius: 'inherit' }}>
 			<svg
 				width={width}
 				height={height}
