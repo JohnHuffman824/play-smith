@@ -470,6 +470,29 @@ export function SVGCanvas({
 					onLinkToPlayer={handleLinkToPlayer}
 				/>
 			)}
+
+			{/* Player snap indicator during whole-drawing drag */}
+			{drawingDragState && wholeDrawingSnapTarget && (
+				<circle
+					cx={coordSystem.feetToPixels(
+						wholeDrawingSnapTarget.playerPosition.x,
+						wholeDrawingSnapTarget.playerPosition.y
+					).x}
+					cy={coordSystem.feetToPixels(
+						wholeDrawingSnapTarget.playerPosition.x,
+						wholeDrawingSnapTarget.playerPosition.y
+					).y}
+					r={PLAYER_RADIUS_FEET * coordSystem.scale + 6}
+					fill="rgba(59,130,246,0.2)"
+					stroke="#3b82f6"
+					strokeWidth={3}
+					pointerEvents="none"
+					className="animate-pulse"
+					style={{
+						filter: 'drop-shadow(0 0 6px rgba(59,130,246,0.6))',
+					}}
+				/>
+			)}
 			</svg>
 
 			<FreehandCapture
