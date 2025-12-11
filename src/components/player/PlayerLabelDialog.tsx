@@ -1,20 +1,20 @@
-import { useTheme } from '../../contexts/ThemeContext';
-import { Trash2 } from 'lucide-react';
-import { useState, useEffect, useRef, useCallback } from 'react';
-import unlinkIconPath from '../../imports/unlink-icon.svg';
+import { useTheme } from '../../contexts/ThemeContext'
+import { Trash2 } from 'lucide-react'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import unlinkIconPath from '../../imports/unlink-icon.svg'
 
 interface PlayerLabelDialogProps {
-  position: { x: number; y: number };
-  currentLabel: string;
-  hasLinkedDrawing: boolean;
-  onLabelChange: (label: string) => void;
-  onUnlink: () => void;
-  onDelete: () => void;
-  onClose: () => void;
+  position: { x: number; y: number }
+  currentLabel: string
+  hasLinkedDrawing: boolean
+  onLabelChange: (label: string) => void
+  onUnlink: () => void
+  onDelete: () => void
+  onClose: () => void
 }
 
-const labelsRow1 = ['X', 'Y', 'Z', 'F'];
-const labelsRow2 = ['T', 'Q', 'H', ''];
+const labelsRow1 = ['X', 'Y', 'Z', 'F']
+const labelsRow2 = ['T', 'Q', 'H', '']
 
 // All predefined labels (excluding empty string)
 const ALL_PREDEFINED_LABELS = [...labelsRow1, ...labelsRow2].filter(label => label != '')
@@ -28,9 +28,9 @@ export function PlayerLabelDialog({
   onDelete,
   onClose,
 }: PlayerLabelDialogProps) {
-  const { theme } = useTheme();
-  const [customLabel, setCustomLabel] = useState('');
-  const inputRef = useRef<HTMLInputElement>(null);
+  const { theme } = useTheme()
+  const [customLabel, setCustomLabel] = useState('')
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const handleLabelSelect = useCallback((label: string) => {
     onLabelChange(label)
@@ -196,8 +196,8 @@ export function PlayerLabelDialog({
           {hasLinkedDrawing && (
             <button
               onClick={() => {
-                onUnlink();
-                onClose();
+                onUnlink()
+                onClose()
               }}
               className={`w-10 h-10 rounded-lg transition-all cursor-pointer flex items-center justify-center flex-shrink-0 ${
                 theme === 'dark'
@@ -213,8 +213,8 @@ export function PlayerLabelDialog({
           )}
           <button
             onClick={() => {
-              onDelete();
-              onClose();
+              onDelete()
+              onClose()
             }}
             className={`w-10 h-10 rounded-lg transition-all cursor-pointer flex items-center justify-center flex-shrink-0 ${
               theme === 'dark'
@@ -227,5 +227,5 @@ export function PlayerLabelDialog({
         </div>
       </div>
     </>
-  );
+  )
 }

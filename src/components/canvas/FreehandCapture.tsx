@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { FieldCoordinateSystem } from '../../utils/coordinates'
 import type { PathStyle, Drawing } from '../../types/drawing.types'
-import { simplifyPath, straightenSegments } from '../../utils/path.utils'
+import { processSharpPath } from '../../utils/sharp-path.utils'
+import { processSmoothPath } from '../../utils/smooth-path.utils'
 import type { Coordinate } from '../../types/field.types'
 
 interface FreehandCaptureProps {
@@ -96,14 +97,13 @@ export function FreehandCapture({
 	function commitDrawing(captured: Coordinate[]) {
 		if (captured.length < 2) return
 
-		let pathPoints = captured
-		if (autoCorrect) {
-			const simplified = simplifyPath(pathPoints, 0.5)
-			const straightened = straightenSegments(simplified, Math.PI / 18)
-			pathPoints = straightened.points
-		}
+		// Use appropriate pipeline based on pathMode
+		// Sharp: Geometric shapes with 15° angle snapping
+		// Smooth: Adaptive smoothing (straight detection + curve smoothing)
+		const { points, segments } = style.pathMode === 'curve'
+			? processSmoothPath(captured)
+			: processSharpPath(captured)
 
-		const { points, segments } = buildDrawingData(pathPoints)
 		const drawing: Drawing = {
 			id: `drawing-${Date.now()}`,
 			points,
@@ -144,39 +144,5 @@ export function FreehandCapture({
 			onPointerLeave={stopDrawing}
 		/>
 	)
-}
-
-/**
- * Build drawing data with shared point pool architecture.
- * Creates points once in a shared pool, segments reference them by ID.
- */
-function buildDrawingData(coords: Coordinate[]) {
-	const points: Record<
-		string,
-		import('../../types/drawing.types').ControlPoint
-	> = {}
-	const segments: import('../../types/drawing.types').PathSegment[] = []
-
-	// Create unique points in the shared pool (no duplicates at boundaries)
-	for (let i = 0; i < coords.length; i++) {
-		const id = `p-${i}`
-		const coord = coords[i]!
-		points[id] = {
-			id,
-			x: coord.x,
-			y: coord.y,
-			type: 'corner',
-		}
-	}
-
-	// Create segments referencing shared points by ID
-	for (let i = 1; i < coords.length; i++) {
-		segments.push({
-			type: 'line',
-			pointIds: [`p-${i - 1}`, `p-${i}`], // References, not copies
-		})
-	}
-
-	return { points, segments }
 }
 

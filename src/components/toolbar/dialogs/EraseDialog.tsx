@@ -1,24 +1,24 @@
-import { X } from 'lucide-react';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { X } from 'lucide-react'
+import { useTheme } from '../../../contexts/ThemeContext'
 
 interface EraseDialogProps {
-  eraseSize: number;
-  onEraseSizeChange: (size: number) => void;
-  onClose: () => void;
+  eraseSize: number
+  onEraseSizeChange: (size: number) => void
+  onClose: () => void
 }
 
 const eraseSizes = [
   { size: 20, label: 'Small' },
   { size: 40, label: 'Medium' },
   { size: 60, label: 'Large' },
-];
+]
 
 export function EraseDialog({
   eraseSize,
   onEraseSizeChange,
   onClose,
 }: EraseDialogProps) {
-  const { theme } = useTheme();
+  const { theme } = useTheme()
   
   return (
     <div 
@@ -68,5 +68,5 @@ export function EraseDialog({
         </div>
       </div>
     </div>
-  );
+  )
 }

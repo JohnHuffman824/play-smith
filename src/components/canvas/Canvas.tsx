@@ -37,9 +37,17 @@ import { Pencil, PaintBucket } from 'lucide-react'
 import { calculateUnlinkPosition } from '../../utils/drawing.utils'
 
 interface CanvasProps {
-	drawingState: DrawingState
-	hashAlignment: HashAlignment
-	showPlayBar: boolean
+	drawingState?: DrawingState
+	hashAlignment?: HashAlignment
+	showPlayBar?: boolean
+	width?: number | string
+	height?: number | string
+	readonly?: boolean
+	showFieldMarkings?: boolean
+	containerMode?: 'page' | 'fill'
+	onSelectionChange?: (ids: string[]) => void
+	initialPlayers?: Array<{ x: number; y: number; label: string; color: string }>
+	initialDrawings?: Drawing[]
 }
 
 // Helper to dispatch fill events
@@ -92,35 +100,45 @@ function computeUnlinkTarget(
 
 export function Canvas({
   drawingState,
-  hashAlignment,
-  showPlayBar,
+  hashAlignment = 'center',
+  showPlayBar = true,
+  width = '100%',
+  height,
+  readonly = false,
+  showFieldMarkings = true,
+  containerMode = 'page',
+  onSelectionChange,
+  initialPlayers,
+  initialDrawings,
 }: CanvasProps) {
-  const whiteboardRef = useRef<HTMLDivElement>(null);
+	// NOTE: Canvas currently requires PlayContext for full functionality
+	// Future refactoring needed for true standalone mode with initialPlayers/initialDrawings
+  const whiteboardRef = useRef<HTMLDivElement>(null)
   const [linemanPositions, setLinemanPositions] = useState<
     { id: number; x: number; y: number }[]
-  >([]);
+  >([])
   const [cursorPosition, setCursorPosition] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
-  const [isOverCanvas, setIsOverCanvas] = useState(false);
+    x: number
+    y: number
+  } | null>(null)
+  const [isOverCanvas, setIsOverCanvas] = useState(false)
   const [isHoveringDeletable, setIsHoveringDeletable] =
-    useState(false);
+    useState(false)
   const [players, setPlayers] = useState<
     Array<{
-      id: string;
-      x: number;
-      y: number;
-      label: string;
-      color: string;
+      id: string
+      x: number
+      y: number
+      label: string
+      color: string
     }>
-  >([]);
-  const [showLabelDialog, setShowLabelDialog] = useState(false);
+  >(initialPlayers ?? [])
+  const [showLabelDialog, setShowLabelDialog] = useState(false)
   const [selectedPlayerId, setSelectedPlayerId] = useState<
     string | null
-  >(null);
+  >(null)
   const [labelDialogPosition, setLabelDialogPosition] =
-    useState({ x: 0, y: 0 });
+    useState({ x: 0, y: 0 })
 	const { state, setDrawings } = usePlayContext()
 	const { drawings } = state
 	const [canvasDimensions, setCanvasDimensions] = useState({
@@ -144,6 +162,7 @@ export function Canvas({
 		strokeWidth: strokeFeet,
 		lineStyle: drawingState.lineStyle,
 		lineEnd: drawingState.lineEnd,
+		pathMode: drawingState.pathMode,
 	}
 
 	function computeInitialLinemanPositions() {
@@ -200,7 +219,8 @@ export function Canvas({
 
 	// Track changes and save snapshots for undo
 	useEffect(() => {
-		if (drawings.length == 0 && players.length == 0) return
+		// Save history for all state changes, including when canvas becomes empty
+		// This allows undo to work after erasing the last player or drawing
 		saveToHistory()
 	}, [drawings, players])
 
@@ -267,45 +287,45 @@ export function Canvas({
   // Add resize handler to update dimensions and trigger re-render
   useEffect(() => {
     function handleResize() {
-      if (!whiteboardRef.current) return;
+      if (!whiteboardRef.current) return
       const rect =
-        whiteboardRef.current.getBoundingClientRect();
+        whiteboardRef.current.getBoundingClientRect()
       setCanvasDimensions({
         width: rect.width,
         height: rect.height,
-      });
+      })
     }
 
-    eventBus.on('system:resize', handleResize);
-    return () => eventBus.off('system:resize', handleResize);
-  }, []);
+    eventBus.on('system:resize', handleResize)
+    return () => eventBus.off('system:resize', handleResize)
+  }, [])
 
   // Update dimensions when showPlayBar changes - synced with CSS transitions
   useEffect(() => {
-    if (!whiteboardRef.current) return;
+    if (!whiteboardRef.current) return
 
-    const whiteboard = whiteboardRef.current;
+    const whiteboard = whiteboardRef.current
 
     function updateDimensions() {
-      if (!whiteboard) return;
-      const rect = whiteboard.getBoundingClientRect();
+      if (!whiteboard) return
+      const rect = whiteboard.getBoundingClientRect()
       setCanvasDimensions({
         width: rect.width,
         height: rect.height,
-      });
+      })
     }
 
     const resizeObserver = new ResizeObserver(() => {
-      updateDimensions();
-    });
+      updateDimensions()
+    })
 
-    resizeObserver.observe(whiteboard);
-    updateDimensions();
+    resizeObserver.observe(whiteboard)
+    updateDimensions()
 
     return () => {
-      resizeObserver.disconnect();
-    };
-  }, [showPlayBar]);
+      resizeObserver.disconnect()
+    }
+  }, [showPlayBar])
 
   function handleLinemanPositionChange(
     id: number,
@@ -313,25 +333,25 @@ export function Canvas({
     y: number,
   ) {
     setLinemanPositions((prev) => {
-      const index = prev.findIndex((p) => p.id == id);
-      if (index == -1) return prev;
+      const index = prev.findIndex((p) => p.id == id)
+      if (index == -1) return prev
 
       // Calculate the offset from the previous position
-      const oldPosition = prev[index];
-      if (!oldPosition) return prev;
+      const oldPosition = prev[index]
+      if (!oldPosition) return prev
       
-      const offsetX = x - oldPosition.x;
-      const offsetY = y - oldPosition.y;
+      const offsetX = x - oldPosition.x
+      const offsetY = y - oldPosition.y
 
       // Move all linemen by the same offset to keep them locked together
       const newPositions = prev.map((p) => ({
         ...p,
         x: p.x + offsetX,
         y: p.y + offsetY,
-      }));
+      }))
 
-      return newPositions;
-    });
+      return newPositions
+    })
   }
 
 
@@ -341,9 +361,9 @@ export function Canvas({
       case TOOL_DRAW:
       case TOOL_FILL:
       case TOOL_ADD_PLAYER:
-        return "none";
+        return "none"
       default:
-        return "default";
+        return "default"
     }
   }
 
@@ -353,26 +373,26 @@ export function Canvas({
         EVENT_FILL_LINEMAN,
         id,
         drawingState.color,
-      );
+      )
     }
   }
 
   function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
-    if (!whiteboardRef.current) return;
-    const rect = whiteboardRef.current.getBoundingClientRect();
+    if (!whiteboardRef.current) return
+    const rect = whiteboardRef.current.getBoundingClientRect()
     setCursorPosition({
       x: e.clientX - rect.left,
       y: e.clientY - rect.top,
-    });
+    })
   }
 
   function handleMouseEnter() {
-    setIsOverCanvas(true);
+    setIsOverCanvas(true)
   }
 
   function handleMouseLeave() {
-    setIsOverCanvas(false);
-    setCursorPosition(null);
+    setIsOverCanvas(false)
+    setCursorPosition(null)
   }
 
 	function handleCanvasClick(
@@ -459,9 +479,9 @@ export function Canvas({
     y: number,
   ) {
     if (drawingState.tool == TOOL_SELECT) {
-      setSelectedPlayerId(id);
-      setLabelDialogPosition({ x, y });
-      setShowLabelDialog(true);
+      setSelectedPlayerId(id)
+      setLabelDialogPosition({ x, y })
+      setShowLabelDialog(true)
     }
   }
 
@@ -471,7 +491,7 @@ export function Canvas({
         prev.map((p) =>
           p.id == selectedPlayerId ? { ...p, label } : p,
         ),
-      );
+      )
     }
   }
 
@@ -479,20 +499,20 @@ export function Canvas({
     if (selectedPlayerId) {
       setPlayers((prev) =>
         prev.filter((p) => p.id != selectedPlayerId),
-      );
-      setShowLabelDialog(false);
-      setSelectedPlayerId(null);
+      )
+      setShowLabelDialog(false)
+      setSelectedPlayerId(null)
     }
   }
 
   function handlePlayerDeleteById(id: string) {
-    setPlayers((prev) => prev.filter((p) => p.id != id));
+    setPlayers((prev) => prev.filter((p) => p.id != id))
     // Reset hover state when deleting a player to show circular cursor again
-    setIsHoveringDeletable(false);
+    setIsHoveringDeletable(false)
     // If the deleted player was selected, close the dialog
     if (selectedPlayerId == id) {
-      setShowLabelDialog(false);
-      setSelectedPlayerId(null);
+      setShowLabelDialog(false)
+      setSelectedPlayerId(null)
     }
   }
 
@@ -502,7 +522,7 @@ export function Canvas({
         EVENT_FILL_PLAYER,
         id,
         drawingState.color,
-      );
+      )
     }
   }
 
@@ -598,8 +618,9 @@ export function Canvas({
 	const playerCursorDiameter = PLAYER_RADIUS_FEET * 2 * scale
 
 	const containerClasses = [
-		'flex-1 flex items-start justify-center px-8 py-4',
-		'overflow-hidden relative',
+		containerMode === 'fill'
+			? 'flex-1 flex items-start justify-center overflow-hidden relative'
+			: 'flex-1 flex items-start justify-center px-8 py-4 overflow-hidden relative',
 	].join(' ')
 
 	const whiteboardClasses = [
@@ -618,7 +639,7 @@ export function Canvas({
 				className={whiteboardClasses}
 				style={{
 					cursor: getCursorStyle(),
-					height: showPlayBar
+					height: containerMode === 'fill' ? '100%' : showPlayBar
 						? 'calc(100vh - 302px)'
 						: 'calc(100vh - 122px)',
 					transition: 'height 800ms ease-in-out',
@@ -831,5 +852,5 @@ export function Canvas({
         />
       )}
     </div>
-  );
+  )
 }

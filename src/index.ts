@@ -1,7 +1,17 @@
-import { serve } from "bun";
-import index from "./index.html";
-import { usersAPI, getUserById } from "./api/users";
-import { authAPI } from "./api/auth";
+import { serve } from 'bun'
+import index from './index.html'
+import { usersAPI, getUserById } from './api/users'
+import { authAPI } from './api/auth'
+import { playbooksAPI } from './api/playbooks'
+import { teamsAPI } from './api/teams'
+import { sectionsAPI } from './api/sections'
+import { playsAPI } from './api/plays'
+import { formationsAPI } from './api/formations'
+import { conceptsAPI } from './api/concepts'
+import { conceptGroupsAPI } from './api/concept-groups'
+import { rolesAPI } from './api/roles'
+import { presetRoutesAPI } from './api/preset-routes'
+import { unifiedSearchAPI } from './api/unified-search'
 
 const server = serve({
   routes: {
@@ -26,27 +36,121 @@ const server = serve({
     "/api/users": usersAPI,
     "/api/users/:id": getUserById,
 
+    // Playbook API endpoints
+    "/api/playbooks": {
+      GET: playbooksAPI.list,
+      POST: playbooksAPI.create
+    },
+    "/api/playbooks/:id": {
+      GET: playbooksAPI.get,
+      PUT: playbooksAPI.update,
+      DELETE: playbooksAPI.delete
+    },
+
+    // Section API endpoints
+    "/api/playbooks/:playbookId/sections": {
+      GET: sectionsAPI.list,
+      POST: sectionsAPI.create
+    },
+    "/api/sections/:sectionId": {
+      PUT: sectionsAPI.update,
+      DELETE: sectionsAPI.delete
+    },
+
+    // Play API endpoints
+    "/api/playbooks/:playbookId/plays": {
+      GET: playsAPI.list,
+      POST: playsAPI.create
+    },
+    "/api/plays/:playId": {
+      PUT: playsAPI.update,
+      DELETE: playsAPI.delete
+    },
+    "/api/plays/:playId/duplicate": {
+      POST: playsAPI.duplicate
+    },
+
+    // Team API endpoints
+    '/api/teams': {
+      GET: teamsAPI.list
+    },
+
+    // Formation API endpoints
+    '/api/teams/:teamId/formations': {
+      GET: formationsAPI.list,
+      POST: formationsAPI.create
+    },
+    '/api/formations/:id': {
+      GET: formationsAPI.get,
+      PUT: formationsAPI.update,
+      DELETE: formationsAPI.delete
+    },
+
+    // Concept API endpoints
+    '/api/teams/:teamId/concepts': {
+      GET: conceptsAPI.list,
+      POST: conceptsAPI.create
+    },
+    '/api/teams/:teamId/concepts/search': {
+      GET: conceptsAPI.search
+    },
+    '/api/concepts/:id': {
+      GET: conceptsAPI.get,
+      PUT: conceptsAPI.update,
+      DELETE: conceptsAPI.delete
+    },
+
+    // Concept Group API endpoints
+    '/api/teams/:teamId/concept-groups': {
+      GET: conceptGroupsAPI.list,
+      POST: conceptGroupsAPI.create
+    },
+    '/api/teams/:teamId/concept-groups/search': {
+      GET: conceptGroupsAPI.search
+    },
+    '/api/concept-groups/:id': {
+      GET: conceptGroupsAPI.get,
+      PUT: conceptGroupsAPI.update,
+      DELETE: conceptGroupsAPI.delete
+    },
+
+    // Role API endpoints
+    '/api/teams/:teamId/roles': {
+      GET: rolesAPI.list,
+      PUT: rolesAPI.update
+    },
+
+    // Preset Route API endpoints
+    '/api/preset-routes': {
+      GET: presetRoutesAPI.list
+    },
+
+    // Unified Search API endpoint
+    '/api/teams/:teamId/search': {
+      GET: unifiedSearchAPI.search
+    },
+
     // Example API endpoints
     "/api/hello": {
       async GET(req) {
         return Response.json({
           message: "Hello, world!",
           method: "GET",
-        });
+        })
       },
       async PUT(req) {
         return Response.json({
           message: "Hello, world!",
           method: "PUT",
-        });
+        })
       },
     },
 
     "/api/hello/:name": async req => {
-      const name = req.params.name;
+      const name = req.params.name
       return Response.json({
         message: `Hello, ${name}!`,
-      });
+      })
     },
 
     // Catch-all route (must be LAST)
@@ -67,6 +171,6 @@ const server = serve({
     // Echo console logs from the browser to the server
     console: true,
   },
-});
+})
 
-console.log(`🚀 Server running at ${server.url}`);
+console.log(`🚀 Server running at ${server.url}`)

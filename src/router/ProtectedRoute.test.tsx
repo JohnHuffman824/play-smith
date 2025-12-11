@@ -1,11 +1,19 @@
-import { describe, test, expect, mock, beforeEach } from 'bun:test'
+import { describe, test, expect, mock, beforeEach, afterEach } from 'bun:test'
 import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { ProtectedRoute } from './ProtectedRoute'
+import { AuthProvider } from '../contexts/AuthContext'
 
 describe('ProtectedRoute', () => {
+	const originalFetch = global.fetch
+
 	beforeEach(() => {
 		mock.restore()
+	})
+
+	afterEach(() => {
+		// Restore original fetch to prevent pollution
+		global.fetch = originalFetch
 	})
 
 	test('shows loading state while checking auth', () => {
@@ -13,11 +21,13 @@ describe('ProtectedRoute', () => {
 		global.fetch = mock(() => new Promise(() => {})) // Never resolves
 
 		render(
-			<MemoryRouter>
-				<ProtectedRoute>
-					<div>Protected Content</div>
-				</ProtectedRoute>
-			</MemoryRouter>
+			<AuthProvider>
+				<MemoryRouter>
+					<ProtectedRoute>
+						<div>Protected Content</div>
+					</ProtectedRoute>
+				</MemoryRouter>
+			</AuthProvider>
 		)
 
 		expect(screen.getByText('Loading...')).toBeDefined()
@@ -30,11 +40,13 @@ describe('ProtectedRoute', () => {
 		)
 
 		render(
-			<MemoryRouter>
-				<ProtectedRoute>
-					<div>Protected Content</div>
-				</ProtectedRoute>
-			</MemoryRouter>
+			<AuthProvider>
+				<MemoryRouter>
+					<ProtectedRoute>
+						<div>Protected Content</div>
+					</ProtectedRoute>
+				</MemoryRouter>
+			</AuthProvider>
 		)
 
 		// Wait for auth check to complete
@@ -49,11 +61,13 @@ describe('ProtectedRoute', () => {
 		)
 
 		render(
-			<MemoryRouter initialEntries={['/playbooks']}>
-				<ProtectedRoute>
-					<div>Protected Content</div>
-				</ProtectedRoute>
-			</MemoryRouter>
+			<AuthProvider>
+				<MemoryRouter initialEntries={['/playbooks']}>
+					<ProtectedRoute>
+						<div>Protected Content</div>
+					</ProtectedRoute>
+				</MemoryRouter>
+			</AuthProvider>
 		)
 
 		// Wait for auth check to complete and redirect to happen

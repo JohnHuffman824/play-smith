@@ -1,46 +1,46 @@
-import { useState, useRef, useEffect, ReactNode } from 'react';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useState, useRef, useEffect, ReactNode } from 'react'
+import { useTheme } from '../../contexts/ThemeContext'
 
 interface TooltipProps {
-  content: string;
-  children: ReactNode;
-  delay?: number; // delay in milliseconds before showing
+  content: string
+  children: ReactNode
+  delay?: number // delay in milliseconds before showing
 }
 
 export function Tooltip({ content, children, delay = 300 }: TooltipProps) {
-  const { theme } = useTheme();
-  const [isVisible, setIsVisible] = useState(false);
-  const [position, setPosition] = useState({ top: 0, left: 0 });
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const triggerRef = useRef<HTMLDivElement>(null);
+  const { theme } = useTheme()
+  const [isVisible, setIsVisible] = useState(false)
+  const [position, setPosition] = useState({ top: 0, left: 0 })
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const triggerRef = useRef<HTMLDivElement>(null)
 
   const handleMouseEnter = () => {
     timeoutRef.current = setTimeout(() => {
       if (triggerRef.current) {
-        const rect = triggerRef.current.getBoundingClientRect();
+        const rect = triggerRef.current.getBoundingClientRect()
         setPosition({
           top: rect.top + rect.height / 2,
           left: rect.right + 12, // 12px gap from the button
-        });
-        setIsVisible(true);
+        })
+        setIsVisible(true)
       }
-    }, delay);
-  };
+    }, delay)
+  }
 
   const handleMouseLeave = () => {
     if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
+      clearTimeout(timeoutRef.current)
     }
-    setIsVisible(false);
-  };
+    setIsVisible(false)
+  }
 
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
+        clearTimeout(timeoutRef.current)
       }
-    };
-  }, []);
+    }
+  }, [])
 
   return (
     <>
@@ -87,15 +87,15 @@ export function Tooltip({ content, children, delay = 300 }: TooltipProps) {
       <style>{`
         @keyframes tooltipFadeIn {
           from {
-            opacity: 0;
-            transform: translateY(-50%) translateX(-4px);
+            opacity: 0
+            transform: translateY(-50%) translateX(-4px)
           }
           to {
-            opacity: 1;
-            transform: translateY(-50%) translateX(0);
+            opacity: 1
+            transform: translateY(-50%) translateX(0)
           }
         }
       `}</style>
     </>
-  );
+  )
 }

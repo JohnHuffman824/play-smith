@@ -1,31 +1,31 @@
-import { Plus, X } from 'lucide-react';
-import type { PlayCard } from '../../types/play.types';
-import { useRef } from 'react';
-import { useTheme } from '../../contexts/ThemeContext';
+import { Plus, X } from 'lucide-react'
+import type { PlayCard } from '../../types/play.types'
+import { useRef } from 'react'
+import { useTheme } from '../../contexts/ThemeContext'
 
 interface PlayCardsSectionProps {
-  playCards: PlayCard[];
-  onAddCard: () => void;
-  onDeleteCard: (id: string) => void;
-  showPlayBar: boolean;
+  playCards: PlayCard[]
+  onAddCard: () => void
+  onDeleteCard: (id: string) => void
+  showPlayBar: boolean
 }
 
 export function PlayCardsSection({ playCards, onAddCard, onDeleteCard, showPlayBar }: PlayCardsSectionProps) {
-  const { theme } = useTheme();
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const { theme } = useTheme()
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   const handleAddClick = () => {
-    onAddCard();
+    onAddCard()
     // Scroll to the end after adding
     setTimeout(() => {
       if (scrollContainerRef.current) {
         scrollContainerRef.current.scrollTo({
           left: scrollContainerRef.current.scrollWidth,
           behavior: 'smooth',
-        });
+        })
       }
-    }, 100);
-  };
+    }, 100)
+  }
 
   return (
     <div
@@ -98,5 +98,5 @@ export function PlayCardsSection({ playCards, onAddCard, onDeleteCard, showPlayB
         </button>
       </div>
     </div>
-  );
+  )
 }

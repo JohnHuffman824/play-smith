@@ -9,7 +9,7 @@ type PlaybookUpdate = {
 export class PlaybookRepository {
 	// Inserts a playbook and returns DB defaults in one call
 	async create(data: {
-		team_id: number
+		team_id: number | null
 		name: string
 		description?: string
 		created_by: number
@@ -46,9 +46,29 @@ export class PlaybookRepository {
 		`
 	}
 
+	/**
+	 * Fetches all personal playbooks created by a specific user.
+	 * Personal playbooks have team_id = NULL and are not shared with any team.
+	 * Results are ordered by most recent update first.
+	 *
+	 * @param userId - The ID of the user who created the playbooks
+	 * @returns Array of personal playbooks belonging to the user, ordered by updated_at DESC
+	 *
+	 * @example
+	 * const personalPlaybooks = await playbookRepo.getUserPersonalPlaybooks(42)
+	 * // Returns all playbooks where team_id IS NULL and created_by = 42
+	 */
+	async getUserPersonalPlaybooks(userId: number): Promise<Playbook[]> {
+		return await db<Playbook[]>`
+			SELECT * FROM playbooks
+			WHERE team_id IS NULL AND created_by = ${userId}
+			ORDER BY updated_at DESC
+		`
+	}
+
 	// Applies provided fields to an existing playbook
 	async update(id: number, data: PlaybookUpdate): Promise<Playbook | null> {
-		if (Object.keys(data).length == 0) {
+		if (Object.keys(data).length === 0) {
 			return this.findById(id)
 		}
 
@@ -67,5 +87,20 @@ export class PlaybookRepository {
 	// Removes a playbook by id
 	async delete(id: number): Promise<void> {
 		await db`DELETE FROM playbooks WHERE id = ${id}`
+	}
+
+	// Fetches all playbooks accessible to user with play counts in single query
+	async getUserPlaybooksWithCounts(
+		userId: number,
+		teamIds: number[]
+	): Promise<Array<Playbook & { play_count: number }>> {
+		return await db<Array<Playbook & { play_count: number }>>`
+			SELECT p.*, COALESCE(COUNT(pl.id), 0)::int as play_count
+			FROM playbooks p
+			LEFT JOIN plays pl ON pl.playbook_id = p.id
+			WHERE p.team_id = ANY(${teamIds}) OR (p.team_id IS NULL AND p.created_by = ${userId})
+			GROUP BY p.id
+			ORDER BY p.updated_at DESC
+		`
 	}
 }

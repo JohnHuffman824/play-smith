@@ -1,9 +1,9 @@
-import { X } from 'lucide-react';
-import { useTheme } from '../../../contexts/ThemeContext';
-import { eventBus } from '../../../services/EventBus';
+import { X } from 'lucide-react'
+import { useTheme } from '../../../contexts/ThemeContext'
+import { eventBus } from '../../../services/EventBus'
 
 interface RouteDialogProps {
-  onClose: () => void;
+  onClose: () => void
 }
 
 const routes = [
@@ -16,15 +16,15 @@ const routes = [
   { number: 7, name: 'Corner', description: 'Deep break to corner' },
   { number: 8, name: 'Post', description: 'Deep inside break' },
   { number: 9, name: 'Go', description: 'Straight vertical route' },
-];
+]
 
 export function RouteDialog({ onClose }: RouteDialogProps) {
-  const { theme } = useTheme();
+  const { theme } = useTheme()
   
   const handleRouteSelect = (route: typeof routes[0]) => {
-    eventBus.emit('drawing:add', { drawing: route });
-    onClose();
-  };
+    eventBus.emit('drawing:add', { drawing: route })
+    onClose()
+  }
 
   return (
     <div 
@@ -74,5 +74,5 @@ export function RouteDialog({ onClose }: RouteDialogProps) {
         ))}
       </div>
     </div>
-  );
+  )
 }

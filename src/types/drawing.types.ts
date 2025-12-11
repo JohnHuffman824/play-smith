@@ -6,7 +6,7 @@ import type { Coordinate } from './field.types'
 
 export interface ControlPoint extends Coordinate {
 	id: string
-	type: 'start' | 'end' | 'corner' | 'curve'
+	type: 'start' | 'end' | 'corner'
 	handleIn?: Coordinate
 	handleOut?: Coordinate
 }
@@ -21,6 +21,7 @@ export interface PathStyle {
 	strokeWidth: number
 	lineStyle: 'solid' | 'dashed'
 	lineEnd: 'none' | 'arrow' | 'tShape'
+	pathMode: 'sharp' | 'curve'
 }
 
 export interface Annotation {

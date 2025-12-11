@@ -3,7 +3,7 @@ import { AuthService } from '../services/AuthService'
 
 const ADMIN_EMAIL = 'admin'
 const ADMIN_NAME = 'Admin User'
-const ADMIN_PASSWORD = 'admin'
+const ADMIN_PASSWORD = 'ALtt98xzH!'
 
 // Seeds the dev database with an admin user for testing
 async function seedDevAdmin(): Promise<void> {
@@ -24,7 +24,7 @@ async function seedDevAdmin(): Promise<void> {
 	})
 
 	console.log(`✓ Created admin user: ${user.email} (id: ${user.id})`)
-	console.log('  Login with: admin / admin')
+	console.log('  Login with: admin / ALtt98xzH!')
 }
 
 seedDevAdmin()

@@ -2,6 +2,10 @@ import { serve, Server } from 'bun'
 import index from '../../src/index.html'
 import { usersAPI, getUserById } from '../../src/api/users'
 import { authAPI } from '../../src/api/auth'
+import { teamsAPI } from '../../src/api/teams'
+import { playbooksAPI } from '../../src/api/playbooks'
+import { sectionsAPI } from '../../src/api/sections'
+import { playsAPI } from '../../src/api/plays'
 
 let testServer: Server | null = null
 
@@ -13,15 +17,17 @@ export async function startTestServer(): Promise<{
 	server: Server
 	url: string
 }> {
+	// If server is already running, return existing instance
 	if (testServer) {
-		throw new Error('Test server already running')
+		return {
+			server: testServer,
+			url: testServer.url.toString().replace(/\/$/, '')
+		}
 	}
 
 	testServer = serve({
 		port: 0, // Use random available port
 		routes: {
-			'/*': index,
-
 			'/api/auth/login': {
 				POST: authAPI.login,
 			},
@@ -37,6 +43,41 @@ export async function startTestServer(): Promise<{
 
 			'/api/users': usersAPI,
 			'/api/users/:id': getUserById,
+
+			'/api/teams': {
+				GET: teamsAPI.list,
+			},
+
+			'/api/playbooks': {
+				GET: playbooksAPI.list,
+				POST: playbooksAPI.create,
+			},
+			'/api/playbooks/:id': {
+				GET: playbooksAPI.get,
+				PUT: playbooksAPI.update,
+				DELETE: playbooksAPI.delete,
+			},
+
+			'/api/playbooks/:playbookId/sections': {
+				GET: sectionsAPI.list,
+				POST: sectionsAPI.create,
+			},
+			'/api/sections/:sectionId': {
+				PUT: sectionsAPI.update,
+				DELETE: sectionsAPI.delete,
+			},
+
+			'/api/playbooks/:playbookId/plays': {
+				GET: playsAPI.list,
+				POST: playsAPI.create,
+			},
+			'/api/plays/:playId': {
+				PUT: playsAPI.update,
+				DELETE: playsAPI.delete,
+			},
+			'/api/plays/:playId/duplicate': {
+				POST: playsAPI.duplicate,
+			},
 
 			'/api/hello': {
 				async GET(req) {
@@ -59,6 +100,8 @@ export async function startTestServer(): Promise<{
 					message: `Hello, ${name}!`,
 				})
 			},
+
+			'/*': index,
 		},
 
 		development: false, // Disable HMR in tests
@@ -72,12 +115,12 @@ export async function startTestServer(): Promise<{
 
 /**
  * Stop the test server if running
+ * NOTE: In test suite, we keep the server running across all test files
+ * It will be cleaned up when the test process exits
  */
 export async function stopTestServer(): Promise<void> {
-	if (testServer) {
-		testServer.stop()
-		testServer = null
-	}
+	// Don't stop the server - let it persist across test files
+	// The server will be cleaned up when the test process exits
 }
 
 /**

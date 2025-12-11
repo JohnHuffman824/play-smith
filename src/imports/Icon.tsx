@@ -1,4 +1,4 @@
-import svgPaths from "./svg-ybscv0ilx3";
+import svgPaths from "./svg-ybscv0ilx3"
 
 function Frame() {
   return (
@@ -12,7 +12,7 @@ function Frame() {
         </svg>
       </div>
     </div>
-  );
+  )
 }
 
 export default function Icon() {
@@ -24,5 +24,5 @@ export default function Icon() {
         </div>
       </div>
     </div>
-  );
+  )
 }

@@ -401,3 +401,8 @@ grouped up and placed on a book.
 - Potential for a walkthrough of the features on the first time opening the software
 - Keep tutorials modular so if someone doesn't understand how to use something we 
 could add a ? icon/button to the feature which will play the tutorial for that one
+
+## To-Do
+- Figure out how we should handle adding concepts/formations
+- Figure out how to handle terminology differences
+- Figure out the updated player edit dialog with

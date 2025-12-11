@@ -163,7 +163,7 @@ export function LoginModal() {
 											border border-gray-200 rounded-2xl
 											focus:outline-none focus:ring-2
 											focus:ring-blue-500 focus:border-transparent
-											transition-all"
+											transition-all placeholder:opacity-40"
 										required={!isLogin}
 									/>
 								</div>
@@ -188,11 +188,12 @@ export function LoginModal() {
 									type="text"
 									value={email}
 									onChange={e => setEmail(e.target.value)}
-									placeholder={isLogin ? 'admin' : 'coach@example.com'}
+									placeholder={isLogin ? 'JohnDoe@gmail.com' : 'coach@example.com'}
 									className="w-full pl-12 pr-4 py-3.5 bg-gray-50
 										border border-gray-200 rounded-2xl focus:outline-none
 										focus:ring-2 focus:ring-blue-500
-										focus:border-transparent transition-all"
+										focus:border-transparent transition-all
+										placeholder:opacity-40"
 									required
 								/>
 							</div>
@@ -220,14 +221,15 @@ export function LoginModal() {
 									className="w-full pl-12 pr-12 py-3.5 bg-gray-50
 										border border-gray-200 rounded-2xl focus:outline-none
 										focus:ring-2 focus:ring-blue-500
-										focus:border-transparent transition-all"
+										focus:border-transparent transition-all
+										placeholder:opacity-40"
 									required
 								/>
 								<button
 									type="button"
 									onClick={() => setShowPassword(!showPassword)}
 									className="absolute right-4 top-1/2 -translate-y-1/2
-										text-gray-400 hover:text-gray-600 transition-colors"
+										text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
 									aria-label="Toggle password visibility"
 								>
 									{showPassword
@@ -244,7 +246,7 @@ export function LoginModal() {
 							disabled={isSubmitting}
 							className="w-full py-3.5 bg-blue-500 hover:bg-blue-600
 								text-white rounded-2xl font-semibold transition-all
-								hover:shadow-lg disabled:opacity-50
+								hover:shadow-lg disabled:opacity-50 cursor-pointer
 								disabled:cursor-not-allowed mb-4"
 						>
 							{isSubmitting
@@ -275,7 +277,7 @@ export function LoginModal() {
 								type="button"
 								onClick={switchMode}
 								className="text-blue-600 hover:text-blue-700
-									font-semibold transition-colors"
+									font-semibold transition-colors cursor-pointer"
 							>
 								{isLogin ? 'Sign up' : 'Sign in'}
 							</button>
