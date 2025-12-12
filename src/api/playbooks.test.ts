@@ -239,7 +239,7 @@ describe('Playbooks API', () => {
 		await db`DELETE FROM users WHERE id = ${otherUser.id}`
 	})
 
-	test('DELETE /api/playbooks/:id deletes playbook', async () => {
+	test('DELETE /api/playbooks/:id soft deletes playbook', async () => {
 		const pb = await createTestPlaybook({
 			teamId: fixture.teamId,
 			name: 'To Delete',
@@ -255,9 +255,11 @@ describe('Playbooks API', () => {
 
 		expect(response.status).toBe(204)
 
-		// Verify deleted
+		// Verify soft deleted (still exists but has deleted_at timestamp)
 		const [deleted] = await db`SELECT * FROM playbooks WHERE id = ${pb.id}`
-		expect(deleted).toBeUndefined()
+		expect(deleted).toBeDefined()
+		expect(deleted.deleted_at).toBeDefined()
+		expect(deleted.deleted_at).not.toBeNull()
 	})
 
 	test('DELETE /api/playbooks/:id requires team membership', async () => {
@@ -416,5 +418,154 @@ describe('Playbooks API', () => {
 		expect(response.status).toBe(400)
 		const data = await response.json()
 		expect(data.error).toBe('Invalid playbook ID')
+	})
+
+	test('PUT /api/playbooks/:id/restore restores soft deleted playbook', async () => {
+		const pb = await createTestPlaybook({
+			teamId: fixture.teamId,
+			name: 'To Restore',
+			createdBy: fixture.userId
+		})
+
+		// Soft delete it
+		await db`UPDATE playbooks SET deleted_at = CURRENT_TIMESTAMP WHERE id = ${pb.id}`
+
+		// Restore it
+		const response = await fetch(`${baseUrl}/api/playbooks/${pb.id}/restore`, {
+			method: 'PUT',
+			headers: {
+				Cookie: `session_token=${fixture.sessionToken}`
+			}
+		})
+
+		expect(response.status).toBe(200)
+		const data = await response.json()
+		expect(data.playbook.id).toBe(pb.id)
+		expect(data.playbook.deleted_at).toBeNull()
+
+		// Verify in database
+		const [restored] = await db`SELECT deleted_at FROM playbooks WHERE id = ${pb.id}`
+		expect(restored.deleted_at).toBeNull()
+
+		// Cleanup
+		await db`DELETE FROM playbooks WHERE id = ${pb.id}`
+	})
+
+	test('PUT /api/playbooks/:id/restore returns 401 when unauthorized', async () => {
+		const response = await fetch(`${baseUrl}/api/playbooks/${fixture.playbookId}/restore`, {
+			method: 'PUT'
+			// No session cookie
+		})
+
+		expect(response.status).toBe(401)
+		const data = await response.json()
+		expect(data.error).toBe('Unauthorized')
+	})
+
+	test('PUT /api/playbooks/:id/restore returns 404 for non-existent playbook', async () => {
+		const response = await fetch(`${baseUrl}/api/playbooks/99999/restore`, {
+			method: 'PUT',
+			headers: {
+				Cookie: `session_token=${fixture.sessionToken}`
+			}
+		})
+
+		expect(response.status).toBe(404)
+		const data = await response.json()
+		expect(data.error).toBe('Playbook not found')
+	})
+
+	test('DELETE /api/playbooks/:id/permanent permanently deletes playbook', async () => {
+		const pb = await createTestPlaybook({
+			teamId: fixture.teamId,
+			name: 'To Permanently Delete',
+			createdBy: fixture.userId
+		})
+
+		// Soft delete it first
+		await db`UPDATE playbooks SET deleted_at = CURRENT_TIMESTAMP WHERE id = ${pb.id}`
+
+		// Permanently delete it
+		const response = await fetch(`${baseUrl}/api/playbooks/${pb.id}/permanent`, {
+			method: 'DELETE',
+			headers: {
+				Cookie: `session_token=${fixture.sessionToken}`
+			}
+		})
+
+		expect(response.status).toBe(204)
+
+		// Verify permanently deleted
+		const [deleted] = await db`SELECT * FROM playbooks WHERE id = ${pb.id}`
+		expect(deleted).toBeUndefined()
+	})
+
+	test('DELETE /api/playbooks/:id/permanent returns 401 when unauthorized', async () => {
+		const response = await fetch(`${baseUrl}/api/playbooks/${fixture.playbookId}/permanent`, {
+			method: 'DELETE'
+			// No session cookie
+		})
+
+		expect(response.status).toBe(401)
+		const data = await response.json()
+		expect(data.error).toBe('Unauthorized')
+	})
+
+	test('DELETE /api/playbooks/:id/permanent returns 404 for non-existent playbook', async () => {
+		const response = await fetch(`${baseUrl}/api/playbooks/99999/permanent`, {
+			method: 'DELETE',
+			headers: {
+				Cookie: `session_token=${fixture.sessionToken}`
+			}
+		})
+
+		expect(response.status).toBe(404)
+		const data = await response.json()
+		expect(data.error).toBe('Playbook not found')
+	})
+
+	test('DELETE /api/trash empties trash for user', async () => {
+		// Create and soft delete multiple playbooks
+		const pb1 = await createTestPlaybook({
+			teamId: fixture.teamId,
+			name: 'Trash 1',
+			createdBy: fixture.userId
+		})
+		const pb2 = await createTestPlaybook({
+			teamId: fixture.teamId,
+			name: 'Trash 2',
+			createdBy: fixture.userId
+		})
+
+		await db`UPDATE playbooks SET deleted_at = CURRENT_TIMESTAMP WHERE id IN (${pb1.id}, ${pb2.id})`
+
+		// Empty trash
+		const response = await fetch(`${baseUrl}/api/trash`, {
+			method: 'DELETE',
+			headers: {
+				Cookie: `session_token=${fixture.sessionToken}`
+			}
+		})
+
+		expect(response.status).toBe(200)
+		const data = await response.json()
+		expect(data.deletedCount).toBeGreaterThanOrEqual(2)
+
+		// Verify permanently deleted
+		const [deleted1] = await db`SELECT * FROM playbooks WHERE id = ${pb1.id}`
+		const [deleted2] = await db`SELECT * FROM playbooks WHERE id = ${pb2.id}`
+		expect(deleted1).toBeUndefined()
+		expect(deleted2).toBeUndefined()
+	})
+
+	test('DELETE /api/trash returns 401 when unauthorized', async () => {
+		const response = await fetch(`${baseUrl}/api/trash`, {
+			method: 'DELETE'
+			// No session cookie
+		})
+
+		expect(response.status).toBe(401)
+		const data = await response.json()
+		expect(data.error).toBe('Unauthorized')
 	})
 })

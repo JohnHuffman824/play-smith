@@ -15,6 +15,7 @@ import { presetRoutesAPI } from './api/preset-routes'
 import { unifiedSearchAPI } from './api/unified-search'
 import { modifierOverridesAPI } from './api/modifierOverrides'
 import { tagsAPI, playTagsAPI, playbookTagsAPI } from './api/tags'
+import { handleCallSheetExport } from './api/exports'
 
 const server = serve({
   routes: {
@@ -46,6 +47,15 @@ const server = serve({
     },
     "/api/playbooks/:id/star": {
       PUT: playbooksAPI.toggleStar
+    },
+    "/api/playbooks/:id/restore": {
+      PUT: playbooksAPI.restore
+    },
+    "/api/playbooks/:id/permanent": {
+      DELETE: playbooksAPI.permanentDelete
+    },
+    "/api/trash": {
+      DELETE: playbooksAPI.emptyTrash
     },
     "/api/playbooks/:id": {
       GET: playbooksAPI.get,
@@ -198,6 +208,11 @@ const server = serve({
     // Unified Search API endpoint
     '/api/search': {
       GET: unifiedSearchAPI.search
+    },
+
+    // Export API endpoints
+    '/api/export/callsheet': {
+      POST: handleCallSheetExport
     },
 
     // Example API endpoints

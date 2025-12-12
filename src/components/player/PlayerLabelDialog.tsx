@@ -92,9 +92,7 @@ export function PlayerLabelDialog({
       {/* Dialog */}
       <div
         data-player-label-dialog
-        className={`fixed z-50 rounded-2xl shadow-2xl border p-3 ${
-          theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-        }`}
+        className="fixed z-50 rounded-2xl shadow-2xl border border-border bg-card p-3"
         style={{
           left: `${position.x}px`,
           top: `${position.y - 200}px`, // Position higher above the player
@@ -137,13 +135,11 @@ export function PlayerLabelDialog({
               className={`w-10 h-10 rounded-lg transition-all cursor-pointer ${
                 currentLabel === label
                   ? 'bg-blue-500 text-white shadow-md scale-110'
-                  : theme === 'dark'
-                    ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  : 'bg-secondary text-secondary-foreground hover:bg-accent'
               }`}
             >
               {label === '' ? (
-                <span className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>—</span>
+                <span className="text-xs text-muted-foreground">—</span>
               ) : (
                 label
               )}
@@ -160,13 +156,11 @@ export function PlayerLabelDialog({
               className={`w-10 h-10 rounded-lg transition-all cursor-pointer ${
                 currentLabel === label
                   ? 'bg-blue-500 text-white shadow-md scale-110'
-                  : theme === 'dark'
-                    ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  : 'bg-secondary text-secondary-foreground hover:bg-accent'
               }`}
             >
               {label === '' ? (
-                <span className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>—</span>
+                <span className="text-xs text-muted-foreground">—</span>
               ) : (
                 label
               )}
@@ -175,9 +169,7 @@ export function PlayerLabelDialog({
         </div>
 
         {/* Custom Label Input and Delete Button */}
-        <div className="flex items-center gap-2 mt-2 pt-2 border-t" style={{
-          borderColor: theme === 'dark' ? '#374151' : '#e5e7eb'
-        }}>
+        <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border">
           <input
             ref={inputRef}
             type="text"
@@ -195,11 +187,7 @@ export function PlayerLabelDialog({
                 onUnlink()
                 onClose()
               }}
-              className={`w-10 h-10 rounded-lg transition-all cursor-pointer flex items-center justify-center flex-shrink-0 ${
-                theme === 'dark'
-                  ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
+              className="w-10 h-10 rounded-lg transition-all cursor-pointer flex items-center justify-center flex-shrink-0 bg-secondary text-secondary-foreground hover:bg-accent"
               title="Unlink drawing"
             >
               <svg width="18" height="18" viewBox="0 0 512 509.84" fill="currentColor">

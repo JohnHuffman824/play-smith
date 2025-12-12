@@ -92,3 +92,31 @@ export async function togglePlaybookStar(id: number): Promise<Playbook> {
 	const result = await handleResponse<{ playbook: Playbook }>(response)
 	return result.playbook
 }
+
+export async function restorePlaybook(id: number): Promise<Playbook> {
+	const response = await fetch(`/api/playbooks/${id}/restore`, {
+		method: 'PUT'
+	})
+	const result = await handleResponse<{ playbook: Playbook }>(response)
+	return result.playbook
+}
+
+export async function permanentDeletePlaybook(id: number): Promise<void> {
+	const response = await fetch(`/api/playbooks/${id}/permanent`, {
+		method: 'DELETE'
+	})
+	if (!response.ok && response.status !== 401) {
+		throw new Error(`Failed to permanently delete playbook: ${response.status}`)
+	}
+	if (response.status === 401) {
+		throw new Error('UNAUTHORIZED')
+	}
+}
+
+export async function emptyTrash(): Promise<number> {
+	const response = await fetch('/api/trash', {
+		method: 'DELETE'
+	})
+	const result = await handleResponse<{ deletedCount: number }>(response)
+	return result.deletedCount
+}

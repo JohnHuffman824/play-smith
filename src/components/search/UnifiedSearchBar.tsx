@@ -108,8 +108,8 @@ export function UnifiedSearchBar({
 
 	return (
 		<div ref={containerRef} className="relative w-full">
-			<div className="flex items-center gap-2 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 focus-within:ring-2 focus-within:ring-blue-500 dark:focus-within:ring-blue-400">
-				<Search className="w-4 h-4 text-gray-400" />
+			<div className="flex items-center gap-2 px-4 py-2.5 bg-input-background rounded-lg border-0 outline-none focus-within:ring-2 focus-within:ring-ring/20 transition-all duration-200">
+				<Search className="w-4 h-4 text-muted-foreground" />
 
 				<div className="flex flex-wrap items-center gap-1 flex-1">
 					{state.appliedConcepts.map(chip => (

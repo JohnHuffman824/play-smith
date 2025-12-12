@@ -85,8 +85,8 @@ function AnimationDialogContent({
 	const displayName = playContent?.name || playName || 'Play Animation'
 
 	return (
-		<div className='flex flex-col gap-4'>
-			<DialogHeader>
+		<div className='flex h-full flex-col gap-4'>
+			<DialogHeader className='flex-shrink-0'>
 				<DialogTitle>{displayName}</DialogTitle>
 				<DialogDescription className='sr-only'>
 					Play animation viewer
@@ -103,14 +103,14 @@ function AnimationDialogContent({
 				</div>
 			) : (
 				<>
-					<div className='aspect-[3/2] w-full overflow-hidden rounded-lg bg-black'>
+					<div className='flex-1 min-h-0 w-full overflow-hidden rounded-lg bg-black'>
 						<AnimationCanvas
 							drawings={playContent.drawings}
 							players={playContent.players}
 						/>
 					</div>
 
-					<div className='flex items-center justify-center gap-4 pb-2'>
+					<div className='flex flex-shrink-0 items-center justify-center gap-4 pb-2'>
 						<Button
 							variant='outline'
 							size='icon'
@@ -153,7 +153,7 @@ export function AnimationDialog({
 }: AnimationDialogProps) {
 	return (
 		<Dialog open={isOpen} onOpenChange={onClose}>
-			<DialogContent className={cn('max-w-6xl p-6')}>
+			<DialogContent className={cn('w-[95vw] h-[95vh] max-w-none p-6')}>
 				<AnimationProvider>
 					<AnimationDialogContent playId={playId} playName={playName} />
 				</AnimationProvider>

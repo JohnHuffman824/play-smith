@@ -56,6 +56,15 @@ export async function startTestServer(): Promise<{
 			'/api/playbooks/:id/star': {
 				PUT: playbooksAPI.toggleStar,
 			},
+			'/api/playbooks/:id/restore': {
+				PUT: playbooksAPI.restore,
+			},
+			'/api/playbooks/:id/permanent': {
+				DELETE: playbooksAPI.permanentDelete,
+			},
+			'/api/trash': {
+				DELETE: playbooksAPI.emptyTrash,
+			},
 			'/api/playbooks/:id': {
 				GET: playbooksAPI.get,
 				PUT: playbooksAPI.update,

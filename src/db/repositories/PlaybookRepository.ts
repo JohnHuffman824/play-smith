@@ -40,6 +40,17 @@ export class PlaybookRepository {
 		return playbook ?? null
 	}
 
+	// Fetches a playbook by id including deleted ones (for trash operations)
+	async findByIdIncludingDeleted(id: number): Promise<Playbook | null> {
+		const [playbook] = await db<Playbook[]>`
+			SELECT id, team_id, name, description, created_by, created_at, updated_at, folder_id, is_starred, deleted_at, last_accessed_at
+			FROM playbooks
+			WHERE id = ${id}
+		`
+
+		return playbook ?? null
+	}
+
 	// Lists playbooks for a team ordered by latest update (excludes deleted)
 	async getTeamPlaybooks(teamId: number): Promise<Playbook[]> {
 		return await db<Playbook[]>`

@@ -1585,11 +1585,66 @@ export function ShareDialog({ isOpen, onClose }: ShareDialogProps) {
 
 ---
 
+## 14. Button Color Guidelines
+
+### Preferred Button Styling
+
+**Default Recommendation:** Use **light blue** (`bg-blue-500` / `bg-primary`) for most interactive buttons
+
+The blue color provides:
+- Strong visual affordance for clickable elements
+- Consistent with sports/team aesthetic
+- High contrast in both light and dark modes
+- Clear distinction from background elements
+
+### Button Color Hierarchy
+
+| Priority | Style | Use Case |
+|----------|-------|----------|
+| **Primary** | `bg-blue-500 text-white` or `bg-primary text-primary-foreground` | Main actions, CTAs, important interactive elements |
+| **Secondary** | `bg-secondary text-secondary-foreground` | Supporting actions |
+| **Ghost/Subtle** | `hover:bg-accent` | Tertiary actions, less emphasis |
+| **Destructive** | `bg-destructive text-destructive-foreground` | Delete, remove actions |
+
+### Examples
+
+```tsx
+// ✅ PREFERRED - Blue circular play button
+<button className="rounded-full bg-blue-500 text-white shadow-lg
+                   hover:bg-blue-600 hover:scale-110 transition-all">
+  <Play className="size-4 fill-white" />
+</button>
+
+// ✅ PREFERRED - Blue primary action button
+<button className="bg-primary text-primary-foreground rounded-lg px-4 py-2
+                   hover:bg-primary/90 transition-all">
+  Create Play
+</button>
+
+// ✅ ACCEPTABLE - White button for special cases only
+<button className="rounded-full bg-white text-black shadow-lg
+                   hover:scale-110 transition-all">
+  <Play className="size-4 fill-black" />
+</button>
+```
+
+### When to Use White/Neutral Buttons
+
+Use white or neutral styling **only** in these cases:
+- Over dark images/backgrounds where blue would clash
+- In high-density toolbars where color would be overwhelming
+- For disabled/inactive states
+
+**Default to blue for all standard interactive elements.**
+
+---
+
 ## Quick Checklist for New Components
 
 - [ ] **⚠️ CRITICAL: Test component in BOTH light and dark modes**
 - [ ] Use semantic color tokens (`bg-background`, `text-foreground`, etc.)
-- [ ] Never use hardcoded colors (`bg-white`, `bg-gray-800`, `bg-blue-500`)
+- [ ] **⚠️ Prefer blue buttons** (`bg-blue-500` or `bg-primary`) for interactive elements
+- [ ] Never use hardcoded colors for backgrounds (`bg-white`, `bg-gray-800`)
 - [ ] Add `cursor-pointer` to all clickable elements
 - [ ] Include focus states (`focus-visible:ring-[3px] focus-visible:ring-ring/50`)
 - [ ] Add `transition-all duration-200` to interactive elements

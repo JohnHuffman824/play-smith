@@ -7,6 +7,7 @@ import { Input } from '../ui/input'
 import { SettingsDialog } from '@/components/shared/SettingsDialog'
 import { ShareDialog } from '@/components/shared/ShareDialog'
 import { AnimationDialog } from '@/components/animation/AnimationDialog'
+import { CallSheetExportDialog } from '@/components/export/CallSheetExportDialog'
 import { ThemeProvider, useTheme } from '@/contexts/ThemeContext'
 import { usePlaybookData } from '@/hooks/usePlaybookData'
 import {
@@ -87,6 +88,7 @@ function PlaybookEditorContent({
   const [activeSectionFilter, setActiveSectionFilter] = useState<string | null>(null)
   const [showPlayViewer, setShowPlayViewer] = useState(false)
   const [viewingPlayId, setViewingPlayId] = useState<string | null>(null)
+  const [showExportDialog, setShowExportDialog] = useState(false)
 
   const {
     sections,
@@ -264,12 +266,7 @@ function PlaybookEditorContent({
   }
 
   function handleExport() {
-    if (onExport) {
-      const playIds = selectedPlays.size > 0
-        ? Array.from(selectedPlays)
-        : undefined
-      onExport(playIds)
-    }
+    setShowExportDialog(true)
   }
 
   function handleShare(
@@ -602,6 +599,14 @@ function PlaybookEditorContent({
         onClose={() => setShowShareDialog(false)}
         playbookName={playbookName}
         onShare={handleShare}
+      />
+
+      <CallSheetExportDialog
+        open={showExportDialog}
+        onClose={() => setShowExportDialog(false)}
+        sections={sections}
+        playbookName={playbookName}
+        playbookId={playbookId || ''}
       />
 
       <Modal

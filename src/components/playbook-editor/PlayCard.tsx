@@ -114,12 +114,12 @@ function PlayCardThumbnail({
             onAnimate()
           }}
           className="absolute left-1/2 top-1/2 z-10 flex size-10 -translate-x-1/2 -translate-y-1/2
-            items-center justify-center rounded-full bg-white shadow-lg
+            items-center justify-center rounded-full bg-blue-500 shadow-lg
             opacity-0 transition-all duration-200
-            group-hover/thumbnail:opacity-100 hover:scale-110"
+            group-hover/thumbnail:opacity-100 hover:bg-blue-600 hover:scale-110"
           aria-label="Animate play"
         >
-          <Play className="size-5 fill-black text-black" />
+          <Play className="size-5 fill-white text-white" />
         </button>
       )}
     </div>

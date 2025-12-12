@@ -25,7 +25,7 @@ export function PlayHeader({
 				{onBackToPlaybook && (
 					<button
 						onClick={onBackToPlaybook}
-						className="px-6 py-3 rounded-xl bg-blue-500 text-white hover:bg-blue-600 active:scale-95 transition-all shadow-md hover:shadow-lg whitespace-nowrap cursor-pointer"
+						className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg whitespace-nowrap cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
 					>
 						Back to Playbook
 					</button>
