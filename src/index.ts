@@ -12,6 +12,7 @@ import { conceptGroupsAPI } from './api/concept-groups'
 import { rolesAPI } from './api/roles'
 import { presetRoutesAPI } from './api/preset-routes'
 import { unifiedSearchAPI } from './api/unified-search'
+import { modifierOverridesAPI } from './api/modifierOverrides'
 import { tagsAPI, playTagsAPI, playbookTagsAPI } from './api/tags'
 
 const server = serve({
@@ -159,6 +160,16 @@ const server = serve({
       DELETE: conceptGroupsAPI.delete
     },
 
+    // Modifier Override API endpoints
+    '/api/modifiers/:modifierId/overrides': {
+      GET: modifierOverridesAPI.listByModifier,
+      POST: modifierOverridesAPI.create
+    },
+    '/api/modifier-overrides/:id': {
+      PUT: modifierOverridesAPI.update,
+      DELETE: modifierOverridesAPI.delete
+    },
+
     // Role API endpoints
     '/api/teams/:teamId/roles': {
       GET: rolesAPI.list,
@@ -171,7 +182,7 @@ const server = serve({
     },
 
     // Unified Search API endpoint
-    '/api/teams/:teamId/search': {
+    '/api/search': {
       GET: unifiedSearchAPI.search
     },
 
