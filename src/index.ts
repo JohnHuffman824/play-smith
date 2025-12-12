@@ -3,6 +3,7 @@ import index from './index.html'
 import { usersAPI, getUserById } from './api/users'
 import { authAPI } from './api/auth'
 import { playbooksAPI } from './api/playbooks'
+import { foldersAPI } from './api/folders'
 import { teamsAPI } from './api/teams'
 import { sectionsAPI } from './api/sections'
 import { playsAPI } from './api/plays'
@@ -47,6 +48,16 @@ const server = serve({
       GET: playbooksAPI.get,
       PUT: playbooksAPI.update,
       DELETE: playbooksAPI.delete
+    },
+
+    // Folder API endpoints
+    "/api/folders": {
+      GET: foldersAPI.list,
+      POST: foldersAPI.create
+    },
+    "/api/folders/:id": {
+      PUT: foldersAPI.update,
+      DELETE: foldersAPI.delete
     },
 
     // Section API endpoints
