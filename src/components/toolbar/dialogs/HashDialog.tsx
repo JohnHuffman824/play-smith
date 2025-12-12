@@ -21,7 +21,7 @@ export function HashDialog({ currentAlignment, linemenAtDefault, onAlignmentChan
       {/* Dialog */}
       <div
         data-hash-dialog
-        className={`${useRelativePosition ? '' : 'fixed left-24 top-1/2 -translate-y-1/2'} rounded-2xl shadow-2xl bg-card p-4 z-50 w-48`}
+        className={`${useRelativePosition ? '' : 'fixed left-24 top-1/2 -translate-y-1/2'} rounded-2xl shadow-2xl border border-border bg-popover p-4 z-50 w-48`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="space-y-2">

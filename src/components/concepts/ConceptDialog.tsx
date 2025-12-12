@@ -182,7 +182,7 @@ export function ConceptDialog({
 
 	return (
 		<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-			<div className="bg-card rounded-lg shadow-xl w-[85vw] h-[85vh] max-w-6xl flex flex-col">
+			<div className="bg-popover border border-border rounded-2xl shadow-2xl w-[85vw] h-[85vh] max-w-6xl flex flex-col">
 				{/* Name and Scope */}
 				<div className="px-6 py-4 flex items-start gap-4">
 					<div className="flex-1">

@@ -27,7 +27,7 @@ export function DrawingDialog({ onClose }: DrawingDialogProps) {
 	const [error, setError] = useState<string | null>(null)
 
 	const containerClass = [
-		'absolute left-24 top-6 w-80 rounded-2xl shadow-2xl bg-card',
+		'absolute left-24 top-6 w-80 rounded-2xl shadow-2xl bg-popover',
 		'border border-border p-4 z-50 max-h-[calc(100vh-4rem)] overflow-y-auto',
 	].join(' ')
 	const numberBadgeClass = [
@@ -35,7 +35,7 @@ export function DrawingDialog({ onClose }: DrawingDialogProps) {
 		'justify-center flex-shrink-0 group-hover:scale-110 transition-transform font-semibold text-sm',
 	].join(' ')
 	const headerClass =
-		'flex items-center justify-between mb-4 sticky top-0 pb-2 border-b border-border bg-card'
+		'flex items-center justify-between mb-4 sticky top-0 pb-2 border-b border-border bg-popover'
 	const itemClass =
 		'w-full p-3 rounded-xl border border-border bg-muted hover:bg-accent hover:border-action-button transition-all text-left group cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50'
 	const closeButtonClass =

@@ -24,7 +24,7 @@ export function UnifiedSettingsDialog({ isOpen, onClose, context }: UnifiedSetti
 			<div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
 			{/* Dialog */}
-			<div className="relative bg-background rounded-lg shadow-xl max-w-2xl w-full mx-4 p-6 max-h-[90vh] overflow-y-auto">
+			<div className="relative bg-popover rounded-2xl shadow-2xl border border-border max-w-2xl w-full mx-4 p-6 max-h-[90vh] overflow-y-auto">
 				{/* Header */}
 				<div className="flex items-center justify-between mb-6">
 					<h2 className="text-2xl font-semibold">Settings</h2>

@@ -212,7 +212,7 @@ export function ManageTeamsDialog({ isOpen, onClose }: ManageTeamsDialogProps) {
 				<div className="absolute inset-0 bg-black/50" onClick={handleClose} />
 
 				{/* Dialog */}
-				<div className="relative bg-background rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[80vh] flex flex-col">
+				<div className="relative bg-popover border border-border rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[80vh] flex flex-col">
 					{/* Header */}
 					<div className="flex items-center justify-between p-6 border-b border-border">
 						<div className="flex items-center gap-3">

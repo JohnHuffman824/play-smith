@@ -36,7 +36,7 @@ export function DrawOptionsDialog({
   return (
     <div
       data-draw-dialog
-      className={`${useRelativePosition ? '' : 'absolute left-24 top-32'} w-64 rounded-2xl shadow-2xl bg-card border border-border p-4 z-50`}>
+      className={`${useRelativePosition ? '' : 'absolute left-24 top-32'} w-64 rounded-2xl shadow-2xl bg-popover border border-border p-4 z-50`}>
       <div className="flex items-center justify-between mb-4">
         <span className="text-foreground">Draw</span>
         <button

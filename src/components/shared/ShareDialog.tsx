@@ -95,7 +95,7 @@ export function ShareDialog({
         onClick={onClose}
       >
         <div
-          className="bg-card rounded-2xl border border-border 
+          className="bg-popover rounded-2xl border border-border
             shadow-2xl w-full max-w-lg overflow-hidden"
           onClick={(e) => e.stopPropagation()}
         >

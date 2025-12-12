@@ -16,8 +16,8 @@
 | **Secondary Button** | `px-4 py-2 border border-border rounded-lg hover:bg-accent transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50` |
 | **Destructive Button** | `px-4 py-2 rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50` |
 | **Card** | `bg-card border border-border rounded-xl p-4` |
-| **Input** | `px-4 py-2.5 bg-input-background rounded-lg border-0 outline-none focus:ring-2 focus-visible:ring-ring/20 transition-all duration-200` |
-| **Dialog** | `rounded-2xl shadow-2xl border border-border p-6 bg-card` |
+| **Input** | `px-4 py-2.5 bg-input-background rounded-lg border border-border outline-none focus:ring-2 focus-visible:ring-ring/20 transition-all duration-200` |
+| **Dialog** | `rounded-2xl shadow-2xl border border-border p-6 bg-popover` |
 
 ### Color Tokens
 
@@ -91,6 +91,29 @@ ring-ring
 | `border-gray-200/700` | `border-border` |
 | `bg-blue-500 text-white` | `bg-action-button text-action-button-foreground` |
 
+### Dark Mode Visual Hierarchy
+
+**IMPORTANT:** Dark mode uses a layered lightness system for depth perception:
+
+```
+16% ─── Page background (bg-background) - darkest base layer
+  ↓
+18% ─── Input fields (bg-input-background, bg-switch-background) - recessed wells
+  ↓
+20% ─── Cards (bg-card) - elevated surfaces
+  ↓
+24% ─── Dialogs & Popovers (bg-popover) - floating elements, most elevated
+  ↓
+25-30% ─ Interactive accents (bg-muted, bg-accent, border-border)
+```
+
+**Key principles:**
+- Each layer is 2-6% lighter than the previous
+- Input elements (18%) are DARKER than their containers (20-24%) - creates "well" effect
+- Dialogs (24%) must be lighter than cards (20%) for clear separation
+- All interactive elements use `border-border` (30%) for visible edges
+- NEVER override dark mode colors with opacity blends (e.g., `dark:bg-input/30`)
+
 ---
 
 ## 3. Component Patterns
@@ -129,18 +152,34 @@ ring-ring
 </div>
 
 // Dialog
-<div className="rounded-2xl shadow-2xl border border-border p-6 bg-card">
+<div className="rounded-2xl shadow-2xl border border-border p-6 bg-popover">
   {children}
 </div>
 ```
 
-### Inputs
+### Inputs & Form Elements
 
 ```tsx
-<input className="w-full px-4 py-2.5 bg-input-background rounded-lg border-0
+// Text Input
+<input className="w-full px-4 py-2.5 bg-input-background rounded-lg border border-border
                   outline-none focus:ring-2 focus:ring-ring/20
                   transition-all duration-200" />
+
+// Select Dropdown (use Select component from @/components/ui/select)
+// - Background: bg-input-background (18% in dark mode)
+// - Border: border-border (30% in dark mode)
+// - NEVER use dark:bg-input/XX opacity overrides
+
+// Switch Toggle (use Switch component from @/components/ui/switch)
+// - Unchecked: bg-switch-background (18% in dark mode) with border-border
+// - Checked: bg-primary with transparent border
+// - NEVER use dark:bg-input/XX opacity overrides
 ```
+
+**Form Element Rules:**
+- ALL form inputs must use `bg-input-background` in dark mode (no opacity overrides)
+- ALL form inputs must use `border-border` for consistent, visible edges
+- Form elements should appear as "wells" (darker than their container)
 
 ---
 

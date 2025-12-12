@@ -90,7 +90,7 @@ export function PlayerLabelDialog({
       {/* Dialog */}
       <div
         data-player-label-dialog
-        className="fixed z-50 rounded-2xl shadow-2xl border border-border bg-card p-3"
+        className="fixed z-50 rounded-2xl shadow-2xl border border-border bg-popover p-3"
         style={{
           left: `${position.x}px`,
           top: `${position.y - 200}px`, // Position higher above the player

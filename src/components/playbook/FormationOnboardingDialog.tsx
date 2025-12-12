@@ -55,7 +55,7 @@ export function FormationOnboardingDialog({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-card rounded-lg shadow-xl w-[600px] max-h-[80vh] flex flex-col">
+      <div className="bg-popover border border-border rounded-2xl shadow-2xl w-[600px] max-h-[80vh] flex flex-col">
         <div className="px-6 py-4 border-b">
           <h2 className="text-xl font-semibold">Set Up Formations</h2>
           <p className="text-sm text-muted-foreground mt-1">

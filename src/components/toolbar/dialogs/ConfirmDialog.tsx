@@ -25,7 +25,7 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
   return (
     <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-card border border-border rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4 animate-in fade-in zoom-in duration-200">
+      <div className="bg-popover border border-border rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4 animate-in fade-in zoom-in duration-200">
         <h3 className="text-foreground mb-2">{title}</h3>
         <p className="text-sm text-muted-foreground mb-6">{message}</p>
         

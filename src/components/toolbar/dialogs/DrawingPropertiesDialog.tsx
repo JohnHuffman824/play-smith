@@ -58,7 +58,7 @@ export function DrawingPropertiesDialog({
 			/>
 			<div
 				style={dialogStyle}
-				className="w-64 rounded-2xl shadow-2xl bg-card border border-border p-4 z-[70]"
+				className="w-64 rounded-2xl shadow-2xl bg-popover border border-border p-4 z-[70]"
 			>
 			{/* Header */}
 			<div className='flex items-center justify-between mb-4'>

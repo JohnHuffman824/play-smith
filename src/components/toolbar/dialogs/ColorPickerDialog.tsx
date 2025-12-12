@@ -37,7 +37,7 @@ export function ColorPickerDialog({ currentColor, onColorChange, onClose, positi
   return (
     <div
       data-color-dialog
-      className={`${useRelativePosition ? '' : `absolute ${positionClasses}`} w-64 rounded-2xl shadow-2xl border border-border bg-card p-4 z-50`}>
+      className={`${useRelativePosition ? '' : `absolute ${positionClasses}`} w-64 rounded-2xl shadow-2xl border border-border bg-popover p-4 z-50`}>
       <div className="flex items-center justify-between mb-4">
         <span className="text-foreground">Pick Color</span>
         <button

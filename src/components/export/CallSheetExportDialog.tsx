@@ -94,7 +94,7 @@ export function CallSheetExportDialog({
 
 	return (
 		<div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
-			<div className="rounded-2xl shadow-2xl p-6 max-w-2xl w-full mx-4 max-h-[80vh] flex flex-col animate-in fade-in zoom-in duration-200 bg-card">
+			<div className="rounded-2xl shadow-2xl border border-border p-6 max-w-2xl w-full mx-4 max-h-[80vh] flex flex-col animate-in fade-in zoom-in duration-200 bg-popover">
 				<h2 className="text-xl font-semibold mb-2 text-card-foreground">
 					Export Call Sheet
 				</h2>
