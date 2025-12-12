@@ -1,5 +1,12 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import type { CanvasSnapshot } from '../../hooks/useCanvasSnapshot'
+import {
+	TRANSITION_DURATION_S,
+	TRANSITION_EASING,
+	TRANSITION_OVERLAY_Z_INDEX,
+	TRANSITION_BORDER_RADIUS,
+	TRANSITION_FINAL_OPACITY,
+} from '../../constants/animation.constants'
 
 interface CanvasTransitionOverlayProps {
 	snapshot: CanvasSnapshot | null
@@ -29,25 +36,25 @@ export function CanvasTransitionOverlay({
 						width: sourceRect.width,
 						height: sourceRect.height,
 						opacity: 1,
-						zIndex: 1000,
+						zIndex: TRANSITION_OVERLAY_Z_INDEX,
 					}}
 					animate={{
 						left: targetRect.left,
 						top: targetRect.top,
 						width: targetRect.width,
 						height: targetRect.height,
-						opacity: 0,
+						opacity: TRANSITION_FINAL_OPACITY,
 					}}
 					transition={{
-						duration: 0.5,
-						ease: [0.4, 0, 0.2, 1], // Smooth easing
+						duration: TRANSITION_DURATION_S,
+						ease: TRANSITION_EASING,
 					}}
 					onAnimationComplete={onAnimationComplete}
 					style={{
 						backgroundImage: `url(${snapshot.dataUrl})`,
 						backgroundSize: 'cover',
 						backgroundPosition: 'center',
-						borderRadius: '12px',
+						borderRadius: TRANSITION_BORDER_RADIUS,
 						boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
 					}}
 				/>

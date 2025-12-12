@@ -58,19 +58,21 @@ function PlayEditorContent() {
 	const canvasRef = useRef<HTMLDivElement>(null)
 	const { getCardPosition } = usePlayTransition()
 
-	const [transitionState, setTransitionState] = useState<{
-		isAnimating: boolean
+	// Use refs for transition data that doesn't need to trigger re-renders
+	const transitionDataRef = useRef<{
 		snapshot: CanvasSnapshot | null
 		sourceRect: DOMRect | null
 		targetRect: DOMRect | null
 		targetPlayId: string | null
 	}>({
-		isAnimating: false,
 		snapshot: null,
 		sourceRect: null,
 		targetRect: null,
 		targetPlayId: null,
 	})
+
+	// Only isAnimating needs to be in state to trigger overlay re-render
+	const [isTransitioning, setIsTransitioning] = useState(false)
 
 	const {
 		state: playState,
@@ -110,7 +112,7 @@ function PlayEditorContent() {
 	const [isAddingPlay, setIsAddingPlay] = useState(false)
 	const [showRenameModal, setShowRenameModal] = useState(false)
 	const [showDeleteModal, setShowDeleteModal] = useState(false)
-	const [targetPlayId, setTargetPlayId] = useState<string | null>(null)
+	const [modalTargetPlayId, setModalTargetPlayId] = useState<string | null>(null)
 	const [targetPlayName, setTargetPlayName] = useState('')
 
 	/**
@@ -404,16 +406,16 @@ function PlayEditorContent() {
 		const play = playbookPlays.find((p) => p.id === playId)
 		if (!play) return
 
-		setTargetPlayId(playId)
+		setModalTargetPlayId(playId)
 		setTargetPlayName(play.name)
 		setShowRenameModal(true)
 	}
 
 	async function confirmRename() {
-		if (!targetPlayId || !targetPlayName.trim()) return
+		if (!modalTargetPlayId || !targetPlayName.trim()) return
 
 		try {
-			const response = await fetch(`/api/plays/${targetPlayId}`, {
+			const response = await fetch(`/api/plays/${modalTargetPlayId}`, {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ name: targetPlayName.trim() })
@@ -427,14 +429,14 @@ function PlayEditorContent() {
 			// Update local state
 			setPlaybookPlays((prev) =>
 				prev.map((p) =>
-					p.id === targetPlayId
+					p.id === modalTargetPlayId
 						? { ...p, name: targetPlayName.trim() }
 						: p
 				)
 			)
 
 			setShowRenameModal(false)
-			setTargetPlayId(null)
+			setModalTargetPlayId(null)
 			setTargetPlayName('')
 		} catch (error) {
 			console.error('Failed to rename play:', error)
@@ -442,15 +444,15 @@ function PlayEditorContent() {
 	}
 
 	function handleDeletePlayFromBar(playId: string) {
-		setTargetPlayId(playId)
+		setModalTargetPlayId(playId)
 		setShowDeleteModal(true)
 	}
 
 	async function confirmDeleteFromBar() {
-		if (!targetPlayId) return
+		if (!modalTargetPlayId) return
 
 		try {
-			const response = await fetch(`/api/plays/${targetPlayId}`, {
+			const response = await fetch(`/api/plays/${modalTargetPlayId}`, {
 				method: 'DELETE',
 				credentials: 'include'
 			})
@@ -462,11 +464,11 @@ function PlayEditorContent() {
 
 			// Update local state
 			setPlaybookPlays((prev) =>
-				prev.filter((p) => p.id !== targetPlayId)
+				prev.filter((p) => p.id !== modalTargetPlayId)
 			)
 
 			setShowDeleteModal(false)
-			setTargetPlayId(null)
+			setModalTargetPlayId(null)
 		} catch (error) {
 			console.error('Failed to delete play:', error)
 		}
@@ -532,24 +534,33 @@ function PlayEditorContent() {
 			return
 		}
 
-		setTransitionState({
-			isAnimating: true,
+		// Store transition data in ref (doesn't trigger re-render)
+		transitionDataRef.current = {
 			snapshot,
 			sourceRect,
 			targetRect,
 			targetPlayId,
-		})
+		}
+
+		// Only set isAnimating in state to trigger overlay render
+		setIsTransitioning(true)
 	}
 
 	function handleTransitionComplete() {
-		const { targetPlayId } = transitionState
-		setTransitionState({
-			isAnimating: false,
+		const { targetPlayId } = transitionDataRef.current
+
+		// Clear transition data
+		transitionDataRef.current = {
 			snapshot: null,
 			sourceRect: null,
 			targetRect: null,
 			targetPlayId: null,
-		})
+		}
+
+		// Stop animation
+		setIsTransitioning(false)
+
+		// Navigate to target play
 		if (targetPlayId) {
 			navigate(`/playbooks/${playbookId}/play/${targetPlayId}`)
 		}
@@ -632,10 +643,10 @@ function PlayEditorContent() {
 	return (
 		<main className={`flex h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
 			<CanvasTransitionOverlay
-				snapshot={transitionState.snapshot}
-				sourceRect={transitionState.sourceRect}
-				targetRect={transitionState.targetRect}
-				isAnimating={transitionState.isAnimating}
+				snapshot={transitionDataRef.current.snapshot}
+				sourceRect={transitionDataRef.current.sourceRect}
+				targetRect={transitionDataRef.current.targetRect}
+				isAnimating={isTransitioning}
 				onAnimationComplete={handleTransitionComplete}
 			/>
 			<Toolbar
