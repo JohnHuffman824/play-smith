@@ -23,8 +23,6 @@ export function ToolButton({
 	disabled = false,
 	dataAttribute
 }: ToolButtonProps) {
-	const { theme } = useTheme()
-
 	const baseButtonClass = [
 		'w-14 h-14 rounded-xl flex items-center justify-center',
 		'transition-all cursor-pointer',
@@ -32,9 +30,7 @@ export function ToolButton({
 
 	const buttonClass = isSelected
 		? 'bg-blue-500 text-white shadow-lg scale-105'
-		: theme === 'dark'
-			? 'bg-gray-700 hover:bg-gray-600 text-gray-300'
-			: 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+		: 'bg-secondary text-secondary-foreground hover:bg-accent'
 
 	return (
 		<Tooltip content={label}>

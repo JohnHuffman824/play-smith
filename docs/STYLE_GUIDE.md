@@ -1612,33 +1612,56 @@ The action-button token provides:
 ### Examples
 
 ```tsx
-// ✅ PREFERRED - Blue circular play button
-<button className="rounded-full bg-blue-500 text-white shadow-lg
-                   hover:bg-blue-600 hover:scale-110 transition-all">
-  <Play className="size-4 fill-white" />
+// ✅ CORRECT - High-level action button (primary CTA)
+<button className="px-4 py-2 rounded-lg bg-action-button text-action-button-foreground
+                   hover:bg-action-button/90 transition-all duration-200 cursor-pointer
+                   outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
+  Back to Playbook
 </button>
 
-// ✅ PREFERRED - Blue primary action button
-<button className="bg-primary text-primary-foreground rounded-lg px-4 py-2
-                   hover:bg-primary/90 transition-all">
-  Create Play
+// ✅ CORRECT - Destructive action button
+<button className="px-4 py-2 rounded-lg bg-destructive text-destructive-foreground
+                   hover:bg-destructive/90 transition-all duration-200 cursor-pointer
+                   outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
+  Delete Play
 </button>
 
-// ✅ ACCEPTABLE - White button for special cases only
-<button className="rounded-full bg-white text-black shadow-lg
-                   hover:scale-110 transition-all">
-  <Play className="size-4 fill-black" />
+// ✅ CORRECT - Secondary/Cancel button
+<button className="px-4 py-2 border border-border rounded-lg hover:bg-accent
+                   transition-all duration-200 cursor-pointer outline-none
+                   focus-visible:ring-[3px] focus-visible:ring-ring/50">
+  Cancel
+</button>
+
+// ❌ INCORRECT - Don't use hardcoded colors
+<button className="bg-blue-500 text-white hover:bg-blue-600">
+  Submit
 </button>
 ```
 
-### When to Use White/Neutral Buttons
+### Button Usage Guidelines
 
-Use white or neutral styling **only** in these cases:
-- Over dark images/backgrounds where blue would clash
-- In high-density toolbars where color would be overwhelming
-- For disabled/inactive states
+**High-level action buttons** (`bg-action-button`):
+- Navigation buttons ("Back to Playbook", "Go to Dashboard")
+- Primary CTAs ("Save", "Create", "Submit")
+- Confirmation actions ("Rename", "Confirm")
+- Any button that represents the primary action in a context
 
-**Default to blue for all standard interactive elements.**
+**Destructive buttons** (`bg-destructive`):
+- Delete operations
+- Remove/discard actions
+- Irreversible operations that need visual warning
+
+**Secondary/Ghost buttons** (`border-border hover:bg-accent`):
+- Cancel actions in dialogs
+- Less important secondary actions
+- Actions that should be de-emphasized
+
+**Always include:**
+- Full transition and hover states
+- Focus states for accessibility
+- Cursor pointer
+- Proper disabled states when applicable
 
 ---
 

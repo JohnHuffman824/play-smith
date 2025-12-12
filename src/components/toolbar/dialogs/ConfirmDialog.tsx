@@ -8,6 +8,9 @@ interface ConfirmDialogProps {
   onConfirm: () => void
   onCancel: () => void
   variant?: 'danger' | 'default'
+  actionLabel?: string
+  onAction?: () => void
+  actionVariant?: 'primary' | 'default'
 }
 
 export function ConfirmDialog({
@@ -18,6 +21,9 @@ export function ConfirmDialog({
   onConfirm,
   onCancel,
   variant = 'default',
+  actionLabel,
+  onAction,
+  actionVariant = 'primary',
 }: ConfirmDialogProps) {
   const { theme } = useTheme()
   
@@ -40,6 +46,20 @@ export function ConfirmDialog({
           >
             {cancelLabel}
           </button>
+          {actionLabel && onAction && (
+            <button
+              onClick={onAction}
+              className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${
+                actionVariant === 'primary'
+                  ? 'bg-blue-500 text-white hover:bg-blue-600'
+                  : theme === 'dark'
+                  ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              {actionLabel}
+            </button>
+          )}
           <button
             onClick={onConfirm}
             className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${

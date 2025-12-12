@@ -64,7 +64,8 @@ function PlayEditorContent() {
 		applyConcept,
 		applyConceptGroup,
 		deleteDrawing,
-		dispatch
+		dispatch,
+		markClean
 	} = usePlayContext()
 
 	const {
@@ -737,13 +738,23 @@ function PlayEditorContent() {
 		{showUnsavedChangesDialog && (
 			<ConfirmDialog
 				title="Unsaved Changes"
-				message="You have unsaved changes. Are you sure you want to leave? Your changes will be lost."
+				message="You have unsaved changes. Would you like to save before leaving?"
 				confirmLabel="Leave Without Saving"
-				cancelLabel="Stay"
+				cancelLabel="Cancel"
 				variant="danger"
+				actionLabel="Save & Leave"
+				actionVariant="primary"
 				onConfirm={() => {
 					setShowUnsavedChangesDialog(false)
 					navigateBackToPlaybook()
+				}}
+				onAction={() => {
+					eventBus.emit('canvas:save')
+					setShowUnsavedChangesDialog(false)
+					// Navigate after a brief delay to allow save to complete
+					setTimeout(() => {
+						navigateBackToPlaybook()
+					}, SAVE_DELAY_MS)
 				}}
 				onCancel={() => setShowUnsavedChangesDialog(false)}
 			/>

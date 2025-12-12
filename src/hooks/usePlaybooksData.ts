@@ -31,7 +31,11 @@ interface UsePlaybooksDataReturn {
 	refetch: () => Promise<void>
 }
 
-export function usePlaybooksData(currentTeamId: number | null = null): UsePlaybooksDataReturn {
+export function usePlaybooksData(
+	currentTeamId: number | null = null,
+	section: string = 'all',
+	folderId: number | null = null
+): UsePlaybooksDataReturn {
 	const navigate = useNavigate()
 	const queryClient = useQueryClient()
 
@@ -58,13 +62,55 @@ export function usePlaybooksData(currentTeamId: number | null = null): UsePlaybo
 		}
 	}, [queryError, handleUnauthorized])
 
+	// Filter playbooks based on section
+	const filteredPlaybooks = useMemo(() => {
+		let result = playbooks
+
+		// Apply section filtering
+		switch (section) {
+			case 'starred':
+				result = result.filter(pb => pb.is_starred)
+				break
+			case 'recent':
+				result = result
+					.filter(pb => pb.last_accessed_at !== null)
+					.sort((a, b) => {
+						const dateA = a.last_accessed_at ? new Date(a.last_accessed_at).getTime() : 0
+						const dateB = b.last_accessed_at ? new Date(b.last_accessed_at).getTime() : 0
+						return dateB - dateA
+					})
+					.slice(0, 20)
+				break
+			case 'folders':
+				if (folderId !== null) {
+					result = result.filter(pb => pb.folder_id === folderId)
+				}
+				break
+			case 'trash':
+				result = result.filter(pb => pb.deleted_at !== null)
+				break
+			case 'shared':
+				// Shared playbooks will be fetched separately via API
+				// For now, filter to empty since we need dedicated API endpoint
+				result = []
+				break
+			case 'all':
+			default:
+				// All non-deleted playbooks
+				result = result
+				break
+		}
+
+		return result
+	}, [playbooks, section, folderId])
+
 	// Derived state - split into personal and team playbooks
 	const { personalPlaybooks, teamPlaybooks } = useMemo(() => ({
-		personalPlaybooks: playbooks.filter(pb => pb.team_id === null),
+		personalPlaybooks: filteredPlaybooks.filter(pb => pb.team_id === null),
 		teamPlaybooks: currentTeamId
-			? playbooks.filter(pb => pb.team_id === currentTeamId)
-			: playbooks.filter(pb => pb.team_id !== null)
-	}), [playbooks, currentTeamId])
+			? filteredPlaybooks.filter(pb => pb.team_id === currentTeamId)
+			: filteredPlaybooks.filter(pb => pb.team_id !== null)
+	}), [filteredPlaybooks, currentTeamId])
 
 	// CREATE MUTATION
 	const createMutation = useMutation({
@@ -252,7 +298,7 @@ export function usePlaybooksData(currentTeamId: number | null = null): UsePlaybo
 	}, [queryClient])
 
 	return {
-		playbooks,
+		playbooks: filteredPlaybooks,
 		personalPlaybooks,
 		teamPlaybooks,
 		isLoading,

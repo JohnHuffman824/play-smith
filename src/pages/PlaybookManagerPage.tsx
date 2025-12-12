@@ -15,26 +15,8 @@ import { Input } from '../components/ui/input'
 
 export function PlaybookManagerPage() {
 	const navigate = useNavigate()
-	const { teams, currentTeamId, switchTeam, isLoading: teamsLoading } = useTeamsData()
-	const {
-		personalPlaybooks: allPersonalPlaybooks,
-		teamPlaybooks: allTeamPlaybooks,
-		isLoading: playbooksLoading,
-		error: playbooksError,
-		createPlaybook,
-		updatePlaybook,
-		deletePlaybook,
-		toggleStar
-	} = usePlaybooksData(currentTeamId)
-	const {
-		folders,
-		isLoading: foldersLoading,
-		error: foldersError
-	} = useFoldersData()
 
-	const isLoading = playbooksLoading || teamsLoading || foldersLoading
-	const error = playbooksError || foldersError
-
+	// State declarations must come before hooks that use them
 	const [activeSection, setActiveSection] = useState('all')
 	const [selectedFolderId, setSelectedFolderId] = useState<number | null>(null)
 	const [searchQuery, setSearchQuery] = useState('')
@@ -48,6 +30,30 @@ export function PlaybookManagerPage() {
 	const [sharePlaybookName, setSharePlaybookName] = useState('')
 	const [sharePlaybookTeamId, setSharePlaybookTeamId] = useState<number | null>(null)
 	const [newPlaybookName, setNewPlaybookName] = useState('')
+
+	// Now hooks that depend on state
+	const { teams, currentTeamId, switchTeam, isLoading: teamsLoading } = useTeamsData()
+	const {
+		personalPlaybooks: allPersonalPlaybooks,
+		teamPlaybooks: allTeamPlaybooks,
+		isLoading: playbooksLoading,
+		error: playbooksError,
+		createPlaybook,
+		updatePlaybook,
+		deletePlaybook,
+		toggleStar,
+		restore,
+		permanentDelete,
+		emptyTrash
+	} = usePlaybooksData(currentTeamId, activeSection, selectedFolderId)
+	const {
+		folders,
+		isLoading: foldersLoading,
+		error: foldersError
+	} = useFoldersData()
+
+	const isLoading = playbooksLoading || teamsLoading || foldersLoading
+	const error = playbooksError || foldersError
 
 	const personalPlaybooks = useMemo(
 		() => allPersonalPlaybooks.filter(pb =>
@@ -132,6 +138,20 @@ export function PlaybookManagerPage() {
 		await toggleStar(id)
 	}
 
+	const handleRestore = async (id: number) => {
+		await restore(id)
+	}
+
+	const handlePermanentDelete = async (id: number) => {
+		await permanentDelete(id)
+	}
+
+	const handleEmptyTrash = async () => {
+		if (confirm('Permanently delete all items in trash? This cannot be undone.')) {
+			await emptyTrash()
+		}
+	}
+
 	const handleRenamePrompt = useCallback((id: number, currentName: string) => {
 		const newName = prompt('Rename playbook:', currentName)
 		if (newName?.trim()) {
@@ -142,6 +162,18 @@ export function PlaybookManagerPage() {
 	const handleDeletePrompt = useCallback((id: number, name: string) => {
 		if (confirm(`Delete "${name}"?`)) {
 			handleDelete(id)
+		}
+	}, [])
+
+	const handleRestorePrompt = useCallback((id: number, name: string) => {
+		if (confirm(`Restore "${name}"?`)) {
+			handleRestore(id)
+		}
+	}, [])
+
+	const handlePermanentDeletePrompt = useCallback((id: number, name: string) => {
+		if (confirm(`Permanently delete "${name}"? This cannot be undone.`)) {
+			handlePermanentDelete(id)
 		}
 	}, [])
 
@@ -191,75 +223,143 @@ export function PlaybookManagerPage() {
 
 				{/* Content */}
 				<div className="flex-1 overflow-auto p-6">
-					{/* Personal Playbooks Section */}
-					{personalPlaybooks.length > 0 && (
-						<div className="mb-8">
-							<h2 className="text-xl font-semibold mb-4">Personal Playbooks</h2>
-							<div className={viewMode === 'grid'
-								? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
-								: "flex flex-col gap-3"
-							}>
-								{personalPlaybooks.map(playbook => (
-									<PlaybookCard
-										key={playbook.id}
-										id={playbook.id}
-										name={playbook.name}
-										type="playbook"
-										playCount={playbook.play_count}
-										lastModified={new Date(playbook.updated_at).toLocaleDateString()}
-										isStarred={playbook.is_starred}
-										onRename={() => handleRenamePrompt(playbook.id, playbook.name)}
-										onDelete={() => handleDeletePrompt(playbook.id, playbook.name)}
-										onDuplicate={handleDuplicate}
-										onExport={handleExportPlaybook}
-										onShare={handleShare}
-										onToggleStar={handleToggleStar}
-									/>
-								))}
-							</div>
-						</div>
+					{/* Trash Section - Special UI */}
+					{activeSection === 'trash' && (
+						<>
+							{playbooks.length > 0 && (
+								<div className="mb-4 flex justify-between items-center">
+									<p className="text-sm text-muted-foreground">
+										Items in trash will be permanently deleted after 30 days
+									</p>
+									<button
+										onClick={handleEmptyTrash}
+										className="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+									>
+										Empty Trash
+									</button>
+								</div>
+							)}
+							{playbooks.length > 0 ? (
+								<div className={viewMode === 'grid'
+									? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+									: "flex flex-col gap-3"
+								}>
+									{playbooks.map(playbook => (
+										<PlaybookCard
+											key={playbook.id}
+											id={playbook.id}
+											name={playbook.name}
+											type="playbook"
+											playCount={playbook.play_count}
+											lastModified={new Date(playbook.updated_at).toLocaleDateString()}
+											isStarred={playbook.is_starred}
+											onRename={() => handleRestorePrompt(playbook.id, playbook.name)}
+											onDelete={() => handlePermanentDeletePrompt(playbook.id, playbook.name)}
+											onDuplicate={handleDuplicate}
+											onExport={handleExportPlaybook}
+											onShare={handleShare}
+											onToggleStar={handleToggleStar}
+										/>
+									))}
+								</div>
+							) : (
+								<div className="text-center py-16">
+									<p className="text-muted-foreground">Trash is empty.</p>
+								</div>
+							)}
+						</>
 					)}
 
-					{/* Team Playbooks Section */}
-					{teamPlaybooks.length > 0 && (
-						<div className="mb-8">
-							<h2 className="text-xl font-semibold mb-4">Team Playbooks</h2>
-							<div className={viewMode === 'grid'
-								? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
-								: "flex flex-col gap-3"
-							}>
-								{teamPlaybooks.map(playbook => (
-									<PlaybookCard
-										key={playbook.id}
-										id={playbook.id}
-										name={playbook.name}
-										type="playbook"
-										playCount={playbook.play_count}
-										lastModified={new Date(playbook.updated_at).toLocaleDateString()}
-										isStarred={playbook.is_starred}
-										onRename={() => handleRenamePrompt(playbook.id, playbook.name)}
-										onDelete={() => handleDeletePrompt(playbook.id, playbook.name)}
-										onDuplicate={handleDuplicate}
-										onExport={handleExportPlaybook}
-										onShare={handleShare}
-										onToggleStar={handleToggleStar}
-									/>
-								))}
-							</div>
-						</div>
-					)}
+					{/* All Other Sections */}
+					{activeSection !== 'trash' && (
+						<>
+							{/* Personal Playbooks Section */}
+							{personalPlaybooks.length > 0 && (
+								<div className="mb-8">
+									<h2 className="text-xl font-semibold mb-4">Personal Playbooks</h2>
+									<div className={viewMode === 'grid'
+										? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+										: "flex flex-col gap-3"
+									}>
+										{personalPlaybooks.map(playbook => (
+											<PlaybookCard
+												key={playbook.id}
+												id={playbook.id}
+												name={playbook.name}
+												type="playbook"
+												playCount={playbook.play_count}
+												lastModified={new Date(playbook.updated_at).toLocaleDateString()}
+												isStarred={playbook.is_starred}
+												onRename={() => handleRenamePrompt(playbook.id, playbook.name)}
+												onDelete={() => handleDeletePrompt(playbook.id, playbook.name)}
+												onDuplicate={handleDuplicate}
+												onExport={handleExportPlaybook}
+												onShare={handleShare}
+												onToggleStar={handleToggleStar}
+											/>
+										))}
+									</div>
+								</div>
+							)}
 
-					{/* Empty State */}
-					{personalPlaybooks.length === 0 && teamPlaybooks.length === 0 && (
-						<div className="text-center py-16">
-							<p className="text-muted-foreground mb-4">No playbooks found</p>
-							<button
-								onClick={() => setShowNewPlaybookModal(true)}
-								className="px-6 py-2.5 bg-primary text-primary-foreground rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
-							>
-								Create Your First Playbook
-							</button>
-						</div>
+							{/* Team Playbooks Section */}
+							{teamPlaybooks.length > 0 && (
+								<div className="mb-8">
+									<h2 className="text-xl font-semibold mb-4">Team Playbooks</h2>
+									<div className={viewMode === 'grid'
+										? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+										: "flex flex-col gap-3"
+									}>
+										{teamPlaybooks.map(playbook => (
+											<PlaybookCard
+												key={playbook.id}
+												id={playbook.id}
+												name={playbook.name}
+												type="playbook"
+												playCount={playbook.play_count}
+												lastModified={new Date(playbook.updated_at).toLocaleDateString()}
+												isStarred={playbook.is_starred}
+												onRename={() => handleRenamePrompt(playbook.id, playbook.name)}
+												onDelete={() => handleDeletePrompt(playbook.id, playbook.name)}
+												onDuplicate={handleDuplicate}
+												onExport={handleExportPlaybook}
+												onShare={handleShare}
+												onToggleStar={handleToggleStar}
+											/>
+										))}
+									</div>
+								</div>
+							)}
+
+							{/* Section-Specific Empty States */}
+							{personalPlaybooks.length === 0 && teamPlaybooks.length === 0 && (
+								<div className="text-center py-16">
+									{activeSection === 'starred' && (
+										<p className="text-muted-foreground">No starred playbooks yet. Star a playbook to see it here.</p>
+									)}
+									{activeSection === 'recent' && (
+										<p className="text-muted-foreground">No recently opened playbooks.</p>
+									)}
+									{activeSection === 'shared' && (
+										<p className="text-muted-foreground">No playbooks have been shared with you.</p>
+									)}
+									{activeSection === 'folders' && selectedFolderId !== null && (
+										<p className="text-muted-foreground">This folder is empty.</p>
+									)}
+									{activeSection === 'all' && (
+										<>
+											<p className="text-muted-foreground mb-4">No playbooks found</p>
+											<button
+												onClick={() => setShowNewPlaybookModal(true)}
+												className="px-6 py-2.5 bg-primary text-primary-foreground rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+											>
+												Create Your First Playbook
+											</button>
+										</>
+									)}
+								</div>
+							)}
+						</>
 					)}
 				</div>
 			</div>
