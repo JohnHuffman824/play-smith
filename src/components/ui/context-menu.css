@@ -1,0 +1,311 @@
+/* || Content */
+.context-menu-content {
+	position: relative;
+	z-index: 50;
+	max-height: var(--radix-context-menu-content-available-height);
+	min-width: 8rem;
+	overflow-x: hidden;
+	overflow-y: auto;
+	border-radius: 8px;
+	border: 1px solid var(--border);
+	background: var(--popover);
+	color: var(--popover-foreground);
+	padding: 4px;
+	box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+	transform-origin: var(--radix-context-menu-content-transform-origin);
+}
+
+/* Content animations */
+.context-menu-content[data-state="open"] {
+	animation: fade-in 150ms ease-out, zoom-in 150ms ease-out;
+}
+
+.context-menu-content[data-state="closed"] {
+	animation: fade-out 150ms ease-out, zoom-out 150ms ease-out;
+}
+
+/* Directional slide animations */
+.context-menu-content[data-state="open"][data-side="bottom"] {
+	animation: fade-in 150ms ease-out, zoom-in 150ms ease-out, slide-in-from-top 150ms ease-out;
+}
+
+.context-menu-content[data-state="open"][data-side="top"] {
+	animation: fade-in 150ms ease-out, zoom-in 150ms ease-out, slide-in-from-bottom 150ms ease-out;
+}
+
+.context-menu-content[data-state="open"][data-side="left"] {
+	animation: fade-in 150ms ease-out, zoom-in 150ms ease-out, slide-in-from-right 150ms ease-out;
+}
+
+.context-menu-content[data-state="open"][data-side="right"] {
+	animation: fade-in 150ms ease-out, zoom-in 150ms ease-out, slide-in-from-left 150ms ease-out;
+}
+
+/* || Sub Content */
+.context-menu-sub-content {
+	position: relative;
+	z-index: 50;
+	min-width: 8rem;
+	overflow: hidden;
+	border-radius: 8px;
+	border: 1px solid var(--border);
+	background: var(--popover);
+	color: var(--popover-foreground);
+	padding: 4px;
+	box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+	transform-origin: var(--radix-context-menu-content-transform-origin);
+}
+
+/* Sub content animations */
+.context-menu-sub-content[data-state="open"] {
+	animation: fade-in 150ms ease-out, zoom-in 150ms ease-out;
+}
+
+.context-menu-sub-content[data-state="closed"] {
+	animation: fade-out 150ms ease-out, zoom-out 150ms ease-out;
+}
+
+/* Directional slide animations for sub content */
+.context-menu-sub-content[data-state="open"][data-side="bottom"] {
+	animation: fade-in 150ms ease-out, zoom-in 150ms ease-out, slide-in-from-top 150ms ease-out;
+}
+
+.context-menu-sub-content[data-state="open"][data-side="top"] {
+	animation: fade-in 150ms ease-out, zoom-in 150ms ease-out, slide-in-from-bottom 150ms ease-out;
+}
+
+.context-menu-sub-content[data-state="open"][data-side="left"] {
+	animation: fade-in 150ms ease-out, zoom-in 150ms ease-out, slide-in-from-right 150ms ease-out;
+}
+
+.context-menu-sub-content[data-state="open"][data-side="right"] {
+	animation: fade-in 150ms ease-out, zoom-in 150ms ease-out, slide-in-from-left 150ms ease-out;
+}
+
+/* || Item */
+.context-menu-item {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	border-radius: 4px;
+	padding: 6px 8px;
+	font-size: 0.875rem;
+	outline: none;
+	cursor: default;
+	user-select: none;
+	transition: background-color 100ms, color 100ms;
+}
+
+.context-menu-item:focus {
+	background: var(--accent);
+	color: var(--accent-foreground);
+}
+
+.context-menu-item[data-disabled] {
+	pointer-events: none;
+	opacity: 0.5;
+}
+
+.context-menu-item[data-inset] {
+	padding-left: 32px;
+}
+
+/* SVG styling for items */
+.context-menu-item svg {
+	flex-shrink: 0;
+	pointer-events: none;
+}
+
+.context-menu-item svg:not([class*='size-']) {
+	width: 1rem;
+	height: 1rem;
+}
+
+.context-menu-item svg:not([class*='text-']) {
+	color: var(--muted-foreground);
+}
+
+/* Destructive variant */
+.context-menu-item[data-variant="destructive"] {
+	color: var(--destructive);
+}
+
+.context-menu-item[data-variant="destructive"]:focus {
+	background: rgb(212 24 61 / 0.1);
+	color: var(--destructive);
+}
+
+.dark .context-menu-item[data-variant="destructive"]:focus {
+	background: rgb(212 24 61 / 0.2);
+}
+
+.context-menu-item[data-variant="destructive"] svg {
+	color: var(--destructive) !important;
+}
+
+/* || Checkbox Item */
+.context-menu-checkbox-item {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	border-radius: 4px;
+	padding: 6px 8px 6px 32px;
+	font-size: 0.875rem;
+	outline: none;
+	cursor: default;
+	user-select: none;
+	transition: background-color 100ms, color 100ms;
+}
+
+.context-menu-checkbox-item:focus {
+	background: var(--accent);
+	color: var(--accent-foreground);
+}
+
+.context-menu-checkbox-item[data-disabled] {
+	pointer-events: none;
+	opacity: 0.5;
+}
+
+/* SVG styling for checkbox items */
+.context-menu-checkbox-item svg {
+	flex-shrink: 0;
+	pointer-events: none;
+}
+
+.context-menu-checkbox-item svg:not([class*='size-']) {
+	width: 1rem;
+	height: 1rem;
+}
+
+/* Item indicator (check icon container) */
+.context-menu-checkbox-item > span:first-child {
+	position: absolute;
+	left: 8px;
+	display: flex;
+	width: 14px;
+	height: 14px;
+	align-items: center;
+	justify-content: center;
+	pointer-events: none;
+}
+
+/* || Radio Item */
+.context-menu-radio-item {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	border-radius: 4px;
+	padding: 6px 8px 6px 32px;
+	font-size: 0.875rem;
+	outline: none;
+	cursor: default;
+	user-select: none;
+	transition: background-color 100ms, color 100ms;
+}
+
+.context-menu-radio-item:focus {
+	background: var(--accent);
+	color: var(--accent-foreground);
+}
+
+.context-menu-radio-item[data-disabled] {
+	pointer-events: none;
+	opacity: 0.5;
+}
+
+/* SVG styling for radio items */
+.context-menu-radio-item svg {
+	flex-shrink: 0;
+	pointer-events: none;
+}
+
+.context-menu-radio-item svg:not([class*='size-']) {
+	width: 1rem;
+	height: 1rem;
+}
+
+/* Item indicator (radio icon container) */
+.context-menu-radio-item > span:first-child {
+	position: absolute;
+	left: 8px;
+	display: flex;
+	width: 14px;
+	height: 14px;
+	align-items: center;
+	justify-content: center;
+	pointer-events: none;
+}
+
+/* || Sub Trigger */
+.context-menu-sub-trigger {
+	display: flex;
+	align-items: center;
+	border-radius: 4px;
+	padding: 6px 8px;
+	font-size: 0.875rem;
+	outline: none;
+	cursor: default;
+	user-select: none;
+	transition: background-color 100ms, color 100ms;
+}
+
+.context-menu-sub-trigger:focus {
+	background: var(--accent);
+	color: var(--accent-foreground);
+}
+
+.context-menu-sub-trigger[data-state="open"] {
+	background: var(--accent);
+	color: var(--accent-foreground);
+}
+
+.context-menu-sub-trigger[data-inset] {
+	padding-left: 32px;
+}
+
+/* SVG styling for sub trigger */
+.context-menu-sub-trigger svg {
+	flex-shrink: 0;
+	pointer-events: none;
+}
+
+.context-menu-sub-trigger svg:not([class*='size-']) {
+	width: 1rem;
+	height: 1rem;
+}
+
+/* Chevron icon positioning */
+.context-menu-sub-trigger svg:last-child {
+	margin-left: auto;
+}
+
+/* || Label */
+.context-menu-label {
+	padding: 6px 8px;
+	font-size: 0.875rem;
+	font-weight: 500;
+	color: var(--foreground);
+}
+
+.context-menu-label[data-inset] {
+	padding-left: 32px;
+}
+
+/* || Separator */
+.context-menu-separator {
+	margin: 4px -4px;
+	height: 1px;
+	background: var(--border);
+}
+
+/* || Shortcut */
+.context-menu-shortcut {
+	margin-left: auto;
+	font-size: 0.75rem;
+	letter-spacing: 0.1em;
+	color: var(--muted-foreground);
+}

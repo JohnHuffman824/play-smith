@@ -1,0 +1,788 @@
+/* || Sidebar Component System */
+
+/* || Provider/Wrapper */
+[data-slot="sidebar-wrapper"] {
+  display: flex;
+  min-height: 100svh;
+  width: 100%;
+}
+
+[data-slot="sidebar-wrapper"][data-variant="inset"] {
+  background: var(--sidebar);
+}
+
+/* || Sidebar Base */
+[data-slot="sidebar"] {
+  background: var(--sidebar);
+  color: var(--sidebar-foreground);
+}
+
+/* Non-collapsible sidebar */
+[data-slot="sidebar"][data-collapsible="none"] {
+  display: flex;
+  height: 100%;
+  width: var(--sidebar-width);
+  flex-direction: column;
+}
+
+/* Desktop sidebar wrapper */
+.group.peer[data-slot="sidebar"] {
+  display: none;
+  color: var(--sidebar-foreground);
+}
+
+@media (width >= 768px) {
+  .group.peer[data-slot="sidebar"] {
+    display: block;
+  }
+}
+
+/* || Sidebar Gap (spacer for collapsed/expanded states) */
+[data-slot="sidebar-gap"] {
+  position: relative;
+  width: var(--sidebar-width);
+  background: transparent;
+  transition: width 200ms ease-linear;
+}
+
+[data-slot="sidebar-gap"]:has(~ [data-collapsible="offcanvas"]) {
+  width: 0;
+}
+
+.group[data-collapsible="offcanvas"] [data-slot="sidebar-gap"] {
+  width: 0;
+}
+
+.group[data-collapsible="icon"] [data-slot="sidebar-gap"] {
+  width: var(--sidebar-width-icon);
+}
+
+.group[data-variant="floating"] [data-slot="sidebar-gap"],
+.group[data-variant="inset"] [data-slot="sidebar-gap"] {
+  width: var(--sidebar-width);
+}
+
+.group[data-variant="floating"][data-collapsible="icon"] [data-slot="sidebar-gap"],
+.group[data-variant="inset"][data-collapsible="icon"] [data-slot="sidebar-gap"] {
+  width: calc(var(--sidebar-width-icon) + 16px);
+}
+
+.group[data-side="right"] [data-slot="sidebar-gap"] {
+  transform: rotate(180deg);
+}
+
+/* || Sidebar Container (fixed positioning wrapper) */
+[data-slot="sidebar-container"] {
+  position: fixed;
+  inset-y: 0;
+  z-index: 10;
+  display: none;
+  height: 100svh;
+  width: var(--sidebar-width);
+  transition: left 200ms ease-linear, right 200ms ease-linear, width 200ms ease-linear;
+}
+
+@media (width >= 768px) {
+  [data-slot="sidebar-container"] {
+    display: flex;
+  }
+}
+
+/* Side positioning */
+.group[data-side="left"] [data-slot="sidebar-container"] {
+  left: 0;
+}
+
+.group[data-side="right"] [data-slot="sidebar-container"] {
+  right: 0;
+}
+
+/* Offcanvas state - slide off screen */
+.group[data-side="left"][data-collapsible="offcanvas"] [data-slot="sidebar-container"] {
+  left: calc(var(--sidebar-width) * -1);
+}
+
+.group[data-side="right"][data-collapsible="offcanvas"] [data-slot="sidebar-container"] {
+  right: calc(var(--sidebar-width) * -1);
+}
+
+/* Floating and inset variants - add padding */
+.group[data-variant="floating"] [data-slot="sidebar-container"],
+.group[data-variant="inset"] [data-slot="sidebar-container"] {
+  padding: 8px;
+}
+
+.group[data-variant="floating"][data-collapsible="icon"] [data-slot="sidebar-container"],
+.group[data-variant="inset"][data-collapsible="icon"] [data-slot="sidebar-container"] {
+  width: calc(var(--sidebar-width-icon) + 16px + 2px);
+}
+
+/* Icon collapsed width */
+.group[data-collapsible="icon"] [data-slot="sidebar-container"] {
+  width: var(--sidebar-width-icon);
+}
+
+/* Borders for sidebar and floating variants */
+.group[data-side="left"]:not([data-variant="floating"]):not([data-variant="inset"]) [data-slot="sidebar-container"] {
+  border-right: 1px solid var(--sidebar-border);
+}
+
+.group[data-side="right"]:not([data-variant="floating"]):not([data-variant="inset"]) [data-slot="sidebar-container"] {
+  border-left: 1px solid var(--sidebar-border);
+}
+
+/* || Sidebar Inner */
+[data-slot="sidebar-inner"] {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  flex-direction: column;
+  background: var(--sidebar);
+}
+
+.group[data-variant="floating"] [data-slot="sidebar-inner"] {
+  border-radius: 12px;
+  border: 1px solid var(--sidebar-border);
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 10%), 0 1px 2px -1px rgb(0 0 0 / 10%);
+}
+
+/* || Mobile Sheet Overrides */
+[data-sidebar="sidebar"][data-mobile="true"] {
+  background: var(--sidebar);
+  color: var(--sidebar-foreground);
+  width: var(--sidebar-width);
+  padding: 0;
+}
+
+[data-sidebar="sidebar"][data-mobile="true"] > button {
+  display: none;
+}
+
+/* || Sidebar Header */
+[data-slot="sidebar-header"] {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+}
+
+/* || Sidebar Footer */
+[data-slot="sidebar-footer"] {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+}
+
+/* || Sidebar Content */
+[data-slot="sidebar-content"] {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  overflow: auto;
+}
+
+.group[data-collapsible="icon"] [data-slot="sidebar-content"] {
+  overflow: hidden;
+}
+
+/* || Sidebar Separator */
+[data-slot="sidebar-separator"] {
+  background: var(--sidebar-border);
+  margin-left: 8px;
+  margin-right: 8px;
+  width: auto;
+}
+
+/* || Sidebar Input */
+[data-slot="sidebar-input"] {
+  background: var(--background);
+  height: 2rem;
+  width: 100%;
+  box-shadow: none;
+}
+
+/* || Sidebar Group */
+[data-slot="sidebar-group"] {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  flex-direction: column;
+  padding: 8px;
+}
+
+/* || Sidebar Group Label */
+[data-slot="sidebar-group-label"] {
+  display: flex;
+  height: 2rem;
+  flex-shrink: 0;
+  align-items: center;
+  border-radius: 8px;
+  padding-left: 8px;
+  padding-right: 8px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: color-mix(in oklch, var(--sidebar-foreground) 70%, transparent);
+  outline: none;
+  transition: margin 200ms ease-linear, opacity 200ms ease-linear;
+}
+
+[data-slot="sidebar-group-label"]:focus-visible {
+  box-shadow: 0 0 0 2px var(--sidebar-ring);
+}
+
+[data-slot="sidebar-group-label"] > svg {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.group[data-collapsible="icon"] [data-slot="sidebar-group-label"] {
+  margin-top: -2rem;
+  opacity: 0;
+}
+
+/* || Sidebar Group Action */
+[data-slot="sidebar-group-action"] {
+  position: absolute;
+  top: 14px;
+  right: 12px;
+  display: flex;
+  aspect-ratio: 1 / 1;
+  width: 20px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  padding: 0;
+  color: var(--sidebar-foreground);
+  outline: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: transform 200ms;
+}
+
+[data-slot="sidebar-group-action"]:hover {
+  background: var(--sidebar-accent);
+  color: var(--sidebar-accent-foreground);
+}
+
+[data-slot="sidebar-group-action"]:focus-visible {
+  box-shadow: 0 0 0 2px var(--sidebar-ring);
+}
+
+[data-slot="sidebar-group-action"] > svg {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+/* Increase hit area on mobile */
+[data-slot="sidebar-group-action"]::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+}
+
+@media (width >= 768px) {
+  [data-slot="sidebar-group-action"]::after {
+    display: none;
+  }
+}
+
+.group[data-collapsible="icon"] [data-slot="sidebar-group-action"] {
+  display: none;
+}
+
+/* || Sidebar Group Content */
+[data-slot="sidebar-group-content"] {
+  width: 100%;
+  font-size: 0.875rem;
+}
+
+/* || Sidebar Menu */
+[data-slot="sidebar-menu"] {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* || Sidebar Menu Item */
+[data-slot="sidebar-menu-item"] {
+  position: relative;
+}
+
+/* || Sidebar Menu Button */
+[data-slot="sidebar-menu-button"] {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  border-radius: 8px;
+  padding: 8px;
+  text-align: left;
+  font-size: 0.875rem;
+  outline: none;
+  border: none;
+  background: transparent;
+  color: var(--sidebar-foreground);
+  cursor: pointer;
+  transition: width 200ms, height 200ms, padding 200ms;
+}
+
+[data-slot="sidebar-menu-button"]:hover {
+  background: var(--sidebar-accent);
+  color: var(--sidebar-accent-foreground);
+}
+
+[data-slot="sidebar-menu-button"]:focus-visible {
+  box-shadow: 0 0 0 2px var(--sidebar-ring);
+}
+
+[data-slot="sidebar-menu-button"]:active {
+  background: var(--sidebar-accent);
+  color: var(--sidebar-accent-foreground);
+}
+
+[data-slot="sidebar-menu-button"]:disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+[data-slot="sidebar-menu-button"][aria-disabled="true"] {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+[data-slot="sidebar-menu-button"][data-active="true"] {
+  background: var(--sidebar-accent);
+  font-weight: 500;
+  color: var(--sidebar-accent-foreground);
+}
+
+[data-slot="sidebar-menu-button"][data-state="open"]:hover {
+  background: var(--sidebar-accent);
+  color: var(--sidebar-accent-foreground);
+}
+
+/* Adjust padding when menu action is present */
+.group\/menu-item:has([data-sidebar="menu-action"]) [data-slot="sidebar-menu-button"] {
+  padding-right: 2rem;
+}
+
+[data-slot="sidebar-menu-button"] > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-slot="sidebar-menu-button"] > svg {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+/* Icon collapsed state */
+.group[data-collapsible="icon"] [data-slot="sidebar-menu-button"] {
+  width: 2rem !important;
+  height: 2rem !important;
+  padding: 8px !important;
+}
+
+/* || Sidebar Menu Button Variants */
+[data-slot="sidebar-menu-button"][data-variant="outline"] {
+  background: var(--background);
+  box-shadow: 0 0 0 1px var(--sidebar-border);
+}
+
+[data-slot="sidebar-menu-button"][data-variant="outline"]:hover {
+  background: var(--sidebar-accent);
+  color: var(--sidebar-accent-foreground);
+  box-shadow: 0 0 0 1px var(--sidebar-accent);
+}
+
+/* || Sidebar Menu Button Sizes */
+[data-slot="sidebar-menu-button"][data-size="default"] {
+  height: 2rem;
+  font-size: 0.875rem;
+}
+
+[data-slot="sidebar-menu-button"][data-size="sm"] {
+  height: 1.75rem;
+  font-size: 0.75rem;
+}
+
+[data-slot="sidebar-menu-button"][data-size="lg"] {
+  height: 3rem;
+  font-size: 0.875rem;
+}
+
+.group[data-collapsible="icon"] [data-slot="sidebar-menu-button"][data-size="lg"] {
+  padding: 0 !important;
+}
+
+/* || Sidebar Menu Action */
+[data-slot="sidebar-menu-action"] {
+  position: absolute;
+  top: 6px;
+  right: 4px;
+  display: flex;
+  aspect-ratio: 1 / 1;
+  width: 20px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  padding: 0;
+  color: var(--sidebar-foreground);
+  outline: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: transform 200ms;
+}
+
+[data-slot="sidebar-menu-action"]:hover {
+  background: var(--sidebar-accent);
+  color: var(--sidebar-accent-foreground);
+}
+
+[data-slot="sidebar-menu-action"]:focus-visible {
+  box-shadow: 0 0 0 2px var(--sidebar-ring);
+}
+
+/* Hover peer styling */
+.peer\/menu-button:hover ~ [data-slot="sidebar-menu-action"] {
+  color: var(--sidebar-accent-foreground);
+}
+
+[data-slot="sidebar-menu-action"] > svg {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+/* Increase hit area on mobile */
+[data-slot="sidebar-menu-action"]::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+}
+
+@media (width >= 768px) {
+  [data-slot="sidebar-menu-action"]::after {
+    display: none;
+  }
+}
+
+/* Size-based positioning */
+.peer\/menu-button[data-size="sm"] ~ [data-slot="sidebar-menu-action"] {
+  top: 4px;
+}
+
+.peer\/menu-button[data-size="default"] ~ [data-slot="sidebar-menu-action"] {
+  top: 6px;
+}
+
+.peer\/menu-button[data-size="lg"] ~ [data-slot="sidebar-menu-action"] {
+  top: 10px;
+}
+
+.group[data-collapsible="icon"] [data-slot="sidebar-menu-action"] {
+  display: none;
+}
+
+/* Show on hover variant */
+[data-slot="sidebar-menu-action"][data-show-on-hover="true"] {
+  opacity: 0;
+}
+
+@media (width >= 768px) {
+  [data-slot="sidebar-menu-action"][data-show-on-hover="true"] {
+    opacity: 0;
+  }
+
+  .group\/menu-item:hover [data-slot="sidebar-menu-action"][data-show-on-hover="true"],
+  .group\/menu-item:focus-within [data-slot="sidebar-menu-action"][data-show-on-hover="true"],
+  [data-slot="sidebar-menu-action"][data-show-on-hover="true"][data-state="open"] {
+    opacity: 1;
+  }
+
+  .peer\/menu-button[data-active="true"] ~ [data-slot="sidebar-menu-action"][data-show-on-hover="true"] {
+    color: var(--sidebar-accent-foreground);
+    opacity: 1;
+  }
+}
+
+/* || Sidebar Menu Badge */
+[data-slot="sidebar-menu-badge"] {
+  position: absolute;
+  right: 4px;
+  display: flex;
+  height: 20px;
+  min-width: 20px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  padding-left: 4px;
+  padding-right: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--sidebar-foreground);
+  pointer-events: none;
+  user-select: none;
+}
+
+.peer\/menu-button:hover ~ [data-slot="sidebar-menu-badge"],
+.peer\/menu-button[data-active="true"] ~ [data-slot="sidebar-menu-badge"] {
+  color: var(--sidebar-accent-foreground);
+}
+
+/* Size-based positioning */
+.peer\/menu-button[data-size="sm"] ~ [data-slot="sidebar-menu-badge"] {
+  top: 4px;
+}
+
+.peer\/menu-button[data-size="default"] ~ [data-slot="sidebar-menu-badge"] {
+  top: 6px;
+}
+
+.peer\/menu-button[data-size="lg"] ~ [data-slot="sidebar-menu-badge"] {
+  top: 10px;
+}
+
+.group[data-collapsible="icon"] [data-slot="sidebar-menu-badge"] {
+  display: none;
+}
+
+/* || Sidebar Menu Skeleton */
+[data-slot="sidebar-menu-skeleton"] {
+  display: flex;
+  height: 2rem;
+  align-items: center;
+  gap: 8px;
+  border-radius: 8px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+/* || Sidebar Menu Sub (nested menu) */
+[data-slot="sidebar-menu-sub"] {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+  border-left: 1px solid var(--sidebar-border);
+  margin-left: 14px;
+  padding-left: 10px;
+  padding-right: 0;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  transform: translateX(1px);
+  list-style: none;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.group[data-collapsible="icon"] [data-slot="sidebar-menu-sub"] {
+  display: none;
+}
+
+/* || Sidebar Menu Sub Item */
+[data-slot="sidebar-menu-sub-item"] {
+  position: relative;
+}
+
+/* || Sidebar Menu Sub Button */
+[data-slot="sidebar-menu-sub-button"] {
+  display: flex;
+  height: 1.75rem;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  border-radius: 8px;
+  padding-left: 8px;
+  padding-right: 8px;
+  outline: none;
+  color: var(--sidebar-foreground);
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transform: translateX(-1px);
+}
+
+[data-slot="sidebar-menu-sub-button"]:hover {
+  background: var(--sidebar-accent);
+  color: var(--sidebar-accent-foreground);
+}
+
+[data-slot="sidebar-menu-sub-button"]:focus-visible {
+  box-shadow: 0 0 0 2px var(--sidebar-ring);
+}
+
+[data-slot="sidebar-menu-sub-button"]:active {
+  background: var(--sidebar-accent);
+  color: var(--sidebar-accent-foreground);
+}
+
+[data-slot="sidebar-menu-sub-button"]:disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+[data-slot="sidebar-menu-sub-button"][aria-disabled="true"] {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+[data-slot="sidebar-menu-sub-button"][data-active="true"] {
+  background: var(--sidebar-accent);
+  color: var(--sidebar-accent-foreground);
+}
+
+[data-slot="sidebar-menu-sub-button"] > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-slot="sidebar-menu-sub-button"] > svg {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  color: var(--sidebar-accent-foreground);
+}
+
+/* Size variants for sub buttons */
+[data-slot="sidebar-menu-sub-button"][data-size="sm"] {
+  font-size: 0.75rem;
+}
+
+[data-slot="sidebar-menu-sub-button"][data-size="md"] {
+  font-size: 0.875rem;
+}
+
+.group[data-collapsible="icon"] [data-slot="sidebar-menu-sub-button"] {
+  display: none;
+}
+
+/* || Sidebar Trigger */
+[data-slot="sidebar-trigger"] {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+/* || Sidebar Rail */
+[data-slot="sidebar-rail"] {
+  position: absolute;
+  inset-y: 0;
+  z-index: 20;
+  display: none;
+  width: 16px;
+  transform: translateX(-50%);
+  transition: all 200ms ease-linear;
+  background: transparent;
+  border: none;
+  padding: 0;
+  outline: none;
+}
+
+@media (width >= 640px) {
+  [data-slot="sidebar-rail"] {
+    display: flex;
+  }
+}
+
+.group[data-side="left"] [data-slot="sidebar-rail"] {
+  right: -16px;
+}
+
+.group[data-side="right"] [data-slot="sidebar-rail"] {
+  left: 0;
+}
+
+[data-slot="sidebar-rail"]::after {
+  content: "";
+  position: absolute;
+  inset-y: 0;
+  left: 50%;
+  width: 2px;
+  background: transparent;
+  transition: background 200ms;
+}
+
+[data-slot="sidebar-rail"]:hover::after {
+  background: var(--sidebar-border);
+}
+
+/* Cursor states */
+.group[data-side="left"] [data-slot="sidebar-rail"] {
+  cursor: w-resize;
+}
+
+.group[data-side="right"] [data-slot="sidebar-rail"] {
+  cursor: e-resize;
+}
+
+.group[data-side="left"][data-state="collapsed"] [data-slot="sidebar-rail"] {
+  cursor: e-resize;
+}
+
+.group[data-side="right"][data-state="collapsed"] [data-slot="sidebar-rail"] {
+  cursor: w-resize;
+}
+
+/* Offcanvas variant rail */
+.group[data-collapsible="offcanvas"] [data-slot="sidebar-rail"] {
+  transform: translateX(0);
+}
+
+.group[data-collapsible="offcanvas"] [data-slot="sidebar-rail"]:hover {
+  background: var(--sidebar);
+}
+
+.group[data-collapsible="offcanvas"] [data-slot="sidebar-rail"]::after {
+  left: 100%;
+}
+
+.group[data-side="left"][data-collapsible="offcanvas"] [data-slot="sidebar-rail"] {
+  right: -8px;
+}
+
+.group[data-side="right"][data-collapsible="offcanvas"] [data-slot="sidebar-rail"] {
+  left: -8px;
+}
+
+/* || Sidebar Inset */
+[data-slot="sidebar-inset"] {
+  position: relative;
+  display: flex;
+  width: 100%;
+  flex: 1;
+  flex-direction: column;
+  background: var(--background);
+}
+
+@media (width >= 768px) {
+  .peer[data-variant="inset"] ~ [data-slot="sidebar-inset"] {
+    margin: 8px;
+    margin-left: 0;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 10%), 0 1px 2px -1px rgb(0 0 0 / 10%);
+  }
+
+  .peer[data-variant="inset"][data-state="collapsed"] ~ [data-slot="sidebar-inset"] {
+    margin-left: 8px;
+  }
+}
