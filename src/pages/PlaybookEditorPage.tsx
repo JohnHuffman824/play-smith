@@ -2,6 +2,18 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import PlaybookEditor from '@/components/playbook-editor/PlaybookEditor'
 import type { PlaybookDetails } from '@/types/playbook'
+/**
+ * TODO: Presentations Integration
+ * Components ready for integration:
+ * - NewPresentationDialog
+ * - PresentationCard
+ * - PresentationEditor
+ * - PresentationViewerModal
+ * - usePresentationsData hook
+ *
+ * Integration can be added to PlaybookEditor component
+ * or PlaybookManagerPage for managing presentations.
+ */
 
 interface Team {
 	id: number
