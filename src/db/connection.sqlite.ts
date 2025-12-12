@@ -48,6 +48,19 @@ function initializeSchema() {
 
 	sqlite.run(`CREATE INDEX IF NOT EXISTS idx_team_members_user ON team_members(user_id)`)
 
+	// Folders table
+	sqlite.run(`
+		CREATE TABLE IF NOT EXISTS folders (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			user_id INTEGER NOT NULL,
+			name TEXT NOT NULL,
+			created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+			FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+		)
+	`)
+
+	sqlite.run(`CREATE INDEX IF NOT EXISTS idx_folders_user ON folders(user_id)`)
+
 	// Playbooks table
 	sqlite.run(`
 		CREATE TABLE IF NOT EXISTS playbooks (
@@ -56,14 +69,22 @@ function initializeSchema() {
 			name TEXT NOT NULL,
 			description TEXT,
 			created_by INTEGER NOT NULL,
+			folder_id INTEGER,
+			is_starred INTEGER DEFAULT 0,
+			deleted_at TEXT,
+			last_accessed_at TEXT,
 			created_at TEXT DEFAULT CURRENT_TIMESTAMP,
 			updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
 			FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE,
-			FOREIGN KEY (created_by) REFERENCES users(id)
+			FOREIGN KEY (created_by) REFERENCES users(id),
+			FOREIGN KEY (folder_id) REFERENCES folders(id) ON DELETE SET NULL
 		)
 	`)
 
 	sqlite.run(`CREATE INDEX IF NOT EXISTS idx_playbooks_team ON playbooks(team_id)`)
+	sqlite.run(`CREATE INDEX IF NOT EXISTS idx_playbooks_folder ON playbooks(folder_id)`)
+	sqlite.run(`CREATE INDEX IF NOT EXISTS idx_playbooks_starred ON playbooks(is_starred) WHERE is_starred = 1`)
+	sqlite.run(`CREATE INDEX IF NOT EXISTS idx_playbooks_deleted ON playbooks(deleted_at) WHERE deleted_at IS NOT NULL`)
 
 	// Sections table
 	sqlite.run(`
