@@ -5,6 +5,7 @@ import type {
 	PathSegment,
 } from '../types/drawing.types'
 import { pointToLineDistance } from './canvas.utils'
+import { applyChaikin, CHAIKIN_ITERATIONS } from './chaikin.utils'
 
 export interface SnapTarget {
 	drawingId: string
@@ -145,18 +146,43 @@ export function calculateUnlinkPosition(
 	const dx = secondToLastPoint.x - playerPos.x
 	const dy = secondToLastPoint.y - playerPos.y
 	const length = Math.sqrt(dx * dx + dy * dy)
-	
+
 	if (length == 0) {
 		return { x: playerPos.x, y: playerPos.y - distance }
 	}
-	
+
 	const unitX = dx / length
 	const unitY = dy / length
-	
+
 	return {
 		x: playerPos.x + unitX * distance,
 		y: playerPos.y + unitY * distance,
 	}
+}
+
+/**
+ * Determine the priority of a lineEnd type.
+ * arrow > tShape > none
+ */
+function lineEndPriority(lineEnd: 'none' | 'arrow' | 'tShape'): number {
+	switch (lineEnd) {
+		case 'arrow':
+			return 2
+		case 'tShape':
+			return 1
+		case 'none':
+			return 0
+	}
+}
+
+/**
+ * Select the higher priority lineEnd between two options.
+ */
+function selectLineEnd(
+	a: 'none' | 'arrow' | 'tShape',
+	b: 'none' | 'arrow' | 'tShape',
+): 'none' | 'arrow' | 'tShape' {
+	return lineEndPriority(a) >= lineEndPriority(b) ? a : b
 }
 
 export function mergeDrawings(
@@ -170,6 +196,22 @@ export function mergeDrawings(
 	const sourceIsStart = isStartPoint(sourceDrawing, sourcePointId)
 	const targetIsStart = isStartPoint(targetDrawing, targetPointId)
 	const targetIsEnd = isEndPoint(targetDrawing, targetPointId)
+
+	// Compute merged lineEnd - preserve arrows from junction points
+	let mergedLineEnd: 'none' | 'arrow' | 'tShape' = 'none'
+
+	// Source's junction was source's END - its arrow is consumed, transfer it
+	if (sourceIsEnd) {
+		mergedLineEnd = selectLineEnd(mergedLineEnd, sourceDrawing.style.lineEnd)
+	}
+	// Target's junction was target's END - its arrow is consumed, transfer it
+	if (targetIsEnd) {
+		mergedLineEnd = selectLineEnd(mergedLineEnd, targetDrawing.style.lineEnd)
+	}
+	// Target's terminal END becomes merged END (if junction was START)
+	if (targetIsStart) {
+		mergedLineEnd = selectLineEnd(mergedLineEnd, targetDrawing.style.lineEnd)
+	}
 
 	// Get segments in correct order (source ends with sourcePoint, target starts with targetPoint)
 	const sourceSegments = sourceIsEnd
@@ -218,7 +260,10 @@ export function mergeDrawings(
 		id: `drawing-${Date.now()}`,
 		points: mergedPoints,
 		segments: mergedSegments,
-		style: sourceDrawing.style,
+		style: {
+			...sourceDrawing.style,
+			lineEnd: mergedLineEnd,
+		},
 		annotations: [
 			...sourceDrawing.annotations,
 			...targetDrawing.annotations,
@@ -702,5 +747,51 @@ export function insertPointIntoDrawing(
 		points: newPoints,
 		segments: newSegments
 	}
+}
+
+/**
+ * Check if a drawing should be smoothed with Chaikin algorithm.
+ * Smooth drawings are those with all line segments and pathMode === 'curve'.
+ */
+export function shouldSmoothDrawing(drawing: Drawing): boolean {
+	const isAllLineSegments = drawing.segments.every(s => s.type === 'line')
+	return isAllLineSegments && drawing.style.pathMode === 'curve'
+}
+
+/**
+ * Collect all unique control points from a drawing in order,
+ * apply a coordinate transform, and return Chaikin-smoothed points.
+ * Returns null if drawing should not be smoothed.
+ */
+export function getSmoothedPoints<T extends Coordinate>(
+	drawing: Drawing,
+	transform: (point: ControlPoint) => T
+): T[] | null {
+	if (!shouldSmoothDrawing(drawing)) {
+		return null
+	}
+
+	// Collect all unique points in order
+	const seenPoints = new Set<string>()
+	const allPoints: T[] = []
+
+	for (const segment of drawing.segments) {
+		for (const pointId of segment.pointIds) {
+			if (!seenPoints.has(pointId)) {
+				seenPoints.add(pointId)
+				const point = drawing.points[pointId]
+				if (point) {
+					allPoints.push(transform(point))
+				}
+			}
+		}
+	}
+
+	if (allPoints.length < 2) {
+		return null
+	}
+
+	// Apply Chaikin smoothing
+	return applyChaikin(allPoints, CHAIKIN_ITERATIONS)
 }
 

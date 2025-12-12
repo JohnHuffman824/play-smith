@@ -1,7 +1,7 @@
 import { describe, test, expect, afterEach } from 'bun:test'
 import { cleanup, render, fireEvent } from '@testing-library/react'
 import { ConceptToolbar } from '../../../src/components/concepts/ConceptToolbar'
-import { ThemeProvider } from '../../../src/contexts/ThemeContext'
+import { SettingsProvider } from '../../../src/contexts/SettingsContext'
 import { PlayProvider } from '../../../src/contexts/PlayContext'
 
 describe('ConceptToolbar - Add Player Tool', () => {
@@ -15,7 +15,7 @@ describe('ConceptToolbar - Add Player Tool', () => {
 	}) {
 		const mockOnToolChange = overrides?.onToolChange ?? (() => {})
 		return render(
-			<ThemeProvider>
+			<SettingsProvider>
 				<PlayProvider>
 					<ConceptToolbar
 						selectedTool={overrides?.selectedTool ?? 'select'}
@@ -38,7 +38,7 @@ describe('ConceptToolbar - Add Player Tool', () => {
 						onPathModeChange={() => {}}
 					/>
 				</PlayProvider>
-			</ThemeProvider>
+			</SettingsProvider>
 		)
 	}
 
@@ -70,7 +70,7 @@ describe('ConceptToolbar - Draw Options Integration', () => {
 	test('clicking draw button twice toggles DrawOptionsDialog', () => {
 		let showDrawOptions = false
 		const { container, rerender } = render(
-			<ThemeProvider>
+			<SettingsProvider>
 				<PlayProvider>
 					<ConceptToolbar
 						selectedTool="draw"
@@ -95,7 +95,7 @@ describe('ConceptToolbar - Draw Options Integration', () => {
 						onPathModeChange={() => {}}
 					/>
 				</PlayProvider>
-			</ThemeProvider>
+			</SettingsProvider>
 		)
 
 		// Find the draw button
@@ -111,7 +111,7 @@ describe('ConceptToolbar - Draw Options Integration', () => {
 
 		// Re-render with updated state
 		rerender(
-			<ThemeProvider>
+			<SettingsProvider>
 				<PlayProvider>
 					<ConceptToolbar
 						selectedTool="draw"
@@ -136,7 +136,7 @@ describe('ConceptToolbar - Draw Options Integration', () => {
 						onPathModeChange={() => {}}
 					/>
 				</PlayProvider>
-			</ThemeProvider>
+			</SettingsProvider>
 		)
 
 		// Second click - should close the dialog

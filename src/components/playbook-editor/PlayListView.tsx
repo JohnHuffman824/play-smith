@@ -162,10 +162,6 @@ export function PlayListView({
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => onOpen(play.id)}>
-                      <Edit className="w-4 h-4" />
-                      Open
-                    </DropdownMenuItem>
                     {onAnimate && (
                       <DropdownMenuItem onClick={() => onAnimate(play.id)}>
                         <Play className="w-4 h-4" />

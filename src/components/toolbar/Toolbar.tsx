@@ -31,9 +31,9 @@ import { EraseDialog } from './dialogs/EraseDialog'
 import { DrawingDialog } from './dialogs/DrawingDialog'
 import { ConfirmDialog } from './dialogs/ConfirmDialog'
 import { HashDialog } from './dialogs/HashDialog'
-import { SettingsDialog } from './dialogs/SettingsDialog'
+import { UnifiedSettingsDialog } from '../shared/UnifiedSettingsDialog'
 import { Tooltip } from './Tooltip'
-import { useTheme } from '../../contexts/ThemeContext'
+import { useTheme } from '@/contexts/SettingsContext'
 import { EraserIcon } from './icons/EraserIcon'
 import { HashIcon } from './icons/HashIcon'
 import { ColorSwatchIndicator } from './ColorSwatchIndicator'
@@ -385,11 +385,7 @@ export function Toolbar({
 	return (
 		<>
 			<div
-				className={`h-full border-r ${
-					theme == 'dark'
-						? 'bg-gray-800 border-gray-700'
-						: 'bg-white border-gray-200'
-				}`}
+				className="h-full border-r bg-card border-border"
 				style={{
 					display: 'grid',
 					gridTemplateColumns: `repeat(${columnCount}, 56px)`,
@@ -748,13 +744,11 @@ export function Toolbar({
 				/>
 			)}
 
-			{showSettingsDialog && (
-				<SettingsDialog
-					snapThreshold={drawingState.snapThreshold}
-					onSnapThresholdChange={handleSnapThresholdChange}
-					onClose={() => setShowSettingsDialog(false)}
-				/>
-			)}
+			<UnifiedSettingsDialog
+				isOpen={showSettingsDialog}
+				onClose={() => setShowSettingsDialog(false)}
+				context="play-editor"
+			/>
 		</>
 	)
 }

@@ -4,7 +4,7 @@ import { userEvent } from '@testing-library/user-event'
 import { PlaybookManagerPage } from '../../../src/pages/PlaybookManagerPage'
 import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ThemeProvider } from '../../../src/contexts/ThemeContext'
+import { SettingsProvider } from '../../../src/contexts/SettingsContext'
 import { AuthProvider } from '../../../src/contexts/AuthContext'
 import { TeamProvider } from '../../../src/contexts/TeamContext'
 
@@ -44,7 +44,7 @@ import * as folderQueries from '../../../src/api/queries/folderQueries'
 
 function renderPlaybookManager(queryClient: QueryClient) {
 	return render(
-		<ThemeProvider>
+		<SettingsProvider>
 			<AuthProvider>
 				<TeamProvider>
 					<BrowserRouter>
@@ -54,7 +54,7 @@ function renderPlaybookManager(queryClient: QueryClient) {
 					</BrowserRouter>
 				</TeamProvider>
 			</AuthProvider>
-		</ThemeProvider>
+		</SettingsProvider>
 	)
 }
 

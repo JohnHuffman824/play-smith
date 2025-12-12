@@ -1,6 +1,5 @@
 import { X, Loader2 } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { useTheme } from '../../../contexts/ThemeContext'
 import { eventBus } from '../../../services/EventBus'
 import type { Drawing } from '../../../types/drawing.types'
 
@@ -23,44 +22,24 @@ interface PresetRoute {
 * Dialog for selecting predefined drawing templates.
 */
 export function DrawingDialog({ onClose }: DrawingDialogProps) {
-	const { theme } = useTheme()
 	const [routes, setRoutes] = useState<PresetRoute[]>([])
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
 
 	const containerClass = [
-		'absolute left-24 top-6 w-80 rounded-2xl shadow-2xl',
-		'border p-4 z-50 max-h-[calc(100vh-4rem)] overflow-y-auto',
+		'absolute left-24 top-6 w-80 rounded-2xl shadow-2xl bg-card',
+		'border border-border p-4 z-50 max-h-[calc(100vh-4rem)] overflow-y-auto',
 	].join(' ')
-	const containerTheme =
-		theme == 'dark'
-			? 'bg-gray-800 border-gray-700'
-			: 'bg-white border-gray-200'
-	const headerTheme =
-		theme == 'dark'
-			? 'bg-gray-800 border-gray-700'
-			: 'bg-white border-gray-100'
-	const titleClass = theme == 'dark' ? 'text-gray-100' : 'text-gray-900'
-	const closeButtonClass =
-		theme == 'dark'
-			? 'hover:bg-gray-700 text-gray-400'
-			: 'hover:bg-gray-100 text-gray-500'
-	const itemClass =
-		theme == 'dark'
-			? 'bg-gray-700 hover:bg-gray-600 border-gray-600 hover:border-blue-500'
-			: 'bg-gray-50 hover:bg-blue-50 border-gray-100 hover:border-blue-200'
 	const numberBadgeClass = [
-		'w-8 h-8 rounded-lg bg-blue-500 text-white flex items-center',
+		'w-8 h-8 rounded-lg bg-action-button text-action-button-foreground flex items-center',
 		'justify-center flex-shrink-0 group-hover:scale-110 transition-transform font-semibold text-sm',
 	].join(' ')
-	const subtitleClass =
-		theme == 'dark' ? 'text-gray-400' : 'text-gray-500'
-	const headerBaseClass =
-		'flex items-center justify-between mb-4 sticky top-0 pb-2 border-b'
-	const itemBaseClass =
-		'w-full p-3 rounded-xl border transition-all text-left group cursor-pointer'
-	const closeBaseClass =
-		'w-6 h-6 rounded-lg flex items-center justify-center cursor-pointer'
+	const headerClass =
+		'flex items-center justify-between mb-4 sticky top-0 pb-2 border-b border-border bg-card'
+	const itemClass =
+		'w-full p-3 rounded-xl border border-border bg-muted hover:bg-accent hover:border-action-button transition-all text-left group cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50'
+	const closeButtonClass =
+		'w-6 h-6 rounded-lg flex items-center justify-center cursor-pointer hover:bg-accent text-muted-foreground outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50'
 
 	useEffect(() => {
 		async function fetchRoutes() {
@@ -103,14 +82,12 @@ export function DrawingDialog({ onClose }: DrawingDialogProps) {
 	return (
 		<div
 			data-drawing-dialog
-			className={`${containerClass} ${containerTheme}`}>
-			<div
-				className={`${headerBaseClass} ${headerTheme}`}
-			>
-				<span className={titleClass}>Add Drawing</span>
+			className={containerClass}>
+			<div className={headerClass}>
+				<span className="text-foreground">Add Drawing</span>
 				<button
 					onClick={onClose}
-					className={`${closeBaseClass} ${closeButtonClass}`}
+					className={closeButtonClass}
 				>
 					<X size={16} />
 				</button>
@@ -118,12 +95,12 @@ export function DrawingDialog({ onClose }: DrawingDialogProps) {
 
 			{loading && (
 				<div className='flex items-center justify-center py-8'>
-					<Loader2 size={24} className={`animate-spin ${theme == 'dark' ? 'text-gray-400' : 'text-gray-500'}`} />
+					<Loader2 size={24} className="animate-spin text-muted-foreground" />
 				</div>
 			)}
 
 			{error && (
-				<div className={`text-center py-8 ${theme == 'dark' ? 'text-red-400' : 'text-red-600'}`}>
+				<div className="text-center py-8 text-destructive">
 					{error}
 				</div>
 			)}
@@ -134,17 +111,17 @@ export function DrawingDialog({ onClose }: DrawingDialogProps) {
 						<button
 							key={route.id}
 							onClick={() => handleDrawingSelect(route)}
-							className={`${itemBaseClass} ${itemClass}`}
+							className={itemClass}
 						>
 							<div className='flex items-start gap-3'>
 								<div className={numberBadgeClass}>
 									{route.route_number ?? route.name.charAt(0).toUpperCase()}
 								</div>
 								<div className='flex-1 min-w-0'>
-									<div className={`${titleClass} mb-1`}>
+									<div className="text-foreground mb-1">
 										{route.name}
 									</div>
-									<div className={`text-xs ${subtitleClass}`}>
+									<div className="text-xs text-muted-foreground">
 										{/* Description from drawing_template or placeholder */}
 										{route.route_number ? `Route ${route.route_number}` : 'Special route'}
 									</div>

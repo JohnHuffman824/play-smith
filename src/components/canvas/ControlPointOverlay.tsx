@@ -5,6 +5,7 @@ import type { Drawing } from '../../types/drawing.types'
 import { findSnapTarget, findPlayerSnapTarget } from '../../utils/drawing.utils'
 import type { SnapTarget, PlayerSnapTarget } from '../../utils/drawing.utils'
 import { PLAYER_RADIUS_FEET } from '../../constants/field.constants'
+import { useTheme } from '../../contexts/SettingsContext'
 
 interface ControlPointOverlayProps {
 	drawing: Drawing | null
@@ -19,6 +20,9 @@ interface ControlPointOverlayProps {
 	coordSystem: FieldCoordinateSystem
 	snapThreshold: number
 	isGlobalSelect?: boolean
+	zoom?: number
+	panX?: number
+	panY?: number
 	onDragPoint?: (
 		drawingId: string,
 		pointId: string,
@@ -56,8 +60,12 @@ export function ControlPointOverlay({
 	onDragPoint,
 	onMerge,
 	onLinkToPlayer,
+	zoom = 1,
+	panX = 0,
+	panY = 0,
 }: ControlPointOverlayProps) {
 	if (!drawing) return null
+	const { theme } = useTheme()
 	const [dragState, setDragState] = useState<DragState | null>(null)
 	const [snapTarget, setSnapTarget] = useState<SnapTarget | null>(null)
 	const [playerSnapTarget, setPlayerSnapTarget] = useState<
@@ -116,9 +124,9 @@ export function ControlPointOverlay({
 			if (!svg) return
 
 			const rect = svg.getBoundingClientRect()
-			const pixelX = event.clientX - rect.left
-			const pixelY = event.clientY - rect.top
-			const feet = coordSystem.pixelsToFeet(pixelX, pixelY)
+			const screenX = event.clientX - rect.left
+			const screenY = event.clientY - rect.top
+			const feet = coordSystem.screenToFeet(screenX, screenY, zoom, panX, panY)
 
 			onDragPoint(drawing.id, dragState.pointId, feet.x, feet.y)
 
@@ -202,14 +210,18 @@ export function ControlPointOverlay({
 				}
 
 				const pixel = coordSystem.feetToPixels(point.x, point.y)
+				// Control node colors: light mode = white fill + black outline, dark mode = dark fill + white outline
+				const nodeFill = theme === 'dark' ? '#1f1f1f' : 'white'
+				const nodeStroke = theme === 'dark' ? 'white' : 'black'
+
 				return (
 					<circle
 						key={point.id}
 						cx={pixel.x}
 						cy={pixel.y}
 						r={6}
-						fill='white'
-						stroke={drawing.style.color}
+						fill={nodeFill}
+						stroke={nodeStroke}
 						strokeWidth={2}
 						pointerEvents={isGlobalSelect ? 'none' : 'all'}
 						style={

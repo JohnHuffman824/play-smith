@@ -19,16 +19,16 @@ export function SelectionOverlay({
 
 	return (
 		<div
-			className="absolute bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg p-2 flex items-center gap-2 z-40"
+			className="absolute bg-popover border border-border rounded-lg shadow-lg p-2 flex items-center gap-2 z-40"
 			style={{ top: position.y, left: position.x }}
 		>
-			<div className="px-3 py-1 text-sm font-medium text-gray-700 dark:text-gray-300 border-r border-gray-300 dark:border-gray-600">
+			<div className="px-3 py-1 text-sm font-medium text-popover-foreground border-r border-border">
 				{selectedCount} selected
 			</div>
 
 			<button
 				onClick={onSaveAsConcept}
-				className="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors flex items-center gap-2 text-sm font-medium"
+				className="px-3 py-1.5 bg-action-button text-action-button-foreground hover:bg-action-button/90 rounded-lg transition-all duration-200 flex items-center gap-2 text-sm font-medium cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
 				title="Save selection as concept"
 			>
 				<Save className="w-4 h-4" />
@@ -37,7 +37,7 @@ export function SelectionOverlay({
 
 			<button
 				onClick={onDuplicate}
-				className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+				className="p-1.5 hover:bg-accent rounded transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
 				title="Duplicate selection"
 			>
 				<Copy className="w-4 h-4" />
@@ -45,7 +45,7 @@ export function SelectionOverlay({
 
 			<button
 				onClick={onDelete}
-				className="p-1.5 hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 rounded transition-colors"
+				className="p-1.5 hover:bg-destructive/10 text-destructive rounded transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
 				title="Delete selection"
 			>
 				<Trash2 className="w-4 h-4" />

@@ -3,7 +3,7 @@ import { cleanup, render, fireEvent, waitFor } from '@testing-library/react'
 import { PlayEditorPage } from './PlayEditorPage'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ThemeProvider } from '../contexts/ThemeContext'
+import { SettingsProvider } from '@/contexts/SettingsContext'
 import { AuthProvider } from '../contexts/AuthContext'
 import { eventBus } from '../services/EventBus'
 import { act } from 'react'
@@ -102,7 +102,7 @@ describe('PlayEditorPage - Unified Delete Functionality', () => {
 			result = render(
 				<QueryClientProvider client={queryClient}>
 					<AuthProvider>
-						<ThemeProvider>
+						<SettingsProvider>
 							<MemoryRouter initialEntries={['/playbook/test-playbook/play/test-play']}>
 								<Routes>
 									<Route
@@ -111,7 +111,7 @@ describe('PlayEditorPage - Unified Delete Functionality', () => {
 									/>
 								</Routes>
 							</MemoryRouter>
-						</ThemeProvider>
+						</SettingsProvider>
 					</AuthProvider>
 				</QueryClientProvider>
 			)

@@ -105,8 +105,8 @@ export function PlaybookEditorPage() {
 		return (
 			<div className="flex items-center justify-center h-screen">
 				<div className="text-center">
-					<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
-					<p className="text-gray-600">Loading playbook...</p>
+					<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-foreground mx-auto mb-4"></div>
+					<p className="text-muted-foreground">Loading playbook...</p>
 				</div>
 			</div>
 		)
@@ -117,11 +117,11 @@ export function PlaybookEditorPage() {
 		return (
 			<div className="flex items-center justify-center h-screen">
 				<div className="text-center">
-					<h1 className="text-2xl font-bold text-red-600 mb-4">Error</h1>
-					<p className="text-gray-600 mb-6">{error}</p>
+					<h1 className="text-2xl font-bold text-destructive mb-4">Error</h1>
+					<p className="text-muted-foreground mb-6">{error}</p>
 					<button
 						onClick={handleBack}
-						className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+						className="px-4 py-2 bg-action-button text-action-button-foreground rounded-lg hover:bg-action-button/90 transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
 					>
 						Back to Playbooks
 					</button>
@@ -135,11 +135,11 @@ export function PlaybookEditorPage() {
 		return (
 			<div className="flex items-center justify-center h-screen">
 				<div className="text-center">
-					<h1 className="text-2xl font-bold text-gray-800 mb-4">Playbook Not Found</h1>
-					<p className="text-gray-600 mb-6">The playbook you're looking for doesn't exist.</p>
+					<h1 className="text-2xl font-bold text-foreground mb-4">Playbook Not Found</h1>
+					<p className="text-muted-foreground mb-6">The playbook you're looking for doesn't exist.</p>
 					<button
 						onClick={handleBack}
-						className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+						className="px-4 py-2 bg-action-button text-action-button-foreground rounded-lg hover:bg-action-button/90 transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
 					>
 						Back to Playbooks
 					</button>

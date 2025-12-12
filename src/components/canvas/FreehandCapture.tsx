@@ -14,6 +14,9 @@ interface FreehandCaptureProps {
 	autoCorrect: boolean
 	onCommit: (drawing: Drawing) => void
 	players?: PlayerForSnap[]
+	zoom?: number
+	panX?: number
+	panY?: number
 }
 
 /**
@@ -26,6 +29,9 @@ export function FreehandCapture({
 	autoCorrect,
 	onCommit,
 	players,
+	zoom = 1,
+	panX = 0,
+	panY = 0,
 }: FreehandCaptureProps) {
 	const canvasRef = useRef<HTMLCanvasElement | null>(null)
 	const [isDrawing, setIsDrawing] = useState(false)
@@ -57,7 +63,7 @@ export function FreehandCapture({
 			x: event.clientX - rect.left,
 			y: event.clientY - rect.top,
 		}
-		const feet = coordSystem.pixelsToFeet(pixel.x, pixel.y)
+		const feet = coordSystem.screenToFeet(pixel.x, pixel.y, zoom, panX, panY)
 
 		ctx.strokeStyle = style.color
 		ctx.lineWidth = style.strokeWidth * coordSystem.scale
@@ -82,7 +88,7 @@ export function FreehandCapture({
 			x: event.clientX - rect.left,
 			y: event.clientY - rect.top,
 		}
-		const feet = coordSystem.pixelsToFeet(pixel.x, pixel.y)
+		const feet = coordSystem.screenToFeet(pixel.x, pixel.y, zoom, panX, panY)
 
 		ctx.lineTo(pixel.x, pixel.y)
 		ctx.stroke()
@@ -158,9 +164,12 @@ export function FreehandCapture({
 	function resizeCanvas() {
 		const canvas = canvasRef.current
 		if (!canvas) return
-		const rect = canvas.getBoundingClientRect()
-		canvas.width = rect.width
-		canvas.height = rect.height
+		// Use natural dimensions from coordSystem, NOT getBoundingClientRect()
+		// getBoundingClientRect() returns TRANSFORMED dimensions which causes
+		// double-scaling when the canvas is inside a CSS transform container
+		const { width, height } = coordSystem.getDimensions()
+		canvas.width = width
+		canvas.height = height
 		resetCanvas()
 	}
 

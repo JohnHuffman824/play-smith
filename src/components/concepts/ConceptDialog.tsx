@@ -12,6 +12,7 @@ import { FlipController } from './FlipController'
 import { TargetingTooltip } from './TargetingTooltip'
 import { ConceptTypeTooltip } from './ConceptTypeTooltip'
 import { PlayProvider } from '../../contexts/PlayContext'
+import { CanvasViewportProvider } from '../../contexts/CanvasViewportContext'
 import type { Tool } from '../../types/play.types'
 import { generateThumbnail } from '../../utils/thumbnail'
 import { ColorPickerDialog } from '../toolbar/dialogs/ColorPickerDialog'
@@ -198,7 +199,7 @@ export function ConceptDialog({
 							aria-invalid={nameError && touched}
 						/>
 						{nameError && touched && (
-							<p className="mt-1 text-sm text-red-600 dark:text-red-400">
+							<p className="mt-1 text-sm text-destructive">
 								{nameError}
 							</p>
 						)}
@@ -240,7 +241,7 @@ export function ConceptDialog({
 
 					<button
 						onClick={onClose}
-						className="p-2 hover:bg-accent rounded transition-colors cursor-pointer ml-auto"
+						className="p-2 border border-border hover:bg-accent rounded transition-colors cursor-pointer ml-auto"
 						aria-label="Close dialog"
 					>
 						<X className="w-5 h-5" />
@@ -281,22 +282,24 @@ export function ConceptDialog({
 
 						{/* Canvas */}
 						<div ref={canvasContainerRef} className="flex-1 flex flex-col rounded-2xl border-2 border-border">
-							<Canvas
-								drawingState={{
-									tool: selectedTool,
-									color,
-									brushSize,
-									lineStyle,
-									lineEnd,
-									pathMode,
-									eraseSize: 40,
-									snapThreshold: 20
-								}}
-								hashAlignment={hashAlignment}
-								showPlayBar={false}
-								containerMode="fill"
-								showFieldMarkings={true}
-							/>
+							<CanvasViewportProvider>
+								<Canvas
+									drawingState={{
+										tool: selectedTool,
+										color,
+										brushSize,
+										lineStyle,
+										lineEnd,
+										pathMode,
+										eraseSize: 40,
+										snapThreshold: 20
+									}}
+									hashAlignment={hashAlignment}
+									showPlayBar={false}
+									containerMode="fill"
+									showFieldMarkings={true}
+								/>
+							</CanvasViewportProvider>
 						</div>
 						<FlipController onFlipReady={handleFlipReady} />
 					</PlayProvider>

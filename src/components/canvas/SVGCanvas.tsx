@@ -46,6 +46,9 @@ interface SVGCanvasProps {
 	eraseSize?: number
 	snapThreshold: number
 	selectedDrawingIds?: string[]
+	zoom?: number
+	panX?: number
+	panY?: number
 	onLinkDrawingToPlayer?: (
 		drawingId: string,
 		pointId: string,
@@ -88,6 +91,9 @@ export function SVGCanvas({
 	eraseSize = 0,
 	snapThreshold,
 	selectedDrawingIds = [],
+	zoom = 1,
+	panX = 0,
+	panY = 0,
 	onLinkDrawingToPlayer,
 	onAddPlayerAtNode,
 	onPlayerLinked,
@@ -272,9 +278,9 @@ export function SVGCanvas({
 	function handleDrawingDragMove(event: React.PointerEvent<SVGSVGElement>) {
 		if (!drawingDragState) return
 		const rect = event.currentTarget.getBoundingClientRect()
-		const pixelX = event.clientX - rect.left
-		const pixelY = event.clientY - rect.top
-		const currentFeet = coordSystem.pixelsToFeet(pixelX, pixelY)
+		const screenX = event.clientX - rect.left
+		const screenY = event.clientY - rect.top
+		const currentFeet = coordSystem.screenToFeet(screenX, screenY, zoom || 1, panX || 0, panY || 0)
 		const deltaX = currentFeet.x - drawingDragState.startFeet.x
 		const deltaY = currentFeet.y - drawingDragState.startFeet.y
 
@@ -536,6 +542,9 @@ export function SVGCanvas({
 					onDragStart={handleDrawingDragStart}
 					onHover={onDrawingHoverChange}
 					onPathContextMenu={activeTool === 'select' ? handlePathContextMenu : undefined}
+					zoom={zoom}
+					panX={panX}
+					panY={panY}
 				/>
 			))}
 
@@ -549,6 +558,9 @@ export function SVGCanvas({
 					snapThreshold={snapThreshold}
 					cursorPosition={cursorPosition}
 					proximityThreshold={NODE_PROXIMITY_THRESHOLD}
+					zoom={zoom}
+					panX={panX}
+					panY={panY}
 					onDragPoint={activeTool === 'select' ? handleDragPoint : undefined}
 					onMerge={activeTool === 'select' ? handleMerge : undefined}
 					onLinkToPlayer={activeTool === 'select' ? handleLinkToPlayer : undefined}
@@ -573,6 +585,9 @@ export function SVGCanvas({
 					onDragPoint={handleDragPoint}
 					onMerge={handleMerge}
 					onLinkToPlayer={handleLinkToPlayer}
+					zoom={zoom}
+					panX={panX}
+					panY={panY}
 				/>
 			)}
 
@@ -607,6 +622,9 @@ export function SVGCanvas({
 				autoCorrect={autoCorrect}
 				onCommit={handleCommit}
 				players={players}
+				zoom={zoom}
+				panX={panX}
+				panY={panY}
 			/>
 
 		{activeTool === 'draw' && lastDrawnDrawingId && isOverCanvas && (
@@ -627,6 +645,9 @@ export function SVGCanvas({
 						onDragPoint={handleDragPoint}
 						onMerge={handleMerge}
 						onLinkToPlayer={handleLinkToPlayer}
+						zoom={zoom}
+						panX={panX}
+						panY={panY}
 					/>
 				</svg>
 			</div>

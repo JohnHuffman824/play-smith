@@ -1,5 +1,4 @@
 import { X } from 'lucide-react'
-import { useTheme } from '../../../contexts/ThemeContext'
 
 interface EraseDialogProps {
   eraseSize: number
@@ -18,21 +17,15 @@ export function EraseDialog({
   onEraseSizeChange,
   onClose,
 }: EraseDialogProps) {
-  const { theme } = useTheme()
-  
   return (
-    <div 
+    <div
       data-erase-dialog
-      className={`absolute left-24 top-32 w-64 rounded-2xl shadow-2xl border p-4 z-50 ${
-      theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-    }`}>
+      className="absolute left-24 top-32 w-64 rounded-2xl shadow-2xl bg-card border border-border p-4 z-50">
       <div className="flex items-center justify-between mb-4">
-        <span className={theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}>Erase</span>
+        <span className="text-foreground">Erase</span>
         <button
           onClick={onClose}
-          className={`w-6 h-6 rounded-lg flex items-center justify-center cursor-pointer ${
-            theme === 'dark' ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-500'
-          }`}
+          className="w-6 h-6 rounded-lg flex items-center justify-center cursor-pointer hover:bg-accent text-muted-foreground outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         >
           <X size={16} />
         </button>
@@ -40,7 +33,7 @@ export function EraseDialog({
 
       {/* Erase Size */}
       <div>
-        <label className={`block text-xs mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+        <label className="block text-xs mb-2 text-muted-foreground">
           Eraser Size
         </label>
         <div className="grid grid-cols-3 gap-2">
@@ -48,12 +41,10 @@ export function EraseDialog({
             <button
               key={erase.size}
               onClick={() => onEraseSizeChange(erase.size)}
-              className={`py-4 px-3 rounded-lg transition-all cursor-pointer ${
+              className={`py-4 px-3 rounded-lg transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
                 eraseSize === erase.size
-                  ? 'bg-blue-500 text-white'
-                  : theme === 'dark' 
-                    ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-action-button text-action-button-foreground'
+                  : 'bg-muted text-foreground hover:bg-accent'
               }`}
             >
               <div className="flex flex-col items-center gap-2">

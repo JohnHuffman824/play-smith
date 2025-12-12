@@ -86,7 +86,7 @@ export function PlayAnimationPage() {
 					</p>
 					<button
 						onClick={handleClose}
-						className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+						className="mt-4 px-4 py-2 bg-action-button text-action-button-foreground rounded-lg hover:bg-action-button/90 transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
 					>
 						Back to Playbook
 					</button>

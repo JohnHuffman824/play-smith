@@ -1,7 +1,7 @@
 import { describe, test, expect, afterEach } from 'bun:test'
 import { cleanup, render, fireEvent, waitFor } from '@testing-library/react'
 import { ConceptDialog } from '../../../src/components/concepts/ConceptDialog'
-import { ThemeProvider } from '../../../src/contexts/ThemeContext'
+import { SettingsProvider } from '../../../src/contexts/SettingsContext'
 
 describe('ConceptDialog - Draw Options', () => {
 	afterEach(() => {
@@ -10,7 +10,7 @@ describe('ConceptDialog - Draw Options', () => {
 
 	function renderDialog() {
 		return render(
-			<ThemeProvider>
+			<SettingsProvider>
 				<ConceptDialog
 					isOpen={true}
 					onClose={() => {}}
@@ -18,7 +18,7 @@ describe('ConceptDialog - Draw Options', () => {
 					teamId="team-1"
 					onSave={async () => {}}
 				/>
-			</ThemeProvider>
+			</SettingsProvider>
 		)
 	}
 

@@ -1,7 +1,7 @@
 import { afterEach, describe, test, expect } from 'bun:test'
 import { cleanup, render, screen } from '@testing-library/react'
 import { RouterProvider, createMemoryRouter } from 'react-router-dom'
-import { ThemeProvider } from './contexts/ThemeContext'
+import { SettingsProvider } from '@/contexts/SettingsContext'
 import { routes } from './router/routes'
 
 describe('App', () => {
@@ -17,9 +17,9 @@ describe('App', () => {
 		})
 
 		render(
-			<ThemeProvider>
+			<SettingsProvider>
 				<RouterProvider router={router} />
-			</ThemeProvider>
+			</SettingsProvider>
 		)
 
 		// Should render landing page at root

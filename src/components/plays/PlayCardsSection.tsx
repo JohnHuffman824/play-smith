@@ -1,6 +1,5 @@
 import { useRef, useEffect, useState } from 'react'
 import { Plus } from 'lucide-react'
-import { useTheme } from '../../contexts/ThemeContext'
 import { PlayCard } from '../playbook-editor/PlayCard'
 import type { Play } from '../../hooks/usePlaybookData'
 
@@ -31,7 +30,6 @@ export function PlayCardsSection({
 	onDeletePlay,
 	onDuplicatePlay
 }: PlayCardsSectionProps) {
-	const { theme } = useTheme()
 	const scrollContainerRef = useRef<HTMLDivElement>(null)
 	// Track whether content should be rendered (delayed unmount on hide)
 	const [shouldRenderContent, setShouldRenderContent] = useState(showPlayBar)
@@ -52,7 +50,7 @@ export function PlayCardsSection({
 
 	return (
 		<div
-			className={`border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'} relative`}
+			className="border-t border-border relative"
 			style={{
 				height: showPlayBar ? '340px' : '0px',
 				overflow: 'visible',
@@ -87,45 +85,25 @@ export function PlayCardsSection({
 							disabled={isAddingPlay}
 							className={`flex-shrink-0 w-64 h-[283px]
 								rounded-xl border-2 border-dashed
-								transition-all flex flex-col
+								transition-all duration-200 flex flex-col
 								items-center justify-center gap-2
+								bg-muted border-border text-muted-foreground
+								outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50
 								${isAddingPlay
 									? 'cursor-wait opacity-50'
-									: 'cursor-pointer'
-								}
-								${theme === 'dark'
-									? `bg-gray-800/50 border-gray-600
-										${!isAddingPlay && 'hover:border-blue-400 hover:bg-gray-700 hover:text-blue-400'}
-										text-gray-400`
-									: `bg-gray-50 border-gray-300
-										${!isAddingPlay && 'hover:border-blue-400 hover:bg-blue-50 hover:text-blue-500'}
-										text-gray-400`
+									: 'cursor-pointer hover:border-action-button hover:bg-accent hover:text-action-button'
 								}`}
 						>
 							{isAddingPlay ? (
 								<>
-									<div
-										className={`w-12 h-12 rounded-xl
-											flex items-center justify-center
-											${theme === 'dark'
-												? 'bg-gray-700'
-												: 'bg-gray-100'
-											}`}
-									>
-										<div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-500" />
+									<div className="w-12 h-12 rounded-xl flex items-center justify-center bg-muted">
+										<div className="animate-spin rounded-full h-6 w-6 border-b-2 border-muted-foreground" />
 									</div>
 									<span className="text-sm font-medium">Creating...</span>
 								</>
 							) : (
 								<>
-									<div
-										className={`w-12 h-12 rounded-xl
-											flex items-center justify-center
-											${theme === 'dark'
-												? 'bg-gray-700'
-												: 'bg-gray-100'
-											}`}
-									>
+									<div className="w-12 h-12 rounded-xl flex items-center justify-center bg-muted">
 										<Plus size={24} />
 									</div>
 									<span className="text-sm font-medium">Add Play</span>
@@ -133,14 +111,7 @@ export function PlayCardsSection({
 							)}
 						</button>
 						{plays.length === 0 && (
-							<div
-								className={`flex items-center
-									justify-center w-full
-									${theme === 'dark'
-										? 'text-gray-500'
-										: 'text-gray-400'
-									}`}
-							>
+							<div className="flex items-center justify-center w-full text-muted-foreground">
 								No plays in this playbook
 							</div>
 						)}

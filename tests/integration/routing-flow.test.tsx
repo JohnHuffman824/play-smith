@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router-dom'
 import { routes } from '../../src/router/routes'
 import { AuthProvider } from '../../src/contexts/AuthContext'
-import { ThemeProvider } from '../../src/contexts/ThemeContext'
+import { SettingsProvider } from '../../src/contexts/SettingsContext'
 import { TeamProvider } from '../../src/contexts/TeamContext'
 import { QueryProvider } from '../../src/providers/QueryProvider'
 
@@ -15,13 +15,13 @@ const ORIGINAL_FETCH = fetch
 function renderWithProviders(router: ReturnType<typeof createMemoryRouter>) {
 	return render(
 		<QueryProvider>
-			<ThemeProvider>
+			<SettingsProvider>
 				<AuthProvider>
 					<TeamProvider>
 						<RouterProvider router={router} />
 					</TeamProvider>
 				</AuthProvider>
-			</ThemeProvider>
+			</SettingsProvider>
 		</QueryProvider>
 	)
 }

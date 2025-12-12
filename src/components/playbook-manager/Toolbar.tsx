@@ -98,7 +98,7 @@ export function Toolbar({
 						{/* Action Buttons */}
 						<button
 							onClick={onNewPlaybook}
-							className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-all duration-200"
+							className="flex items-center gap-2 px-4 py-2 bg-action-button text-action-button-foreground rounded-lg hover:bg-action-button/90 transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 whitespace-nowrap"
 						>
 							<Plus className="w-4 h-4" />
 							New Playbook
@@ -106,7 +106,7 @@ export function Toolbar({
 
 						<button
 							onClick={onNewFolder}
-							className="p-2 hover:bg-accent rounded-lg transition-all duration-200"
+							className="p-2 border border-border hover:bg-accent rounded-lg transition-all duration-200"
 							title="New Folder"
 						>
 							<FolderPlus className="w-5 h-5" />
@@ -114,7 +114,7 @@ export function Toolbar({
 
 						<button
 							onClick={onImport}
-							className="p-2 hover:bg-accent rounded-lg transition-all duration-200"
+							className="p-2 border border-border hover:bg-accent rounded-lg transition-all duration-200"
 							title="Import"
 						>
 							<Upload className="w-5 h-5" />
@@ -122,7 +122,7 @@ export function Toolbar({
 
 						<button
 							onClick={onExport}
-							className="p-2 hover:bg-accent rounded-lg transition-all duration-200"
+							className="p-2 border border-border hover:bg-accent rounded-lg transition-all duration-200"
 							title="Export"
 						>
 							<Download className="w-5 h-5" />
@@ -133,7 +133,7 @@ export function Toolbar({
 						{/* Settings */}
 						<button
 							onClick={onSettingsClick}
-							className="p-2 hover:bg-accent rounded-lg transition-all duration-200"
+							className="p-2 border border-border hover:bg-accent rounded-lg transition-all duration-200"
 							title="Settings"
 						>
 							<Settings className="w-5 h-5" />

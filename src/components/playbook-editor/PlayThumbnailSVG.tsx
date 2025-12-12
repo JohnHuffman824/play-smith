@@ -4,6 +4,12 @@ import type {
 	PathSegment,
 	Coordinate
 } from '@/types/drawing.types'
+import {
+	applyChaikin,
+	CHAIKIN_ITERATIONS,
+} from '@/utils/chaikin.utils'
+import { useTheme } from '@/contexts/SettingsContext'
+import { getThemeAwareColor } from '@/utils/colorUtils'
 
 interface ThumbnailPlayer {
 	id: string
@@ -76,6 +82,39 @@ function buildPathString(
 	padding: number
 ): string {
 	if (drawing.segments.length === 0) return ''
+
+	// Check if this should be smoothed (all line segments with curve mode)
+	const isAllLineSegments = drawing.segments.every(s => s.type === 'line')
+	const shouldSmooth = isAllLineSegments && drawing.style.pathMode === 'curve'
+
+	if (shouldSmooth) {
+		// Collect all unique points in order
+		const seenPoints = new Set<string>()
+		const allPoints: Coordinate[] = []
+
+		for (const segment of drawing.segments) {
+			for (const pointId of segment.pointIds) {
+				if (!seenPoints.has(pointId)) {
+					seenPoints.add(pointId)
+					const point = drawing.points[pointId]
+					if (point) allPoints.push(point)
+				}
+			}
+		}
+
+		if (allPoints.length < 2) return ''
+
+		// Transform to SVG coords, apply smoothing, build path
+		const transform = (p: Coordinate) => transformPoint(p, viewBoxWidth, viewBoxHeight, padding)
+		const transformed = allPoints.map(transform)
+		const smoothed = applyChaikin(transformed, CHAIKIN_ITERATIONS)
+
+		const commands: string[] = [`M ${smoothed[0].x.toFixed(2)} ${smoothed[0].y.toFixed(2)}`]
+		for (let i = 1; i < smoothed.length; i++) {
+			commands.push(`L ${smoothed[i].x.toFixed(2)} ${smoothed[i].y.toFixed(2)}`)
+		}
+		return commands.join(' ')
+	}
 
 	const commands: string[] = []
 
@@ -183,6 +222,7 @@ function buildPathString(
 }
 
 export function PlayThumbnailSVG({ drawings, players = [], className }: PlayThumbnailSVGProps) {
+	const { theme } = useTheme()
 	const hasContent = hasValidDrawings(drawings) || players.length > 0
 	if (!hasContent) {
 		return null
@@ -192,6 +232,9 @@ export function PlayThumbnailSVG({ drawings, players = [], className }: PlayThum
 	const viewBoxHeight = 60
 	const padding = 5
 	const scale = (viewBoxWidth - 2 * padding) / FIELD_WIDTH_FEET
+
+	// Player outline: black in light mode, white in dark mode
+	const playerStroke = theme === 'dark' ? 'white' : 'black'
 
 	return (
 		<svg
@@ -215,7 +258,7 @@ export function PlayThumbnailSVG({ drawings, players = [], className }: PlayThum
 						cy={pos.y}
 						r={radius}
 						fill={player.color}
-						stroke="white"
+						stroke={playerStroke}
 						strokeWidth={0.5}
 					/>
 				)
@@ -231,12 +274,14 @@ export function PlayThumbnailSVG({ drawings, players = [], className }: PlayThum
 				)
 				if (!pathString) return null
 
+				// Apply theme-aware color switching for visibility
+				const displayColor = getThemeAwareColor(drawing.style.color, theme)
 				const isDashed = drawing.style.lineStyle === 'dashed'
 				return (
 					<path
 						key={index}
 						d={pathString}
-						stroke={drawing.style.color}
+						stroke={displayColor}
 						strokeWidth={drawing.style.strokeWidth * 0.5}
 						fill="none"
 						strokeDasharray={isDashed ? '2,2' : undefined}

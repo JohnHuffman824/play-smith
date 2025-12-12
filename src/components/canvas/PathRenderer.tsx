@@ -19,9 +19,11 @@ import {
 	getPoint,
 	findClosestSegmentPosition,
 } from '../../utils/drawing.utils'
+import {
+	applyChaikin as applyChaikinUtil,
+	CHAIKIN_ITERATIONS,
+} from '../../utils/chaikin.utils'
 
-// Chaikin smoothing for render-time curve smoothing
-const CHAIKIN_ITERATIONS = 3
 const SEGMENT_HIT_THRESHOLD_PX = 15
 
 interface PixelPoint {
@@ -29,61 +31,9 @@ interface PixelPoint {
 	y: number
 }
 
-function chaikinSubdivide(points: PixelPoint[], preserveEndpoints: boolean = false): PixelPoint[] {
-	if (points.length < 2) return points
-
-	const result: PixelPoint[] = []
-
-	// Preserve first endpoint if requested
-	if (preserveEndpoints) {
-		result.push(points[0])
-	}
-
-	for (let i = 0; i < points.length - 1; i++) {
-		const p0 = points[i]
-		const p1 = points[i + 1]
-
-		// For first/last segments with endpoint preservation, only add one point
-		if (preserveEndpoints && i === 0) {
-			// Only add R point for first segment
-			result.push({
-				x: 0.25 * p0.x + 0.75 * p1.x,
-				y: 0.25 * p0.y + 0.75 * p1.y,
-			})
-		} else if (preserveEndpoints && i === points.length - 2) {
-			// Only add Q point for last segment
-			result.push({
-				x: 0.75 * p0.x + 0.25 * p1.x,
-				y: 0.75 * p0.y + 0.25 * p1.y,
-			})
-		} else {
-			// Normal subdivision for middle segments
-			result.push({
-				x: 0.75 * p0.x + 0.25 * p1.x,
-				y: 0.75 * p0.y + 0.25 * p1.y,
-			})
-			result.push({
-				x: 0.25 * p0.x + 0.75 * p1.x,
-				y: 0.25 * p0.y + 0.75 * p1.y,
-			})
-		}
-	}
-
-	// Preserve last endpoint if requested
-	if (preserveEndpoints) {
-		result.push(points[points.length - 1])
-	}
-
-	return result
-}
-
+// Wrapper to adapt Coordinate-based util to PixelPoint
 function applyChaikin(points: PixelPoint[], iterations: number): PixelPoint[] {
-	let result = points
-	for (let i = 0; i < iterations; i++) {
-		// Preserve endpoints on every iteration to maintain start/end positions
-		result = chaikinSubdivide(result, true)
-	}
-	return result
+	return applyChaikinUtil(points, iterations) as PixelPoint[]
 }
 
 interface PathRendererProps {
@@ -103,6 +53,9 @@ interface PathRendererProps {
 		insertPosition: Coordinate,
 		pixelPosition: { x: number; y: number }
 	) => void
+	zoom?: number
+	panX?: number
+	panY?: number
 }
 
 /**
@@ -120,6 +73,9 @@ export function PathRenderer({
 	onDragStart,
 	onHover,
 	onPathContextMenu,
+	zoom = 1,
+	panX = 0,
+	panY = 0,
 }: PathRendererProps) {
 	const mouseDownPosRef = useRef<{ x: number; y: number } | null>(null)
 	const DRAG_THRESHOLD = 5
@@ -180,18 +136,18 @@ export function PathRenderer({
 			const svg = event.currentTarget.ownerSVGElement
 			if (!svg) return
 			const rect = svg.getBoundingClientRect()
-			const pixelX = event.clientX - rect.left
-			const pixelY = event.clientY - rect.top
+			const screenX = event.clientX - rect.left
+			const screenY = event.clientY - rect.top
 			const nearNode = isPointNearControlPoint(
 				drawing,
 				coordSystem,
-				{ x: pixelX, y: pixelY },
+				{ x: screenX, y: screenY },
 				12,
 			)
 			if (nearNode) return
 
 			if (onDragStart) {
-				const feet = coordSystem.pixelsToFeet(pixelX, pixelY)
+				const feet = coordSystem.screenToFeet(screenX, screenY, zoom, panX, panY)
 				onDragStart(drawing.id, feet.x, feet.y)
 			}
 		}
@@ -280,9 +236,9 @@ export function PathRenderer({
 					const svg = e.currentTarget.ownerSVGElement
 					if (!svg) return
 					const rect = svg.getBoundingClientRect()
-					const pixelX = e.clientX - rect.left
-					const pixelY = e.clientY - rect.top
-					const feetPos = coordSystem.pixelsToFeet(pixelX, pixelY)
+					const screenX = e.clientX - rect.left
+					const screenY = e.clientY - rect.top
+					const feetPos = coordSystem.screenToFeet(screenX, screenY, zoom, panX, panY)
 
 					// Find which segment was clicked
 					const result = findClosestSegmentPosition(drawing, feetPos, coordSystem)
@@ -291,7 +247,7 @@ export function PathRenderer({
 							drawing.id,
 							result.segmentIndex,
 							result.insertPosition,
-							{ x: pixelX, y: pixelY }
+							{ x: screenX, y: screenY }
 						)
 					}
 				}}
@@ -302,8 +258,8 @@ export function PathRenderer({
 					cx={linkedPixel.x}
 					cy={linkedPixel.y}
 					r={4}
-					fill='#3b82f6'
-					stroke='white'
+					fill='hsl(var(--action-button))'
+					stroke='hsl(var(--action-button-foreground))'
 					strokeWidth={1}
 					pointerEvents='none'
 				/>
@@ -459,7 +415,7 @@ function renderLineEnding(
 	drawing: Drawing,
 	endDirection: { angle: number; point: Coordinate } | undefined,
 	strokeWidth: number,
-	activeTool?: 'draw' | 'select' | 'erase',
+	activeTool: 'draw' | 'select' | 'erase' | undefined,
 ) {
 	if (drawing.style.lineEnd === LINE_END_NONE) return null
 	if (!endDirection) return null

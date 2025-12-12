@@ -1,7 +1,7 @@
 import { describe, test, expect, afterEach } from 'bun:test'
 import { cleanup, render, fireEvent } from '@testing-library/react'
 import { DrawingPropertiesDialog } from './DrawingPropertiesDialog'
-import { ThemeProvider } from '../../../contexts/ThemeContext'
+import { SettingsProvider } from '@/contexts/SettingsContext'
 import { FieldCoordinateSystem } from '../../../utils/coordinates'
 import type { Drawing } from '../../../types/drawing.types'
 
@@ -37,7 +37,7 @@ describe('DrawingPropertiesDialog - White Color Preset', () => {
 
 	test('white color button exists in color palette', () => {
 		const { container } = render(
-			<ThemeProvider>
+			<SettingsProvider>
 				<DrawingPropertiesDialog
 					drawing={mockDrawing}
 					position={{ x: 100, y: 100 }}
@@ -45,7 +45,7 @@ describe('DrawingPropertiesDialog - White Color Preset', () => {
 					onClose={() => {}}
 					coordSystem={coordSystem}
 				/>
-			</ThemeProvider>
+			</SettingsProvider>
 		)
 
 		// Find all color buttons by looking for buttons with background-color style
@@ -74,7 +74,7 @@ describe('DrawingPropertiesDialog - White Color Preset', () => {
 		let updatedColor: string | undefined
 
 		const { container } = render(
-			<ThemeProvider>
+			<SettingsProvider>
 				<DrawingPropertiesDialog
 					drawing={mockDrawing}
 					position={{ x: 100, y: 100 }}
@@ -86,7 +86,7 @@ describe('DrawingPropertiesDialog - White Color Preset', () => {
 					onClose={() => {}}
 					coordSystem={coordSystem}
 				/>
-			</ThemeProvider>
+			</SettingsProvider>
 		)
 
 		// Find white color button
@@ -115,7 +115,7 @@ describe('DrawingPropertiesDialog - White Color Preset', () => {
 
 	test('white color is distinct from other colors in palette', () => {
 		const { container } = render(
-			<ThemeProvider>
+			<SettingsProvider>
 				<DrawingPropertiesDialog
 					drawing={mockDrawing}
 					position={{ x: 100, y: 100 }}
@@ -123,7 +123,7 @@ describe('DrawingPropertiesDialog - White Color Preset', () => {
 					onClose={() => {}}
 					coordSystem={coordSystem}
 				/>
-			</ThemeProvider>
+			</SettingsProvider>
 		)
 
 		const colorButtons = Array.from(
@@ -152,7 +152,7 @@ describe('DrawingPropertiesDialog - White Color Preset', () => {
 
 	test('color palette includes both black and white', () => {
 		const { container } = render(
-			<ThemeProvider>
+			<SettingsProvider>
 				<DrawingPropertiesDialog
 					drawing={mockDrawing}
 					position={{ x: 100, y: 100 }}
@@ -160,7 +160,7 @@ describe('DrawingPropertiesDialog - White Color Preset', () => {
 					onClose={() => {}}
 					coordSystem={coordSystem}
 				/>
-			</ThemeProvider>
+			</SettingsProvider>
 		)
 
 		const colorButtons = Array.from(

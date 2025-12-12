@@ -17,7 +17,7 @@
  */
 
 import { useEffect, useState, useRef } from 'react'
-import { useTheme } from '../../contexts/ThemeContext'
+import { useTheme } from '@/contexts/SettingsContext'
 import {
   FIELD_WIDTH_FEET,
   HASH_SPACING,

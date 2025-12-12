@@ -2,7 +2,7 @@ import { describe, test, expect, beforeEach, afterEach } from 'bun:test'
 import { cleanup, render, waitFor } from '@testing-library/react'
 import { Canvas } from '../../../src/components/canvas/Canvas'
 import { PlayProvider } from '../../../src/contexts/PlayContext'
-import { ThemeProvider } from '../../../src/contexts/ThemeContext'
+import { SettingsProvider } from '../../../src/contexts/SettingsContext'
 import { eventBus } from '../../../src/services/EventBus'
 import type { DrawingState } from '../../../src/types/play.types'
 
@@ -31,7 +31,7 @@ function renderCanvas(
 	}
 
 	return render(
-		<ThemeProvider>
+		<SettingsProvider>
 			<PlayProvider initialState={mockInitialState}>
 				<Canvas
 					drawingState={drawingState}
@@ -43,7 +43,7 @@ function renderCanvas(
 					initialPlayers={initialPlayers}
 				/>
 			</PlayProvider>
-		</ThemeProvider>
+		</SettingsProvider>
 	)
 }
 

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Tooltip } from './Tooltip'
-import { useTheme } from '../../contexts/ThemeContext'
+import { useTheme } from '@/contexts/SettingsContext'
 
 interface ToolButtonProps {
 	icon: ReactNode

@@ -201,10 +201,6 @@ export function PlayCard({
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onOpen(id)}>
-                <Edit className="w-4 h-4" />
-                Open
-              </DropdownMenuItem>
               {onAnimate && (
                 <DropdownMenuItem onClick={() => onAnimate(id)}>
                   <Play className="w-4 h-4" />

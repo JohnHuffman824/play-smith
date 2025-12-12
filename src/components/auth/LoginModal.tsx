@@ -101,30 +101,28 @@ export function LoginModal() {
 			{/* Modal */}
 			<div className="fixed inset-0 z-50 flex items-center justify-center p-4">
 				<div
-					className="bg-white rounded-3xl shadow-2xl max-w-md w-full
-						overflow-hidden animate-modal-in"
+					className="bg-card rounded-3xl shadow-2xl max-w-md w-full
+						overflow-hidden animate-modal-in border border-border"
 				>
 					{/* Header */}
 					<div
-						className="relative bg-gradient-to-br from-blue-50
-							to-blue-100 p-8 pb-12"
+						className="relative bg-muted p-8 pb-12"
 					>
 						<div className="flex items-center gap-3 mb-3">
 							<div
-								className="w-12 h-12 rounded-2xl bg-gradient-to-br
-									from-blue-600 to-blue-400 flex items-center
+								className="w-12 h-12 rounded-2xl bg-action-button flex items-center
 									justify-center shadow-lg"
 							>
-								<span className="text-white text-xl font-bold">
+								<span className="text-action-button-foreground text-xl font-bold">
 									PS
 								</span>
 							</div>
-							<h2 className="text-2xl text-gray-800 font-semibold">
+							<h2 className="text-2xl text-foreground font-semibold">
 								Play Smith
 							</h2>
 						</div>
 
-						<p className="text-gray-600 text-sm">
+						<p className="text-muted-foreground text-sm">
 							{isLogin
 								? 'Sign in to access your playbooks'
 								: 'Create an account to get started'}
@@ -147,7 +145,7 @@ export function LoginModal() {
 							<div className="mb-4">
 								<label
 									htmlFor="name"
-									className="block text-sm text-gray-700 mb-2
+									className="block text-sm text-foreground mb-2
 										font-medium"
 								>
 									Name
@@ -155,7 +153,7 @@ export function LoginModal() {
 								<div className="relative">
 									<User
 										className="absolute left-4 top-1/2
-											-translate-y-1/2 w-5 h-5 text-gray-400"
+											-translate-y-1/2 w-5 h-5 text-muted-foreground"
 									/>
 									<Input
 										id="name"
@@ -174,14 +172,14 @@ export function LoginModal() {
 						<div className="mb-4">
 							<label
 								htmlFor="email"
-								className="block text-sm text-gray-700 mb-2 font-medium"
+								className="block text-sm text-foreground mb-2 font-medium"
 							>
 								{isLogin ? 'Username or Email' : 'Email'}
 							</label>
 							<div className="relative">
 								<Mail
 									className="absolute left-4 top-1/2 -translate-y-1/2
-										w-5 h-5 text-gray-400"
+										w-5 h-5 text-muted-foreground"
 								/>
 								<Input
 									id="email"
@@ -199,14 +197,14 @@ export function LoginModal() {
 						<div className="mb-6">
 							<label
 								htmlFor="password"
-								className="block text-sm text-gray-700 mb-2 font-medium"
+								className="block text-sm text-foreground mb-2 font-medium"
 							>
 								Password
 							</label>
 							<div className="relative">
 								<Lock
 									className="absolute left-4 top-1/2 -translate-y-1/2
-										w-5 h-5 text-gray-400"
+										w-5 h-5 text-muted-foreground"
 								/>
 								<Input
 									id="password"
@@ -221,7 +219,7 @@ export function LoginModal() {
 									type="button"
 									onClick={() => setShowPassword(!showPassword)}
 									className="absolute right-4 top-1/2 -translate-y-1/2
-										text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+										text-muted-foreground hover:text-foreground transition-colors cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
 									aria-label="Toggle password visibility"
 								>
 									{showPassword
@@ -236,10 +234,10 @@ export function LoginModal() {
 						<button
 							type="submit"
 							disabled={isSubmitting}
-							className="w-full py-3.5 bg-blue-500 hover:bg-blue-600
-								text-white rounded-2xl font-semibold transition-all
-								hover:shadow-lg disabled:opacity-50 cursor-pointer
-								disabled:cursor-not-allowed mb-4"
+							className="w-full py-3.5 bg-action-button text-action-button-foreground
+								rounded-2xl font-semibold transition-all duration-200
+								hover:bg-action-button/90 hover:shadow-lg disabled:opacity-50 cursor-pointer
+								disabled:cursor-not-allowed mb-4 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
 						>
 							{isSubmitting
 								? 'Please wait...'
@@ -250,17 +248,17 @@ export function LoginModal() {
 						{/* Divider */}
 						<div className="relative my-6">
 							<div className="absolute inset-0 flex items-center">
-								<div className="w-full border-t border-gray-200" />
+								<div className="w-full border-t border-border" />
 							</div>
 							<div className="relative flex justify-center">
-								<span className="px-4 bg-white text-sm text-gray-500">
+								<span className="px-4 bg-card text-sm text-muted-foreground">
 									or
 								</span>
 							</div>
 						</div>
 
 						{/* Switch Mode Link */}
-						<p className="text-center text-sm text-gray-600">
+						<p className="text-center text-sm text-muted-foreground">
 							{isLogin
 								? "Don't have an account? "
 								: 'Already have an account? '
@@ -268,8 +266,8 @@ export function LoginModal() {
 							<button
 								type="button"
 								onClick={switchMode}
-								className="text-blue-600 hover:text-blue-700
-									font-semibold transition-colors cursor-pointer"
+								className="text-action-button hover:text-action-button/80
+									font-semibold transition-colors cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
 							>
 								{isLogin ? 'Sign up' : 'Sign in'}
 							</button>

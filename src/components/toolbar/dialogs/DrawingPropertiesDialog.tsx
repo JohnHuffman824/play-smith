@@ -1,5 +1,4 @@
 import { X } from 'lucide-react'
-import { useTheme } from '../../../contexts/ThemeContext'
 import type { Drawing, PathStyle } from '../../../types/drawing.types'
 import type { FieldCoordinateSystem } from '../../../utils/coordinates'
 
@@ -41,7 +40,6 @@ export function DrawingPropertiesDialog({
 	onClose,
 	coordSystem,
 }: DrawingPropertiesDialogProps) {
-	const { theme } = useTheme()
 	const { style } = drawing
 
 	// Position dialog near click, but keep on screen
@@ -60,26 +58,16 @@ export function DrawingPropertiesDialog({
 			/>
 			<div
 				style={dialogStyle}
-				className={`w-64 rounded-2xl shadow-2xl border p-4 z-[70] ${
-					theme === 'dark'
-						? 'bg-gray-800 border-gray-700'
-						: 'bg-white border-gray-200'
-				}`}
+				className="w-64 rounded-2xl shadow-2xl bg-card border border-border p-4 z-[70]"
 			>
 			{/* Header */}
 			<div className='flex items-center justify-between mb-4'>
-				<span
-					className={theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}
-				>
+				<span className="text-foreground">
 					Edit Drawing
 				</span>
 				<button
 					onClick={onClose}
-					className={`w-6 h-6 rounded-lg flex items-center justify-center cursor-pointer ${
-						theme === 'dark'
-							? 'hover:bg-gray-700 text-gray-400'
-							: 'hover:bg-gray-100 text-gray-500'
-					}`}
+					className="w-6 h-6 rounded-lg flex items-center justify-center cursor-pointer hover:bg-accent text-muted-foreground outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
 				>
 					<X size={16} />
 				</button>
@@ -87,11 +75,7 @@ export function DrawingPropertiesDialog({
 
 			{/* Color */}
 			<div className='mb-4'>
-				<label
-					className={`block text-xs mb-2 ${
-						theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
-					}`}
-				>
+				<label className="block text-xs mb-2 text-muted-foreground">
 					Color
 				</label>
 				<div className='grid grid-cols-4 gap-2'>
@@ -99,10 +83,10 @@ export function DrawingPropertiesDialog({
 						<button
 							key={color}
 							onClick={() => onUpdate({ color })}
-							className={`h-10 rounded-lg transition-all cursor-pointer ${
+							className={`h-10 rounded-lg transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
 								style.color === color
-									? 'ring-2 ring-blue-500 ring-offset-2'
-									: `hover:scale-105 border ${theme === 'dark' ? 'border-gray-600' : 'border-gray-300'}`
+									? 'ring-2 ring-action-button ring-offset-2'
+									: 'hover:scale-105 border border-border'
 							}`}
 							style={{ backgroundColor: color }}
 							title={color}
@@ -113,22 +97,16 @@ export function DrawingPropertiesDialog({
 
 			{/* Path Mode */}
 			<div className='mb-4'>
-				<label
-					className={`block text-xs mb-2 ${
-						theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
-					}`}
-				>
+				<label className="block text-xs mb-2 text-muted-foreground">
 					Path Mode
 				</label>
 				<div className='flex gap-2'>
 					<button
 						onClick={() => onUpdate({ pathMode: 'sharp' })}
-						className={`flex-1 py-2 px-3 rounded-lg transition-all cursor-pointer ${
+						className={`flex-1 py-2 px-3 rounded-lg transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
 							style.pathMode === 'sharp'
-								? 'bg-blue-500 text-white'
-								: theme === 'dark'
-									? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-									: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+								? 'bg-action-button text-action-button-foreground'
+								: 'bg-muted text-foreground hover:bg-accent'
 						}`}
 					>
 						<svg viewBox='0 0 48 16' className='h-4 w-full'>
@@ -144,12 +122,10 @@ export function DrawingPropertiesDialog({
 					</button>
 					<button
 						onClick={() => onUpdate({ pathMode: 'curve' })}
-						className={`flex-1 py-2 px-3 rounded-lg transition-all cursor-pointer ${
+						className={`flex-1 py-2 px-3 rounded-lg transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
 							style.pathMode === 'curve'
-								? 'bg-blue-500 text-white'
-								: theme === 'dark'
-									? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-									: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+								? 'bg-action-button text-action-button-foreground'
+								: 'bg-muted text-foreground hover:bg-accent'
 						}`}
 					>
 						<svg viewBox='0 0 48 16' className='h-4 w-full'>
@@ -167,34 +143,26 @@ export function DrawingPropertiesDialog({
 
 			{/* Line Style */}
 			<div className='mb-4'>
-				<label
-					className={`block text-xs mb-2 ${
-						theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
-					}`}
-				>
+				<label className="block text-xs mb-2 text-muted-foreground">
 					Line Style
 				</label>
 				<div className='flex gap-2'>
 					<button
 						onClick={() => onUpdate({ lineStyle: 'solid' })}
-						className={`flex-1 py-2 px-3 rounded-lg transition-all cursor-pointer ${
+						className={`flex-1 py-2 px-3 rounded-lg transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
 							style.lineStyle === 'solid'
-								? 'bg-blue-500 text-white'
-								: theme === 'dark'
-									? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-									: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+								? 'bg-action-button text-action-button-foreground'
+								: 'bg-muted text-foreground hover:bg-accent'
 						}`}
 					>
 						<div className='h-0.5 bg-current mx-auto w-12' />
 					</button>
 					<button
 						onClick={() => onUpdate({ lineStyle: 'dashed' })}
-						className={`flex-1 py-2 px-3 rounded-lg transition-all cursor-pointer ${
+						className={`flex-1 py-2 px-3 rounded-lg transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
 							style.lineStyle === 'dashed'
-								? 'bg-blue-500 text-white'
-								: theme === 'dark'
-									? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-									: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+								? 'bg-action-button text-action-button-foreground'
+								: 'bg-muted text-foreground hover:bg-accent'
 						}`}
 					>
 						<div className='h-0.5 mx-auto w-12 flex gap-1'>
@@ -208,34 +176,26 @@ export function DrawingPropertiesDialog({
 
 			{/* Line End */}
 			<div className='mb-4'>
-				<label
-					className={`block text-xs mb-2 ${
-						theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
-					}`}
-				>
+				<label className="block text-xs mb-2 text-muted-foreground">
 					Line End
 				</label>
 				<div className='grid grid-cols-3 gap-2'>
 					<button
 						onClick={() => onUpdate({ lineEnd: 'none' })}
-						className={`py-2 px-3 rounded-lg transition-all text-xs cursor-pointer ${
+						className={`py-2 px-3 rounded-lg transition-all duration-200 text-xs cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
 							style.lineEnd === 'none'
-								? 'bg-blue-500 text-white'
-								: theme === 'dark'
-									? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-									: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+								? 'bg-action-button text-action-button-foreground'
+								: 'bg-muted text-foreground hover:bg-accent'
 						}`}
 					>
 						None
 					</button>
 					<button
 						onClick={() => onUpdate({ lineEnd: 'arrow' })}
-						className={`py-2 px-3 rounded-lg transition-all flex items-center justify-center cursor-pointer ${
+						className={`py-2 px-3 rounded-lg transition-all duration-200 flex items-center justify-center cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
 							style.lineEnd === 'arrow'
-								? 'bg-blue-500 text-white'
-								: theme === 'dark'
-									? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-									: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+								? 'bg-action-button text-action-button-foreground'
+								: 'bg-muted text-foreground hover:bg-accent'
 						}`}
 					>
 						<svg width='20' height='16' viewBox='0 0 20 16'>
@@ -253,12 +213,10 @@ export function DrawingPropertiesDialog({
 					</button>
 					<button
 						onClick={() => onUpdate({ lineEnd: 'tShape' })}
-						className={`py-2 px-3 rounded-lg transition-all flex items-center justify-center cursor-pointer ${
+						className={`py-2 px-3 rounded-lg transition-all duration-200 flex items-center justify-center cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
 							style.lineEnd === 'tShape'
-								? 'bg-blue-500 text-white'
-								: theme === 'dark'
-									? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-									: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+								? 'bg-action-button text-action-button-foreground'
+								: 'bg-muted text-foreground hover:bg-accent'
 						}`}
 					>
 						<svg
@@ -277,11 +235,7 @@ export function DrawingPropertiesDialog({
 
 			{/* Thickness */}
 			<div>
-				<label
-					className={`block text-xs mb-2 ${
-						theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
-					}`}
-				>
+				<label className="block text-xs mb-2 text-muted-foreground">
 					Line Thickness
 				</label>
 				<div className='grid grid-cols-2 gap-2'>
@@ -296,12 +250,10 @@ export function DrawingPropertiesDialog({
 							<button
 								key={brush.size}
 								onClick={() => onUpdate({ strokeWidth: strokeWidthInFeet })}
-								className={`py-3 px-3 rounded-lg transition-all cursor-pointer ${
+								className={`py-3 px-3 rounded-lg transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
 									isSelected
-										? 'bg-blue-500 text-white'
-										: theme === 'dark'
-											? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-											: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+										? 'bg-action-button text-action-button-foreground'
+										: 'bg-muted text-foreground hover:bg-accent'
 								}`}
 							>
 								<div className='flex flex-col items-center gap-1'>

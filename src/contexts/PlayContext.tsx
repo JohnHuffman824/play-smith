@@ -10,7 +10,7 @@ import type { DrawingState, Tool } from '../types/play.types'
 import type { HashAlignment } from '../types/field.types'
 import type { Drawing } from '../types/drawing.types'
 import type { Formation, BaseConcept, ConceptGroup } from '../types/concept.types'
-import { useTheme } from './ThemeContext'
+import { useTheme } from './SettingsContext'
 import { repositionLinemenForHash } from '../utils/lineman.utils'
 
 interface Player {

@@ -1,4 +1,3 @@
-import { useTheme } from '../../contexts/ThemeContext'
 import { Trash2 } from 'lucide-react'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import unlinkIconPath from '../../imports/unlink-icon.svg'
@@ -28,7 +27,6 @@ export function PlayerLabelDialog({
   onDelete,
   onClose,
 }: PlayerLabelDialogProps) {
-  const { theme } = useTheme()
   const [customLabel, setCustomLabel] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -102,26 +100,22 @@ export function PlayerLabelDialog({
       >
         {/* Arrow pointing down */}
         <div
-          className={`absolute left-1/2 -translate-x-1/2 w-0 h-0 ${
-            theme === 'dark' ? 'border-gray-800' : 'border-white'
-          }`}
+          className="absolute left-1/2 -translate-x-1/2 w-0 h-0"
           style={{
             bottom: '-8px',
             borderLeft: '8px solid transparent',
             borderRight: '8px solid transparent',
-            borderTop: `8px solid ${theme === 'dark' ? '#1f2937' : '#ffffff'}`,
+            borderTop: '8px solid hsl(var(--card))',
           }}
         />
         {/* Border arrow for the carat */}
         <div
-          className={`absolute left-1/2 -translate-x-1/2 w-0 h-0 ${
-            theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
-          }`}
+          className="absolute left-1/2 -translate-x-1/2 w-0 h-0"
           style={{
             bottom: '-9px',
             borderLeft: '9px solid transparent',
             borderRight: '9px solid transparent',
-            borderTop: `9px solid ${theme === 'dark' ? '#374151' : '#e5e7eb'}`,
+            borderTop: '9px solid hsl(var(--border))',
             zIndex: -1,
           }}
         />
@@ -132,9 +126,9 @@ export function PlayerLabelDialog({
             <button
               key={index}
               onClick={() => handleLabelSelect(label)}
-              className={`w-10 h-10 rounded-lg transition-all cursor-pointer ${
+              className={`w-10 h-10 rounded-lg transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
                 currentLabel === label
-                  ? 'bg-blue-500 text-white shadow-md scale-110'
+                  ? 'bg-action-button text-action-button-foreground shadow-md scale-110'
                   : 'bg-secondary text-secondary-foreground hover:bg-accent'
               }`}
             >
@@ -153,9 +147,9 @@ export function PlayerLabelDialog({
             <button
               key={index}
               onClick={() => handleLabelSelect(label)}
-              className={`w-10 h-10 rounded-lg transition-all cursor-pointer ${
+              className={`w-10 h-10 rounded-lg transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
                 currentLabel === label
-                  ? 'bg-blue-500 text-white shadow-md scale-110'
+                  ? 'bg-action-button text-action-button-foreground shadow-md scale-110'
                   : 'bg-secondary text-secondary-foreground hover:bg-accent'
               }`}
             >
@@ -200,11 +194,7 @@ export function PlayerLabelDialog({
               onDelete()
               onClose()
             }}
-            className={`w-10 h-10 rounded-lg transition-all cursor-pointer flex items-center justify-center flex-shrink-0 ${
-              theme === 'dark'
-                ? 'bg-red-900/30 text-red-400 hover:bg-red-900/50'
-                : 'bg-red-50 text-red-600 hover:bg-red-100'
-            }`}
+            className="w-10 h-10 rounded-lg transition-all duration-200 cursor-pointer flex items-center justify-center flex-shrink-0 bg-destructive/10 text-destructive hover:bg-destructive/20 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
           >
             <Trash2 className="w-5 h-5" />
           </button>

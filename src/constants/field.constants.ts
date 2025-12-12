@@ -45,6 +45,11 @@ export const CURSOR_Z_INDEX = 100
 export const MAX_HISTORY_SIZE = 10
 export const SELECTION_GLOW_BLUR = 3
 
+// Zoom/Pan Constants
+export const MIN_ZOOM = 1.0 // Cannot zoom out past baseline (current view)
+export const MAX_ZOOM = 4.0 // Maximum 4x zoom in
+export const ZOOM_SENSITIVITY = 0.002 // Zoom increment per wheel delta unit
+
 // Tool Names
 export const TOOL_DRAW = 'draw'
 export const TOOL_ERASE = 'erase'

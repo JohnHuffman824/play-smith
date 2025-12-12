@@ -35,28 +35,28 @@ export function TargetingTooltip() {
 
 					<div className="space-y-3 text-xs">
 						<div>
-							<div className="font-semibold text-blue-600 dark:text-blue-400 mb-1">
+							<div className="font-semibold text-foreground mb-1">
 								Absolute Role
 							</div>
 							<p className="text-muted-foreground mb-2">
 								Assign routes to specific player roles (X, Y, Z, etc.)
 							</p>
 							<div className="bg-secondary p-2 rounded">
-								<span className="font-mono text-green-600 dark:text-green-400">
+								<span className="font-mono text-muted-foreground">
 									Example: X runs Post, Y runs Corner
 								</span>
 							</div>
 						</div>
 
 						<div>
-							<div className="font-semibold text-purple-600 dark:text-purple-400 mb-1">
+							<div className="font-semibold text-foreground mb-1">
 								Relative Selector
 							</div>
 							<p className="text-muted-foreground mb-2">
 								Assign routes based on player position (leftmost, inside, etc.)
 							</p>
 							<div className="bg-secondary p-2 rounded">
-								<span className="font-mono text-green-600 dark:text-green-400">
+								<span className="font-mono text-muted-foreground">
 									Example: Leftmost receiver runs Post, Inside receivers run Curl
 								</span>
 							</div>

@@ -2,6 +2,7 @@ import { useRef, useEffect, useState } from 'react'
 import { useFieldCoordinates, usePlayerDrag } from '@/hooks'
 import { PLAYER_RADIUS_FEET } from '@/constants'
 import { eventBus } from '@/services'
+import { useTheme } from '@/contexts/SettingsContext'
 
 /**
  * Calculate the luminance of a color to determine if text should be black or white
@@ -61,7 +62,11 @@ export function Player({
   currentTool,
   color = '#3b82f6',
   onHoverChange,
+  zoom,
+  panX,
+  panY,
 }: PlayerProps) {
+  const { theme } = useTheme()
   const playerRef = useRef<HTMLDivElement>(null)
   const mouseDownPosRef = useRef<{ x: number; y: number } | null>(null)
   const [fillColor, setFillColor] = useState(color)
@@ -89,6 +94,9 @@ export function Player({
     coordSystem,
     elementRef: playerRef,
     onPositionChange,
+    zoom,
+    panX,
+    panY,
   })
 
   useEffect(() => {
@@ -187,6 +195,9 @@ export function Player({
   // Calculate text color based on background color for visibility
   const textColor = getTextColorForBackground(fillColor)
 
+  // Player outline color: black in light mode, white in dark mode
+  const outlineColor = theme === 'dark' ? 'white' : 'black'
+
   return (
     <div
       ref={playerRef}
@@ -218,7 +229,7 @@ export function Player({
           height: '100%',
           borderRadius: '50%',
           backgroundColor: fillColor,
-          border: '2px solid white',
+          border: `2px solid ${outlineColor}`,
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
           display: 'flex',
           alignItems: 'center',

@@ -1,4 +1,4 @@
-import { useTheme } from '../../../contexts/ThemeContext'
+import { useTheme } from '@/contexts/SettingsContext'
 import type { HashAlignment } from '../../../types/field.types'
 
 interface HashDialogProps {

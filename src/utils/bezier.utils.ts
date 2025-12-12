@@ -11,6 +11,7 @@ import {
 	quadraticLength,
 	cubicLength,
 } from './animation.utils'
+import { getSmoothedPoints } from './drawing.utils'
 
 /**
  * Resolve point IDs to actual coordinates from drawing's point pool.
@@ -109,6 +110,43 @@ export function calculateRouteTiming(
 	drawing: Drawing,
 	speedFps: number = ANIMATION_DEFAULTS.PLAYER_SPEED_FPS
 ): RouteTiming {
+	// Get smoothed points if drawing should be smoothed
+	// Transform to extract just x,y coordinates
+	const smoothedPoints = getSmoothedPoints(drawing, (point) => ({ x: point.x, y: point.y }))
+
+	if (smoothedPoints) {
+
+		// Create line segments from consecutive smoothed points
+		const segments: SegmentTiming[] = []
+		let totalLength = 0
+		let currentTime = 0
+
+		for (let i = 0; i < smoothedPoints.length - 1; i++) {
+			const points = [smoothedPoints[i], smoothedPoints[i + 1]]
+			const segment: PathSegment = { type: 'line', pointIds: [] }
+
+			const segmentTiming = buildSegmentTiming(
+				segment,
+				points,
+				currentTime,
+				speedFps
+			)
+
+			segments.push(segmentTiming)
+			totalLength += segmentTiming.length
+			currentTime = segmentTiming.endTime
+		}
+
+		return {
+			drawingId: drawing.id,
+			playerId: drawing.playerId ?? null,
+			totalLength,
+			duration: currentTime,
+			segments,
+		}
+	}
+
+	// Original logic for non-smooth drawings (sharp mode, cubic, quadratic)
 	const segments: SegmentTiming[] = []
 	let totalLength = 0
 	let currentTime = 0

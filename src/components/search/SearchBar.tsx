@@ -119,16 +119,16 @@ export function SearchBar({
 
       {/* Results dropdown */}
       {isOpen && results && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border rounded-md shadow-lg z-50 max-h-64 overflow-auto">
+        <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg z-50 max-h-64 overflow-auto">
           {/* Formation results */}
           {results.results.formations?.map((f: any) => (
             <button
               key={f.id}
-              className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="w-full text-left px-3 py-2 hover:bg-accent transition-colors cursor-pointer"
               onClick={() => handleSelect(f, 'formation')}
             >
               <span className="font-medium">{f.name}</span>
-              <span className="text-sm text-gray-500 ml-2">Formation</span>
+              <span className="text-sm text-muted-foreground ml-2">Formation</span>
             </button>
           ))}
 
@@ -136,11 +136,11 @@ export function SearchBar({
           {results.results.concepts?.map((c: any) => (
             <button
               key={c.id}
-              className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="w-full text-left px-3 py-2 hover:bg-accent transition-colors cursor-pointer"
               onClick={() => handleSelect({ ...c, is_saved: true }, 'concept')}
             >
               <span className="font-medium">{c.name}</span>
-              <span className="text-sm text-gray-500 ml-2">
+              <span className="text-sm text-muted-foreground ml-2">
                 {c.is_motion ? 'Motion' : c.is_modifier ? 'Modifier' : 'Concept'}
               </span>
             </button>
@@ -149,27 +149,27 @@ export function SearchBar({
           {/* Composition suggestion */}
           {results.parseResult?.type === 'composition' && (
             <button
-              className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 border-t"
+              className="w-full text-left px-3 py-2 hover:bg-accent border-t border-border transition-colors cursor-pointer"
               onClick={() => handleSelect(results.parseResult.composition, 'concept')}
             >
               <span className="font-medium">
                 {results.parseResult.composition.role} {results.parseResult.composition.template_name}
               </span>
-              <span className="text-sm text-yellow-600 ml-2">Auto-compose (unsaved)</span>
+              <span className="text-sm text-muted-foreground ml-2">Auto-compose (unsaved)</span>
             </button>
           )}
 
           {/* Needs role prompt */}
           {results.parseResult?.type === 'needs_role' && (
-            <div className="px-3 py-2 border-t">
-              <span className="text-sm text-gray-600">
+            <div className="px-3 py-2 border-t border-border">
+              <span className="text-sm text-muted-foreground">
                 Apply "{results.parseResult.template_name}" to which player?
               </span>
               <div className="flex gap-2 mt-1">
                 {results.parseResult.availableRoles?.slice(0, 5).map((role: string) => (
                   <button
                     key={role}
-                    className="px-2 py-1 text-sm bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200"
+                    className="px-2 py-1 text-sm bg-secondary text-secondary-foreground rounded hover:bg-secondary/80 transition-colors cursor-pointer"
                     onClick={() => handleSelect({
                       role,
                       template_name: results.parseResult.template_name,
@@ -185,8 +185,8 @@ export function SearchBar({
 
           {/* No match */}
           {results.parseResult?.type === 'no_match' && query && (
-            <div className="px-3 py-2 text-sm text-gray-500 border-t">
-              No match found. <button className="text-blue-500 hover:underline">Create new concept?</button>
+            <div className="px-3 py-2 text-sm text-muted-foreground border-t border-border">
+              No match found. <button className="text-action-button hover:underline cursor-pointer">Create new concept?</button>
             </div>
           )}
         </div>

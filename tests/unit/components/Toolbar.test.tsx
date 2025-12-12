@@ -1,7 +1,7 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test'
 import { cleanup, render } from '@testing-library/react'
 import { Toolbar } from '../../../src/components/toolbar/Toolbar'
-import { ThemeProvider } from '../../../src/contexts/ThemeContext'
+import { SettingsProvider } from '../../../src/contexts/SettingsContext'
 import { PlayProvider } from '../../../src/contexts/PlayContext'
 import type { DrawingState } from '../../../src/types/play.types'
 import type { HashAlignment } from '../../../src/types/field.types'
@@ -48,7 +48,7 @@ describe('Toolbar - Responsive Layout', () => {
 		onDeletePlay: () => Promise<void>
 	}>) {
 		return render(
-			<ThemeProvider>
+			<SettingsProvider>
 				<PlayProvider>
 					<Toolbar
 						drawingState={mockDrawingState}
@@ -61,7 +61,7 @@ describe('Toolbar - Responsive Layout', () => {
 						onDeletePlay={overrides?.onDeletePlay}
 					/>
 				</PlayProvider>
-			</ThemeProvider>
+			</SettingsProvider>
 		)
 	}
 

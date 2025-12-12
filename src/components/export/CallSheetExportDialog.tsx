@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useTheme } from '../../contexts/ThemeContext'
+import { useTheme } from '@/contexts/SettingsContext'
 import type { Section } from '../../hooks/usePlaybookData'
 import type { CallSheetConfig } from '../../types/export.types'
 

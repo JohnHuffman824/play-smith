@@ -1,5 +1,4 @@
 import { X } from 'lucide-react'
-import { useTheme } from '../../../contexts/ThemeContext'
 
 interface DrawOptionsDialogProps {
   lineStyle: 'solid' | 'dashed'
@@ -33,21 +32,16 @@ export function DrawOptionsDialog({
   onClose,
   useRelativePosition = false,
 }: DrawOptionsDialogProps) {
-  const { theme } = useTheme()
   
   return (
     <div
       data-draw-dialog
-      className={`${useRelativePosition ? '' : 'absolute left-24 top-32'} w-64 rounded-2xl shadow-2xl border p-4 z-50 ${
-      theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-    }`}>
+      className={`${useRelativePosition ? '' : 'absolute left-24 top-32'} w-64 rounded-2xl shadow-2xl bg-card border border-border p-4 z-50`}>
       <div className="flex items-center justify-between mb-4">
-        <span className={theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}>Draw</span>
+        <span className="text-foreground">Draw</span>
         <button
           onClick={onClose}
-          className={`w-6 h-6 rounded-lg flex items-center justify-center cursor-pointer ${
-            theme === 'dark' ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-500'
-          }`}
+          className="w-6 h-6 rounded-lg flex items-center justify-center cursor-pointer hover:bg-accent text-muted-foreground outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         >
           <X size={16} />
         </button>
@@ -55,18 +49,16 @@ export function DrawOptionsDialog({
 
       {/* Path Mode */}
       <div className="mb-4">
-        <label className={`block text-xs mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+        <label className="block text-xs mb-2 text-muted-foreground">
           Path Mode
         </label>
         <div className="flex gap-2">
           <button
             onClick={() => onPathModeChange('sharp')}
-            className={`flex-1 py-2 px-3 rounded-lg transition-all cursor-pointer ${
+            className={`flex-1 py-2 px-3 rounded-lg transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
               pathMode === 'sharp'
-                ? 'bg-blue-500 text-white'
-                : theme === 'dark'
-                  ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-action-button text-action-button-foreground'
+                : 'bg-muted text-foreground hover:bg-accent'
             }`}
           >
             <svg viewBox="0 0 48 16" className="h-4 w-full">
@@ -82,12 +74,10 @@ export function DrawOptionsDialog({
           </button>
           <button
             onClick={() => onPathModeChange('curve')}
-            className={`flex-1 py-2 px-3 rounded-lg transition-all cursor-pointer ${
+            className={`flex-1 py-2 px-3 rounded-lg transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
               pathMode === 'curve'
-                ? 'bg-blue-500 text-white'
-                : theme === 'dark'
-                  ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-action-button text-action-button-foreground'
+                : 'bg-muted text-foreground hover:bg-accent'
             }`}
           >
             <svg viewBox="0 0 48 16" className="h-4 w-full">
@@ -105,30 +95,26 @@ export function DrawOptionsDialog({
 
       {/* Line Style */}
       <div className="mb-4">
-        <label className={`block text-xs mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+        <label className="block text-xs mb-2 text-muted-foreground">
           Line Style
         </label>
         <div className="flex gap-2">
           <button
             onClick={() => onLineStyleChange('solid')}
-            className={`flex-1 py-2 px-3 rounded-lg transition-all cursor-pointer ${
+            className={`flex-1 py-2 px-3 rounded-lg transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
               lineStyle === 'solid'
-                ? 'bg-blue-500 text-white'
-                : theme === 'dark' 
-                  ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-action-button text-action-button-foreground'
+                : 'bg-muted text-foreground hover:bg-accent'
             }`}
           >
             <div className="h-0.5 bg-current mx-auto w-12" />
           </button>
           <button
             onClick={() => onLineStyleChange('dashed')}
-            className={`flex-1 py-2 px-3 rounded-lg transition-all cursor-pointer ${
+            className={`flex-1 py-2 px-3 rounded-lg transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
               lineStyle === 'dashed'
-                ? 'bg-blue-500 text-white'
-                : theme === 'dark' 
-                  ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-action-button text-action-button-foreground'
+                : 'bg-muted text-foreground hover:bg-accent'
             }`}
           >
             <div className="h-0.5 mx-auto w-12 flex gap-1">
@@ -142,30 +128,26 @@ export function DrawOptionsDialog({
 
       {/* Line End */}
       <div className="mb-4">
-        <label className={`block text-xs mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+        <label className="block text-xs mb-2 text-muted-foreground">
           Line End
         </label>
         <div className="grid grid-cols-3 gap-2">
           <button
             onClick={() => onLineEndChange('none')}
-            className={`py-2 px-3 rounded-lg transition-all text-xs cursor-pointer ${
+            className={`py-2 px-3 rounded-lg transition-all duration-200 text-xs cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
               lineEnd === 'none'
-                ? 'bg-blue-500 text-white'
-                : theme === 'dark' 
-                  ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-action-button text-action-button-foreground'
+                : 'bg-muted text-foreground hover:bg-accent'
             }`}
           >
             None
           </button>
           <button
             onClick={() => onLineEndChange('arrow')}
-            className={`py-2 px-3 rounded-lg transition-all flex items-center justify-center cursor-pointer ${
+            className={`py-2 px-3 rounded-lg transition-all duration-200 flex items-center justify-center cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
               lineEnd === 'arrow'
-                ? 'bg-blue-500 text-white'
-                : theme === 'dark' 
-                  ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-action-button text-action-button-foreground'
+                : 'bg-muted text-foreground hover:bg-accent'
             }`}
           >
             <svg width="20" height="16" viewBox="0 0 20 16">
@@ -175,12 +157,10 @@ export function DrawOptionsDialog({
           </button>
           <button
             onClick={() => onLineEndChange('tShape')}
-            className={`py-2 px-3 rounded-lg transition-all flex items-center justify-center cursor-pointer ${
+            className={`py-2 px-3 rounded-lg transition-all duration-200 flex items-center justify-center cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
               lineEnd === 'tShape'
-                ? 'bg-blue-500 text-white'
-                : theme === 'dark' 
-                  ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-action-button text-action-button-foreground'
+                : 'bg-muted text-foreground hover:bg-accent'
             }`}
           >
             <svg width="20" height="16" viewBox="0 0 20 16" fill="none" stroke="currentColor" strokeWidth="2">
@@ -192,7 +172,7 @@ export function DrawOptionsDialog({
 
       {/* Brush Size */}
       <div>
-        <label className={`block text-xs mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+        <label className="block text-xs mb-2 text-muted-foreground">
           Line Thickness
         </label>
         <div className="grid grid-cols-2 gap-2">
@@ -200,12 +180,10 @@ export function DrawOptionsDialog({
             <button
               key={brush.size}
               onClick={() => onBrushSizeChange(brush.size)}
-              className={`py-3 px-3 rounded-lg transition-all cursor-pointer ${
+              className={`py-3 px-3 rounded-lg transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
                 brushSize === brush.size
-                  ? 'bg-blue-500 text-white'
-                  : theme === 'dark' 
-                    ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-action-button text-action-button-foreground'
+                  : 'bg-muted text-foreground hover:bg-accent'
               }`}
             >
               <div className="flex flex-col items-center gap-1">

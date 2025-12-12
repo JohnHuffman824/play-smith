@@ -35,28 +35,28 @@ export function ConceptTypeTooltip() {
 
 					<div className="space-y-3 text-xs">
 						<div>
-							<div className="font-semibold text-blue-600 dark:text-blue-400 mb-1">
+							<div className="font-semibold text-foreground mb-1">
 								Motion
 							</div>
 							<p className="text-muted-foreground mb-2">
 								Pre-snap player movement that occurs before the ball is snapped. Motion paths are displayed as dotted lines and animate before routes execute.
 							</p>
 							<div className="bg-secondary p-2 rounded">
-								<span className="font-mono text-green-600 dark:text-green-400 text-xs">
+								<span className="font-mono text-muted-foreground text-xs">
 									Examples: Jet, Orbit, Return
 								</span>
 							</div>
 						</div>
 
 						<div>
-							<div className="font-semibold text-purple-600 dark:text-purple-400 mb-1">
+							<div className="font-semibold text-foreground mb-1">
 								Modifier
 							</div>
 							<p className="text-muted-foreground mb-2">
 								Adjusts player positions within an existing formation. Modifiers move players closer or farther from the formation center.
 							</p>
 							<div className="bg-secondary p-2 rounded">
-								<span className="font-mono text-green-600 dark:text-green-400 text-xs">
+								<span className="font-mono text-muted-foreground text-xs">
 									Examples: Tight, Nasty, Wide
 								</span>
 							</div>

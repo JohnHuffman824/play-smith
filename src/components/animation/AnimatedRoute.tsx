@@ -18,7 +18,9 @@ import {
 	LINE_END_TSHAPE,
 	TSHAPE_LENGTH_MULTIPLIER,
 } from '../../constants/field.constants'
-import { getSegmentPoints } from '../../utils/drawing.utils'
+import { getSegmentPoints, getSmoothedPoints } from '../../utils/drawing.utils'
+import { useTheme } from '../../contexts/SettingsContext'
+import { getThemeAwareColor } from '../../utils/colorUtils'
 
 type AnimatedRouteProps = {
 	drawing: Drawing
@@ -37,12 +39,17 @@ export function AnimatedRoute({
 	traveledColor = '#22c55e', // Green for traveled
 	opacity = 1,
 }: AnimatedRouteProps) {
+	const { theme } = useTheme()
+
 	// Build the full SVG path
-	const { d, pathLength, endPoints } = useMemo(() => {
+	const { d, pathLength, endPoints, endDirection } = useMemo(() => {
 		return buildPathWithLength(drawing, coordSystem)
 	}, [drawing, coordSystem])
 
 	if (!d) return null
+
+	// Apply theme-aware color switching for visibility
+	const displayColor = getThemeAwareColor(drawing.style.color, theme)
 
 	const strokeWidth = drawing.style.strokeWidth * coordSystem.scale
 	const lineDash =
@@ -60,7 +67,9 @@ export function AnimatedRoute({
 		drawing,
 		endPoints,
 		strokeWidth,
-		coordSystem
+		coordSystem,
+		displayColor,
+		endDirection
 	)
 
 	return (
@@ -69,7 +78,7 @@ export function AnimatedRoute({
 			<path
 				d={d}
 				fill="none"
-				stroke={drawing.style.color}
+				stroke={displayColor}
 				strokeWidth={strokeWidth}
 				strokeLinecap="round"
 				strokeLinejoin="round"
@@ -105,11 +114,43 @@ export function AnimatedRoute({
 function buildPathWithLength(
 	drawing: Drawing,
 	coordSystem: FieldCoordinateSystem
-): { d: string; pathLength: number; endPoints: Coordinate[] } {
+): { d: string; pathLength: number; endPoints: Coordinate[]; endDirection?: { angle: number; point: Coordinate } } {
 	if (drawing.segments.length === 0) {
 		return { d: '', pathLength: 0, endPoints: [] }
 	}
 
+	// Get smoothed points in pixel coordinates
+	const smoothed = getSmoothedPoints(drawing, (point) => toPixels(point, coordSystem))
+
+	if (smoothed) {
+
+		// Build path from smoothed points
+		const commands: string[] = [`M ${smoothed[0].x} ${smoothed[0].y}`]
+		let pathLength = 0
+
+		for (let i = 1; i < smoothed.length; i++) {
+			commands.push(`L ${smoothed[i].x} ${smoothed[i].y}`)
+			pathLength += distance(smoothed[i - 1], smoothed[i])
+		}
+
+		// Calculate end direction from smoothed path for arrow rendering
+		const lastSmoothed = smoothed[smoothed.length - 1]
+		const prevSmoothed = smoothed[smoothed.length - 2]
+		const endAngle = Math.atan2(
+			lastSmoothed.y - prevSmoothed.y,
+			lastSmoothed.x - prevSmoothed.x
+		)
+
+		// Chaikin preserves endpoints, so first and last smoothed points are the original endpoints
+		return {
+			d: commands.join(' '),
+			pathLength,
+			endPoints: [smoothed[0], smoothed[smoothed.length - 1]],
+			endDirection: { angle: endAngle, point: lastSmoothed }
+		}
+	}
+
+	// Original logic for non-smooth drawings (sharp mode, cubic, quadratic)
 	const commands: string[] = []
 	const endPoints: Coordinate[] = []
 	let pathLength = 0
@@ -244,25 +285,38 @@ function renderLineEnding(
 	drawing: Drawing,
 	endPoints: Coordinate[],
 	strokeWidth: number,
-	coordSystem: FieldCoordinateSystem
+	coordSystem: FieldCoordinateSystem,
+	displayColor: string,
+	endDirection?: { angle: number; point: Coordinate }
 ) {
 	if (drawing.style.lineEnd === LINE_END_NONE) return null
 	if (endPoints.length === 0) return null
 
-	const lastSegment = drawing.segments[drawing.segments.length - 1]
-	if (!lastSegment) return null
+	// For smooth drawings, use the smoothed path's end direction
+	let endPoint: Coordinate
+	let angle: number
 
-	const points = getSegmentPoints(drawing, lastSegment)
-	const pixelPoints = points.map((p) => toPixels(p, coordSystem))
-	if (pixelPoints.length < 2) return null
+	if (endDirection) {
+		// Smooth drawing: use direction from smoothed path, position at control point
+		endPoint = endPoints[endPoints.length - 1]!
+		angle = endDirection.angle
+	} else {
+		// Sharp drawing: calculate from control points
+		const lastSegment = drawing.segments[drawing.segments.length - 1]
+		if (!lastSegment) return null
 
-	const endPoint = pixelPoints[pixelPoints.length - 1]!
-	const prevPoint = pixelPoints[pixelPoints.length - 2]!
+		const points = getSegmentPoints(drawing, lastSegment)
+		const pixelPoints = points.map((p) => toPixels(p, coordSystem))
+		if (pixelPoints.length < 2) return null
 
-	const angle = Math.atan2(
-		endPoint.y - prevPoint.y,
-		endPoint.x - prevPoint.x
-	)
+		endPoint = pixelPoints[pixelPoints.length - 1]!
+		const prevPoint = pixelPoints[pixelPoints.length - 2]!
+
+		angle = Math.atan2(
+			endPoint.y - prevPoint.y,
+			endPoint.x - prevPoint.x
+		)
+	}
 
 	if (drawing.style.lineEnd === LINE_END_ARROW) {
 		const arrowLen = strokeWidth * ARROW_LENGTH_MULTIPLIER
@@ -281,7 +335,7 @@ function renderLineEnding(
 			<path
 				d={`M ${p1.x} ${p1.y} L ${endPoint.x} ${endPoint.y} L ${p2.x} ${p2.y}`}
 				fill="none"
-				stroke={drawing.style.color}
+				stroke={displayColor}
 				strokeWidth={strokeWidth}
 				strokeLinecap="round"
 				strokeLinejoin="round"
@@ -306,7 +360,7 @@ function renderLineEnding(
 			<path
 				d={`M ${p1.x} ${p1.y} L ${p2.x} ${p2.y}`}
 				fill="none"
-				stroke={drawing.style.color}
+				stroke={displayColor}
 				strokeWidth={strokeWidth}
 				strokeLinecap="round"
 			/>

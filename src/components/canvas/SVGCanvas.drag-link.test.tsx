@@ -2,7 +2,7 @@ import { describe, test, expect, beforeEach, afterEach } from 'bun:test'
 import { cleanup, render, fireEvent, waitFor } from '@testing-library/react'
 import { SVGCanvas } from './SVGCanvas'
 import { FieldCoordinateSystem } from '../../utils/coordinates'
-import { ThemeProvider } from '../../contexts/ThemeContext'
+import { SettingsProvider } from '@/contexts/SettingsContext'
 import type { Drawing, PathStyle } from '../../types/drawing.types'
 
 /**
@@ -49,7 +49,7 @@ describe('SVGCanvas - Drawing Drag Link to Player', () => {
 		let linkCalled = false
 
 		const { container } = render(
-			<ThemeProvider>
+			<SettingsProvider>
 				<SVGCanvas
 					width={1600}
 					height={800}
@@ -63,7 +63,7 @@ describe('SVGCanvas - Drawing Drag Link to Player', () => {
 					snapThreshold={20}
 					onLinkDrawingToPlayer={() => { linkCalled = true }}
 				/>
-			</ThemeProvider>
+			</SettingsProvider>
 		)
 
 		// Find the drawing path
@@ -83,7 +83,7 @@ describe('SVGCanvas - Drawing Drag Link to Player', () => {
 		let linkedPlayerId: string | null = null
 
 		const { container } = render(
-			<ThemeProvider>
+			<SettingsProvider>
 				<SVGCanvas
 					width={1600}
 					height={800}
@@ -101,7 +101,7 @@ describe('SVGCanvas - Drawing Drag Link to Player', () => {
 						linkedPlayerId = playerId
 					}}
 				/>
-			</ThemeProvider>
+			</SettingsProvider>
 		)
 
 		// TODO: Simulate drag near player and release
@@ -121,7 +121,7 @@ describe('SVGCanvas - Drawing Drag Link to Player', () => {
 		}
 
 		const { container } = render(
-			<ThemeProvider>
+			<SettingsProvider>
 				<SVGCanvas
 					width={1600}
 					height={800}
@@ -135,7 +135,7 @@ describe('SVGCanvas - Drawing Drag Link to Player', () => {
 					snapThreshold={20}
 					onLinkDrawingToPlayer={() => {}}
 				/>
-			</ThemeProvider>
+			</SettingsProvider>
 		)
 
 		// TODO: Simulate drag toward different player

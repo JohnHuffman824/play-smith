@@ -2,7 +2,7 @@ import { describe, test, expect, beforeEach, afterEach, mock } from 'bun:test'
 import { cleanup, render, waitFor } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { PlayProvider } from '../../../src/contexts/PlayContext'
-import { ThemeProvider } from '../../../src/contexts/ThemeContext'
+import { SettingsProvider } from '../../../src/contexts/SettingsContext'
 
 // Mock fetch for play data
 const mockFetch = mock(() => Promise.resolve({

@@ -1,5 +1,5 @@
 import { X } from 'lucide-react'
-import { useTheme } from '../../../contexts/ThemeContext'
+import { useTheme } from '@/contexts/SettingsContext'
 
 interface ColorPickerDialogProps {
   currentColor: string

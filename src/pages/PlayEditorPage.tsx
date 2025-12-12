@@ -8,9 +8,10 @@ import { ConceptDialog } from '../components/concepts/ConceptDialog'
 import { SelectionOverlay } from '../components/canvas/SelectionOverlay'
 import { SelectedTagsOverlay } from '../components/tags/SelectedTagsOverlay'
 import { TagDialog } from '../components/tags/TagDialog'
-import { useTheme } from '../contexts/ThemeContext'
+import { useTheme } from '@/contexts/SettingsContext'
 import { PlayProvider, usePlayContext } from '../contexts/PlayContext'
 import { ConceptProvider, useConcept } from '../contexts/ConceptContext'
+import { CanvasViewportProvider } from '../contexts/CanvasViewportContext'
 import { useConceptData } from '../hooks/useConceptData'
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
 import { useTagsData, type Tag } from '../hooks/useTagsData'
@@ -587,10 +588,10 @@ function PlayEditorContent() {
 	// Concepts can load in the background after the canvas appears
 	if (!isPlayLoaded) {
 		return (
-			<div className={`flex items-center justify-center h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+			<div className="flex items-center justify-center h-screen bg-background">
 				<div className="text-center">
 					<div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
-					<p className={theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}>
+					<p className="text-foreground">
 						Loading play...
 					</p>
 				</div>
@@ -599,7 +600,7 @@ function PlayEditorContent() {
 	}
 
 	return (
-		<main className={`flex h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+		<main className="flex h-screen bg-background">
 			<Toolbar
 				drawingState={playState.drawingState}
 				setDrawingState={setDrawingState}
@@ -617,13 +618,15 @@ function PlayEditorContent() {
 					onBackToPlaybook={handleBackToPlaybook}
 				/>
 				<div className="relative flex-1">
-					<Canvas
-						drawingState={playState.drawingState}
-						hashAlignment={playState.hashAlignment}
-						showPlayBar={playState.showPlayBar}
-						playId={playId}
-						onSelectionChange={setSelectedObjectIds}
-					/>
+					<CanvasViewportProvider>
+						<Canvas
+							drawingState={playState.drawingState}
+							hashAlignment={playState.hashAlignment}
+							showPlayBar={playState.showPlayBar}
+							playId={playId}
+							onSelectionChange={setSelectedObjectIds}
+						/>
+					</CanvasViewportProvider>
 					{/* Selected Tags Overlay */}
 					<SelectedTagsOverlay
 						tags={selectedTags}

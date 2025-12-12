@@ -153,7 +153,7 @@ export function AnimationDialog({
 }: AnimationDialogProps) {
 	return (
 		<Dialog open={isOpen} onOpenChange={onClose}>
-			<DialogContent className={cn('w-[95vw] h-[95vh] max-w-none p-6')}>
+			<DialogContent className={cn('w-[98vw] h-[95vh] max-w-none sm:max-w-none p-6')}>
 				<AnimationProvider>
 					<AnimationDialogContent playId={playId} playName={playName} />
 				</AnimationProvider>

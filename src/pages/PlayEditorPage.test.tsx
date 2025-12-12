@@ -2,7 +2,7 @@ import { describe, test, expect, beforeAll, afterAll, afterEach } from 'bun:test
 import { render, screen, waitFor, cleanup } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ThemeProvider } from '../contexts/ThemeContext'
+import { SettingsProvider } from '@/contexts/SettingsContext'
 import { AuthProvider } from '../contexts/AuthContext'
 import { PlayEditorPage } from './PlayEditorPage'
 import { act } from 'react'
@@ -109,13 +109,13 @@ describe('PlayEditorPage', () => {
 			render(
 				<QueryClientProvider client={queryClient}>
 					<AuthProvider>
-						<ThemeProvider>
+						<SettingsProvider>
 							<MemoryRouter initialEntries={['/teams/1/playbooks/1/plays/1']}>
 								<Routes>
 									<Route path="/teams/:teamId/playbooks/:playbookId/plays/:playId" element={<PlayEditorPage />} />
 								</Routes>
 							</MemoryRouter>
-						</ThemeProvider>
+						</SettingsProvider>
 					</AuthProvider>
 				</QueryClientProvider>
 			)

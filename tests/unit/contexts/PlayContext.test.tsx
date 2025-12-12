@@ -6,13 +6,13 @@
 import { afterEach, describe, it, expect } from 'bun:test'
 import { cleanup, renderHook, act } from '@testing-library/react'
 import { PlayProvider, usePlayContext } from '../../../src/contexts/PlayContext'
-import { ThemeProvider } from '../../../src/contexts/ThemeContext'
+import { SettingsProvider } from '../../../src/contexts/SettingsContext'
 import { ReactNode } from 'react'
 
 const wrapper = ({ children }: { children: ReactNode }) => (
-	<ThemeProvider>
+	<SettingsProvider>
 		<PlayProvider>{children}</PlayProvider>
-	</ThemeProvider>
+	</SettingsProvider>
 )
 
 describe('PlayContext', () => {

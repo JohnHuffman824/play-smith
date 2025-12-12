@@ -21,7 +21,7 @@ import { PlaybookManagerPage } from '../../../src/pages/PlaybookManagerPage'
 import { PlaybookProvider } from '../../../src/contexts/PlaybookContext'
 import { TeamProvider } from '../../../src/contexts/TeamContext'
 import { AuthProvider } from '../../../src/contexts/AuthContext'
-import { ThemeProvider } from '../../../src/contexts/ThemeContext'
+import { SettingsProvider } from '../../../src/contexts/SettingsContext'
 import { BrowserRouter } from 'react-router-dom'
 
 // Mock successful auth but NO teams (for personal playbooks)
@@ -72,7 +72,7 @@ global.fetch = async (url: string, options?: any) => {
 function renderPlaybookManager() {
 	return render(
 		<BrowserRouter>
-			<ThemeProvider>
+			<SettingsProvider>
 				<AuthProvider>
 					<TeamProvider>
 						<PlaybookProvider>
@@ -80,7 +80,7 @@ function renderPlaybookManager() {
 						</PlaybookProvider>
 					</TeamProvider>
 				</AuthProvider>
-			</ThemeProvider>
+			</SettingsProvider>
 		</BrowserRouter>
 	)
 }
