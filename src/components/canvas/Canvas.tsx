@@ -849,15 +849,55 @@ export function Canvas({
 					/>
 				</div>
 
-				{/* Canvas and interactive overlays */}
-				<div
-					className={cursorOverlayClasses}
-					style={{
-						cursor: getCursorStyle(),
-						pointerEvents: 'none',
-						borderRadius: 'inherit',
+			{/* Players - inside transform so they zoom/pan with content */}
+          <div
+            className="absolute top-0 left-0 w-full h-full overflow-hidden"
+            style={{ pointerEvents: 'none', borderRadius: 'inherit' }}
+          >
+            {players.map((player) => (
+                <Player
+                  key={player.id}
+                  id={player.id}
+                  initialX={player.x}
+                  initialY={player.y}
+                  containerWidth={canvasDimensions.width}
+                  containerHeight={canvasDimensions.height}
+                  label={player.label}
+                  color={player.color}
+                  onPositionChange={handlePlayerPositionChange}
+                  onLabelClick={handlePlayerLabelClick}
+                  onFill={handleFillPlayer}
+                  onDelete={handlePlayerDeleteById}
+                  currentTool={drawingState.tool}
+                  interactable={playerInteractable}
+                  zoom={zoom}
+                  panX={panX}
+                  panY={panY}
+					onHoverChange={(isHovered) => {
+						// Only track hover state when erase tool is active
+						if (drawingState.tool == TOOL_ERASE) {
+							setIsHoveringDeletable(isHovered)
+						}
 					}}
-				>
+                />
+              ))}
+            </div>
+		</div> {/* End transform container */}
+
+		{/* Cursor overlay - OUTSIDE transform so cursors stay at mouse position */}
+		<div
+			className={cursorOverlayClasses}
+			style={{
+				cursor: getCursorStyle(),
+				pointerEvents: 'none',
+				borderRadius: 'inherit',
+				position: 'absolute',
+				top: 0,
+				left: 0,
+				width: '100%',
+				height: '100%',
+			}}
+		>
           {/* Custom Pencil Cursor - only visible when draw tool is active */}
           {drawingState.tool == TOOL_DRAW &&
             isOverCanvas &&
@@ -950,40 +990,7 @@ export function Canvas({
               </div>
             )}
 
-          <div
-            className="absolute top-0 left-0 w-full h-full overflow-hidden"
-            style={{ pointerEvents: 'none', borderRadius: 'inherit' }}
-          >
-            {players.map((player) => (
-                <Player
-                  key={player.id}
-                  id={player.id}
-                  initialX={player.x}
-                  initialY={player.y}
-                  containerWidth={canvasDimensions.width}
-                  containerHeight={canvasDimensions.height}
-                  label={player.label}
-                  color={player.color}
-                  onPositionChange={handlePlayerPositionChange}
-                  onLabelClick={handlePlayerLabelClick}
-                  onFill={handleFillPlayer}
-                  onDelete={handlePlayerDeleteById}
-                  currentTool={drawingState.tool}
-                  interactable={playerInteractable}
-                  zoom={zoom}
-                  panX={panX}
-                  panY={panY}
-					onHoverChange={(isHovered) => {
-						// Only track hover state when erase tool is active
-						if (drawingState.tool == TOOL_ERASE) {
-							setIsHoveringDeletable(isHovered)
-						}
-					}}
-                />
-              ))}
-            </div>
         </div>
-				</div> {/* End transform container */}
       </div>
 
       {/* Player Label Dialog */}
