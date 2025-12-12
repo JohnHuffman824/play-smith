@@ -412,4 +412,420 @@ describe('PlaybookRepository', () => {
 		// Should not throw an error
 		await expect(playbookRepo.updateLastAccessed(nonExistentId)).resolves.toBeUndefined()
 	})
+
+	// Soft Delete Tests
+	test('softDelete - marks playbook as deleted', async () => {
+		// Create a new playbook
+		const playbook = await playbookRepo.create({
+			team_id: null,
+			name: 'Soft Delete Test Playbook',
+			created_by: testUserId,
+		})
+
+		// Verify deleted_at is initially null
+		expect(playbook.deleted_at).toBeNull()
+
+		// Soft delete the playbook
+		await playbookRepo.softDelete(playbook.id)
+
+		// Fetch the playbook and verify deleted_at is set
+		const deleted = await playbookRepo.findById(playbook.id)
+		expect(deleted?.deleted_at).not.toBeNull()
+
+		// Verify the timestamp is valid
+		const timestamp = deleted?.deleted_at
+		if (timestamp instanceof Date) {
+			expect(timestamp.getTime()).toBeGreaterThan(0)
+		} else if (typeof timestamp === 'string') {
+			expect(new Date(timestamp).getTime()).toBeGreaterThan(0)
+		}
+
+		// Cleanup
+		await db`DELETE FROM playbooks WHERE id = ${playbook.id}`
+	})
+
+	test('restore - unmarks playbook as deleted', async () => {
+		// Create and soft delete a playbook
+		const playbook = await playbookRepo.create({
+			team_id: null,
+			name: 'Restore Test Playbook',
+			created_by: testUserId,
+		})
+
+		await playbookRepo.softDelete(playbook.id)
+
+		// Verify it's deleted
+		const deleted = await playbookRepo.findById(playbook.id)
+		expect(deleted?.deleted_at).not.toBeNull()
+
+		// Restore the playbook
+		const restored = await playbookRepo.restore(playbook.id)
+
+		expect(restored).not.toBeNull()
+		expect(restored?.deleted_at).toBeNull()
+		expect(restored?.id).toBe(playbook.id)
+
+		// Cleanup
+		await db`DELETE FROM playbooks WHERE id = ${playbook.id}`
+	})
+
+	test('restore - returns null for non-existent playbook', async () => {
+		const nonExistentId = 999999999
+		const result = await playbookRepo.restore(nonExistentId)
+
+		expect(result).toBeNull()
+	})
+
+	test('permanentDelete - physically removes playbook', async () => {
+		// Create a playbook
+		const playbook = await playbookRepo.create({
+			team_id: null,
+			name: 'Permanent Delete Test',
+			created_by: testUserId,
+		})
+
+		// Verify it exists
+		const exists = await playbookRepo.findById(playbook.id)
+		expect(exists).not.toBeNull()
+
+		// Permanently delete it
+		await playbookRepo.permanentDelete(playbook.id)
+
+		// Verify it's gone
+		const gone = await playbookRepo.findById(playbook.id)
+		expect(gone).toBeNull()
+	})
+
+	test('emptyTrash - deletes all trashed playbooks for user', async () => {
+		// Create multiple playbooks and soft delete them
+		const playbook1 = await playbookRepo.create({
+			team_id: null,
+			name: 'Trash 1',
+			created_by: testUserId,
+		})
+
+		const playbook2 = await playbookRepo.create({
+			team_id: testTeamId,
+			name: 'Trash 2',
+			created_by: testUserId,
+		})
+
+		const playbook3 = await playbookRepo.create({
+			team_id: null,
+			name: 'Trash 3',
+			created_by: testUserId,
+		})
+
+		// Soft delete all three
+		await playbookRepo.softDelete(playbook1.id)
+		await playbookRepo.softDelete(playbook2.id)
+		await playbookRepo.softDelete(playbook3.id)
+
+		// Empty trash
+		const deletedCount = await playbookRepo.emptyTrash(testUserId, [testTeamId])
+
+		expect(deletedCount).toBeGreaterThanOrEqual(3)
+
+		// Verify they're permanently gone
+		const gone1 = await playbookRepo.findById(playbook1.id)
+		const gone2 = await playbookRepo.findById(playbook2.id)
+		const gone3 = await playbookRepo.findById(playbook3.id)
+
+		expect(gone1).toBeNull()
+		expect(gone2).toBeNull()
+		expect(gone3).toBeNull()
+	})
+
+	test('emptyTrash - only deletes trashed playbooks, not active ones', async () => {
+		// Create two playbooks: one active, one trashed
+		const activePlaybook = await playbookRepo.create({
+			team_id: null,
+			name: 'Active Playbook',
+			created_by: testUserId,
+		})
+
+		const trashedPlaybook = await playbookRepo.create({
+			team_id: null,
+			name: 'Trashed Playbook',
+			created_by: testUserId,
+		})
+
+		// Only soft delete the second one
+		await playbookRepo.softDelete(trashedPlaybook.id)
+
+		// Empty trash
+		await playbookRepo.emptyTrash(testUserId, [testTeamId])
+
+		// Verify active playbook still exists
+		const active = await playbookRepo.findById(activePlaybook.id)
+		expect(active).not.toBeNull()
+
+		// Verify trashed playbook is gone
+		const trashed = await playbookRepo.findById(trashedPlaybook.id)
+		expect(trashed).toBeNull()
+
+		// Cleanup
+		await db`DELETE FROM playbooks WHERE id = ${activePlaybook.id}`
+	})
+
+	test('cleanupOldTrash - deletes playbooks older than 30 days', async () => {
+		// Create a playbook and manually set deleted_at to 31 days ago
+		const oldPlaybook = await playbookRepo.create({
+			team_id: null,
+			name: 'Old Trash',
+			created_by: testUserId,
+		})
+
+		// Set deleted_at to 31 days ago (works for both SQLite and PostgreSQL)
+		await db`
+			UPDATE playbooks
+			SET deleted_at = datetime('now', '-31 days')
+			WHERE id = ${oldPlaybook.id}
+		`
+
+		// Verify it was set
+		const old = await playbookRepo.findById(oldPlaybook.id)
+		expect(old?.deleted_at).not.toBeNull()
+
+		// Cleanup old trash
+		const deletedCount = await playbookRepo.cleanupOldTrash()
+
+		expect(deletedCount).toBeGreaterThanOrEqual(1)
+
+		// Verify it's gone
+		const gone = await playbookRepo.findById(oldPlaybook.id)
+		expect(gone).toBeNull()
+	})
+
+	test('cleanupOldTrash - does not delete recent trash', async () => {
+		// Create a playbook and soft delete it (will be recent)
+		const recentPlaybook = await playbookRepo.create({
+			team_id: null,
+			name: 'Recent Trash',
+			created_by: testUserId,
+		})
+
+		await playbookRepo.softDelete(recentPlaybook.id)
+
+		// Cleanup old trash
+		await playbookRepo.cleanupOldTrash()
+
+		// Verify recent trash still exists (use direct query since findById excludes deleted)
+		const [recent] = await db<Array<{ id: number; deleted_at: any }>>`
+			SELECT id, deleted_at FROM playbooks WHERE id = ${recentPlaybook.id}
+		`
+		expect(recent).not.toBeUndefined()
+		expect(recent?.deleted_at).not.toBeNull()
+
+		// Cleanup
+		await db`DELETE FROM playbooks WHERE id = ${recentPlaybook.id}`
+	})
+
+	test('getTrashedPlaybooks - fetches only deleted playbooks', async () => {
+		// Create playbooks: some active, some deleted
+		const activePlaybook = await playbookRepo.create({
+			team_id: null,
+			name: 'Active',
+			created_by: testUserId,
+		})
+
+		const deletedPlaybook1 = await playbookRepo.create({
+			team_id: null,
+			name: 'Deleted 1',
+			created_by: testUserId,
+		})
+
+		const deletedPlaybook2 = await playbookRepo.create({
+			team_id: testTeamId,
+			name: 'Deleted 2',
+			created_by: testUserId,
+		})
+
+		// Soft delete two of them
+		await playbookRepo.softDelete(deletedPlaybook1.id)
+		await playbookRepo.softDelete(deletedPlaybook2.id)
+
+		// Fetch trashed playbooks
+		const trashed = await playbookRepo.getTrashedPlaybooks(testUserId, [testTeamId])
+
+		// Verify only deleted playbooks are returned
+		expect(trashed.some((p) => p.id === activePlaybook.id)).toBe(false)
+		expect(trashed.some((p) => p.id === deletedPlaybook1.id)).toBe(true)
+		expect(trashed.some((p) => p.id === deletedPlaybook2.id)).toBe(true)
+		expect(trashed.every((p) => p.deleted_at !== null)).toBe(true)
+
+		// Cleanup
+		await db`DELETE FROM playbooks WHERE id = ${activePlaybook.id}`
+		await db`DELETE FROM playbooks WHERE id = ${deletedPlaybook1.id}`
+		await db`DELETE FROM playbooks WHERE id = ${deletedPlaybook2.id}`
+	})
+
+	test('getTrashedPlaybooks - includes play_count', async () => {
+		// Create a deleted playbook with plays
+		const playbook = await playbookRepo.create({
+			team_id: null,
+			name: 'Deleted with Plays',
+			created_by: testUserId,
+		})
+
+		// Add a play to it (using correct columns)
+		await db`
+			INSERT INTO plays (playbook_id, name, created_by)
+			VALUES (${playbook.id}, 'Test Play', ${testUserId})
+		`
+
+		// Soft delete it
+		await playbookRepo.softDelete(playbook.id)
+
+		// Fetch trashed playbooks
+		const trashed = await playbookRepo.getTrashedPlaybooks(testUserId, [testTeamId])
+
+		const trashedPlaybook = trashed.find((p) => p.id === playbook.id)
+		expect(trashedPlaybook).not.toBeUndefined()
+		expect(trashedPlaybook?.play_count).toBeGreaterThanOrEqual(1)
+
+		// Cleanup
+		await db`DELETE FROM plays WHERE playbook_id = ${playbook.id}`
+		await db`DELETE FROM playbooks WHERE id = ${playbook.id}`
+	})
+
+	// Tests for exclusion of deleted playbooks from query methods
+	test('findById - excludes deleted playbooks', async () => {
+		// Create and soft delete a playbook
+		const playbook = await playbookRepo.create({
+			team_id: null,
+			name: 'Deleted Playbook',
+			created_by: testUserId,
+		})
+
+		// Verify it exists before deletion
+		const existsBefore = await playbookRepo.findById(playbook.id)
+		expect(existsBefore).not.toBeNull()
+
+		// Soft delete it
+		await playbookRepo.softDelete(playbook.id)
+
+		// Try to find it - should return null
+		const existsAfter = await playbookRepo.findById(playbook.id)
+		expect(existsAfter).toBeNull()
+
+		// Cleanup
+		await db`DELETE FROM playbooks WHERE id = ${playbook.id}`
+	})
+
+	test('getTeamPlaybooks - excludes deleted playbooks', async () => {
+		// Create two team playbooks
+		const playbook1 = await playbookRepo.create({
+			team_id: testTeamId,
+			name: 'Team Playbook Active',
+			created_by: testUserId,
+		})
+
+		const playbook2 = await playbookRepo.create({
+			team_id: testTeamId,
+			name: 'Team Playbook Deleted',
+			created_by: testUserId,
+		})
+
+		// Soft delete the second one
+		await playbookRepo.softDelete(playbook2.id)
+
+		// Fetch team playbooks
+		const teamPlaybooks = await playbookRepo.getTeamPlaybooks(testTeamId)
+
+		// Should include active playbook but not deleted one
+		expect(teamPlaybooks.some((p) => p.id === playbook1.id)).toBe(true)
+		expect(teamPlaybooks.some((p) => p.id === playbook2.id)).toBe(false)
+
+		// Cleanup
+		await db`DELETE FROM playbooks WHERE id = ${playbook1.id}`
+		await db`DELETE FROM playbooks WHERE id = ${playbook2.id}`
+	})
+
+	test('getUserPersonalPlaybooks - excludes deleted playbooks', async () => {
+		// Create two personal playbooks
+		const playbook1 = await playbookRepo.create({
+			team_id: null,
+			name: 'Personal Active',
+			created_by: testUserId,
+		})
+
+		const playbook2 = await playbookRepo.create({
+			team_id: null,
+			name: 'Personal Deleted',
+			created_by: testUserId,
+		})
+
+		// Soft delete the second one
+		await playbookRepo.softDelete(playbook2.id)
+
+		// Fetch personal playbooks
+		const personalPlaybooks = await playbookRepo.getUserPersonalPlaybooks(testUserId)
+
+		// Should include active playbook but not deleted one
+		expect(personalPlaybooks.some((p) => p.id === playbook1.id)).toBe(true)
+		expect(personalPlaybooks.some((p) => p.id === playbook2.id)).toBe(false)
+
+		// Cleanup
+		await db`DELETE FROM playbooks WHERE id = ${playbook1.id}`
+		await db`DELETE FROM playbooks WHERE id = ${playbook2.id}`
+	})
+
+	test('getUserPlaybooksWithCounts - excludes deleted playbooks', async () => {
+		// Create two playbooks: one active, one deleted
+		const activePlaybook = await playbookRepo.create({
+			team_id: null,
+			name: 'Active Playbook for Count',
+			created_by: testUserId,
+		})
+
+		const deletedPlaybook = await playbookRepo.create({
+			team_id: testTeamId,
+			name: 'Deleted Playbook for Count',
+			created_by: testUserId,
+		})
+
+		// Soft delete the second one
+		await playbookRepo.softDelete(deletedPlaybook.id)
+
+		// Fetch playbooks with counts
+		const playbooks = await playbookRepo.getUserPlaybooksWithCounts(testUserId, [testTeamId])
+
+		// Should include active playbook but not deleted one
+		expect(playbooks.some((p) => p.id === activePlaybook.id)).toBe(true)
+		expect(playbooks.some((p) => p.id === deletedPlaybook.id)).toBe(false)
+
+		// Cleanup
+		await db`DELETE FROM playbooks WHERE id = ${activePlaybook.id}`
+		await db`DELETE FROM playbooks WHERE id = ${deletedPlaybook.id}`
+	})
+
+	test('restored playbooks appear in query methods again', async () => {
+		// Create and soft delete a playbook
+		const playbook = await playbookRepo.create({
+			team_id: null,
+			name: 'Restore Test',
+			created_by: testUserId,
+		})
+
+		await playbookRepo.softDelete(playbook.id)
+
+		// Verify it's excluded
+		const excludedPlaybook = await playbookRepo.findById(playbook.id)
+		expect(excludedPlaybook).toBeNull()
+
+		// Restore it
+		await playbookRepo.restore(playbook.id)
+
+		// Verify it appears in queries again
+		const restoredPlaybook = await playbookRepo.findById(playbook.id)
+		expect(restoredPlaybook).not.toBeNull()
+		expect(restoredPlaybook?.id).toBe(playbook.id)
+
+		const personalPlaybooks = await playbookRepo.getUserPersonalPlaybooks(testUserId)
+		expect(personalPlaybooks.some((p) => p.id === playbook.id)).toBe(true)
+
+		// Cleanup
+		await db`DELETE FROM playbooks WHERE id = ${playbook.id}`
+	})
 })
