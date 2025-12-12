@@ -55,11 +55,11 @@ export async function startTestServer(): Promise<{
 				POST: playbooksAPI.create,
 			},
 			'/api/playbooks/:id/shares': {
-				GET: playbookSharesAPI.list,
-				POST: playbookSharesAPI.create,
+				GET: playbookSharesAPI.listShares,
+				POST: playbookSharesAPI.createShare,
 			},
 			'/api/playbooks/:id/shares/:teamId': {
-				DELETE: playbookSharesAPI.delete,
+				DELETE: playbookSharesAPI.deleteShare,
 			},
 			'/api/playbooks/:id/star': {
 				PUT: playbooksAPI.toggleStar,

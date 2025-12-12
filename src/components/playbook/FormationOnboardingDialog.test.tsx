@@ -61,8 +61,8 @@ describe('FormationOnboardingDialog', () => {
     fireEvent.click(iFormButton!)
 
     // Both should have selected state (we can verify by class)
-    expect(shotgunButton?.className).toContain('border-blue-500')
-    expect(iFormButton?.className).toContain('border-blue-500')
+    expect(shotgunButton?.className).toContain('border-action-button')
+    expect(iFormButton?.className).toContain('border-action-button')
   })
 
   test('calls onComplete with selected formations', () => {
