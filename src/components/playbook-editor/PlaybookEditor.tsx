@@ -15,6 +15,25 @@ import { ConceptCard } from './ConceptCard'
 import { ConceptsToolbar, type ConceptFilter } from './ConceptsToolbar'
 import { ConceptDialog } from '@/components/concepts/ConceptDialog'
 import type { BaseConcept } from '@/types/concept.types'
+
+type ConceptType = 'concept' | 'formation' | 'group'
+
+type ConceptItem = {
+	id: number
+	name: string
+	type: ConceptType
+	thumbnail: string | null
+	description: string | null
+	isMotion?: boolean
+	isModifier?: boolean
+	updatedAt: string
+}
+
+type ConceptToDelete = {
+	id: number
+	type: ConceptType
+}
+
 import {
   ArrowLeft,
   Search,
@@ -101,7 +120,8 @@ function PlaybookEditorContent({
   const [showConceptDialog, setShowConceptDialog] = useState(false)
   const [editingConcept, setEditingConcept] = useState<BaseConcept | null>(null)
   const [showDeleteConceptModal, setShowDeleteConceptModal] = useState(false)
-  const [conceptToDelete, setConceptToDelete] = useState<{ id: number; type: 'concept' | 'formation' | 'group' } | null>(null)
+  const [conceptToDelete, setConceptToDelete] =
+    useState<ConceptToDelete | null>(null)
 
   const {
     sections,
@@ -139,50 +159,67 @@ function PlaybookEditorContent({
 
   // Concept filtering (must be before early returns to follow Rules of Hooks)
   const filteredConcepts = useMemo(() => {
-    let items: Array<{
-      id: number; name: string; type: 'concept' | 'formation' | 'group';
-      thumbnail: string | null; description: string | null;
-      isMotion?: boolean; isModifier?: boolean; updatedAt: string;
-    }> = []
+    let items: ConceptItem[] = []
 
     // Formations
     if (conceptFilter === 'all' || conceptFilter === 'formations') {
-      items.push(...formations.map(f => ({
-        id: f.id, name: f.name, type: 'formation' as const,
-        thumbnail: f.thumbnail, description: f.description,
-        updatedAt: new Date(f.updated_at).toLocaleDateString(),
-      })))
+      items.push(
+        ...formations.map(f => ({
+          id: f.id,
+          name: f.name,
+          type: 'formation' as const,
+          thumbnail: f.thumbnail,
+          description: f.description,
+          updatedAt: new Date(f.updated_at).toLocaleDateString(),
+        }))
+      )
     }
 
     // Concepts (routes, motions, modifiers)
     if (conceptFilter !== 'formations' && conceptFilter !== 'groups') {
-      const conceptItems = concepts.filter(c => {
-        if (conceptFilter === 'all') return true
-        if (conceptFilter === 'routes') return !c.is_motion && !c.is_modifier
-        if (conceptFilter === 'motions') return c.is_motion
-        if (conceptFilter === 'modifiers') return c.is_modifier
-        return false
-      }).map(c => ({
-        id: c.id, name: c.name, type: 'concept' as const,
-        thumbnail: c.thumbnail, description: c.description,
-        isMotion: c.is_motion, isModifier: c.is_modifier,
-        updatedAt: new Date(c.updated_at).toLocaleDateString(),
-      }))
+      const conceptItems = concepts
+        .filter(c => {
+          if (conceptFilter === 'all') return true
+          if (conceptFilter === 'routes') {
+            return !c.is_motion && !c.is_modifier
+          }
+          if (conceptFilter === 'motions') return c.is_motion
+          if (conceptFilter === 'modifiers') return c.is_modifier
+          return false
+        })
+        .map(c => ({
+          id: c.id,
+          name: c.name,
+          type: 'concept' as const,
+          thumbnail: c.thumbnail,
+          description: c.description,
+          isMotion: c.is_motion,
+          isModifier: c.is_modifier,
+          updatedAt: new Date(c.updated_at).toLocaleDateString(),
+        }))
       items.push(...conceptItems)
     }
 
     // Groups
     if (conceptFilter === 'all' || conceptFilter === 'groups') {
-      items.push(...conceptGroups.map(g => ({
-        id: g.id, name: g.name, type: 'group' as const,
-        thumbnail: g.thumbnail, description: g.description,
-        updatedAt: new Date(g.updated_at).toLocaleDateString(),
-      })))
+      items.push(
+        ...conceptGroups.map(g => ({
+          id: g.id,
+          name: g.name,
+          type: 'group' as const,
+          thumbnail: g.thumbnail,
+          description: g.description,
+          updatedAt: new Date(g.updated_at).toLocaleDateString(),
+        }))
+      )
     }
 
     // Search filter
     if (searchQuery) {
-      items = items.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
+      const query = searchQuery.toLowerCase()
+      items = items.filter(item =>
+        item.name.toLowerCase().includes(query)
+      )
     }
 
     return items
@@ -239,15 +276,18 @@ function PlaybookEditorContent({
     : filteredSections
 
   // Concept handlers
-  const handleEditConcept = (id: number, type: 'concept' | 'formation' | 'group') => {
+  const handleEditConcept = (id: number, type: ConceptType) => {
     if (type === 'concept') {
       const concept = concepts.find(c => c.id === id)
-      if (concept) { setEditingConcept(concept); setShowConceptDialog(true) }
+      if (concept) {
+        setEditingConcept(concept)
+        setShowConceptDialog(true)
+      }
     }
     // TODO: Formation/group editing in future
   }
 
-  const handleDeleteConcept = (id: number, type: 'concept' | 'formation' | 'group') => {
+  const handleDeleteConcept = (id: number, type: ConceptType) => {
     setConceptToDelete({ id, type })
     setShowDeleteConceptModal(true)
   }
@@ -262,13 +302,16 @@ function PlaybookEditorContent({
     setConceptToDelete(null)
   }
 
-  const handleDuplicateConcept = async (id: number, type: 'concept' | 'formation' | 'group') => {
+  const handleDuplicateConcept = async (id: number, type: ConceptType) => {
     // TODO: Implement duplication
   }
 
   const handleSaveConcept = async (data: Partial<BaseConcept>) => {
-    if (editingConcept) await updateConcept(editingConcept.id, data)
-    else await createConcept(data as any)
+    if (editingConcept) {
+      await updateConcept(editingConcept.id, data)
+    } else {
+      await createConcept(data)
+    }
     setShowConceptDialog(false)
     setEditingConcept(null)
   }
@@ -641,7 +684,10 @@ function PlaybookEditorContent({
         ) : (
           <>
             <ConceptsToolbar
-              onNewConcept={() => { setEditingConcept(null); setShowConceptDialog(true) }}
+              onNewConcept={() => {
+                setEditingConcept(null)
+                setShowConceptDialog(true)
+              }}
               activeFilter={conceptFilter}
               onFilterChange={setConceptFilter}
             />
@@ -655,8 +701,13 @@ function PlaybookEditorContent({
                 <div className="flex flex-col items-center justify-center h-64 gap-4">
                   <p className="text-muted-foreground">No concepts found</p>
                   <button
-                    onClick={() => { setEditingConcept(null); setShowConceptDialog(true) }}
-                    className="px-4 py-2 bg-action-button text-action-button-foreground rounded-lg hover:bg-action-button/90"
+                    onClick={() => {
+                      setEditingConcept(null)
+                      setShowConceptDialog(true)
+                    }}
+                    className="px-4 py-2 bg-action-button
+                      text-action-button-foreground rounded-lg
+                      hover:bg-action-button/90"
                   >
                     Create your first concept
                   </button>
