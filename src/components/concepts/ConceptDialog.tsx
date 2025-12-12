@@ -62,6 +62,8 @@ export function ConceptDialog({
 	const [brushSize, setBrushSize] = useState(3)
 	const [pathMode, setPathMode] = useState<'sharp' | 'curve'>('sharp')
 	const [flipCanvas, setFlipCanvas] = useState<(() => void) | null>(null)
+	const [isMotion, setIsMotion] = useState(false)
+	const [isModifier, setIsModifier] = useState(false)
 	const canvasContainerRef = useRef<HTMLDivElement>(null)
 
 	useEffect(() => {
@@ -72,6 +74,8 @@ export function ConceptDialog({
 			setTargetingMode(concept.targeting_mode)
 			setBallPosition(concept.ball_position)
 			setPlayDirection(concept.play_direction)
+			setIsMotion(concept.is_motion)
+			setIsModifier(concept.is_modifier)
 			setNameError('')
 			setTouched(false)
 		} else if (isOpen && mode === 'create') {
@@ -81,6 +85,8 @@ export function ConceptDialog({
 			setTargetingMode('absolute_role')
 			setBallPosition('center')
 			setPlayDirection('na')
+			setIsMotion(false)
+			setIsModifier(false)
 			setNameError('')
 			setTouched(false)
 		}
@@ -137,6 +143,8 @@ export function ConceptDialog({
 				targeting_mode: targetingMode,
 				ball_position: ballPosition,
 				play_direction: playDirection,
+				is_motion: isMotion,
+				is_modifier: isModifier,
 				playbook_id: scope === 'playbook' && playbookId ? parseInt(playbookId) : null
 			}
 
@@ -351,6 +359,34 @@ export function ConceptDialog({
 							<FlipHorizontal className="w-4 h-4" />
 							Flip
 						</button>
+
+						{/* Concept Type Flags */}
+						<div className="flex items-center gap-3 ml-4 pl-4 border-l border-gray-300 dark:border-gray-600">
+							<label className="flex items-center gap-2 cursor-pointer">
+								<input
+									type="checkbox"
+									checked={isMotion}
+									onChange={(e) => {
+										setIsMotion(e.target.checked)
+										if (e.target.checked) setIsModifier(false)
+									}}
+									className="cursor-pointer"
+								/>
+								<span className="text-sm font-medium">Motion</span>
+							</label>
+							<label className="flex items-center gap-2 cursor-pointer">
+								<input
+									type="checkbox"
+									checked={isModifier}
+									onChange={(e) => {
+										setIsModifier(e.target.checked)
+										if (e.target.checked) setIsMotion(false)
+									}}
+									className="cursor-pointer"
+								/>
+								<span className="text-sm font-medium">Modifier</span>
+							</label>
+						</div>
 					</div>
 
 					{/* Action Buttons */}
