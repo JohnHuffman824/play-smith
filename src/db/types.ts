@@ -230,3 +230,21 @@ export interface PlaybookTag {
 	tag_id: number
 	created_at: Date
 }
+
+export interface Presentation {
+	id: number
+	playbook_id: number
+	name: string
+	description: string | null
+	created_by: number
+	created_at: Date
+	updated_at: Date
+}
+
+export interface PresentationSlide {
+	id: number
+	presentation_id: number
+	play_id: number
+	display_order: number
+	created_at: Date
+}
