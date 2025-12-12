@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import "./clickable-button.css"
 
 export interface ClickableButtonProps
 	extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -11,8 +12,7 @@ const ClickableButton = React.forwardRef<HTMLButtonElement, ClickableButtonProps
 		return (
 			<button
 				className={cn(
-					"cursor-pointer",
-					disabled && "cursor-not-allowed",
+					"clickable-button",
 					className
 				)}
 				ref={ref}

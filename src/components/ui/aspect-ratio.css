@@ -1,0 +1,5 @@
+/* || Base styles */
+.aspect-ratio {
+  /* Aspect ratio component uses Radix primitive which handles all styling internally */
+  /* This file exists for consistency with component structure */
+}

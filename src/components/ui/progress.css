@@ -1,0 +1,20 @@
+/* || Progress Component */
+
+/* Base progress bar */
+.progress {
+  position: relative;
+  height: 0.5rem;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: color-mix(in oklch, var(--primary) 20%, transparent);
+}
+
+/* Progress indicator (filled portion) */
+.progress-indicator {
+  height: 100%;
+  width: 100%;
+  flex: 1 1 0%;
+  background: var(--primary);
+  transition: all 200ms;
+}
