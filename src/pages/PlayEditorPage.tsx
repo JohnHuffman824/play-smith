@@ -88,6 +88,7 @@ function PlayEditorContent() {
 	const [showTagDialog, setShowTagDialog] = useState(false)
 	const [isPlayLoaded, setIsPlayLoaded] = useState(false)
 	const [playbookPlays, setPlaybookPlays] = useState<Play[]>([])
+	const [isAddingPlay, setIsAddingPlay] = useState(false)
 	const [showRenameModal, setShowRenameModal] = useState(false)
 	const [showDeleteModal, setShowDeleteModal] = useState(false)
 	const [targetPlayId, setTargetPlayId] = useState<string | null>(null)
@@ -333,7 +334,9 @@ function PlayEditorContent() {
 	}
 
 	async function handleAddPlay() {
-		if (!playbookId) return
+		if (!playbookId || isAddingPlay) return
+
+		setIsAddingPlay(true)
 
 		try {
 			// Save current play first
@@ -357,6 +360,7 @@ function PlayEditorContent() {
 			if (!response.ok) {
 				const errorData = await response.json()
 				console.error('Failed to create play:', errorData)
+				setIsAddingPlay(false)
 				return
 			}
 
@@ -365,12 +369,15 @@ function PlayEditorContent() {
 
 			if (!newPlayId) {
 				console.error('No play ID in response')
+				setIsAddingPlay(false)
 				return
 			}
 
+			// Note: isAddingPlay will reset on unmount/navigation
 			navigate(`/playbooks/${playbookId}/play/${newPlayId}`)
 		} catch (error) {
 			console.error('Failed to create play:', error)
+			setIsAddingPlay(false)
 		}
 	}
 
@@ -606,6 +613,7 @@ function PlayEditorContent() {
 					showPlayBar={playState.showPlayBar}
 					onOpenPlay={(id) => navigate(`/playbooks/${playbookId}/play/${id}`)}
 					onAddPlay={handleAddPlay}
+					isAddingPlay={isAddingPlay}
 				onRenamePlay={handleRenamePlay}
 				onDeletePlay={handleDeletePlayFromBar}
 				onDuplicatePlay={handleDuplicatePlay}

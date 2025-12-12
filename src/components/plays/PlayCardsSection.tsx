@@ -12,6 +12,7 @@ interface PlayCardsSectionProps {
 	showPlayBar: boolean
 	onOpenPlay: (id: string) => void
 	onAddPlay: () => void
+	isAddingPlay?: boolean
 	onRenamePlay?: (id: string) => void
 	onDeletePlay?: (id: string) => void
 	onDuplicatePlay?: (id: string) => void
@@ -25,6 +26,7 @@ export function PlayCardsSection({
 	showPlayBar,
 	onOpenPlay,
 	onAddPlay,
+	isAddingPlay,
 	onRenamePlay,
 	onDeletePlay,
 	onDuplicatePlay
@@ -60,21 +62,19 @@ export function PlayCardsSection({
 		>
 			{/* Render content when visible OR during hide animation (delayed unmount) */}
 			{shouldRenderContent && (
-				<div className="h-[340px] px-4 pt-4 flex items-start">
+				<div className="h-[340px] px-4 pt-4 pb-4 flex items-start">
 					<div
 						ref={scrollContainerRef}
-						className="flex gap-4 overflow-x-auto overflow-y-hidden"
+						className="flex gap-4 overflow-x-auto overflow-y-visible py-2"
 						style={{ scrollbarGutter: 'stable' }}
 					>
 						{plays
 							.filter((play) => play.id !== currentPlayId)
 							.map((play) => (
-								<div key={play.id} className="flex-shrink-0">
+								<div key={play.id} className="flex-shrink-0 px-1">
 									<PlayCard
 										{...play}
-										selected={false}
-										onSelect={NOOP}
-										onOpen={onOpenPlay}
+												onOpen={onOpenPlay}
 										onRename={onRenamePlay ?? NOOP}
 										onDelete={onDeletePlay ?? NOOP}
 										onDuplicate={onDuplicatePlay ?? NOOP}
@@ -84,35 +84,53 @@ export function PlayCardsSection({
 						{/* Add Play button */}
 						<button
 							onClick={onAddPlay}
+							disabled={isAddingPlay}
 							className={`flex-shrink-0 w-64 h-[283px]
 								rounded-xl border-2 border-dashed
 								transition-all flex flex-col
 								items-center justify-center gap-2
-								cursor-pointer
+								${isAddingPlay
+									? 'cursor-wait opacity-50'
+									: 'cursor-pointer'
+								}
 								${theme === 'dark'
 									? `bg-gray-800/50 border-gray-600
-										hover:border-blue-400
-										hover:bg-gray-700
-										text-gray-400
-										hover:text-blue-400`
+										${!isAddingPlay && 'hover:border-blue-400 hover:bg-gray-700 hover:text-blue-400'}
+										text-gray-400`
 									: `bg-gray-50 border-gray-300
-										hover:border-blue-400
-										hover:bg-blue-50
-										text-gray-400
-										hover:text-blue-500`
+										${!isAddingPlay && 'hover:border-blue-400 hover:bg-blue-50 hover:text-blue-500'}
+										text-gray-400`
 								}`}
 						>
-							<div
-								className={`w-12 h-12 rounded-xl
-									flex items-center justify-center
-									${theme === 'dark'
-										? 'bg-gray-700'
-										: 'bg-gray-100'
-									}`}
-							>
-								<Plus size={24} />
-							</div>
-							<span className="text-sm font-medium">Add Play</span>
+							{isAddingPlay ? (
+								<>
+									<div
+										className={`w-12 h-12 rounded-xl
+											flex items-center justify-center
+											${theme === 'dark'
+												? 'bg-gray-700'
+												: 'bg-gray-100'
+											}`}
+									>
+										<div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-500" />
+									</div>
+									<span className="text-sm font-medium">Creating...</span>
+								</>
+							) : (
+								<>
+									<div
+										className={`w-12 h-12 rounded-xl
+											flex items-center justify-center
+											${theme === 'dark'
+												? 'bg-gray-700'
+												: 'bg-gray-100'
+											}`}
+									>
+										<Plus size={24} />
+									</div>
+									<span className="text-sm font-medium">Add Play</span>
+								</>
+							)}
 						</button>
 						{plays.length === 0 && (
 							<div
