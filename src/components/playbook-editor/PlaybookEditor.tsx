@@ -4,12 +4,17 @@ import { PlayCard } from './PlayCard'
 import { PlayListView } from './PlayListView'
 import { Modal } from '@/components/shared/Modal'
 import { Input } from '../ui/input'
-import { SettingsDialog } from '@/components/shared/SettingsDialog'
+import { UnifiedSettingsDialog } from '@/components/shared/UnifiedSettingsDialog'
 import { ShareDialog } from '@/components/shared/ShareDialog'
 import { AnimationDialog } from '@/components/animation/AnimationDialog'
 import { CallSheetExportDialog } from '@/components/export/CallSheetExportDialog'
-import { ThemeProvider, useTheme } from '@/contexts/ThemeContext'
+import { useTheme } from '@/contexts/SettingsContext'
 import { usePlaybookData } from '@/hooks/usePlaybookData'
+import { useConceptData } from '@/hooks/useConceptData'
+import { ConceptCard } from './ConceptCard'
+import { ConceptsToolbar, type ConceptFilter } from './ConceptsToolbar'
+import { ConceptDialog } from '@/components/concepts/ConceptDialog'
+import type { BaseConcept } from '@/types/concept.types'
 import {
   ArrowLeft,
   Search,
@@ -90,6 +95,14 @@ function PlaybookEditorContent({
   const [viewingPlayId, setViewingPlayId] = useState<string | null>(null)
   const [showExportDialog, setShowExportDialog] = useState(false)
 
+  // Concepts tab state
+  const [activeTab, setActiveTab] = useState<'plays' | 'concepts'>('plays')
+  const [conceptFilter, setConceptFilter] = useState<ConceptFilter>('all')
+  const [showConceptDialog, setShowConceptDialog] = useState(false)
+  const [editingConcept, setEditingConcept] = useState<BaseConcept | null>(null)
+  const [showDeleteConceptModal, setShowDeleteConceptModal] = useState(false)
+  const [conceptToDelete, setConceptToDelete] = useState<{ id: number; type: 'concept' | 'formation' | 'group' } | null>(null)
+
   const {
     sections,
     isLoading: isLoadingData,
@@ -102,6 +115,19 @@ function PlaybookEditorContent({
     updateSection,
     deleteSection
   } = usePlaybookData(playbookId)
+
+  // Fetch concept data
+  const {
+    concepts,
+    formations,
+    conceptGroups,
+    isLoading: conceptsLoading,
+    createConcept,
+    updateConcept,
+    deleteConcept,
+    deleteFormation,
+    deleteConceptGroup,
+  } = useConceptData(teamId ?? '', playbookId)
 
   useEffect(() => {
     if (theme == DARK_MODE_CLASS) {
@@ -421,6 +447,25 @@ function PlaybookEditorContent({
           </div>
         </div>
 
+        {/* Tab Bar */}
+        <div className="border-b border-border bg-card px-6">
+          <div className="flex gap-1">
+            {(['plays', 'concepts'] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors capitalize ${
+                  activeTab === tab
+                    ? 'border-primary text-foreground'
+                    : 'border-transparent text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <PlaybookEditorToolbar
           onNewPlay={() => setShowNewPlayModal(true)}
           onNewSection={() => setShowNewSectionModal(true)}
@@ -583,15 +628,10 @@ function PlaybookEditorContent({
         </div>
       </Modal>
 
-      <SettingsDialog
+      <UnifiedSettingsDialog
         isOpen={showSettingsDialog}
         onClose={() => setShowSettingsDialog(false)}
-        theme={theme}
-        onThemeChange={setTheme}
-        positionNaming={positionNaming}
-        onPositionNamingChange={setPositionNaming}
-        fieldLevel={fieldLevel}
-        onFieldLevelChange={setFieldLevel}
+        context="playbook-editor"
       />
 
       <ShareDialog
@@ -685,9 +725,5 @@ function PlaybookEditorContent({
 }
 
 export default function PlaybookEditor(props: PlaybookEditorProps) {
-  return (
-    <ThemeProvider>
-      <PlaybookEditorContent {...props} />
-    </ThemeProvider>
-  )
+  return <PlaybookEditorContent {...props} />
 }
