@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Toolbar } from '../components/toolbar/Toolbar'
 import { Canvas } from '../components/canvas/Canvas'
@@ -8,9 +8,12 @@ import { ConceptDialog } from '../components/concepts/ConceptDialog'
 import { SelectionOverlay } from '../components/canvas/SelectionOverlay'
 import { SelectedTagsOverlay } from '../components/tags/SelectedTagsOverlay'
 import { TagDialog } from '../components/tags/TagDialog'
+import { CanvasTransitionOverlay } from '../components/canvas/CanvasTransitionOverlay'
 import { useTheme } from '../contexts/ThemeContext'
 import { PlayProvider, usePlayContext } from '../contexts/PlayContext'
 import { ConceptProvider, useConcept } from '../contexts/ConceptContext'
+import { PlayTransitionProvider, usePlayTransition } from '../contexts/PlayTransitionContext'
+import { captureCanvasSnapshot, type CanvasSnapshot } from '../hooks/useCanvasSnapshot'
 import { useConceptData } from '../hooks/useConceptData'
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
 import { useTagsData, type Tag } from '../hooks/useTagsData'
@@ -52,6 +55,22 @@ function PlayEditorContent() {
 	}>()
 	const [teamId, setTeamId] = useState<string | null>(null)
 	const navigate = useNavigate()
+	const canvasRef = useRef<HTMLDivElement>(null)
+	const { getCardPosition } = usePlayTransition()
+
+	const [transitionState, setTransitionState] = useState<{
+		isAnimating: boolean
+		snapshot: CanvasSnapshot | null
+		sourceRect: DOMRect | null
+		targetRect: DOMRect | null
+		targetPlayId: string | null
+	}>({
+		isAnimating: false,
+		snapshot: null,
+		sourceRect: null,
+		targetRect: null,
+		targetPlayId: null,
+	})
 
 	const {
 		state: playState,
@@ -502,6 +521,40 @@ function PlayEditorContent() {
 		}
 	}
 
+	function handleOpenPlayWithAnimation(targetPlayId: string) {
+		const snapshot = captureCanvasSnapshot(canvasRef.current)
+		const sourceRect = canvasRef.current?.getBoundingClientRect() ?? null
+		const targetRect = getCardPosition(targetPlayId)
+
+		if (!snapshot || !sourceRect || !targetRect) {
+			// Fallback: navigate immediately
+			navigate(`/playbooks/${playbookId}/play/${targetPlayId}`)
+			return
+		}
+
+		setTransitionState({
+			isAnimating: true,
+			snapshot,
+			sourceRect,
+			targetRect,
+			targetPlayId,
+		})
+	}
+
+	function handleTransitionComplete() {
+		const { targetPlayId } = transitionState
+		setTransitionState({
+			isAnimating: false,
+			snapshot: null,
+			sourceRect: null,
+			targetRect: null,
+			targetPlayId: null,
+		})
+		if (targetPlayId) {
+			navigate(`/playbooks/${playbookId}/play/${targetPlayId}`)
+		}
+	}
+
 	async function handleDeletePlay() {
 		if (!playId) return
 
@@ -578,6 +631,13 @@ function PlayEditorContent() {
 
 	return (
 		<main className={`flex h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+			<CanvasTransitionOverlay
+				snapshot={transitionState.snapshot}
+				sourceRect={transitionState.sourceRect}
+				targetRect={transitionState.targetRect}
+				isAnimating={transitionState.isAnimating}
+				onAnimationComplete={handleTransitionComplete}
+			/>
 			<Toolbar
 				drawingState={playState.drawingState}
 				setDrawingState={setDrawingState}
@@ -594,7 +654,7 @@ function PlayEditorContent() {
 					playbookId={playbookId}
 					onBackToPlaybook={handleBackToPlaybook}
 				/>
-				<div className="relative flex-1">
+				<div ref={canvasRef} className="relative flex-1">
 					<Canvas
 						drawingState={playState.drawingState}
 						hashAlignment={playState.hashAlignment}
@@ -611,7 +671,7 @@ function PlayEditorContent() {
 					plays={playbookPlays}
 					currentPlayId={playId}
 					showPlayBar={playState.showPlayBar}
-					onOpenPlay={(id) => navigate(`/playbooks/${playbookId}/play/${id}`)}
+					onOpenPlay={handleOpenPlayWithAnimation}
 					onAddPlay={handleAddPlay}
 					isAddingPlay={isAddingPlay}
 				onRenamePlay={handleRenamePlay}
@@ -753,10 +813,12 @@ function PlayEditorContent() {
 
 export function PlayEditorPage() {
 	return (
-		<ConceptProvider>
-			<PlayProvider>
-				<PlayEditorContent />
-			</PlayProvider>
-		</ConceptProvider>
+		<PlayTransitionProvider>
+			<ConceptProvider>
+				<PlayProvider>
+					<PlayEditorContent />
+				</PlayProvider>
+			</ConceptProvider>
+		</PlayTransitionProvider>
 	)
 }
