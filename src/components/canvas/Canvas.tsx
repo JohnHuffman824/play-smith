@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 import type { DrawingState } from '../../types/play.types'
 import type { HashAlignment } from '../../types/field.types'
 import { useFieldCoordinates } from '../../hooks/useFieldCoordinates'
@@ -27,7 +28,7 @@ import { FootballField } from '../field/FootballField'
 import { Player } from '../player/Player'
 import { PlayerLabelDialog } from '../player/PlayerLabelDialog'
 import { Pencil, PaintBucket } from 'lucide-react'
-import { calculateUnlinkPosition } from '../../utils/drawing.utils'
+import { calculateUnlinkPosition, findDrawingSnapTarget } from '../../utils/drawing.utils'
 import { applyLOSSnap } from '../../utils/los-snap.utils'
 
 const HEADER_TOOLBAR_HEIGHT = 122
@@ -39,6 +40,7 @@ interface CanvasProps {
 	drawingState: DrawingState
 	hashAlignment: HashAlignment
 	showPlayBar: boolean
+	playId?: string
 	containerMode?: 'viewport' | 'fill'
 	showFieldMarkings?: boolean
 }
@@ -91,6 +93,7 @@ export function Canvas({
   drawingState,
   hashAlignment,
   showPlayBar,
+  playId,
   containerMode = 'viewport',
   showFieldMarkings = false,
 }: CanvasProps) {
@@ -317,6 +320,21 @@ export function Canvas({
 		}
 
 		setPlayers([...players, newPlayer])
+
+		// Auto-link to nearby drawing control point if one exists
+		const drawingTarget = findDrawingSnapTarget(
+			snappedCoords,
+			drawings,
+			PLAYER_RADIUS_FEET,
+		)
+		if (drawingTarget) {
+			handleLinkDrawingToPlayer(
+				drawingTarget.drawingId,
+				drawingTarget.pointId,
+				newPlayer.id,
+			)
+		}
+
 		setSelectedPlayerId(newPlayer.id)
 		setLabelDialogPosition({ x: e.clientX, y: e.clientY })
 		setShowLabelDialog(true)
@@ -573,6 +591,12 @@ export function Canvas({
 	return (
 		<div className={containerClasses}>
 			{/* Whiteboard frame with field background */}
+			<motion.div
+				key={playId}
+				initial={{ opacity: 0, scale: 0.98 }}
+				animate={{ opacity: 1, scale: 1 }}
+				transition={{ duration: 0.4, delay: 0.2 }}
+			>
 			<div
 				ref={whiteboardRef}
 				className={whiteboardClasses}
@@ -773,6 +797,7 @@ export function Canvas({
           onClose={() => setShowLabelDialog(false)}
         />
       )}
+			</motion.div>
     </div>
   );
 }

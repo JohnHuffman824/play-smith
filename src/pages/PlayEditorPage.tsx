@@ -659,6 +659,7 @@ function PlayEditorContent() {
 						drawingState={playState.drawingState}
 						hashAlignment={playState.hashAlignment}
 						showPlayBar={playState.showPlayBar}
+						playId={playId}
 						onSelectionChange={setSelectedObjectIds}
 					/>
 					{/* Selected Tags Overlay */}
