@@ -175,11 +175,11 @@ describe('Toolbar - Responsive Layout', () => {
 		expect(toolbar.style.gridTemplateRows).toContain('56px')
 	})
 
-	test('should have 15 buttons total', () => {
+	test('should have 16 buttons total', () => {
 		const { container } = renderToolbar()
 		const buttons = container.querySelectorAll('button')
 
-		expect(buttons.length).toBe(15)
+		expect(buttons.length).toBe(16)
 	})
 
 	test('should disable Delete Play button when playId is not provided', () => {
