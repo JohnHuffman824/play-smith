@@ -55,6 +55,45 @@ border: 1px solid red;  /* width style color */
 border: solid red 1px;
 ```
 
+### Background Properties: Shorthand vs Longhand
+
+**Critical:** LightningCSS (our bundler) may strip `background` shorthand if mixed with `background-color` longhand.
+
+```css
+/* ❌ WRONG - Bundler strips base background during minification */
+.button {
+  background: var(--muted);  /* Shorthand */
+}
+.button:hover {
+  background-color: var(--accent);  /* Longhand - causes conflict! */
+}
+
+/* ✅ CORRECT - Use background-color consistently */
+.button {
+  background-color: var(--muted);  /* Longhand */
+}
+.button:hover {
+  background-color: var(--accent);  /* Longhand */
+}
+
+/* ✅ ALSO CORRECT - Use background shorthand consistently */
+.button {
+  background: var(--muted);  /* Shorthand */
+}
+.button:hover {
+  background: var(--accent);  /* Shorthand */
+}
+```
+
+**Why this happens:**
+- `background` is shorthand that resets ALL background properties (color, image, position, etc.)
+- `background-color` only sets the color
+- Mixing them creates a specificity conflict
+- LightningCSS optimizes by removing the "redundant" base property
+- Result: Base class has NO background in production build
+
+**Preferred solution:** Use `background-color` for color-only changes, `background` shorthand only when setting multiple properties.
+
 ### Units
 ```css
 /* ✅ Relative units for flexibility */

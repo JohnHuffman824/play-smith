@@ -8,7 +8,7 @@
 }
 
 .play-cards-section__content {
-	height: 340px;
+	height: 320px;
 	padding: 16px 16px 0;
 	display: flex;
 	align-items: flex-start;
@@ -31,8 +31,8 @@
 /* || Add Play Button */
 .play-cards-section__add-button {
 	flex-shrink: 0;
-	width: 256px;
-	height: 283px;
+	width: 320px;
+	height: 260px;
 	border-radius: 12px;
 	border: 2px dashed var(--border);
 	background: var(--muted);

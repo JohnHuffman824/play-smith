@@ -16,7 +16,7 @@
 .toolbar-custom-button {
   width: 56px;
   height: 56px;
-  border-radius: 12px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -24,6 +24,8 @@
   outline: none;
   transition: all 200ms;
   border: 1px solid var(--border);
+  background: var(--muted);
+  color: var(--icon-muted);
 }
 
 .toolbar-custom-button:hover {
@@ -42,50 +44,22 @@
   border-color: transparent;
 }
 
-/* || Save button variants */
+/* || Save button */
 .toolbar-save-button {
-  composes: toolbar-custom-button;
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  outline: none;
+  transition: all 200ms;
+  border: 1px solid transparent;
 }
 
-.toolbar-save-button[data-theme="dark"] {
-  background: rgb(20 83 45);
-  color: rgb(74 222 128);
-}
-
-.toolbar-save-button[data-theme="dark"]:hover {
-  background: rgb(22 101 52);
-}
-
-.toolbar-save-button[data-theme="light"] {
-  background: rgb(240 253 244);
-  color: rgb(22 163 74);
-}
-
-.toolbar-save-button[data-theme="light"]:hover {
-  background: rgb(220 252 231);
-}
-
-.toolbar-save-button[data-success="true"][data-theme="light"] {
-  background: rgb(240 253 244);
-  color: rgb(22 163 74);
-}
-
-.toolbar-save-button[data-success="true"][data-theme="light"]:hover {
-  background: rgb(220 252 231);
-}
-
-.toolbar-save-button[data-error="true"][data-theme="light"] {
-  background: rgb(254 242 242);
-  color: rgb(220 38 38);
-}
-
-.toolbar-save-button[data-error="true"][data-theme="light"]:hover {
-  background: rgb(254 226 226);
-}
-
-.toolbar-save-button[data-success="true"],
-.toolbar-save-button[data-error="true"] {
-  transform: scale(1.2);
+.toolbar-save-button:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
 }
 
 .toolbar-save-button:disabled {
@@ -93,32 +67,83 @@
   cursor: not-allowed;
 }
 
-/* || Delete button variants */
-.toolbar-delete-button {
-  composes: toolbar-custom-button;
+/* Dark theme */
+.toolbar-save-button[data-theme="dark"] {
+  background: rgb(21 128 61);
+  color: rgb(134 239 172);
 }
 
-.toolbar-delete-button[data-theme="dark"] {
-  background: rgb(127 29 29);
-  color: rgb(248 113 113);
+.toolbar-save-button[data-theme="dark"]:hover:not(:disabled) {
+  background: rgb(22 163 74);
 }
 
-.toolbar-delete-button[data-theme="dark"]:hover {
-  background: rgb(153 27 27);
+/* Light theme */
+.toolbar-save-button[data-theme="light"] {
+  background: rgb(220 252 231);
+  color: rgb(22 101 52);
 }
 
-.toolbar-delete-button[data-theme="light"] {
-  background: rgb(254 242 242);
-  color: rgb(239 68 68);
+.toolbar-save-button[data-theme="light"]:hover:not(:disabled) {
+  background: rgb(187 247 208);
 }
 
-.toolbar-delete-button[data-theme="light"]:hover {
+/* Success/Error states */
+.toolbar-save-button[data-success="true"],
+.toolbar-save-button[data-error="true"] {
+  transform: scale(1.1);
+}
+
+.toolbar-save-button[data-error="true"][data-theme="light"] {
   background: rgb(254 226 226);
+  color: rgb(220 38 38);
+}
+
+.toolbar-save-button[data-error="true"][data-theme="dark"] {
+  background: rgb(153 27 27);
+  color: rgb(252 165 165);
+}
+
+/* || Delete button */
+.toolbar-delete-button {
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  outline: none;
+  transition: all 200ms;
+  border: 1px solid transparent;
+}
+
+.toolbar-delete-button:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
 }
 
 .toolbar-delete-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Dark theme */
+.toolbar-delete-button[data-theme="dark"] {
+  background: rgb(153 27 27);
+  color: rgb(252 165 165);
+}
+
+.toolbar-delete-button[data-theme="dark"]:hover:not(:disabled) {
+  background: rgb(185 28 28);
+}
+
+/* Light theme */
+.toolbar-delete-button[data-theme="light"] {
+  background: rgb(254 226 226);
+  color: rgb(153 27 27);
+}
+
+.toolbar-delete-button[data-theme="light"]:hover:not(:disabled) {
+  background: rgb(254 202 202);
 }
 
 /* || Status dot */

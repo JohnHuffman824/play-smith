@@ -21,6 +21,7 @@ import { createDefaultLinemen } from '../utils/lineman.utils'
 import { Modal } from '../components/shared/Modal'
 import { Input } from '../components/ui/input'
 import { ConfirmDialog } from '../components/toolbar/dialogs/ConfirmDialog'
+import './play-editor-page.css'
 import {
 	CHIP_TYPE_FORMATION,
 	CHIP_TYPE_CONCEPT,
@@ -600,7 +601,7 @@ function PlayEditorContent() {
 	}
 
 	return (
-		<main className="flex h-screen bg-background">
+		<main className="play-editor-page">
 			<Toolbar
 				drawingState={playState.drawingState}
 				setDrawingState={setDrawingState}
@@ -611,13 +612,13 @@ function PlayEditorContent() {
 				playId={playId}
 				onDeletePlay={handleDeletePlay}
 			/>
-			<div className='flex-1 flex flex-col relative'>
+			<div className="play-editor-content">
 				<PlayHeader
 					teamId={teamId}
 					playbookId={playbookId}
 					onBackToPlaybook={handleBackToPlaybook}
 				/>
-				<div className="relative flex-1">
+				<div className="play-editor-canvas-area">
 					<CanvasViewportProvider>
 						<Canvas
 							drawingState={playState.drawingState}

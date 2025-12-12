@@ -20,7 +20,7 @@
 	width: 100%;
 	border-radius: 16px;
 	position: relative;
-	box-shadow: 0 0 0 2px rgb(209 213 219);
+	box-shadow: 0 0 0 2px var(--border);
 }
 
 .canvas-transform-container {

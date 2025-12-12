@@ -1,6 +1,7 @@
 /* || Base styles */
 .play-card {
   position: relative;
+  width: 300px;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 12px;
@@ -113,15 +114,15 @@
 
 /* || Content */
 .play-card-content {
-  padding: 16px;
+  padding: 12px;
 }
 
 .play-card-header {
   display: flex;
   align-items: start;
   justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: 0px;
+  margin-bottom: 4px;
 }
 
 .play-card-title {
@@ -138,6 +139,10 @@
   transition: all 200ms;
   opacity: 0;
   cursor: pointer;
+  color: var(--foreground);
+  background: transparent;
+  border: none;
+  outline: none;
 }
 
 .play-card:hover .play-card-menu-button {
@@ -146,6 +151,11 @@
 
 .play-card-menu-button:hover {
   background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.play-card-menu-button:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
 }
 
 /* || Meta */
