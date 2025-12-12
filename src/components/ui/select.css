@@ -1,0 +1,226 @@
+/* || Select Component */
+
+/* || Trigger */
+.select-trigger {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  white-space: nowrap;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--input-background);
+  padding: 8px 12px;
+  font-size: 0.875rem;
+  transition: color 200ms, box-shadow 200ms;
+  outline: none;
+  cursor: pointer;
+}
+
+.select-trigger:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.select-trigger:focus-visible {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.select-trigger[aria-invalid="true"] {
+  border-color: var(--destructive);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--destructive) 20%, transparent);
+}
+
+.dark .select-trigger[aria-invalid="true"] {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--destructive) 40%, transparent);
+}
+
+.select-trigger[data-placeholder] {
+  color: var(--muted-foreground);
+}
+
+.select-trigger svg:not([class*='text-']) {
+  color: var(--muted-foreground);
+}
+
+.select-trigger [data-slot="select-value"] {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+
+.select-trigger svg {
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.select-trigger svg:not([class*='size-']) {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* || Sizes */
+.select-trigger[data-size="default"] {
+  height: 2.25rem;
+}
+
+.select-trigger[data-size="sm"] {
+  height: 2rem;
+}
+
+/* || Content (Dropdown) */
+.select-content {
+  position: relative;
+  z-index: 50;
+  max-height: var(--radix-select-content-available-height);
+  min-width: 8rem;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--popover);
+  color: var(--popover-foreground);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 10%), 0 2px 4px -2px rgb(0 0 0 / 10%);
+  transform-origin: var(--radix-select-content-transform-origin);
+}
+
+.select-content[data-state="open"] {
+  animation: zoom-in 200ms ease-out, fade-in 200ms ease-out;
+}
+
+.select-content[data-state="closed"] {
+  animation: zoom-out 200ms ease-out, fade-out 200ms ease-out;
+}
+
+.select-content[data-side="bottom"] {
+  animation: slide-in-from-top 200ms ease-out, zoom-in 200ms ease-out, fade-in 200ms ease-out;
+}
+
+.select-content[data-side="left"] {
+  animation: slide-in-from-right 200ms ease-out, zoom-in 200ms ease-out, fade-in 200ms ease-out;
+}
+
+.select-content[data-side="right"] {
+  animation: slide-in-from-left 200ms ease-out, zoom-in 200ms ease-out, fade-in 200ms ease-out;
+}
+
+.select-content[data-side="top"] {
+  animation: slide-in-from-bottom 200ms ease-out, zoom-in 200ms ease-out, fade-in 200ms ease-out;
+}
+
+/* Position adjustments when using popper */
+.select-content[data-position="popper"][data-side="bottom"] {
+  transform: translateY(0.25rem);
+}
+
+.select-content[data-position="popper"][data-side="left"] {
+  transform: translateX(-0.25rem);
+}
+
+.select-content[data-position="popper"][data-side="right"] {
+  transform: translateX(0.25rem);
+}
+
+.select-content[data-position="popper"][data-side="top"] {
+  transform: translateY(-0.25rem);
+}
+
+/* || Viewport */
+.select-viewport {
+  padding: 4px;
+}
+
+.select-viewport[data-position="popper"] {
+  height: var(--radix-select-trigger-height);
+  width: 100%;
+  min-width: var(--radix-select-trigger-width);
+  scroll-margin: 4px;
+}
+
+/* || Item */
+.select-item {
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 8px;
+  border-radius: 4px;
+  padding: 6px 8px 6px 8px;
+  padding-right: 2rem;
+  font-size: 0.875rem;
+  outline: none;
+  user-select: none;
+  cursor: pointer;
+}
+
+.select-item:focus {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.select-item[data-disabled] {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.select-item svg:not([class*='text-']) {
+  color: var(--muted-foreground);
+}
+
+.select-item svg {
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.select-item svg:not([class*='size-']) {
+  width: 1rem;
+  height: 1rem;
+}
+
+.select-item > span:last-child {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.select-item-indicator {
+  position: absolute;
+  right: 8px;
+  display: flex;
+  width: 0.875rem;
+  height: 0.875rem;
+  align-items: center;
+  justify-content: center;
+}
+
+/* || Label */
+.select-label {
+  padding: 6px 8px;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+/* || Separator */
+.select-separator {
+  margin: 4px -4px;
+  height: 1px;
+  background: var(--border);
+  pointer-events: none;
+}
+
+/* || Scroll Buttons */
+.select-scroll-up-button,
+.select-scroll-down-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 0;
+  cursor: default;
+}
