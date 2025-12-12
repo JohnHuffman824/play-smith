@@ -42,6 +42,9 @@ export const playbooksAPI = {
 			return Response.json({ error: 'Access denied' }, { status: 403 })
 		}
 
+		// Fire-and-forget: update last_accessed_at timestamp
+		playbookRepo.updateLastAccessed(playbookId)
+
 		return Response.json({ playbook })
 	},
 

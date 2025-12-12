@@ -124,4 +124,9 @@ export class PlaybookRepository {
 			ORDER BY p.updated_at DESC
 		`
 	}
+
+	// Updates the last_accessed_at timestamp for a playbook
+	async updateLastAccessed(id: number): Promise<void> {
+		await db`UPDATE playbooks SET last_accessed_at = CURRENT_TIMESTAMP WHERE id = ${id}`
+	}
 }

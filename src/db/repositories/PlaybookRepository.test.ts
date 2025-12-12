@@ -338,4 +338,78 @@ describe('PlaybookRepository', () => {
 
 		expect(result).toBeNull()
 	})
+
+	test('updateLastAccessed - sets last_accessed_at timestamp', async () => {
+		// Create a new playbook
+		const playbook = await playbookRepo.create({
+			team_id: null,
+			name: 'Last Accessed Test Playbook',
+			created_by: testUserId,
+		})
+
+		// Verify last_accessed_at is initially null
+		expect(playbook.last_accessed_at).toBeNull()
+
+		// Update last_accessed_at
+		await playbookRepo.updateLastAccessed(playbook.id)
+
+		// Fetch the playbook and verify timestamp is set
+		const updated = await playbookRepo.findById(playbook.id)
+		expect(updated?.last_accessed_at).not.toBeNull()
+
+		// Verify the timestamp is a valid date (could be Date or string depending on DB driver)
+		const timestamp = updated?.last_accessed_at
+		if (timestamp instanceof Date) {
+			expect(timestamp.getTime()).toBeGreaterThan(0)
+		} else if (typeof timestamp === 'string') {
+			expect(new Date(timestamp).getTime()).toBeGreaterThan(0)
+		}
+
+		// Cleanup
+		await db`DELETE FROM playbooks WHERE id = ${playbook.id}`
+	})
+
+	test('updateLastAccessed - updates existing timestamp', async () => {
+		// Create a new playbook
+		const playbook = await playbookRepo.create({
+			team_id: null,
+			name: 'Last Accessed Update Test',
+			created_by: testUserId,
+		})
+
+		// Set initial timestamp
+		await playbookRepo.updateLastAccessed(playbook.id)
+		const first = await playbookRepo.findById(playbook.id)
+		const firstTimestamp = first?.last_accessed_at
+
+		// Wait a full second to ensure different timestamp (PostgreSQL second precision)
+		await new Promise((resolve) => setTimeout(resolve, 1100))
+
+		// Update timestamp again
+		await playbookRepo.updateLastAccessed(playbook.id)
+		const second = await playbookRepo.findById(playbook.id)
+		const secondTimestamp = second?.last_accessed_at
+
+		// Verify timestamp was updated (handle both Date and string formats)
+		expect(firstTimestamp).not.toBeNull()
+		expect(secondTimestamp).not.toBeNull()
+
+		const firstTime = firstTimestamp instanceof Date
+			? firstTimestamp.getTime()
+			: new Date(firstTimestamp as string).getTime()
+		const secondTime = secondTimestamp instanceof Date
+			? secondTimestamp.getTime()
+			: new Date(secondTimestamp as string).getTime()
+
+		expect(secondTime).toBeGreaterThan(firstTime)
+
+		// Cleanup
+		await db`DELETE FROM playbooks WHERE id = ${playbook.id}`
+	})
+
+	test('updateLastAccessed - does not fail for non-existent playbook', async () => {
+		const nonExistentId = 999999999
+		// Should not throw an error
+		await expect(playbookRepo.updateLastAccessed(nonExistentId)).resolves.toBeUndefined()
+	})
 })
