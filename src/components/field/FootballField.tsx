@@ -42,10 +42,10 @@ export function FootballField({ className, onDimensionsChange }: FootballFieldPr
   // Theme-aware colors
   const fieldBg = theme === 'dark' ? '#1f2937' : '#f2f2f2'
   const lineColor = theme === 'dark' ? '#4b5563' : '#a9a9a9'
-  const losLineColor = theme === 'dark' ? '#6b7280' : '#8a8a8a'
+  const losLineColor = theme === 'dark' ? '#60A5FA' : '#3B82F6' // Blue for better visibility
   const textColor = theme === 'dark' ? '#6b7280' : '#919191'
   const lineOpacity = theme === 'dark' ? 0.6 : 0.4
-  const losOpacity = theme === 'dark' ? 0.9 : 0.7
+  const losOpacity = theme === 'dark' ? 0.9 : 0.8
   const textOpacity = theme === 'dark' ? 0.5 : 0.3
 
   // Update dimensions when container size changes
