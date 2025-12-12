@@ -4,6 +4,7 @@ import { usersAPI, getUserById } from '../../src/api/users'
 import { authAPI } from '../../src/api/auth'
 import { teamsAPI } from '../../src/api/teams'
 import { playbooksAPI } from '../../src/api/playbooks'
+import { playbookSharesAPI } from '../../src/api/playbook-shares'
 import { foldersAPI } from '../../src/api/folders'
 import { sectionsAPI } from '../../src/api/sections'
 import { playsAPI } from '../../src/api/plays'
@@ -52,6 +53,13 @@ export async function startTestServer(): Promise<{
 			'/api/playbooks': {
 				GET: playbooksAPI.list,
 				POST: playbooksAPI.create,
+			},
+			'/api/playbooks/:id/shares': {
+				GET: playbookSharesAPI.list,
+				POST: playbookSharesAPI.create,
+			},
+			'/api/playbooks/:id/shares/:teamId': {
+				DELETE: playbookSharesAPI.delete,
 			},
 			'/api/playbooks/:id/star': {
 				PUT: playbooksAPI.toggleStar,
