@@ -2,6 +2,7 @@ import type { LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Tooltip, TooltipContent, TooltipTrigger } from './tooltip'
 import { cn } from './utils'
+import './toolbar-button.css'
 
 type ToolbarButtonProps = {
 	icon: LucideIcon
@@ -28,23 +29,11 @@ export function ToolbarButton({
 				<button
 					onClick={onClick}
 					disabled={disabled}
-					className={cn(
-						// Base
-						"w-14 h-14 rounded-xl flex items-center justify-center",
-						"cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
-						"transition-all duration-200",
-						"disabled:opacity-50 disabled:cursor-not-allowed",
-
-						// Active/Inactive states
-						isActive
-							? "bg-action-button text-action-button-foreground shadow-lg"
-							: "border border-border hover:bg-accent hover:text-foreground",
-
-						className
-					)}
+					data-active={isActive}
+					className={cn('toolbar-button', className)}
 					style={!isActive ? { color: 'var(--icon-muted)' } : undefined}
 				>
-					<Icon className="w-6 h-6" />
+					<Icon />
 					{children}
 				</button>
 			</TooltipTrigger>

@@ -1,0 +1,63 @@
+/* || Base styles */
+.input {
+  display: flex;
+  height: 2.25rem;
+  width: 100%;
+  min-width: 0;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--input-background);
+  color: var(--foreground);
+  padding: 0.25rem 0.75rem;
+  font-size: 1rem;
+  transition: color 200ms, box-shadow 200ms;
+  outline: none;
+}
+
+.input::file-selector-button {
+  display: inline-flex;
+  height: 1.75rem;
+  border: 0;
+  background: transparent;
+  color: var(--foreground);
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-medium);
+}
+
+.input::placeholder {
+  color: var(--muted-foreground);
+}
+
+.input::selection {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+/* || States */
+.input:focus-visible {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.input:disabled {
+  pointer-events: none;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.input[aria-invalid="true"] {
+  border-color: var(--destructive);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--destructive) 20%, transparent);
+}
+
+/* || Media queries */
+@media (width >= 768px) {
+  .input {
+    font-size: 0.875rem;
+  }
+}
+
+/* || Dark mode states */
+.dark .input[aria-invalid="true"] {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--destructive) 40%, transparent);
+}

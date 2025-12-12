@@ -1,0 +1,62 @@
+/* || Base styles */
+.switch {
+  display: inline-flex;
+  height: 1.15rem;
+  width: 2rem;
+  flex-shrink: 0;
+  align-items: center;
+  border-radius: 9999px;
+  border: 1px solid var(--border);
+  transition: all 200ms;
+  outline: none;
+  cursor: pointer;
+}
+
+.switch[data-state="checked"] {
+  background: var(--primary);
+  border-color: transparent;
+}
+
+.switch[data-state="unchecked"] {
+  background: var(--switch-background);
+  border-color: var(--border);
+}
+
+.switch-thumb {
+  display: block;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 9999px;
+  background: var(--card);
+  pointer-events: none;
+  ring: 0;
+  transition: transform 200ms;
+}
+
+.switch-thumb[data-state="checked"] {
+  transform: translateX(calc(100% - 2px));
+}
+
+.switch-thumb[data-state="unchecked"] {
+  transform: translateX(0);
+}
+
+/* || States */
+.switch:focus-visible {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.switch:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* || Dark mode styles */
+.dark .switch-thumb[data-state="unchecked"] {
+  background: var(--card-foreground);
+}
+
+.dark .switch-thumb[data-state="checked"] {
+  background: var(--primary-foreground);
+}

@@ -1,0 +1,93 @@
+/* || Base styles */
+.tooltip-content {
+  position: relative;
+  z-index: 50;
+  width: fit-content;
+  padding: 6px 12px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-radius: 6px;
+  font-size: 0.75rem;
+  text-wrap: balance;
+  transform-origin: var(--radix-tooltip-content-transform-origin);
+}
+
+/* || Animations - fade and zoom in on open */
+.tooltip-content[data-state="delayed-open"] {
+  animation: tooltip-fade-in 150ms ease-out, tooltip-zoom-in 150ms ease-out;
+}
+
+/* || Animations - fade and zoom out on close */
+.tooltip-content[data-state="closed"] {
+  animation: tooltip-fade-out 100ms ease-in, tooltip-zoom-out 100ms ease-in;
+}
+
+/* || Slide animations based on side */
+.tooltip-content[data-side="bottom"] {
+  animation: tooltip-fade-in 150ms ease-out, tooltip-zoom-in 150ms ease-out, tooltip-slide-in-from-top 150ms ease-out;
+}
+
+.tooltip-content[data-side="left"] {
+  animation: tooltip-fade-in 150ms ease-out, tooltip-zoom-in 150ms ease-out, tooltip-slide-in-from-right 150ms ease-out;
+}
+
+.tooltip-content[data-side="right"] {
+  animation: tooltip-fade-in 150ms ease-out, tooltip-zoom-in 150ms ease-out, tooltip-slide-in-from-left 150ms ease-out;
+}
+
+.tooltip-content[data-side="top"] {
+  animation: tooltip-fade-in 150ms ease-out, tooltip-zoom-in 150ms ease-out, tooltip-slide-in-from-bottom 150ms ease-out;
+}
+
+/* || Arrow */
+.tooltip-arrow {
+  position: relative;
+  z-index: 50;
+  width: 10px;
+  height: 10px;
+  background: var(--primary);
+  fill: var(--primary);
+  border-radius: 2px;
+  transform: translateY(calc(-50% - 2px)) rotate(45deg);
+}
+
+/* || Keyframes */
+@keyframes tooltip-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes tooltip-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes tooltip-zoom-in {
+  from { transform: scale(0.95); }
+  to { transform: scale(1); }
+}
+
+@keyframes tooltip-zoom-out {
+  from { transform: scale(1); }
+  to { transform: scale(0.95); }
+}
+
+@keyframes tooltip-slide-in-from-top {
+  from { transform: translateY(-0.5rem); }
+  to { transform: translateY(0); }
+}
+
+@keyframes tooltip-slide-in-from-bottom {
+  from { transform: translateY(0.5rem); }
+  to { transform: translateY(0); }
+}
+
+@keyframes tooltip-slide-in-from-left {
+  from { transform: translateX(-0.5rem); }
+  to { transform: translateX(0); }
+}
+
+@keyframes tooltip-slide-in-from-right {
+  from { transform: translateX(0.5rem); }
+  to { transform: translateX(0); }
+}

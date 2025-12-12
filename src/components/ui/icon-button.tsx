@@ -1,6 +1,6 @@
 import type { LucideIcon } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from './tooltip'
-import { cn } from './utils'
+import './icon-button.css'
 
 type IconButtonProps = {
 	icon: LucideIcon
@@ -21,34 +21,18 @@ export function IconButton({
 	size = 'md',
 	className
 }: IconButtonProps) {
+	const variantClass = `icon-button-${variant}`
+	const sizeClass = `icon-button-${size}`
+
 	return (
 		<Tooltip>
 			<TooltipTrigger asChild>
 				<button
 					onClick={onClick}
 					disabled={disabled}
-					className={cn(
-						// Base interactive styles
-						"cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
-						"transition-all duration-200",
-						"disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none",
-
-						// Size variants
-						size === 'sm' && "p-1.5 rounded-lg",
-						size === 'md' && "p-2 rounded-lg",
-
-						// Style variants
-						variant === 'default' && "border border-border hover:bg-accent",
-						variant === 'ghost' && "hover:bg-accent",
-						variant === 'destructive' && "hover:bg-destructive/10 hover:text-destructive",
-
-						className
-					)}
+					className={`icon-button ${variantClass} ${sizeClass} ${className || ''}`}
 				>
-					<Icon className={cn(
-						size === 'sm' && "w-4 h-4",
-						size === 'md' && "w-5 h-5"
-					)} />
+					<Icon className="icon-button-icon" />
 				</button>
 			</TooltipTrigger>
 			<TooltipContent>{tooltip}</TooltipContent>
