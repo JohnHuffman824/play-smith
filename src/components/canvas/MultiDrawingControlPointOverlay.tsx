@@ -14,7 +14,7 @@ import { NodeAddPopup } from './NodeAddPopup'
 const BEZIER_SAMPLE_POINTS = 10
 const DEFAULT_PROXIMITY_THRESHOLD = 20
 
-interface MultiDrawingControlPointOverlayProps {
+type MultiDrawingControlPointOverlayProps = {
 	drawings: Drawing[]
 	selectedDrawingIds?: string[]
 	players?: Array<{
@@ -53,6 +53,13 @@ interface MultiDrawingControlPointOverlayProps {
 		insertPosition: Coordinate,
 		pixelPosition: { x: number; y: number }
 	) => void) | null>
+	onAddPlayerAtNode?: (
+		drawingId: string,
+		pointId: string,
+		x: number,
+		y: number,
+	) => void
+	activeTool?: 'select' | 'addPlayer'
 }
 
 interface MultiDragState {
@@ -217,6 +224,8 @@ export function MultiDrawingControlPointOverlay({
 	onDeletePoint,
 	onAddPoint,
 	onPathContextMenuHandlerRef,
+	onAddPlayerAtNode,
+	activeTool,
 }: MultiDrawingControlPointOverlayProps) {
 	const [dragState, setDragState] = useState<MultiDragState | null>(null)
 	const [snapTarget, setSnapTarget] = useState<SnapTarget | null>(null)
@@ -441,6 +450,24 @@ export function MultiDrawingControlPointOverlay({
 		setAddPopupState(null)
 	}
 
+	function handleNodeClick(
+		drawingId: string,
+		pointId: string,
+		x: number,
+		y: number
+	) {
+		return (event: React.MouseEvent) => {
+			if (activeTool !== 'addPlayer' || !onAddPlayerAtNode) return
+
+			// Block if drawing already has a player
+			const drawing = drawings.find(d => d.id === drawingId)
+			if (drawing?.playerId) return
+
+			event.stopPropagation()
+			onAddPlayerAtNode(drawingId, pointId, x, y)
+		}
+	}
+
 	// Show nodes for drawings that are EITHER hovered OR selected
 	const drawingsToShowNodes = useMemo(() => {
 		const hoveredDrawingIds = new Set<string>()
@@ -508,9 +535,16 @@ export function MultiDrawingControlPointOverlay({
 						stroke={cp.color}
 						strokeWidth={2}
 						pointerEvents='all'
-						style={{ cursor: dragState ? 'grabbing' : 'grab' }}
-						onPointerDown={startDrag(cp.drawingId, cp.pointId)}
-						onContextMenu={handleContextMenu(cp.drawingId, cp.pointId, pixel.x, pixel.y)}
+						style={{
+							cursor: activeTool === 'addPlayer'
+								? 'pointer'
+								: dragState
+									? 'grabbing'
+									: 'grab'
+						}}
+						onPointerDown={activeTool === 'select' ? startDrag(cp.drawingId, cp.pointId) : undefined}
+						onClick={handleNodeClick(cp.drawingId, cp.pointId, cp.x, cp.y)}
+						onContextMenu={activeTool === 'select' ? handleContextMenu(cp.drawingId, cp.pointId, pixel.x, pixel.y) : undefined}
 					/>
 				)
 			})}

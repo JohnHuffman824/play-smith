@@ -17,6 +17,8 @@ import { useTagsData, type Tag } from '../hooks/useTagsData'
 import type { Play } from '../hooks/usePlaybookData'
 import { eventBus } from '../services/EventBus'
 import { createDefaultLinemen } from '../utils/lineman.utils'
+import { Modal } from '../components/shared/Modal'
+import { Input } from '../components/ui/input'
 import {
 	CHIP_TYPE_FORMATION,
 	CHIP_TYPE_CONCEPT,
@@ -86,6 +88,10 @@ function PlayEditorContent() {
 	const [showTagDialog, setShowTagDialog] = useState(false)
 	const [isPlayLoaded, setIsPlayLoaded] = useState(false)
 	const [playbookPlays, setPlaybookPlays] = useState<Play[]>([])
+	const [showRenameModal, setShowRenameModal] = useState(false)
+	const [showDeleteModal, setShowDeleteModal] = useState(false)
+	const [targetPlayId, setTargetPlayId] = useState<string | null>(null)
+	const [targetPlayName, setTargetPlayName] = useState('')
 
 	/**
 	 * Unified delete method for removing selected objects.
@@ -361,6 +367,127 @@ function PlayEditorContent() {
 		}
 	}
 
+	function handleRenamePlay(playId: string) {
+		const play = playbookPlays.find((p) => p.id === playId)
+		if (!play) return
+
+		setTargetPlayId(playId)
+		setTargetPlayName(play.name)
+		setShowRenameModal(true)
+	}
+
+	async function confirmRename() {
+		if (!targetPlayId || !targetPlayName.trim()) return
+
+		try {
+			const response = await fetch(`/api/plays/${targetPlayId}`, {
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ name: targetPlayName.trim() })
+			})
+
+			if (!response.ok) {
+				console.error('Failed to rename play')
+				return
+			}
+
+			// Update local state
+			setPlaybookPlays((prev) =>
+				prev.map((p) =>
+					p.id === targetPlayId
+						? { ...p, name: targetPlayName.trim() }
+						: p
+				)
+			)
+
+			setShowRenameModal(false)
+			setTargetPlayId(null)
+			setTargetPlayName('')
+		} catch (error) {
+			console.error('Failed to rename play:', error)
+		}
+	}
+
+	function handleDeletePlayFromBar(playId: string) {
+		setTargetPlayId(playId)
+		setShowDeleteModal(true)
+	}
+
+	async function confirmDeleteFromBar() {
+		if (!targetPlayId) return
+
+		try {
+			const response = await fetch(`/api/plays/${targetPlayId}`, {
+				method: 'DELETE',
+				credentials: 'include'
+			})
+
+			if (!response.ok) {
+				console.error('Failed to delete play')
+				return
+			}
+
+			// Update local state
+			setPlaybookPlays((prev) =>
+				prev.filter((p) => p.id !== targetPlayId)
+			)
+
+			setShowDeleteModal(false)
+			setTargetPlayId(null)
+		} catch (error) {
+			console.error('Failed to delete play:', error)
+		}
+	}
+
+	async function handleDuplicatePlay(playId: string) {
+		try {
+			const response = await fetch(`/api/plays/${playId}/duplicate`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' }
+			})
+
+			if (!response.ok) {
+				console.error('Failed to duplicate play')
+				return
+			}
+
+			const data = await response.json()
+			const newPlay = data.play
+
+			// Add duplicated play to local state (right after original)
+			setPlaybookPlays((prev) => {
+				const index = prev.findIndex((p) => p.id === playId)
+				const playToInsert: Play = {
+					id: String(newPlay.id),
+					name: newPlay.name || '',
+					section_id: newPlay.section_id
+						? String(newPlay.section_id)
+						: null,
+					formation: newPlay.formation_id
+						? String(newPlay.formation_id)
+						: '',
+					personnel: newPlay.personnel_id
+						? String(newPlay.personnel_id)
+						: undefined,
+					playType: newPlay.play_type || '',
+					defensiveFormation: newPlay.defensive_formation_id
+						? String(newPlay.defensive_formation_id)
+						: '',
+					tags: [],
+					tagObjects: [],
+					lastModified: new Date().toLocaleDateString(),
+					drawings: newPlay.custom_drawings || [],
+					players: newPlay.custom_players || []
+				}
+				const newPlays = [...prev]
+				newPlays.splice(index + 1, 0, playToInsert)
+				return newPlays
+			})
+		} catch (error) {
+			console.error('Failed to duplicate play:', error)
+		}
+	}
+
 	async function handleDeletePlay() {
 		if (!playId) return
 
@@ -472,6 +599,9 @@ function PlayEditorContent() {
 					showPlayBar={playState.showPlayBar}
 					onOpenPlay={(id) => navigate(`/playbooks/${playbookId}/play/${id}`)}
 					onAddPlay={handleAddPlay}
+				onRenamePlay={handleRenamePlay}
+				onDeletePlay={handleDeletePlayFromBar}
+				onDuplicatePlay={handleDuplicatePlay}
 				/>
 
 				{/* Selection Overlay */}
@@ -484,7 +614,100 @@ function PlayEditorContent() {
 			</div>
 
 
-			{/* Tag Dialog */}
+			{/* Rename Play Modal */}
+		<Modal
+			isOpen={showRenameModal}
+			onClose={() => {
+				setShowRenameModal(false)
+				setTargetPlayId(null)
+				setTargetPlayName('')
+			}}
+			title="Rename Play"
+		>
+			<div className="space-y-4">
+				<div>
+					<label className="block mb-2">Play Name</label>
+					<Input
+						type="text"
+						value={targetPlayName}
+						onChange={(e) => setTargetPlayName(e.target.value)}
+						onKeyDown={(e) => {
+							if (e.key === 'Enter') {
+								confirmRename()
+							}
+						}}
+						placeholder="Enter play name..."
+						autoFocus
+					/>
+				</div>
+				<div className="flex justify-end gap-2 pt-2">
+					<button
+						onClick={() => {
+							setShowRenameModal(false)
+							setTargetPlayId(null)
+							setTargetPlayName('')
+						}}
+						className="px-4 py-2 border border-gray-300
+							dark:border-gray-600 rounded-md
+							hover:bg-gray-100 dark:hover:bg-gray-700
+							transition-colors cursor-pointer"
+					>
+						Cancel
+					</button>
+					<button
+						onClick={confirmRename}
+						disabled={!targetPlayName.trim()}
+						className="px-4 py-2 bg-blue-500 hover:bg-blue-600
+							text-white rounded-md transition-colors
+							disabled:opacity-50 disabled:cursor-not-allowed
+							cursor-pointer"
+					>
+						Rename
+					</button>
+				</div>
+			</div>
+		</Modal>
+
+		{/* Delete Play Confirmation Modal */}
+		<Modal
+			isOpen={showDeleteModal}
+			onClose={() => {
+				setShowDeleteModal(false)
+				setTargetPlayId(null)
+			}}
+			title="Delete Play"
+		>
+			<div className="space-y-4">
+				<p>
+					Are you sure you want to delete this play?
+					This action cannot be undone.
+				</p>
+				<div className="flex justify-end gap-2 pt-2">
+					<button
+						onClick={() => {
+							setShowDeleteModal(false)
+							setTargetPlayId(null)
+						}}
+						className="px-4 py-2 border border-gray-300
+							dark:border-gray-600 rounded-md
+							hover:bg-gray-100 dark:hover:bg-gray-700
+							transition-colors cursor-pointer"
+					>
+						Cancel
+					</button>
+					<button
+						onClick={confirmDeleteFromBar}
+						className="px-4 py-2 bg-red-500 hover:bg-red-600
+							text-white rounded-md transition-colors
+							cursor-pointer"
+					>
+						Delete
+					</button>
+				</div>
+			</div>
+		</Modal>
+
+		{/* Tag Dialog */}
 			<TagDialog
 				isOpen={showTagDialog}
 				onClose={() => setShowTagDialog(false)}

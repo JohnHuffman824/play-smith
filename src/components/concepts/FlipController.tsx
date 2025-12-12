@@ -16,10 +16,18 @@ export function FlipController({ onFlipReady }: FlipControllerProps) {
 	useEffect(() => {
 		const flipCanvas = () => {
 			// Access current state from ref, not stale closure
+			console.log('[FLIP] Before flip - drawings:', stateRef.current.drawings)
+			console.log('[FLIP] Before flip - drawings count:', stateRef.current.drawings.length)
+
 			const { players, drawings } = flipCanvasHorizontally(
 				stateRef.current.players,
 				stateRef.current.drawings
 			)
+
+			console.log('[FLIP] After flip - drawings:', drawings)
+			console.log('[FLIP] After flip - drawings count:', drawings.length)
+			console.log('[FLIP] Calling setDrawings...')
+
 			setPlayers(players)
 			setDrawings(drawings)
 		}

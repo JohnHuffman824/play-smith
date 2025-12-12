@@ -22,6 +22,7 @@ import {
 
 // Chaikin smoothing for render-time curve smoothing
 const CHAIKIN_ITERATIONS = 3
+const SEGMENT_HIT_THRESHOLD_PX = 15
 
 interface PixelPoint {
 	x: number
@@ -285,7 +286,7 @@ export function PathRenderer({
 
 					// Find which segment was clicked
 					const result = findClosestSegmentPosition(drawing, feetPos, coordSystem)
-					if (result && result.distance < 15) { // 15px threshold
+					if (result && result.distance < SEGMENT_HIT_THRESHOLD_PX) {
 						onPathContextMenu(
 							drawing.id,
 							result.segmentIndex,

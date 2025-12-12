@@ -476,6 +476,37 @@ export function Canvas({
 		)
 	}
 
+	function handleAddPlayerAtNode(
+		drawingId: string,
+		pointId: string,
+		x: number,
+		y: number,
+	) {
+		const drawing = drawings.find((d) => d.id === drawingId)
+		if (drawing?.playerId) return
+
+		const newPlayer = {
+			id: `player-${Date.now()}`,
+			x,
+			y,
+			label: '',
+			color: drawingState.color,
+		}
+
+		setPlayers([...players, newPlayer])
+		handleLinkDrawingToPlayer(drawingId, pointId, newPlayer.id)
+
+		// Show label dialog
+		setSelectedPlayerId(newPlayer.id)
+		const pixelPos = coordSystem.feetToPixels(x, y)
+		const rect = whiteboardRef.current?.getBoundingClientRect()
+		setLabelDialogPosition({
+			x: pixelPos.x + (rect?.left || 0),
+			y: pixelPos.y + (rect?.top || 0),
+		})
+		setShowLabelDialog(true)
+	}
+
 	function handleUnlinkDrawing(playerId: string) {
 		const linkedDrawing = drawings.find((d) => d.playerId == playerId)
 		if (!linkedDrawing || !linkedDrawing.linkedPointId) return
@@ -579,7 +610,9 @@ export function Canvas({
 								? 'draw'
 								: drawingState.tool == TOOL_ERASE
 									? 'erase'
-									: 'select'
+									: drawingState.tool == TOOL_ADD_PLAYER
+										? 'addPlayer'
+										: 'select'
 						}
 						onDeleteDrawing={handleDeleteDrawing}
 						eraseSize={drawingState.eraseSize}
@@ -587,6 +620,7 @@ export function Canvas({
 						defaultStyle={defaultPathStyle}
 						snapThreshold={drawingState.snapThreshold}
 						onLinkDrawingToPlayer={handleLinkDrawingToPlayer}
+						onAddPlayerAtNode={handleAddPlayerAtNode}
 						onMovePlayer={handleMovePlayerOnly}
 						isOverCanvas={isOverCanvas}
 						cursorPosition={cursorPosition}

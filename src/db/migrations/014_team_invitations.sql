@@ -1,7 +1,7 @@
 -- Migration: Create team invitations table for email-based member invitations
 
 -- Team invitations table
-CREATE TABLE team_invitations (
+CREATE TABLE IF NOT EXISTS team_invitations (
     id BIGSERIAL PRIMARY KEY,
     team_id BIGINT NOT NULL,
     email VARCHAR(255) NOT NULL,
@@ -16,6 +16,6 @@ CREATE TABLE team_invitations (
 );
 
 -- Indexes for efficient lookups
-CREATE INDEX idx_team_invitations_token ON team_invitations(token);
-CREATE INDEX idx_team_invitations_email ON team_invitations(email);
-CREATE INDEX idx_team_invitations_team ON team_invitations(team_id);
+CREATE INDEX IF NOT EXISTS idx_team_invitations_token ON team_invitations(token);
+CREATE INDEX IF NOT EXISTS idx_team_invitations_email ON team_invitations(email);
+CREATE INDEX IF NOT EXISTS idx_team_invitations_team ON team_invitations(team_id);

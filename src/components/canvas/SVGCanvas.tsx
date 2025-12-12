@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import type React from 'react'
 import { FieldCoordinateSystem } from '../../utils/coordinates'
 import { PathRenderer } from './PathRenderer'
 import { ControlPointOverlay } from './ControlPointOverlay'
@@ -38,7 +39,7 @@ interface SVGCanvasProps {
 	drawings: Drawing[]
 	players?: Player[]
 	onChange: (drawings: Drawing[]) => void
-	activeTool: 'draw' | 'select' | 'erase'
+	activeTool: 'draw' | 'select' | 'erase' | 'addPlayer'
 	autoCorrect: boolean
 	defaultStyle: PathStyle
 	onDeleteDrawing?: (id: string) => void
@@ -49,6 +50,12 @@ interface SVGCanvasProps {
 		drawingId: string,
 		pointId: string,
 		playerId: string,
+	) => void
+	onAddPlayerAtNode?: (
+		drawingId: string,
+		pointId: string,
+		x: number,
+		y: number,
 	) => void
 	onPlayerLinked?: (playerId: string, position: { x: number; y: number }) => void
 	onMovePlayer?: (
@@ -82,6 +89,7 @@ export function SVGCanvas({
 	snapThreshold,
 	selectedDrawingIds = [],
 	onLinkDrawingToPlayer,
+	onAddPlayerAtNode,
 	onPlayerLinked,
 	onMovePlayer,
 	onSelectionChange,
@@ -531,8 +539,8 @@ export function SVGCanvas({
 				/>
 			))}
 
-			{/* Show draggable nodes for all drawings when SELECT tool is active */}
-			{activeTool === 'select' && isOverCanvas && (
+			{/* Show draggable nodes for SELECT and ADD PLAYER tools */}
+			{(activeTool === 'select' || activeTool === 'addPlayer') && isOverCanvas && (
 				<MultiDrawingControlPointOverlay
 					drawings={drawings}
 					selectedDrawingIds={selectedDrawingIds}
@@ -541,17 +549,19 @@ export function SVGCanvas({
 					snapThreshold={snapThreshold}
 					cursorPosition={cursorPosition}
 					proximityThreshold={NODE_PROXIMITY_THRESHOLD}
-					onDragPoint={handleDragPoint}
-					onMerge={handleMerge}
-					onLinkToPlayer={handleLinkToPlayer}
+					onDragPoint={activeTool === 'select' ? handleDragPoint : undefined}
+					onMerge={activeTool === 'select' ? handleMerge : undefined}
+					onLinkToPlayer={activeTool === 'select' ? handleLinkToPlayer : undefined}
 					onDeletePoint={activeTool === 'select' ? handleDeletePoint : undefined}
 					onAddPoint={activeTool === 'select' ? handleAddPoint : undefined}
-					onPathContextMenuHandlerRef={overlayPathContextMenuHandler}
+					onPathContextMenuHandlerRef={activeTool === 'select' ? overlayPathContextMenuHandler : undefined}
+					onAddPlayerAtNode={activeTool === 'addPlayer' ? onAddPlayerAtNode : undefined}
+					activeTool={activeTool}
 				/>
 			)}
 
 			{/* Show draggable nodes for selected drawing when cursor is over canvas (non-SELECT tools) */}
-			{activeTool !== 'select' && selectedDrawingIds.length > 0 && (
+			{activeTool !== 'select' && activeTool !== 'addPlayer' && selectedDrawingIds.length > 0 && (
 				<ControlPointOverlay
 					drawing={
 						drawings.find((item) => selectedDrawingIds.includes(item.id))

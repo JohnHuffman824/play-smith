@@ -403,11 +403,20 @@ export function deletePointFromDrawing(
 
 // POINT INSERTION UTILITIES FOR ADD NODE FEATURE
 
-interface SegmentHitResult {
+type SegmentHitResult = {
 	segmentIndex: number
-	insertPosition: Coordinate  // The position to insert the new point (in feet)
+	insertPosition: Coordinate
 	distance: number
 }
+
+type CoordSystemLike = {
+	feetToPixels: (x: number, y: number) => Coordinate
+	pixelsToFeet: (x: number, y: number) => Coordinate
+	scale: number
+}
+
+const CHAIKIN_SMOOTH_ITERATIONS = 3
+const CHAIKIN_MULTIPLIER = 8
 
 /**
  * Find which segment a point is closest to, considering Chaikin smoothing for curved paths.
@@ -416,7 +425,7 @@ interface SegmentHitResult {
 export function findClosestSegmentPosition(
 	drawing: Drawing,
 	clickPositionFeet: Coordinate,
-	coordSystem: { feetToPixels: (x: number, y: number) => Coordinate; pixelsToFeet: (x: number, y: number) => Coordinate; scale: number }
+	coordSystem: CoordSystemLike
 ): SegmentHitResult | null {
 	if (drawing.segments.length === 0) return null
 
@@ -431,9 +440,9 @@ export function findClosestSegmentPosition(
 		// For curved paths, apply Chaikin smoothing and find position on smoothed curve
 		const pixelPoints = orderedPoints.map(p => coordSystem.feetToPixels(p.x, p.y))
 
-		// Apply Chaikin 3 times (matching PathRenderer)
+		// Apply Chaikin smoothing (matching PathRenderer)
 		let smoothedPixels = pixelPoints
-		for (let i = 0; i < 3; i++) {
+		for (let i = 0; i < CHAIKIN_SMOOTH_ITERATIONS; i++) {
 			smoothedPixels = chaikinSubdivideSimple(smoothedPixels, true)
 		}
 
@@ -457,9 +466,8 @@ export function findClosestSegmentPosition(
 
 		// Map smoothed index back to original segment
 		// Each Chaikin iteration roughly doubles the points
-		// After 3 iterations: originalIndex ≈ smoothedIndex / 8
 		const originalSegmentIndex = Math.min(
-			Math.floor(closestSmoothedIndex / 8),
+			Math.floor(closestSmoothedIndex / CHAIKIN_MULTIPLIER),
 			drawing.segments.length - 1
 		)
 
@@ -483,20 +491,23 @@ export function findClosestSegmentPosition(
 
 		for (let i = 0; i < drawing.segments.length; i++) {
 			const segment = drawing.segments[i]
-			const points = segment.pointIds.map(id => drawing.points[id]).filter(Boolean) as ControlPoint[]
+			const points = segment.pointIds
+				.map(id => drawing.points[id])
+				.filter(Boolean) as ControlPoint[]
 
 			if (points.length < 2) continue
 
 			const p1Pixel = coordSystem.feetToPixels(points[0].x, points[0].y)
-			const p2Pixel = coordSystem.feetToPixels(points[points.length - 1].x, points[points.length - 1].y)
+			const lastPoint = points[points.length - 1]
+			const p2Pixel = coordSystem.feetToPixels(lastPoint.x, lastPoint.y)
 
 			const { distance, t } = pointToSegmentInfo(clickPixel, p1Pixel, p2Pixel)
 
 			if (distance < bestDistance) {
 				bestDistance = distance
 				const insertFeet = {
-					x: points[0].x + t * (points[points.length - 1].x - points[0].x),
-					y: points[0].y + t * (points[points.length - 1].y - points[0].y)
+					x: points[0].x + t * (lastPoint.x - points[0].x),
+					y: points[0].y + t * (lastPoint.y - points[0].y)
 				}
 				bestResult = {
 					segmentIndex: i,

@@ -12,6 +12,9 @@ interface PlayCardsSectionProps {
 	showPlayBar: boolean
 	onOpenPlay: (id: string) => void
 	onAddPlay: () => void
+	onRenamePlay?: (id: string) => void
+	onDeletePlay?: (id: string) => void
+	onDuplicatePlay?: (id: string) => void
 }
 
 const NOOP = () => {}
@@ -21,7 +24,10 @@ export function PlayCardsSection({
 	currentPlayId,
 	showPlayBar,
 	onOpenPlay,
-	onAddPlay
+	onAddPlay,
+	onRenamePlay,
+	onDeletePlay,
+	onDuplicatePlay
 }: PlayCardsSectionProps) {
 	const { theme } = useTheme()
 	const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -69,9 +75,9 @@ export function PlayCardsSection({
 										selected={false}
 										onSelect={NOOP}
 										onOpen={onOpenPlay}
-										onRename={NOOP}
-										onDelete={NOOP}
-										onDuplicate={NOOP}
+										onRename={onRenamePlay ?? NOOP}
+										onDelete={onDeletePlay ?? NOOP}
+										onDuplicate={onDuplicatePlay ?? NOOP}
 									/>
 								</div>
 							))}
