@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { usePlaybooksData } from '../hooks/usePlaybooksData'
 import { useTeamsData } from '../hooks/useTeamsData'
+import { useFoldersData } from '../hooks/useFoldersData'
 import { Sidebar } from '../components/playbook-manager/Sidebar'
 import { Toolbar } from '../components/playbook-manager/Toolbar'
 import { PlaybookCard } from '../components/playbook-manager/PlaybookCard'
@@ -23,11 +24,17 @@ export function PlaybookManagerPage() {
 		updatePlaybook,
 		deletePlaybook
 	} = usePlaybooksData(currentTeamId)
+	const {
+		folders,
+		isLoading: foldersLoading,
+		error: foldersError
+	} = useFoldersData()
 
-	const isLoading = playbooksLoading || teamsLoading
-	const error = playbooksError
+	const isLoading = playbooksLoading || teamsLoading || foldersLoading
+	const error = playbooksError || foldersError
 
 	const [activeSection, setActiveSection] = useState('all')
+	const [selectedFolderId, setSelectedFolderId] = useState<number | null>(null)
 	const [searchQuery, setSearchQuery] = useState('')
 	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 	const [showNewPlaybookModal, setShowNewPlaybookModal] = useState(false)
@@ -138,6 +145,9 @@ export function PlaybookManagerPage() {
 			<Sidebar
 				activeSection={activeSection}
 				onSectionChange={setActiveSection}
+				folders={folders}
+				selectedFolderId={selectedFolderId}
+				onFolderSelect={setSelectedFolderId}
 			/>
 
 			<div className="flex-1 flex flex-col overflow-hidden">
