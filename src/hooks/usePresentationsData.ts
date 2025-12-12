@@ -83,7 +83,10 @@ export function usePresentationsData(playbookId: number | null) {
 			)
 			queryClient.setQueryData(
 				presentationKeys.list(playbookId!),
-				(old: any[]) => old?.filter(p => p.id !== id)
+				(old: unknown) => {
+					if (!Array.isArray(old)) return old
+					return old.filter(p => p.id !== id)
+				}
 			)
 			return { previous }
 		},
