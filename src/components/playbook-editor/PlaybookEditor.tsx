@@ -552,16 +552,18 @@ function PlaybookEditorContent({
           </div>
         </div>
 
-        <PlaybookEditorToolbar
-          onNewPlay={() => setShowNewPlayModal(true)}
-          onNewSection={() => setShowNewSectionModal(true)}
-          sections={sections.map(s => ({ id: s.id, name: s.name }))}
-          activeSectionFilter={activeSectionFilter}
-          onSectionFilterChange={setActiveSectionFilter}
-        />
+        {activeTab === 'plays' ? (
+          <>
+            <PlaybookEditorToolbar
+              onNewPlay={() => setShowNewPlayModal(true)}
+              onNewSection={() => setShowNewSectionModal(true)}
+              sections={sections.map(s => ({ id: s.id, name: s.name }))}
+              activeSectionFilter={activeSectionFilter}
+              onSectionFilterChange={setActiveSectionFilter}
+            />
 
-        <div className="flex-1 overflow-auto">
-          <div className="p-6">
+            <div className="flex-1 overflow-auto">
+              <div className="p-6">
             {displayedSections.length > 0 ? (
               <div className="space-y-8">
                 {displayedSections.map((section) => (
@@ -633,9 +635,86 @@ function PlaybookEditorContent({
                 </div>
               </div>
             )}
-          </div>
-        </div>
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            <ConceptsToolbar
+              onNewConcept={() => { setEditingConcept(null); setShowConceptDialog(true) }}
+              activeFilter={conceptFilter}
+              onFilterChange={setConceptFilter}
+            />
+
+            <div className="flex-1 overflow-y-auto p-6">
+              {conceptsLoading ? (
+                <div className="flex items-center justify-center h-64">
+                  <p className="text-muted-foreground">Loading concepts...</p>
+                </div>
+              ) : filteredConcepts.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-64 gap-4">
+                  <p className="text-muted-foreground">No concepts found</p>
+                  <button
+                    onClick={() => { setEditingConcept(null); setShowConceptDialog(true) }}
+                    className="px-4 py-2 bg-action-button text-action-button-foreground rounded-lg hover:bg-action-button/90"
+                  >
+                    Create your first concept
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {filteredConcepts.map((item) => (
+                    <ConceptCard
+                      key={`${item.type}-${item.id}`}
+                      id={item.id}
+                      name={item.name}
+                      type={item.type}
+                      thumbnail={item.thumbnail}
+                      description={item.description}
+                      isMotion={item.isMotion}
+                      isModifier={item.isModifier}
+                      lastModified={item.updatedAt}
+                      onEdit={handleEditConcept}
+                      onDelete={handleDeleteConcept}
+                      onDuplicate={handleDuplicateConcept}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </div>
+
+      {/* Concept Dialog */}
+      <ConceptDialog
+        isOpen={showConceptDialog}
+        onClose={() => { setShowConceptDialog(false); setEditingConcept(null) }}
+        mode={editingConcept ? 'edit' : 'create'}
+        concept={editingConcept ?? undefined}
+        teamId={teamId ?? ''}
+        playbookId={playbookId}
+        onSave={handleSaveConcept}
+      />
+
+      {/* Delete Concept Confirmation */}
+      <Modal
+        isOpen={showDeleteConceptModal}
+        onClose={() => setShowDeleteConceptModal(false)}
+        title="Delete Concept"
+      >
+        <p className="text-muted-foreground mb-4">
+          Are you sure you want to delete this {conceptToDelete?.type}? This action cannot be undone.
+        </p>
+        <div className="flex justify-end gap-2">
+          <button onClick={() => setShowDeleteConceptModal(false)} className="px-4 py-2 border border-border rounded-lg hover:bg-accent">
+            Cancel
+          </button>
+          <button onClick={confirmDeleteConcept} className="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg hover:bg-destructive/90">
+            Delete
+          </button>
+        </div>
+      </Modal>
 
       <Modal
         isOpen={showNewPlayModal}
