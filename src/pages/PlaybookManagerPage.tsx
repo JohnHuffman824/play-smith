@@ -7,14 +7,21 @@ import { Sidebar } from '../components/playbook-manager/Sidebar'
 import { Toolbar } from '../components/playbook-manager/Toolbar'
 import { PlaybookCard } from '../components/playbook-manager/PlaybookCard'
 import { Modal } from '../components/playbook-manager/Modal'
-import { SettingsDialog } from '../components/playbook-manager/SettingsDialog'
+import { UnifiedSettingsDialog } from '../components/shared/UnifiedSettingsDialog'
 import { ManageTeamsDialog } from '../components/playbook-manager/ManageTeamsDialog'
 import { NewFolderDialog } from '../components/playbook-manager/NewFolderDialog'
 import { SharePlaybookDialog } from '../components/playbook-manager/SharePlaybookDialog'
 import { Input } from '../components/ui/input'
+import {
+	ResizablePanelGroup,
+	ResizablePanel,
+	ResizableHandle,
+} from '../components/ui/resizable'
+import { useSettings, MIN_SIDEBAR_WIDTH, MAX_SIDEBAR_WIDTH } from '../contexts/SettingsContext'
 
 export function PlaybookManagerPage() {
 	const navigate = useNavigate()
+	const { sidebarWidth, setSidebarWidth } = useSettings()
 
 	// State declarations must come before hooks that use them
 	const [activeSection, setActiveSection] = useState('all')
@@ -179,50 +186,73 @@ export function PlaybookManagerPage() {
 
 	if (isLoading) {
 		return (
-			<div className="flex items-center justify-center h-screen">
-				<div className="text-lg">Loading playbooks...</div>
+			<div className="flex items-center justify-center h-screen bg-background">
+				<div className="text-lg text-foreground">Loading playbooks...</div>
 			</div>
 		)
 	}
 
 	if (error) {
 		return (
-			<div className="flex items-center justify-center h-screen">
+			<div className="flex items-center justify-center h-screen bg-background">
 				<div className="text-red-500">Error: {error}</div>
 			</div>
 		)
 	}
 
+	// Calculate initial size as percentage (assuming 1440px viewport as baseline)
+	const BASELINE_VIEWPORT = 1440
+	const initialSidebarPercent = (sidebarWidth / BASELINE_VIEWPORT) * 100
+
 	return (
-		<div className="flex h-screen overflow-hidden">
-			<Sidebar
-				activeSection={activeSection}
-				onSectionChange={setActiveSection}
-				folders={folders}
-				selectedFolderId={selectedFolderId}
-				onFolderSelect={setSelectedFolderId}
-			/>
-
-			<div className="flex-1 flex flex-col overflow-hidden">
-				{/* Toolbar */}
-				<Toolbar
-					viewMode={viewMode}
-					onViewModeChange={setViewMode}
-					searchQuery={searchQuery}
-					onSearchChange={setSearchQuery}
-					onNewPlaybook={() => setShowNewPlaybookModal(true)}
-					onNewFolder={handleNewFolder}
-					onImport={handleImport}
-					onExport={handleExport}
-					onSettingsClick={handleSettings}
-					teams={teams}
-					currentTeamId={currentTeamId}
-					onSwitchTeam={switchTeam}
-					onManageTeams={handleManageTeams}
+		<>
+		<ResizablePanelGroup
+			direction="horizontal"
+			className="h-screen overflow-hidden bg-background"
+		>
+			<ResizablePanel
+				id="sidebar"
+				defaultSize={initialSidebarPercent}
+				minSize={(MIN_SIDEBAR_WIDTH / BASELINE_VIEWPORT) * 100}
+				maxSize={(MAX_SIDEBAR_WIDTH / BASELINE_VIEWPORT) * 100}
+				onResize={(size) => {
+					// Convert percentage back to pixels
+					const width = Math.round((size / 100) * BASELINE_VIEWPORT)
+					setSidebarWidth(width)
+				}}
+			>
+				<Sidebar
+					activeSection={activeSection}
+					onSectionChange={setActiveSection}
+					folders={folders}
+					selectedFolderId={selectedFolderId}
+					onFolderSelect={setSelectedFolderId}
 				/>
+			</ResizablePanel>
 
-				{/* Content */}
-				<div className="flex-1 overflow-auto p-6">
+			<ResizableHandle withHandle />
+
+			<ResizablePanel defaultSize={100 - initialSidebarPercent} minSize={50}>
+				<div className="flex flex-col h-full overflow-hidden">
+					{/* Toolbar */}
+					<Toolbar
+						viewMode={viewMode}
+						onViewModeChange={setViewMode}
+						searchQuery={searchQuery}
+						onSearchChange={setSearchQuery}
+						onNewPlaybook={() => setShowNewPlaybookModal(true)}
+						onNewFolder={handleNewFolder}
+						onImport={handleImport}
+						onExport={handleExport}
+						onSettingsClick={handleSettings}
+						teams={teams}
+						currentTeamId={currentTeamId}
+						onSwitchTeam={switchTeam}
+						onManageTeams={handleManageTeams}
+					/>
+
+					{/* Content */}
+					<div className="flex-1 overflow-auto p-6">
 					{/* Trash Section - Special UI */}
 					{activeSection === 'trash' && (
 						<>
@@ -351,7 +381,7 @@ export function PlaybookManagerPage() {
 											<p className="text-muted-foreground mb-4">No playbooks found</p>
 											<button
 												onClick={() => setShowNewPlaybookModal(true)}
-												className="px-6 py-2.5 bg-primary text-primary-foreground rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+												className="px-6 py-2.5 bg-action-button text-action-button-foreground rounded-lg cursor-pointer hover:bg-action-button/90 transition-all duration-200 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
 											>
 												Create Your First Playbook
 											</button>
@@ -361,9 +391,13 @@ export function PlaybookManagerPage() {
 							)}
 						</>
 					)}
+					</div>
 				</div>
-			</div>
+			</ResizablePanel>
+		</ResizablePanelGroup>
 
+		{/* Modals outside the resizable panels */}
+		<div>
 			{/* New Playbook Modal */}
 			<Modal
 				isOpen={showNewPlaybookModal}
@@ -402,7 +436,7 @@ export function PlaybookManagerPage() {
 						<button
 							onClick={handleCreatePlaybook}
 							disabled={!newPlaybookName.trim()}
-							className="px-4 py-2 bg-primary text-primary-foreground rounded-lg disabled:opacity-50 cursor-pointer hover:opacity-90 transition-opacity disabled:cursor-not-allowed"
+							className="px-4 py-2 bg-action-button text-action-button-foreground rounded-lg disabled:opacity-50 cursor-pointer hover:bg-action-button/90 transition-all duration-200 disabled:cursor-not-allowed outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
 						>
 							Create
 						</button>
@@ -411,9 +445,10 @@ export function PlaybookManagerPage() {
 			</Modal>
 
 			{/* Settings Dialog */}
-			<SettingsDialog
+			<UnifiedSettingsDialog
 				isOpen={showSettingsDialog}
 				onClose={() => setShowSettingsDialog(false)}
+				context="playbook-manager"
 			/>
 
 			{/* Manage Teams Dialog */}
@@ -444,5 +479,6 @@ export function PlaybookManagerPage() {
 				/>
 			)}
 		</div>
+		</>
 	)
 }
