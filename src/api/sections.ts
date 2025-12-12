@@ -123,6 +123,14 @@ export const sectionsAPI = {
 			return Response.json({ error: 'Access denied' }, { status: 403 })
 		}
 
+		// Prevent deletion of Ideas section
+		if (section.section_type === 'ideas') {
+			return Response.json(
+				{ error: 'The Ideas section cannot be deleted' },
+				{ status: 403 }
+			)
+		}
+
 		await sectionRepo.delete(sectionId)
 
 		return new Response(null, { status: 204 })
