@@ -187,6 +187,92 @@ function PlaybookEditorContent({
     ? filteredSections.filter((section) => section.id == activeSectionFilter)
     : filteredSections
 
+  // Concept filtering
+  const filteredConcepts = useMemo(() => {
+    let items: Array<{
+      id: number; name: string; type: 'concept' | 'formation' | 'group';
+      thumbnail: string | null; description: string | null;
+      isMotion?: boolean; isModifier?: boolean; updatedAt: string;
+    }> = []
+
+    // Formations
+    if (conceptFilter === 'all' || conceptFilter === 'formations') {
+      items.push(...formations.map(f => ({
+        id: f.id, name: f.name, type: 'formation' as const,
+        thumbnail: f.thumbnail, description: f.description,
+        updatedAt: new Date(f.updated_at).toLocaleDateString(),
+      })))
+    }
+
+    // Concepts (routes, motions, modifiers)
+    if (conceptFilter !== 'formations' && conceptFilter !== 'groups') {
+      const conceptItems = concepts.filter(c => {
+        if (conceptFilter === 'all') return true
+        if (conceptFilter === 'routes') return !c.is_motion && !c.is_modifier
+        if (conceptFilter === 'motions') return c.is_motion
+        if (conceptFilter === 'modifiers') return c.is_modifier
+        return false
+      }).map(c => ({
+        id: c.id, name: c.name, type: 'concept' as const,
+        thumbnail: c.thumbnail, description: c.description,
+        isMotion: c.is_motion, isModifier: c.is_modifier,
+        updatedAt: new Date(c.updated_at).toLocaleDateString(),
+      }))
+      items.push(...conceptItems)
+    }
+
+    // Groups
+    if (conceptFilter === 'all' || conceptFilter === 'groups') {
+      items.push(...conceptGroups.map(g => ({
+        id: g.id, name: g.name, type: 'group' as const,
+        thumbnail: g.thumbnail, description: g.description,
+        updatedAt: new Date(g.updated_at).toLocaleDateString(),
+      })))
+    }
+
+    // Search filter
+    if (searchQuery) {
+      items = items.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    }
+
+    return items
+  }, [concepts, formations, conceptGroups, conceptFilter, searchQuery])
+
+  // Concept handlers
+  const handleEditConcept = (id: number, type: 'concept' | 'formation' | 'group') => {
+    if (type === 'concept') {
+      const concept = concepts.find(c => c.id === id)
+      if (concept) { setEditingConcept(concept); setShowConceptDialog(true) }
+    }
+    // TODO: Formation/group editing in future
+  }
+
+  const handleDeleteConcept = (id: number, type: 'concept' | 'formation' | 'group') => {
+    setConceptToDelete({ id, type })
+    setShowDeleteConceptModal(true)
+  }
+
+  const confirmDeleteConcept = async () => {
+    if (!conceptToDelete) return
+    const { id, type } = conceptToDelete
+    if (type === 'concept') await deleteConcept(id)
+    else if (type === 'formation') await deleteFormation(id)
+    else if (type === 'group') await deleteConceptGroup(id)
+    setShowDeleteConceptModal(false)
+    setConceptToDelete(null)
+  }
+
+  const handleDuplicateConcept = async (id: number, type: 'concept' | 'formation' | 'group') => {
+    // TODO: Implement duplication
+  }
+
+  const handleSaveConcept = async (data: Partial<BaseConcept>) => {
+    if (editingConcept) await updateConcept(editingConcept.id, data)
+    else await createConcept(data as any)
+    setShowConceptDialog(false)
+    setEditingConcept(null)
+  }
+
   async function handleNewPlay() {
     if (!newItemName.trim()) return
 
