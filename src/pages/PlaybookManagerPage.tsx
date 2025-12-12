@@ -22,7 +22,8 @@ export function PlaybookManagerPage() {
 		error: playbooksError,
 		createPlaybook,
 		updatePlaybook,
-		deletePlaybook
+		deletePlaybook,
+		toggleStar
 	} = usePlaybooksData(currentTeamId)
 	const {
 		folders,
@@ -111,6 +112,10 @@ export function PlaybookManagerPage() {
 		// TODO: Implement single playbook export
 	}
 
+	const handleToggleStar = async (id: number) => {
+		await toggleStar(id)
+	}
+
 	const handleRenamePrompt = useCallback((id: number, currentName: string) => {
 		const newName = prompt('Rename playbook:', currentName)
 		if (newName?.trim()) {
@@ -186,11 +191,13 @@ export function PlaybookManagerPage() {
 										type="playbook"
 										playCount={playbook.play_count}
 										lastModified={new Date(playbook.updated_at).toLocaleDateString()}
+										isStarred={playbook.is_starred}
 										onRename={() => handleRenamePrompt(playbook.id, playbook.name)}
 										onDelete={() => handleDeletePrompt(playbook.id, playbook.name)}
 										onDuplicate={handleDuplicate}
 										onExport={handleExportPlaybook}
 										onShare={handleShare}
+										onToggleStar={handleToggleStar}
 									/>
 								))}
 							</div>
@@ -213,11 +220,13 @@ export function PlaybookManagerPage() {
 										type="playbook"
 										playCount={playbook.play_count}
 										lastModified={new Date(playbook.updated_at).toLocaleDateString()}
+										isStarred={playbook.is_starred}
 										onRename={() => handleRenamePrompt(playbook.id, playbook.name)}
 										onDelete={() => handleDeletePrompt(playbook.id, playbook.name)}
 										onDuplicate={handleDuplicate}
 										onExport={handleExportPlaybook}
 										onShare={handleShare}
+										onToggleStar={handleToggleStar}
 									/>
 								))}
 							</div>
