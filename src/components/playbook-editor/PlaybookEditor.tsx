@@ -12,7 +12,7 @@ import { useTheme } from '@/contexts/SettingsContext'
 import { usePlaybookData } from '@/hooks/usePlaybookData'
 import { useConceptData } from '@/hooks/useConceptData'
 import { ConceptCard } from './ConceptCard'
-import { ConceptsToolbar, type ConceptFilter } from './ConceptsToolbar'
+import type { ConceptFilter } from './ConceptsToolbar'
 import { ConceptDialog } from '@/components/concepts/ConceptDialog'
 import type { BaseConcept } from '@/types/concept.types'
 
@@ -34,6 +34,21 @@ type ConceptToDelete = {
 	type: ConceptType
 }
 
+// Button style constants
+const BUTTON_ACTIVE =
+	'bg-action-button text-action-button-foreground hover:bg-action-button/90'
+const BUTTON_INACTIVE = 'border border-border hover:bg-accent'
+
+// Concept filters
+const CONCEPT_FILTERS = [
+	{ id: 'all' as const, label: 'All' },
+	{ id: 'routes' as const, label: 'Routes' },
+	{ id: 'motions' as const, label: 'Motions' },
+	{ id: 'modifiers' as const, label: 'Modifiers' },
+	{ id: 'formations' as const, label: 'Formations' },
+	{ id: 'groups' as const, label: 'Groups' },
+]
+
 import {
   ArrowLeft,
   Search,
@@ -43,6 +58,8 @@ import {
   Upload,
   Download,
   Share2,
+  Plus,
+  FolderPlus,
 } from 'lucide-react'
 import {
   PLAY_TYPE_PASS,
@@ -576,34 +593,119 @@ function PlaybookEditorContent({
           </div>
         </div>
 
-        {/* Tab Bar */}
-        <div className="border-b border-border bg-card px-6">
-          <div className="flex gap-1">
-            {(['plays', 'concepts'] as const).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors capitalize ${
-                  activeTab === tab
-                    ? 'border-primary text-foreground'
-                    : 'border-transparent text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
+        {/* Combined Tab Bar and Toolbar */}
+        <div className="border-b border-border bg-card px-6 py-3">
+          <div className="flex items-center gap-4">
+            {/* Tabs */}
+            <div className="flex gap-1">
+              {(['plays', 'concepts'] as const).map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`px-4 py-2 text-sm font-medium
+                    transition-colors capitalize rounded-lg ${
+                      activeTab === tab
+                        ? 'bg-accent text-foreground'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                    }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+
+            <div className="w-px h-6 bg-border" />
+
+            {/* Conditional Toolbar Content */}
+            {activeTab === 'plays' ? (
+              <>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setShowNewPlayModal(true)}
+                    className={`${BUTTON_BASE} ${BUTTON_ACTIVE}
+                      flex items-center gap-2 cursor-pointer`}
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>New Play</span>
+                  </button>
+
+                  <button
+                    onClick={() => setShowNewSectionModal(true)}
+                    className={`${BUTTON_BASE} ${BUTTON_INACTIVE}
+                      flex items-center gap-2 cursor-pointer`}
+                    title="Create New Section"
+                  >
+                    <FolderPlus className="w-4 h-4" />
+                    <span>New Section</span>
+                  </button>
+                </div>
+
+                <div className="w-px h-6 bg-border" />
+
+                <div className="flex items-center gap-2 flex-1">
+                  <button
+                    onClick={() => setActiveSectionFilter(null)}
+                    className={`${BUTTON_BASE} ${
+                      activeSectionFilter == null
+                        ? BUTTON_ACTIVE
+                        : BUTTON_INACTIVE
+                    } cursor-pointer`}
+                  >
+                    All Plays
+                  </button>
+
+                  {sections.map((section) => (
+                    <button
+                      key={section.id}
+                      onClick={() => setActiveSectionFilter(section.id)}
+                      className={`${BUTTON_BASE} ${
+                        activeSectionFilter == section.id
+                          ? BUTTON_ACTIVE
+                          : BUTTON_INACTIVE
+                      } cursor-pointer`}
+                    >
+                      {section.name}
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => {
+                    setEditingConcept(null)
+                    setShowConceptDialog(true)
+                  }}
+                  className={`${BUTTON_BASE} ${BUTTON_ACTIVE}
+                    flex items-center gap-2`}
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>New Concept</span>
+                </button>
+
+                <div className="w-px h-6 bg-border" />
+
+                <div className="flex items-center gap-2 flex-1">
+                  {CONCEPT_FILTERS.map((filter) => (
+                    <button
+                      key={filter.id}
+                      onClick={() => setConceptFilter(filter.id)}
+                      className={`${BUTTON_BASE}
+                        ${conceptFilter === filter.id
+                          ? BUTTON_ACTIVE
+                          : BUTTON_INACTIVE}`}
+                    >
+                      {filter.label}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         </div>
 
         {activeTab === 'plays' ? (
           <>
-            <PlaybookEditorToolbar
-              onNewPlay={() => setShowNewPlayModal(true)}
-              onNewSection={() => setShowNewSectionModal(true)}
-              sections={sections.map(s => ({ id: s.id, name: s.name }))}
-              activeSectionFilter={activeSectionFilter}
-              onSectionFilterChange={setActiveSectionFilter}
-            />
 
             <div className="flex-1 overflow-auto">
               <div className="p-6">
@@ -682,17 +784,7 @@ function PlaybookEditorContent({
             </div>
           </>
         ) : (
-          <>
-            <ConceptsToolbar
-              onNewConcept={() => {
-                setEditingConcept(null)
-                setShowConceptDialog(true)
-              }}
-              activeFilter={conceptFilter}
-              onFilterChange={setConceptFilter}
-            />
-
-            <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 overflow-y-auto p-6">
               {conceptsLoading ? (
                 <div className="flex items-center justify-center h-64">
                   <p className="text-muted-foreground">Loading concepts...</p>
@@ -733,14 +825,16 @@ function PlaybookEditorContent({
                 </div>
               )}
             </div>
-          </>
         )}
       </div>
 
       {/* Concept Dialog */}
       <ConceptDialog
         isOpen={showConceptDialog}
-        onClose={() => { setShowConceptDialog(false); setEditingConcept(null) }}
+        onClose={() => {
+          setShowConceptDialog(false)
+          setEditingConcept(null)
+        }}
         mode={editingConcept ? 'edit' : 'create'}
         concept={editingConcept ?? undefined}
         teamId={teamId ?? ''}
