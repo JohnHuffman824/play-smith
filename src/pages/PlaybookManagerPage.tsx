@@ -230,6 +230,13 @@ export function PlaybookManagerPage() {
 				/>
 			</ResizablePanel>
 
+			{/*
+			  Keyboard accessible resize handle:
+			  - Tab to focus the handle
+			  - Arrow keys (←/→) to resize
+			  - Home/End to jump to min/max
+			  - Enter to toggle expand/collapse
+			*/}
 			<ResizableHandle
 				withHandle
 				className="hover:bg-sidebar-accent active:bg-sidebar-border transition-colors duration-200"
