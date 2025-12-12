@@ -24,4 +24,13 @@ describe('PlayTransitionContext', () => {
 		const { result } = renderHook(() => usePlayTransition(), { wrapper })
 		expect(result.current.getCardPosition('unknown-id')).toBeNull()
 	})
+
+	test('returns no-op functions when used outside provider', () => {
+		const { result } = renderHook(() => usePlayTransition())
+		expect(typeof result.current.registerCard).toBe('function')
+		expect(typeof result.current.getCardPosition).toBe('function')
+		expect(result.current.getCardPosition('any-id')).toBeNull()
+		// Should not throw when calling registerCard
+		result.current.registerCard('test-id', document.createElement('div'))
+	})
 })

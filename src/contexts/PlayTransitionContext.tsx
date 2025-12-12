@@ -36,7 +36,12 @@ export function PlayTransitionProvider({ children }: { children: ReactNode }) {
 export function usePlayTransition() {
 	const context = useContext(PlayTransitionContext)
 	if (!context) {
-		throw new Error('usePlayTransition must be used within PlayTransitionProvider')
+		// Return no-op functions when used outside provider
+		// This allows PlayCard to work in contexts without animations
+		return {
+			registerCard: () => {},
+			getCardPosition: () => null,
+		}
 	}
 	return context
 }
