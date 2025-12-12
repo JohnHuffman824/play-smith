@@ -1060,7 +1060,7 @@ export function Canvas({
         />
       )}
 
-      {/* Drawing Properties Dialog - OUTSIDE transform for correct fixed positioning */}
+      {/* Drawing Properties Dialog - outside transform */}
       {editingDrawing && (
         <DrawingPropertiesDialog
           drawing={editingDrawing.drawing}

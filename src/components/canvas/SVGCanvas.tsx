@@ -16,8 +16,6 @@ import {
 	deletePointFromDrawing,
 	insertPointIntoDrawing
 } from '../../utils/drawing.utils'
-import { convertToSharp, extractMainCoordinates } from '../../utils/curve.utils'
-import { processSmoothPath } from '../../utils/smooth-path.utils'
 import { PLAYER_RADIUS_FEET } from '../../constants/field.constants'
 
 // Constants

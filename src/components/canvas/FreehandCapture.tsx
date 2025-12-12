@@ -59,17 +59,15 @@ export function FreehandCapture({
 		if (!ctx) return
 
 		const rect = canvas.getBoundingClientRect()
-		// Coordinates relative to the transformed canvas element
 		const screenRelative = {
 			x: event.clientX - rect.left,
 			y: event.clientY - rect.top,
 		}
-		// Convert to canvas internal coordinates (divide by zoom since we're inside transform)
+		// getBoundingClientRect accounts for CSS transform scaling
 		const canvasPixel = {
-			x: screenRelative.x / zoom,
-			y: screenRelative.y / zoom,
+			x: screenRelative.x,
+			y: screenRelative.y,
 		}
-		// Use pixelsToFeet directly (NOT screenToFeet) since we're already in canvas space
 		const feet = coordSystem.pixelsToFeet(canvasPixel.x, canvasPixel.y)
 
 		ctx.strokeStyle = style.color
@@ -91,17 +89,14 @@ export function FreehandCapture({
 		if (!ctx) return
 
 		const rect = canvas.getBoundingClientRect()
-		// Coordinates relative to the transformed canvas element
 		const screenRelative = {
 			x: event.clientX - rect.left,
 			y: event.clientY - rect.top,
 		}
-		// Convert to canvas internal coordinates (divide by zoom since we're inside transform)
 		const canvasPixel = {
-			x: screenRelative.x / zoom,
-			y: screenRelative.y / zoom,
+			x: screenRelative.x,
+			y: screenRelative.y,
 		}
-		// Use pixelsToFeet directly (NOT screenToFeet) since we're already in canvas space
 		const feet = coordSystem.pixelsToFeet(canvasPixel.x, canvasPixel.y)
 
 		ctx.lineTo(canvasPixel.x, canvasPixel.y)
@@ -178,9 +173,7 @@ export function FreehandCapture({
 	function resizeCanvas() {
 		const canvas = canvasRef.current
 		if (!canvas) return
-		// Use natural dimensions from coordSystem, NOT getBoundingClientRect()
-		// getBoundingClientRect() returns TRANSFORMED dimensions which causes
-		// double-scaling when the canvas is inside a CSS transform container
+		// coordSystem provides untransformed dimensions
 		const { width, height } = coordSystem.getDimensions()
 		canvas.width = width
 		canvas.height = height
@@ -194,7 +187,7 @@ export function FreehandCapture({
 		const observer = new ResizeObserver(() => resizeCanvas())
 		observer.observe(canvas)
 		return () => observer.disconnect()
-	}, [])
+	}, [coordSystem])
 
 	return (
 		<canvas
