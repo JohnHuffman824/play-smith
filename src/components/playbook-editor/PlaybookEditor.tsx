@@ -4,6 +4,7 @@ import { PlayCard } from './PlayCard'
 import { PlayListView } from './PlayListView'
 import { Modal } from '@/components/shared/Modal'
 import { Input } from '../ui/input'
+import { SearchInput } from '../ui/search-input'
 import { UnifiedSettingsDialog } from '@/components/shared/UnifiedSettingsDialog'
 import { ShareDialog } from '@/components/shared/ShareDialog'
 import { AnimationDialog } from '@/components/animation/AnimationDialog'
@@ -514,23 +515,12 @@ function PlaybookEditorContent({
               
               <div className="w-px self-stretch bg-border ml-2" />
 
-              <div className="relative min-w-[400px]">
-                <Search 
-                  className="absolute left-3 top-1/2 -translate-y-1/2 
-                    w-5 h-5 text-muted-foreground" 
-                />
-                <input
-                  type="text"
-                  placeholder="Search plays, formations, tags..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-11 pr-4 py-2.5 
-                    bg-input-background text-foreground 
-                    placeholder:text-muted-foreground rounded-lg 
-                    border-0 outline-none focus:ring-2 
-                    focus:ring-ring/20 transition-all duration-200"
-                />
-              </div>
+              <SearchInput
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Search plays, formations, tags..."
+                className="min-w-[400px]"
+              />
             </div>
 
             <div className="flex items-center gap-2">

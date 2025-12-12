@@ -1,5 +1,5 @@
-import { X } from 'lucide-react'
 import { useTheme } from '@/contexts/SettingsContext'
+import { DialogCloseButton } from '../../ui/dialog-close-button'
 
 interface ColorPickerDialogProps {
   currentColor: string
@@ -40,12 +40,7 @@ export function ColorPickerDialog({ currentColor, onColorChange, onClose, positi
       className={`${useRelativePosition ? '' : `absolute ${positionClasses}`} w-64 rounded-2xl shadow-2xl border border-border bg-popover p-4 z-50`}>
       <div className="flex items-center justify-between mb-4">
         <span className="text-foreground">Pick Color</span>
-        <button
-          onClick={onClose}
-          className="w-6 h-6 rounded-lg flex items-center justify-center cursor-pointer hover:bg-accent text-muted-foreground"
-        >
-          <X size={16} />
-        </button>
+        <DialogCloseButton onClose={onClose} />
       </div>
 
       {/* Custom Color Input */}

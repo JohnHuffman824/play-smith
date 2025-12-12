@@ -32,13 +32,15 @@ import { DrawingDialog } from './dialogs/DrawingDialog'
 import { ConfirmDialog } from './dialogs/ConfirmDialog'
 import { HashDialog } from './dialogs/HashDialog'
 import { UnifiedSettingsDialog } from '../shared/UnifiedSettingsDialog'
-import { Tooltip } from './Tooltip'
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip'
+import { ToolbarButton } from '../ui/toolbar-button'
 import { useTheme } from '@/contexts/SettingsContext'
 import { EraserIcon } from './icons/EraserIcon'
 import { HashIcon } from './icons/HashIcon'
 import { ColorSwatchIndicator } from './ColorSwatchIndicator'
 import { usePlayContext } from '../../contexts/PlayContext'
 import { areLinemenAtDefaultPositions } from '../../utils/lineman.utils'
+import { cn } from '../ui/utils'
 
 interface ToolbarProps {
 	drawingState: DrawingState
@@ -85,17 +87,14 @@ export function Toolbar({
 	const [columnCount, setColumnCount] = useState(1)
 	const [rowsPerColumn, setRowsPerColumn] = useState(14)
 	const drawDialogRef = useRef<HTMLDivElement>(null)
-	const baseButtonClass = [
+
+	// Base styles for special buttons (Save, Delete) that don't use ToolbarButton
+	const baseButtonClass = cn(
 		'w-14 h-14 rounded-xl flex items-center justify-center',
-		'transition-all cursor-pointer',
-	].join(' ')
-	const darkNeutralClass = 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-	const lightNeutralClass = 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-	const lightToggleClass = 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-	const statusDotClass = [
-		'absolute -right-1 -top-1 w-3 h-3 bg-green-500',
-		'rounded-full border-2 border-white',
-	].join(' ')
+		'cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50',
+		'transition-all duration-200'
+	)
+	const statusDotClass = 'absolute -right-1 -top-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white'
 
 	function handleSnapThresholdChange(value: number) {
 		setDrawingState({ ...drawingState, snapThreshold: value })
@@ -258,31 +257,6 @@ export function Toolbar({
 		return () => window.removeEventListener('resize', calculateLayout)
 	}, [])
 
-	function toolButtonClass(isActive: boolean) {
-		const activeClass = 'bg-blue-500 text-white shadow-lg scale-105'
-		const variant = isActive
-			? activeClass
-			: theme == 'dark'
-				? darkNeutralClass
-				: lightNeutralClass
-		return `${baseButtonClass} ${variant}`
-	}
-
-	function neutralButtonClass(lightVariant: string) {
-		return `${baseButtonClass} ${
-			theme == 'dark' ? darkNeutralClass : lightVariant
-		}`
-	}
-
-	function coloredButtonClass(
-		lightVariant: string,
-		darkVariant: string,
-	) {
-		return `${baseButtonClass} ${
-			theme == 'dark' ? darkVariant : lightVariant
-		}`
-	}
-
 	function handleToolChange(tool: Tool) {
 		// Close all dialogs when switching tools
 		closeAllDialogs()
@@ -383,7 +357,7 @@ export function Toolbar({
 	}
 
 	return (
-		<>
+		<TooltipProvider>
 			<div
 				className="h-full border-r bg-card border-border"
 				style={{
@@ -400,259 +374,252 @@ export function Toolbar({
 				}}
 			>
 				{/* Select Tool */}
-				<Tooltip content='Select (S)'>
-					<button
-						onClick={() => handleToolChange('select')}
-						className={toolButtonClass(
-							drawingState.tool == 'select',
-						)}
-					>
-						<MousePointer size={22} />
-					</button>
-				</Tooltip>
+				<ToolbarButton
+					icon={MousePointer}
+					tooltip='Select (S)'
+					isActive={drawingState.tool == 'select'}
+					onClick={() => handleToolChange('select')}
+				/>
 
 				{/* Add Player Tool */}
-				<Tooltip content='Add Player (A)'>
-					<button
-						onClick={() => {
-							handleToolChange('addPlayer')
-							handleAddPlayer()
-						}}
-						className={toolButtonClass(
-							drawingState.tool == 'addPlayer',
-						)}
-					>
-						<UserPlus size={22} />
-					</button>
+				<ToolbarButton
+					icon={UserPlus}
+					tooltip='Add Player (A)'
+					isActive={drawingState.tool == 'addPlayer'}
+					onClick={() => {
+						handleToolChange('addPlayer')
+						handleAddPlayer()
+					}}
+				/>
+
+				{/* Draw Tool - Custom due to status dot */}
+				<ToolbarButton
+					icon={Pencil}
+					tooltip='Draw (D)'
+					isActive={drawingState.tool == 'draw'}
+					onClick={() => handleToolChange('draw')}
+					className={drawingState.tool == 'draw' ? 'relative' : ''}
+				>
+					{drawingState.tool == 'draw' && (
+						<div className={statusDotClass} />
+					)}
+				</ToolbarButton>
+
+				{/* Erase Tool - Custom icon (EraserIcon not a Lucide icon) */}
+				{/* Note: Keeping as custom button since EraserIcon is not a LucideIcon */}
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<button
+							onClick={() => {
+								// Close all dialogs first
+								closeAllDialogs()
+
+								// If already on erase tool, toggle the dialog
+								if (drawingState.tool == 'erase') {
+									setShowEraseDialog(!showEraseDialog)
+								} else {
+									// Switch to erase tool and show dialog
+									setDrawingState({ ...drawingState, tool: 'erase' })
+									setShowEraseDialog(true)
+								}
+							}}
+							className={cn(
+								baseButtonClass,
+								drawingState.tool == 'erase'
+									? "bg-action-button text-action-button-foreground shadow-lg"
+									: "border border-border hover:bg-accent hover:text-foreground"
+							)}
+							style={drawingState.tool !== 'erase' ? { color: 'var(--icon-muted)' } : undefined}
+						>
+							<EraserIcon />
+						</button>
+					</TooltipTrigger>
+					<TooltipContent side="right">Erase (E)</TooltipContent>
 				</Tooltip>
 
-				{/* Draw Tool */}
-				<Tooltip content='Draw (D)'>
-					<button
-						onClick={() => handleToolChange('draw')}
-						className={`${
-							toolButtonClass(drawingState.tool == 'draw')
-						} relative`}
-					>
-						<Pencil size={22} />
-						{drawingState.tool == 'draw' && (
-							<div className={statusDotClass} />
-						)}
-					</button>
-				</Tooltip>
-
-				{/* Erase Tool */}
-				<Tooltip content='Erase (E)'>
-					<button
-						onClick={() => {
-							// Close all dialogs first
-							closeAllDialogs()
-
-							// If already on erase tool, toggle the dialog
-							if (drawingState.tool == 'erase') {
-								setShowEraseDialog(!showEraseDialog)
-							} else {
-								// Switch to erase tool and show dialog
-								setDrawingState({ ...drawingState, tool: 'erase' })
-								setShowEraseDialog(true)
-							}
-						}}
-						className={toolButtonClass(
-							drawingState.tool == 'erase',
-						)}
-					>
-						<EraserIcon />
-					</button>
-				</Tooltip>
-
-				{/* Color Tool */}
-				<Tooltip content='Pick Color (C)'>
-					<button
-						onClick={() => handleToolChange('color')}
-						className={`${
-							toolButtonClass(showColorPicker)
-						} relative`}
-					>
-						<Palette size={22} />
-						<ColorSwatchIndicator color={drawingState.color} />
-					</button>
-				</Tooltip>
+				{/* Color Tool - Custom with color swatch overlay */}
+				<ToolbarButton
+					icon={Palette}
+					tooltip='Pick Color (C)'
+					isActive={showColorPicker}
+					onClick={() => handleToolChange('color')}
+					className="relative"
+				>
+					<ColorSwatchIndicator color={drawingState.color} />
+				</ToolbarButton>
 
 				{/* Fill Color Tool */}
-				<Tooltip content='Fill Color (F)'>
-					<button
-						onClick={() => handleToolChange('fill')}
-						className={`${toolButtonClass(drawingState.tool == 'fill')} relative`}
-					>
-						<PaintBucket size={22} style={{ transform: 'scaleX(-1)' }} />
-					</button>
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<button
+							onClick={() => handleToolChange('fill')}
+							className={cn(
+								baseButtonClass,
+								"relative",
+								drawingState.tool == 'fill'
+									? "bg-action-button text-action-button-foreground shadow-lg"
+									: "border border-border hover:bg-accent hover:text-foreground"
+							)}
+							style={drawingState.tool !== 'fill' ? { color: 'var(--icon-muted)' } : undefined}
+						>
+							<PaintBucket className="w-6 h-6" style={{ transform: 'scaleX(-1)' }} />
+						</button>
+					</TooltipTrigger>
+					<TooltipContent side="right">Fill Color (F)</TooltipContent>
 				</Tooltip>
 
 				{/* Undo Button */}
-				<Tooltip content='Undo (⌘Z)'>
-					<button
-						onClick={() => eventBus.emit('canvas:undo')}
-						className={neutralButtonClass(lightNeutralClass)}
-					>
-						<Undo2 size={22} />
-					</button>
+				<ToolbarButton
+					icon={Undo2}
+					tooltip='Undo (⌘Z)'
+					onClick={() => eventBus.emit('canvas:undo')}
+				/>
+
+				{/* Drawing Tool - Custom icon transform */}
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<button
+							onClick={() => handleToolChange('drawing')}
+							className={cn(
+								baseButtonClass,
+								showDrawingDialog
+									? "bg-action-button text-action-button-foreground shadow-lg"
+									: "border border-border hover:bg-accent hover:text-foreground"
+							)}
+							style={!showDrawingDialog ? { color: 'var(--icon-muted)' } : undefined}
+						>
+							<ArrowDown
+								className="w-6 h-6"
+								style={{ transform: 'rotate(-45deg)' }}
+							/>
+						</button>
+					</TooltipTrigger>
+					<TooltipContent side="right">Add Drawing (R)</TooltipContent>
 				</Tooltip>
 
-				{/* Drawing Tool */}
-				<Tooltip content='Add Drawing (R)'>
-					<button
-						onClick={() => handleToolChange('drawing')}
-						className={toolButtonClass(showDrawingDialog)}
-					>
-						<ArrowDown
-							size={24}
-							style={{
-								transform: 'rotate(-45deg)',
+				{/* Hash Marker Tool - Custom icon (HashIcon not a Lucide icon) */}
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<button
+							onClick={() => {
+								closeAllDialogs()
+								setShowHashDialog(!showHashDialog)
 							}}
-						/>
-					</button>
-				</Tooltip>
-
-				{/* Hash Marker Tool */}
-				<Tooltip content='Ball on Hash (H)'>
-					<button
-						onClick={() => {
-							closeAllDialogs()
-							setShowHashDialog(!showHashDialog)
-						}}
-						className={toolButtonClass(showHashDialog)}
-					>
-						<HashIcon />
-					</button>
+							className={cn(
+								baseButtonClass,
+								showHashDialog
+									? "bg-action-button text-action-button-foreground shadow-lg"
+									: "border border-border hover:bg-accent hover:text-foreground"
+							)}
+							style={!showHashDialog ? { color: 'var(--icon-muted)' } : undefined}
+						>
+							<HashIcon />
+						</button>
+					</TooltipTrigger>
+					<TooltipContent side="right">Ball on Hash (H)</TooltipContent>
 				</Tooltip>
 
 				{/* Create Concept Tool */}
-				<Tooltip content='Create Concept (G)'>
-					<button
-						onClick={() => {
-							handleToolChange('addComponent')
-							handleAddComponent()
-						}}
-						className={toolButtonClass(
-							drawingState.tool == 'addComponent',
-						)}
-					>
-						<Plus size={24} />
-					</button>
-				</Tooltip>
+				<ToolbarButton
+					icon={Plus}
+					tooltip='Create Concept (G)'
+					isActive={drawingState.tool == 'addComponent'}
+					onClick={() => {
+						handleToolChange('addComponent')
+						handleAddComponent()
+					}}
+				/>
 
 				{/* Tags Button */}
-				<Tooltip content='Tags (T)'>
-					<button
-						onClick={handleToggleTags}
-						className={neutralButtonClass(lightNeutralClass)}
-					>
-						<Tag size={22} />
-					</button>
-				</Tooltip>
+				<ToolbarButton
+					icon={Tag}
+					tooltip='Tags (T)'
+					onClick={handleToggleTags}
+				/>
 
 				{/* Toggle Play Bar Button */}
-				<Tooltip
-					content={
-						showPlayBar ? 'Hide Play Bar' : 'Show Play Bar'
-					}
-				>
-					<button
-						onClick={() => setShowPlayBar(!showPlayBar)}
-						className={neutralButtonClass(lightNeutralClass)}
-					>
-						{showPlayBar ? (
-							<Eye size={22} />
-						) : (
-							<EyeOff size={22} />
-						)}
-					</button>
-				</Tooltip>
+				<ToolbarButton
+					icon={showPlayBar ? Eye : EyeOff}
+					tooltip={showPlayBar ? 'Hide Play Bar' : 'Show Play Bar'}
+					onClick={() => setShowPlayBar(!showPlayBar)}
+				/>
 
 				{/* Settings Button */}
-				<Tooltip content='Settings'>
-					<button
-						onClick={() => {
-							closeAllDialogs()
-							setShowSettingsDialog(!showSettingsDialog)
-						}}
-						className={neutralButtonClass(lightNeutralClass)}
-					>
-						<Settings size={22} />
-					</button>
-				</Tooltip>
+				<ToolbarButton
+					icon={Settings}
+					tooltip='Settings'
+					onClick={() => {
+						closeAllDialogs()
+						setShowSettingsDialog(!showSettingsDialog)
+					}}
+				/>
 
 				{/* Clear Canvas Button */}
-				<Tooltip content='Clear Canvas'>
-					<button
-						onClick={handleClearPlay}
-						className={neutralButtonClass(
-							lightNeutralClass
-						)}
-					>
-						<RotateCcw size={22} />
-					</button>
+				<ToolbarButton
+					icon={RotateCcw}
+					tooltip='Clear Canvas'
+					onClick={handleClearPlay}
+				/>
+
+				{/* Save Button - Custom with success/error states */}
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<button
+							onClick={handleSavePlay}
+							disabled={isSaving}
+							className={cn(
+								baseButtonClass,
+								"transition-transform duration-200 ease-out",
+								// Color states
+								theme == 'dark'
+									? "bg-green-900 text-green-400 hover:bg-green-800"
+									: showSuccess
+									? "bg-green-50 text-green-600 hover:bg-green-100"
+									: showError
+									? "bg-red-50 text-red-600 hover:bg-red-100"
+									: "bg-green-50 text-green-600 hover:bg-green-100",
+								// Scale animation
+								showSuccess || showError ? "scale-[1.2]" : "scale-100",
+								// Disabled state
+								isSaving && "opacity-70 cursor-not-allowed"
+							)}
+						>
+							{isSaving ? (
+								<Loader2 className="w-6 h-6 animate-spin" />
+							) : showSuccess ? (
+								<Check className="w-6 h-6" />
+							) : showError ? (
+								<X className="w-6 h-6" />
+							) : (
+								<Save className="w-6 h-6" />
+							)}
+						</button>
+					</TooltipTrigger>
+					<TooltipContent side="right">Save</TooltipContent>
 				</Tooltip>
 
-				{/* Save Button */}
-				<Tooltip content='Save'>
-					<button
-						onClick={handleSavePlay}
-						disabled={isSaving}
-						className={`${
-							showSuccess
-								? coloredButtonClass(
-										'bg-green-50 text-green-600 hover:bg-green-100',
-										'bg-green-900 text-green-400 hover:bg-green-800',
-								  )
-								: showError
-								? coloredButtonClass(
-										'bg-red-50 text-red-600 hover:bg-red-100',
-										'bg-red-900 text-red-400 hover:bg-red-800',
-								  )
-								: coloredButtonClass(
-										'bg-green-50 text-green-600 hover:bg-green-100',
-										'bg-green-900 text-green-400 hover:bg-green-800',
-								  )
-						} transition-transform duration-200 ease-out ${
-							showSuccess || showError ? 'scale-[1.2]' : 'scale-100'
-						} ${isSaving ? 'opacity-70 cursor-not-allowed' : ''}`}
-					>
-						{isSaving ? (
-							<Loader2 size={22} className="animate-spin" />
-						) : showSuccess ? (
-							<Check size={22} />
-						) : showError ? (
-							<X size={22} />
-						) : (
-							<Save size={22} />
-						)}
-					</button>
-				</Tooltip>
-
-				{/* Delete Play Button */}
-				<Tooltip content='Delete Play'>
-					<button
-						onClick={handleDeletePlay}
-						disabled={!playId || isDeleting}
-						className={`${coloredButtonClass(
-							'bg-red-50 text-red-500 hover:bg-red-100',
-							'bg-red-900 text-red-400 hover:bg-red-800',
-						)} ${
-							!playId || isDeleting
-								? 'opacity-50 cursor-not-allowed'
-								: ''
-						}`}
-					>
-						{isDeleting ? (
-							<Loader2
-								size={22}
-								className="animate-spin"
-							/>
-						) : (
-							<Trash2 size={22} />
-						)}
-					</button>
+				{/* Delete Play Button - Custom with destructive colors */}
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<button
+							onClick={handleDeletePlay}
+							disabled={!playId || isDeleting}
+							className={cn(
+								baseButtonClass,
+								theme == 'dark'
+									? "bg-red-900 text-red-400 hover:bg-red-800"
+									: "bg-red-50 text-red-500 hover:bg-red-100",
+								(!playId || isDeleting) && "opacity-50 cursor-not-allowed"
+							)}
+						>
+							{isDeleting ? (
+								<Loader2 className="w-6 h-6 animate-spin" />
+							) : (
+								<Trash2 className="w-6 h-6" />
+							)}
+						</button>
+					</TooltipTrigger>
+					<TooltipContent side="right">Delete Play</TooltipContent>
 				</Tooltip>
 			</div>
 
@@ -749,6 +716,6 @@ export function Toolbar({
 				onClose={() => setShowSettingsDialog(false)}
 				context="play-editor"
 			/>
-		</>
+		</TooltipProvider>
 	)
 }

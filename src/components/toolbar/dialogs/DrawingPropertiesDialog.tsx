@@ -1,6 +1,6 @@
-import { X } from 'lucide-react'
 import type { Drawing, PathStyle } from '../../../types/drawing.types'
 import type { FieldCoordinateSystem } from '../../../utils/coordinates'
+import { DialogCloseButton } from '../../ui/dialog-close-button'
 
 interface DrawingPropertiesDialogProps {
 	drawing: Drawing
@@ -65,12 +65,7 @@ export function DrawingPropertiesDialog({
 				<span className="text-foreground">
 					Edit Drawing
 				</span>
-				<button
-					onClick={onClose}
-					className="w-6 h-6 rounded-lg flex items-center justify-center cursor-pointer hover:bg-accent text-muted-foreground outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-				>
-					<X size={16} />
-				</button>
+				<DialogCloseButton onClose={onClose} />
 			</div>
 
 			{/* Color */}

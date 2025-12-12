@@ -7,6 +7,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { cn } from '@/components/ui/utils'
+
+const CARD_ACTION_BUTTON = 'p-1.5 rounded-lg bg-card/90 backdrop-blur-sm border border-border transition-opacity duration-200 hover:bg-accent z-10 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50'
 
 type PlaybookCardProps = {
 	id: number
@@ -70,7 +73,7 @@ export function PlaybookCard({
 						{/* Star Button - Always visible in top-left */}
 						{onToggleStar && (
 							<button
-								className="absolute top-2 left-2 p-1.5 rounded-lg bg-card/90 backdrop-blur-sm border border-border transition-opacity duration-200 hover:bg-accent z-10"
+								className={cn(CARD_ACTION_BUTTON, "absolute top-2 left-2")}
 								onClick={(e) => {
 									e.stopPropagation()
 									onToggleStar(id)
@@ -84,7 +87,7 @@ export function PlaybookCard({
 						)}
 						{onShare && (
 							<button
-								className="absolute top-2 right-20 p-1.5 rounded-lg bg-card/90 backdrop-blur-sm border border-border opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-accent z-10"
+								className={cn(CARD_ACTION_BUTTON, "absolute top-2 right-20 opacity-0 group-hover:opacity-100")}
 								onClick={(e) => {
 									e.stopPropagation()
 									onShare(id)
@@ -96,7 +99,7 @@ export function PlaybookCard({
 						)}
 						{onExport && (
 							<button
-								className="absolute top-2 right-11 p-1.5 rounded-lg bg-card/90 backdrop-blur-sm border border-border opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-accent z-10"
+								className={cn(CARD_ACTION_BUTTON, "absolute top-2 right-11 opacity-0 group-hover:opacity-100")}
 								onClick={(e) => {
 									e.stopPropagation()
 									onExport(id)
@@ -113,7 +116,7 @@ export function PlaybookCard({
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
 						<button
-							className="absolute top-2 right-2 p-1.5 rounded-lg bg-card/90 backdrop-blur-sm border border-border opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-accent z-10 cursor-pointer"
+							className={cn(CARD_ACTION_BUTTON, "absolute top-2 right-2 opacity-0 group-hover:opacity-100")}
 							onClick={(e) => {
 								e.stopPropagation()
 							}}

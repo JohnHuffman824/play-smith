@@ -1,5 +1,5 @@
-import { X } from 'lucide-react'
 import { eventBus } from '../../../services/EventBus'
+import { DialogCloseButton } from '../../ui/dialog-close-button'
 
 interface RouteDialogProps {
   onClose: () => void
@@ -28,8 +28,6 @@ export function RouteDialog({ onClose }: RouteDialogProps) {
     'w-full p-3 rounded-xl border border-border bg-muted hover:bg-accent hover:border-action-button transition-all duration-200 text-left group cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50'
   const numberBadgeClass =
     'w-8 h-8 rounded-lg bg-action-button text-action-button-foreground flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform font-semibold'
-  const closeButtonClass =
-    'w-6 h-6 rounded-lg flex items-center justify-center cursor-pointer hover:bg-accent text-muted-foreground outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50'
 
   const handleRouteSelect = (route: typeof routes[0]) => {
     eventBus.emit('drawing:add', { drawing: route })
@@ -42,12 +40,7 @@ export function RouteDialog({ onClose }: RouteDialogProps) {
       className={containerClass}>
       <div className={headerClass}>
         <span className="text-foreground">Add Drawing</span>
-        <button
-          onClick={onClose}
-          className={closeButtonClass}
-        >
-          <X size={16} />
-        </button>
+        <DialogCloseButton onClose={onClose} />
       </div>
 
       <div className="space-y-2">

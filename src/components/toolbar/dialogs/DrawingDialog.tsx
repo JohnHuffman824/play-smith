@@ -1,7 +1,8 @@
-import { X, Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { eventBus } from '../../../services/EventBus'
 import type { Drawing } from '../../../types/drawing.types'
+import { DialogCloseButton } from '../../ui/dialog-close-button'
 
 interface DrawingDialogProps {
 	onClose: () => void
@@ -38,8 +39,6 @@ export function DrawingDialog({ onClose }: DrawingDialogProps) {
 		'flex items-center justify-between mb-4 sticky top-0 pb-2 border-b border-border bg-popover'
 	const itemClass =
 		'w-full p-3 rounded-xl border border-border bg-muted hover:bg-accent hover:border-action-button transition-all text-left group cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50'
-	const closeButtonClass =
-		'w-6 h-6 rounded-lg flex items-center justify-center cursor-pointer hover:bg-accent text-muted-foreground outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50'
 
 	useEffect(() => {
 		async function fetchRoutes() {
@@ -85,12 +84,7 @@ export function DrawingDialog({ onClose }: DrawingDialogProps) {
 			className={containerClass}>
 			<div className={headerClass}>
 				<span className="text-foreground">Add Drawing</span>
-				<button
-					onClick={onClose}
-					className={closeButtonClass}
-				>
-					<X size={16} />
-				</button>
+				<DialogCloseButton onClose={onClose} />
 			</div>
 
 			{loading && (

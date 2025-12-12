@@ -49,7 +49,7 @@ export function Sidebar({
 	}
 
 	return (
-		<div className="border-r border-sidebar-border bg-sidebar h-screen sticky top-0 flex flex-col">
+		<div className="border-r border-sidebar-border bg-sidebar-primary h-screen sticky top-0 flex flex-col">
 			{/* Logo/Header */}
 			<div className="border-b border-sidebar-border" style={{ height: `${HEADER_HEIGHT}px` }}>
 				<div className="px-6 h-full flex items-center">

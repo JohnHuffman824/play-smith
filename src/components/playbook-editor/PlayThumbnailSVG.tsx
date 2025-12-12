@@ -509,29 +509,7 @@ export function PlayThumbnailSVG({ drawings, players = [], className }: PlayThum
 			{/* Field markers (yard lines, hash marks, LOS) */}
 			{renderFieldBackground(viewBoxWidth, viewBoxHeight, padding, theme)}
 
-			{/* Render players */}
-			{players.map((player) => {
-				const pos = transformPoint(
-					{ x: player.x, y: player.y },
-					viewBoxWidth,
-					viewBoxHeight,
-					padding
-				)
-				const radius = PLAYER_RADIUS_FEET * scale
-				return (
-					<circle
-						key={player.id}
-						cx={pos.x}
-						cy={pos.y}
-						r={radius}
-						fill={player.color}
-						stroke={playerStroke}
-						strokeWidth={0.5}
-					/>
-				)
-			})}
-
-			{/* Render drawings on top */}
+			{/* Render drawings */}
 			{drawings.map((drawing, index) => {
 				const pathString = buildPathString(
 					drawing,
@@ -580,6 +558,28 @@ export function PlayThumbnailSVG({ drawings, players = [], className }: PlayThum
 							/>
 						)}
 					</g>
+				)
+			})}
+
+			{/* Render players on top */}
+			{players.map((player) => {
+				const pos = transformPoint(
+					{ x: player.x, y: player.y },
+					viewBoxWidth,
+					viewBoxHeight,
+					padding
+				)
+				const radius = PLAYER_RADIUS_FEET * scale
+				return (
+					<circle
+						key={player.id}
+						cx={pos.x}
+						cy={pos.y}
+						r={radius}
+						fill={player.color}
+						stroke={playerStroke}
+						strokeWidth={0.5}
+					/>
 				)
 			})}
 		</svg>

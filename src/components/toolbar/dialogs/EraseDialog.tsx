@@ -1,4 +1,4 @@
-import { X } from 'lucide-react'
+import { DialogCloseButton } from '../../ui/dialog-close-button'
 
 interface EraseDialogProps {
   eraseSize: number
@@ -23,12 +23,7 @@ export function EraseDialog({
       className="absolute left-24 top-32 w-64 rounded-2xl shadow-2xl bg-popover border border-border p-4 z-50">
       <div className="flex items-center justify-between mb-4">
         <span className="text-foreground">Erase</span>
-        <button
-          onClick={onClose}
-          className="w-6 h-6 rounded-lg flex items-center justify-center cursor-pointer hover:bg-accent text-muted-foreground outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-        >
-          <X size={16} />
-        </button>
+        <DialogCloseButton onClose={onClose} />
       </div>
 
       {/* Erase Size */}
