@@ -19,6 +19,7 @@ import { eventBus } from '../services/EventBus'
 import { createDefaultLinemen } from '../utils/lineman.utils'
 import { Modal } from '../components/shared/Modal'
 import { Input } from '../components/ui/input'
+import { ConfirmDialog } from '../components/toolbar/dialogs/ConfirmDialog'
 import {
 	CHIP_TYPE_FORMATION,
 	CHIP_TYPE_CONCEPT,
@@ -93,6 +94,11 @@ function PlayEditorContent() {
 	const [showDeleteModal, setShowDeleteModal] = useState(false)
 	const [modalTargetPlayId, setModalTargetPlayId] = useState<string | null>(null)
 	const [targetPlayName, setTargetPlayName] = useState('')
+	const [showUnsavedChangesDialog, setShowUnsavedChangesDialog] = useState(false)
+	const [initialPlayState, setInitialPlayState] = useState<{
+		players: any[]
+		drawings: any[]
+	} | null>(null)
 
 	/**
 	 * Unified delete method for removing selected objects.
@@ -234,6 +240,14 @@ function PlayEditorContent() {
 
 				// Mark play as loaded after all data is fetched
 				setIsPlayLoaded(true)
+
+				// Store initial state for unsaved changes detection
+				setInitialPlayState({
+					players: play.players?.length > 0
+						? play.players
+						: createDefaultLinemen(play.hashAlignment || 'middle'),
+					drawings: play.drawings || []
+				})
 			} catch (error) {
 				console.error('Load error:', error)
 				setIsPlayLoaded(true)
@@ -321,7 +335,28 @@ function PlayEditorContent() {
 		return () => eventBus.off('tags:openDialog', handleOpenTagDialog)
 	}, [])
 
+	function hasUnsavedChanges(): boolean {
+		if (!initialPlayState) return false
+
+		// Compare players
+		const playersChanged = JSON.stringify(playState.players) !== JSON.stringify(initialPlayState.players)
+
+		// Compare drawings
+		const drawingsChanged = JSON.stringify(playState.drawings) !== JSON.stringify(initialPlayState.drawings)
+
+		return playersChanged || drawingsChanged
+	}
+
 	function handleBackToPlaybook() {
+		if (hasUnsavedChanges()) {
+			setShowUnsavedChangesDialog(true)
+			return
+		}
+
+		navigateBackToPlaybook()
+	}
+
+	function navigateBackToPlaybook() {
 		if (playbookId) {
 			navigate(`/playbooks/${playbookId}`)
 		} else if (teamId) {
@@ -722,6 +757,22 @@ function PlayEditorContent() {
 				</div>
 			</div>
 		</Modal>
+
+		{/* Unsaved Changes Dialog */}
+		{showUnsavedChangesDialog && (
+			<ConfirmDialog
+				title="Unsaved Changes"
+				message="You have unsaved changes. Are you sure you want to leave? Your changes will be lost."
+				confirmLabel="Leave Without Saving"
+				cancelLabel="Stay"
+				variant="danger"
+				onConfirm={() => {
+					setShowUnsavedChangesDialog(false)
+					navigateBackToPlaybook()
+				}}
+				onCancel={() => setShowUnsavedChangesDialog(false)}
+			/>
+		)}
 
 		{/* Tag Dialog */}
 			<TagDialog
