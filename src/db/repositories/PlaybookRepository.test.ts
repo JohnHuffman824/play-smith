@@ -256,4 +256,86 @@ describe('PlaybookRepository', () => {
 		// Cleanup
 		await db`DELETE FROM folders WHERE id = ${folder.id}`
 	})
+
+	test('toggleStar - star an unstarred playbook', async () => {
+		// Create a new playbook (default is_starred = false)
+		const playbook = await playbookRepo.create({
+			team_id: null,
+			name: 'Unstarred Playbook',
+			created_by: testUserId,
+		})
+
+		// Verify it starts unstarred (PostgreSQL returns 0 for false)
+		expect(playbook.is_starred).toBeFalsy()
+
+		// Toggle to starred
+		const starred = await playbookRepo.toggleStar(playbook.id)
+
+		expect(starred).not.toBeNull()
+		expect(starred?.is_starred).toBeTruthy()
+		expect(starred?.id).toBe(playbook.id)
+
+		// Cleanup
+		await db`DELETE FROM playbooks WHERE id = ${playbook.id}`
+	})
+
+	test('toggleStar - unstar a starred playbook', async () => {
+		// Create a new playbook
+		const playbook = await playbookRepo.create({
+			team_id: null,
+			name: 'Starred Playbook',
+			created_by: testUserId,
+		})
+
+		// Star it first
+		await playbookRepo.toggleStar(playbook.id)
+
+		// Verify it's starred (PostgreSQL returns 1 for true)
+		const starredPlaybook = await playbookRepo.findById(playbook.id)
+		expect(starredPlaybook?.is_starred).toBeTruthy()
+
+		// Toggle to unstarred
+		const unstarred = await playbookRepo.toggleStar(playbook.id)
+
+		expect(unstarred).not.toBeNull()
+		expect(unstarred?.is_starred).toBeFalsy()
+		expect(unstarred?.id).toBe(playbook.id)
+
+		// Cleanup
+		await db`DELETE FROM playbooks WHERE id = ${playbook.id}`
+	})
+
+	test('toggleStar - multiple toggles work correctly', async () => {
+		// Create a new playbook
+		const playbook = await playbookRepo.create({
+			team_id: null,
+			name: 'Toggle Test Playbook',
+			created_by: testUserId,
+		})
+
+		// Initial state: unstarred (PostgreSQL returns 0 for false)
+		expect(playbook.is_starred).toBeFalsy()
+
+		// First toggle: star
+		const toggle1 = await playbookRepo.toggleStar(playbook.id)
+		expect(toggle1?.is_starred).toBeTruthy()
+
+		// Second toggle: unstar
+		const toggle2 = await playbookRepo.toggleStar(playbook.id)
+		expect(toggle2?.is_starred).toBeFalsy()
+
+		// Third toggle: star again
+		const toggle3 = await playbookRepo.toggleStar(playbook.id)
+		expect(toggle3?.is_starred).toBeTruthy()
+
+		// Cleanup
+		await db`DELETE FROM playbooks WHERE id = ${playbook.id}`
+	})
+
+	test('toggleStar - returns null for non-existent playbook', async () => {
+		const nonExistentId = 999999999
+		const result = await playbookRepo.toggleStar(nonExistentId)
+
+		expect(result).toBeNull()
+	})
 })

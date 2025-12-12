@@ -95,6 +95,17 @@ export class PlaybookRepository {
 		await db`DELETE FROM playbooks WHERE id = ${id}`
 	}
 
+	// Toggles the starred status of a playbook
+	async toggleStar(id: number): Promise<Playbook | null> {
+		const [playbook] = await db<Playbook[]>`
+			UPDATE playbooks
+			SET is_starred = NOT COALESCE(is_starred, false)
+			WHERE id = ${id}
+			RETURNING *
+		`
+		return playbook ?? null
+	}
+
 	// Fetches all playbooks accessible to user with play counts in single query
 	async getUserPlaybooksWithCounts(
 		userId: number,
