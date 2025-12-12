@@ -9,6 +9,7 @@ import { TeamRepository } from '../../src/db/repositories/TeamRepository'
 import { PlaybookRepository } from '../../src/db/repositories/PlaybookRepository'
 import { SectionRepository } from '../../src/db/repositories/SectionRepository'
 import { SessionRepository } from '../../src/db/repositories/SessionRepository'
+import { FolderRepository } from '../../src/db/repositories/FolderRepository'
 
 // Track created IDs for cleanup
 export interface TestFixtures {
@@ -38,6 +39,11 @@ export interface CreateSectionOptions {
 	playbookId: number
 	name?: string
 	displayOrder?: number
+}
+
+export interface CreateFolderOptions {
+	userId: number
+	name?: string
 }
 
 /**
@@ -96,6 +102,17 @@ export async function createTestSection(options: CreateSectionOptions) {
 		options.name ?? 'Test Section',
 		options.displayOrder ?? 0
 	)
+}
+
+/**
+ * Creates a test folder for a user
+ */
+export async function createTestFolder(options: CreateFolderOptions) {
+	const folderRepo = new FolderRepository()
+	return await folderRepo.create({
+		user_id: options.userId,
+		name: options.name ?? `Test Folder ${Date.now()}`
+	})
 }
 
 /**

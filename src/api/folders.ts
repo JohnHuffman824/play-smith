@@ -40,6 +40,14 @@ export const foldersAPI = {
 			)
 		}
 
+		// Validate name length (max 255 characters)
+		if (name.trim().length > 255) {
+			return Response.json(
+				{ error: 'name must be 255 characters or less' },
+				{ status: 400 }
+			)
+		}
+
 		// Create folder
 		const folder = await folderRepo.create({
 			user_id: userId,
@@ -83,6 +91,14 @@ export const foldersAPI = {
 		if (typeof name !== 'string' || name.trim() === '') {
 			return Response.json(
 				{ error: 'name must be a non-empty string' },
+				{ status: 400 }
+			)
+		}
+
+		// Validate name length (max 255 characters)
+		if (name.trim().length > 255) {
+			return Response.json(
+				{ error: 'name must be 255 characters or less' },
 				{ status: 400 }
 			)
 		}
