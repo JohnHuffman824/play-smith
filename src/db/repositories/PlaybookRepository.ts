@@ -4,6 +4,7 @@ import type { Playbook } from '../types'
 type PlaybookUpdate = {
 	name?: string
 	description?: string
+	folder_id?: number | null
 }
 
 export class PlaybookRepository {
@@ -80,7 +81,8 @@ export class PlaybookRepository {
 			UPDATE playbooks
 			SET
 				name = COALESCE(${data.name ?? null}, name),
-				description = COALESCE(${data.description ?? null}, description)
+				description = COALESCE(${data.description ?? null}, description),
+				folder_id = CASE WHEN ${data.folder_id !== undefined} THEN ${data.folder_id ?? null} ELSE folder_id END
 			WHERE id = ${id}
 			RETURNING id, team_id, name, description, created_by, created_at, updated_at
 		`
