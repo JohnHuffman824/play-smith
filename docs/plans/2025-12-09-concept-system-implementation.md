@@ -3,7 +3,7 @@
 **Date:** 2025-12-09
 **Status:** Planning
 **Phase:** Phase 1 - Core Concept System
-**Architecture Reference:** [`docs/ConceptArchitecture.md`](../ConceptArchitecture.md)
+**Architecture Reference:** [`docs/ConceptArchitecture.md`](../CONCEPT_ARCHITECTURE.md)
 
 ---
 
@@ -724,9 +724,9 @@ src/
 
 ## References
 
-- **Architecture Document:** [`docs/ConceptArchitecture.md`](../ConceptArchitecture.md)
-- **Database Architecture:** [`docs/DatabaseArchitecture.md`](../DatabaseArchitecture.md)
-- **Design Document:** [`docs/PlaySmithDesignDocument.md`](../PlaySmithDesignDocument.md)
+- **Architecture Document:** [`docs/ConceptArchitecture.md`](../CONCEPT_ARCHITECTURE.md)
+- **Database Architecture:** [`docs/DatabaseArchitecture.md`](../DATABASE_ARCHITECTURE.md)
+- **Design Document:** [`docs/PlaySmithDesignDocument.md`](../DESIGN_DOCUMENT.md)
 - **Drawing Types:** [`src/types/drawing.types.ts`](../../src/types/drawing.types.ts)
 
 ---

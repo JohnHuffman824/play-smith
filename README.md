@@ -245,7 +245,7 @@ bun start
 
 **Database:**
 - [AWS RDS Setup Guide](docs/AWS-RDS-Setup.md) - Complete RDS PostgreSQL setup
-- [Database Architecture](docs/DatabaseArchitecture.md) - Schema and table design
+- [Database Architecture](docs/DATABASE_ARCHITECTURE.md) - Schema and table design
 - [PostgreSQL Decision](docs/plans/2024-12-09-postgresql-decision.md) - Why PostgreSQL + RDS
 
 **Implementation Plans:**
@@ -253,7 +253,7 @@ bun start
 - [Routing Infrastructure Design](docs/plans/2025-12-09-routing-infrastructure-design.md) - Routing architecture and design decisions
 
 **Design:**
-- [PlaySmith Design Document](docs/PlaySmithDesignDocument.md) - Feature specifications
+- [PlaySmith Design Document](docs/DESIGN_DOCUMENT.md) - Feature specifications
 
 ## Project Structure
 

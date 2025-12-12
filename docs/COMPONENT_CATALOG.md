@@ -1635,4 +1635,4 @@ function Card({ variant, size, className, children }: CardProps) {
 ## Related Documentation
 
 - [Style Guide](./STYLE_GUIDE.md) - Comprehensive styling reference
-- [SQL Guidelines](./SQLGuideline.md) - Database patterns
+- [SQL Guidelines](SQL_GUIDELINES.md) - Database patterns

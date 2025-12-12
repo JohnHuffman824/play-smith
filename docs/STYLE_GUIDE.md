@@ -244,6 +244,26 @@ className="
 | Inputs | `rounded-lg` |
 | Badges | `rounded-full` |
 
+### Shadows & Glow Effects
+
+| Use Case | Class |
+|----------|-------|
+| Active toolbar button | `shadow-lg` |
+| Dialogs | `shadow-2xl` |
+| Hover glow with overflow-hidden | `ring-4 ring-blue-500/50` (NOT shadow) |
+
+**Note:** When adding hover glow to elements with `overflow-hidden`, use `ring` instead of `shadow`:
+- `shadow` gets clipped by overflow-hidden
+- `ring` renders outside the element boundary
+
+### Z-Index Layers
+
+| Layer | Z-Index | Elements |
+|-------|---------|----------|
+| Base | `z-10` | Players, field elements |
+| Dialogs | `z-50` | All dialogs, popovers |
+| Overlays | `z-[70]` | Context menus over dialogs |
+
 ---
 
 ## 6. Anti-Patterns (NEVER DO)
@@ -315,6 +335,14 @@ className="
 
 ### Line Height
 All text uses `line-height: 1.5`
+
+### Font Family
+
+```css
+font-family: 'SF Compact Rounded', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+```
+
+Applied globally via `index.css`. Do not override.
 
 ---
 
@@ -398,4 +426,4 @@ When creating or modifying components:
 ## Related Docs
 
 - [Component Catalog](./COMPONENT_CATALOG.md) - Complete UI component reference
-- [SQL Guidelines](./SQLGuideline.md) - Database patterns
+- [SQL Guidelines](SQL_GUIDELINES.md) - Database patterns
