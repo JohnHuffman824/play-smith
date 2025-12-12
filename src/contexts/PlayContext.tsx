@@ -22,11 +22,6 @@ interface Player {
 	isLineman?: boolean
 }
 
-interface PlayCard {
-	id: string
-	name: string
-}
-
 interface PlayState {
 	drawingState: DrawingState
 	formation: string
@@ -36,7 +31,6 @@ interface PlayState {
 	showPlayBar: boolean
 	players: Player[]
 	drawings: Drawing[]
-	playCards: PlayCard[]
 }
 
 type PlayAction =
@@ -61,8 +55,6 @@ type PlayAction =
 	| { type: 'APPLY_FORMATION'; formation: Formation }
 	| { type: 'APPLY_CONCEPT'; concept: BaseConcept }
 	| { type: 'APPLY_CONCEPT_GROUP'; conceptGroup: ConceptGroup }
-	| { type: 'ADD_PLAY_CARD' }
-	| { type: 'DELETE_PLAY_CARD'; id: string }
 
 interface PlayContextType {
 	state: PlayState
@@ -73,8 +65,6 @@ interface PlayContextType {
 	setFormation: (formation: string) => void
 	setPlay: (play: string) => void
 	setDefensiveFormation: (formation: string) => void
-	addPlayCard: () => void
-	deletePlayCard: (id: string) => void
 	setHashAlignment: (alignment: HashAlignment) => void
 	setShowPlayBar: (show: boolean) => void
 	setPlayers: (players: Player[]) => void
@@ -107,7 +97,6 @@ const initialState: PlayState = {
 	showPlayBar: true,
 	players: [],
 	drawings: [],
-	playCards: [],
 }
 
 type SetToolAction = Extract<PlayAction, { type: 'SET_TOOL' }>
@@ -134,8 +123,6 @@ type UpdateDrawingAction = Extract<PlayAction, { type: 'UPDATE_DRAWING' }>
 type ApplyFormationAction = Extract<PlayAction, { type: 'APPLY_FORMATION' }>
 type ApplyConceptAction = Extract<PlayAction, { type: 'APPLY_CONCEPT' }>
 type ApplyConceptGroupAction = Extract<PlayAction, { type: 'APPLY_CONCEPT_GROUP' }>
-type AddPlayCardAction = Extract<PlayAction, { type: 'ADD_PLAY_CARD' }>
-type DeletePlayCardAction = Extract<PlayAction, { type: 'DELETE_PLAY_CARD' }>
 
 function applySetTool(
 	state: PlayState,
@@ -342,27 +329,6 @@ function applyRepositionLinemenForHash(
 	}
 }
 
-function applyAddPlayCard(state: PlayState): PlayState {
-	const newCard: PlayCard = {
-		id: `play-card-${Date.now()}`,
-		name: `Play ${state.playCards.length + 1}`,
-	}
-	return {
-		...state,
-		playCards: [...state.playCards, newCard],
-	}
-}
-
-function applyDeletePlayCard(
-	state: PlayState,
-	action: DeletePlayCardAction
-): PlayState {
-	return {
-		...state,
-		playCards: state.playCards.filter((card) => card.id !== action.id),
-	}
-}
-
 /**
 * Reducer handling play state transitions.
 */
@@ -410,10 +376,6 @@ function playReducer(state: PlayState, action: PlayAction): PlayState {
 			return applyApplyConcept(state, action)
 		case 'APPLY_CONCEPT_GROUP':
 			return applyApplyConceptGroup(state, action)
-		case 'ADD_PLAY_CARD':
-			return applyAddPlayCard(state)
-		case 'DELETE_PLAY_CARD':
-			return applyDeletePlayCard(state, action)
 		default:
 			return state
 	}
@@ -503,14 +465,6 @@ export function PlayProvider({ children }: { children: ReactNode }) {
 		dispatch({ type: 'APPLY_CONCEPT_GROUP', conceptGroup })
 	}, [])
 
-	const addPlayCard = useCallback(() => {
-		dispatch({ type: 'ADD_PLAY_CARD' })
-	}, [])
-
-	const deletePlayCard = useCallback((id: string) => {
-		dispatch({ type: 'DELETE_PLAY_CARD', id })
-	}, [])
-
 	// Save draw color to localStorage when it changes
 	useEffect(() => {
 		if (state.drawingState.color) {
@@ -527,8 +481,6 @@ export function PlayProvider({ children }: { children: ReactNode }) {
 		setFormation,
 		setPlay,
 		setDefensiveFormation,
-		addPlayCard,
-		deletePlayCard,
 		setHashAlignment,
 		setShowPlayBar,
 		setPlayers,
@@ -546,8 +498,6 @@ export function PlayProvider({ children }: { children: ReactNode }) {
 		setFormation,
 		setPlay,
 		setDefensiveFormation,
-		addPlayCard,
-		deletePlayCard,
 		setHashAlignment,
 		setShowPlayBar,
 		setPlayers,

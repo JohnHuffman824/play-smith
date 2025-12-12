@@ -27,7 +27,6 @@ describe('PlayContext', () => {
 
 			expect(result.current.state.drawingState.tool).toBe('select')
 			expect(result.current.state.formation).toBe('')
-			expect(result.current.state.playCards).toEqual([])
 			expect(result.current.state.hashAlignment).toBe('middle')
 			expect(result.current.state.showPlayBar).toBe(true)
 		})
@@ -95,64 +94,6 @@ describe('PlayContext', () => {
 			})
 			
 			expect(result.current.state.defensiveFormation).toBe('4-3 Defense')
-		})
-	})
-
-	describe('play cards management', () => {
-		it('should add play card', () => {
-			const { result } = renderHook(() => usePlayContext(), { wrapper })
-			
-			act(() => {
-				result.current.addPlayCard()
-			})
-			
-			expect(result.current.state.playCards).toHaveLength(1)
-			expect(result.current.state.playCards[0]?.name).toBe('Play 1')
-		})
-
-		it('should increment play card numbers', () => {
-			const { result } = renderHook(() => usePlayContext(), { wrapper })
-			
-			act(() => {
-				result.current.addPlayCard()
-			})
-			
-			const firstCardName = result.current.state.playCards[0]?.name
-			
-			act(() => {
-				result.current.addPlayCard()
-			})
-			
-			expect(result.current.state.playCards).toHaveLength(2)
-			// Each card gets a name based on count at time of creation
-			expect(firstCardName).toContain('Play')
-			expect(result.current.state.playCards[1]?.name).toContain('Play')
-		})
-
-		it('should delete play card by id', async () => {
-			const { result } = renderHook(() => usePlayContext(), { wrapper })
-			
-			act(() => {
-				result.current.addPlayCard()
-			})
-			
-			// Wait to ensure different timestamp
-			await new Promise(resolve => setTimeout(resolve, 2))
-			
-			const cardId = result.current.state.playCards[0]?.id ?? ''
-			
-			act(() => {
-				result.current.addPlayCard()
-			})
-			
-			expect(result.current.state.playCards).toHaveLength(2)
-			
-			act(() => {
-				result.current.deletePlayCard(cardId)
-			})
-			
-			expect(result.current.state.playCards).toHaveLength(1)
-			expect(result.current.state.playCards.every(card => card.id !== cardId)).toBe(true)
 		})
 	})
 
