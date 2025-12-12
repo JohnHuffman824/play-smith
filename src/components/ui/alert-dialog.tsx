@@ -4,7 +4,7 @@ import * as React from "react"
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog"
 
 import { cn } from "./utils"
-import { buttonVariants } from "./button"
+import "./button.css"
 
 function AlertDialog({
   ...props
@@ -124,7 +124,9 @@ function AlertDialogAction({
 }: React.ComponentProps<typeof AlertDialogPrimitive.Action>) {
   return (
     <AlertDialogPrimitive.Action
-      className={cn(buttonVariants(), className)}
+      data-variant="default"
+      data-size="default"
+      className={cn("button", className)}
       {...props}
     />
   )
@@ -136,7 +138,9 @@ function AlertDialogCancel({
 }: React.ComponentProps<typeof AlertDialogPrimitive.Cancel>) {
   return (
     <AlertDialogPrimitive.Cancel
-      className={cn(buttonVariants({ variant: "outline" }), className)}
+      data-variant="outline"
+      data-size="default"
+      className={cn("button", className)}
       {...props}
     />
   )

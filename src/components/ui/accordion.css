@@ -1,0 +1,80 @@
+/* || Accordion Component */
+/* No base styles needed for root */
+
+/* || AccordionItem Component */
+.accordion-item {
+  border-bottom: 1px solid var(--border);
+}
+
+.accordion-item:last-child {
+  border-bottom: 0;
+}
+
+/* || AccordionHeader Component */
+.accordion-header {
+  display: flex;
+}
+
+/* || AccordionTrigger Component */
+.accordion-trigger {
+  display: flex;
+  flex: 1;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  border-radius: 8px;
+  padding: 16px 0;
+  text-align: left;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 200ms;
+  outline: none;
+  cursor: pointer;
+}
+
+.accordion-trigger:hover {
+  text-decoration: underline;
+}
+
+.accordion-trigger:focus-visible {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.accordion-trigger:disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.accordion-trigger svg {
+  color: var(--muted-foreground);
+  pointer-events: none;
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  transform: translateY(0.125rem);
+  transition: transform 200ms;
+}
+
+.accordion-trigger[data-state="open"] > svg {
+  transform: rotate(180deg);
+}
+
+/* || AccordionContent Component */
+.accordion-content {
+  overflow: hidden;
+  font-size: 0.875rem;
+}
+
+.accordion-content[data-state="closed"] {
+  animation: accordion-up 200ms ease-out;
+}
+
+.accordion-content[data-state="open"] {
+  animation: accordion-down 200ms ease-out;
+}
+
+.accordion-content-inner {
+  padding-top: 0;
+  padding-bottom: 16px;
+}

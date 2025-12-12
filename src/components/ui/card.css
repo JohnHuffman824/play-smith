@@ -1,0 +1,68 @@
+/* || Card Component */
+.card {
+  background: var(--card);
+  color: var(--card-foreground);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+/* || Card Header */
+.card-header {
+  container-type: inline-size;
+  container-name: card-header;
+  display: grid;
+  grid-auto-rows: min-content;
+  grid-template-rows: auto auto;
+  align-items: start;
+  gap: 6px;
+  padding: 24px 24px 0;
+}
+
+.card-header:has([data-slot="card-action"]) {
+  grid-template-columns: 1fr auto;
+}
+
+.card-header:has(.border-b) {
+  padding-bottom: 24px;
+}
+
+/* || Card Title */
+.card-title {
+  line-height: 1;
+}
+
+/* || Card Description */
+.card-description {
+  color: var(--muted-foreground);
+}
+
+/* || Card Action */
+.card-action {
+  grid-column-start: 2;
+  grid-row: 1 / span 2;
+  align-self: start;
+  justify-self: end;
+}
+
+/* || Card Content */
+.card-content {
+  padding: 0 24px;
+}
+
+.card-content:last-child {
+  padding-bottom: 24px;
+}
+
+/* || Card Footer */
+.card-footer {
+  display: flex;
+  align-items: center;
+  padding: 0 24px 24px;
+}
+
+.card-footer:has(.border-t) {
+  padding-top: 24px;
+}

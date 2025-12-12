@@ -1,0 +1,92 @@
+/* || Base styles */
+.badge {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 8px;
+	border: 1px solid transparent;
+	padding: 0.125rem 0.5rem;
+	font-size: 0.75rem;
+	font-weight: 500;
+	width: fit-content;
+	white-space: nowrap;
+	flex-shrink: 0;
+	gap: 0.25rem;
+	transition: color 200ms, box-shadow 200ms;
+	overflow: hidden;
+}
+
+.badge > svg {
+	width: 0.75rem;
+	height: 0.75rem;
+	pointer-events: none;
+}
+
+/* || Variants */
+.badge[data-variant="default"] {
+	border-color: transparent;
+	background: var(--primary);
+	color: var(--primary-foreground);
+}
+
+a.badge[data-variant="default"]:hover {
+	background: color-mix(in oklch, var(--primary) 90%, transparent);
+}
+
+.badge[data-variant="secondary"] {
+	border-color: transparent;
+	background: var(--secondary);
+	color: var(--secondary-foreground);
+}
+
+a.badge[data-variant="secondary"]:hover {
+	background: color-mix(in oklch, var(--secondary) 90%, transparent);
+}
+
+.badge[data-variant="destructive"] {
+	border-color: transparent;
+	background: var(--destructive);
+	color: white;
+}
+
+a.badge[data-variant="destructive"]:hover {
+	background: color-mix(in oklch, var(--destructive) 90%, transparent);
+}
+
+.badge[data-variant="outline"] {
+	border-color: var(--border);
+	background: transparent;
+	color: var(--foreground);
+}
+
+a.badge[data-variant="outline"]:hover {
+	background: var(--accent);
+	color: var(--accent-foreground);
+}
+
+/* || States */
+.badge:focus-visible {
+	border-color: var(--ring);
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.badge[data-variant="destructive"]:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--destructive) 20%, transparent);
+}
+
+.dark .badge[data-variant="destructive"] {
+	background: color-mix(in oklch, var(--destructive) 60%, transparent);
+}
+
+.dark .badge[data-variant="destructive"]:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--destructive) 40%, transparent);
+}
+
+.badge[aria-invalid="true"] {
+	border-color: var(--destructive);
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--destructive) 20%, transparent);
+}
+
+.dark .badge[aria-invalid="true"] {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--destructive) 40%, transparent);
+}

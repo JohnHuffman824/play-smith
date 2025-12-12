@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react"
 import { DayPicker } from "react-day-picker"
 
 import { cn } from "./utils"
-import { buttonVariants } from "./button"
+import "./button.css"
 
 function Calendar({
   className,
@@ -24,7 +24,7 @@ function Calendar({
         caption_label: "text-sm font-medium",
         nav: "flex items-center gap-1",
         nav_button: cn(
-          buttonVariants({ variant: "outline" }),
+          "button",
           "size-7 bg-transparent p-0 opacity-50 hover:opacity-100",
         ),
         nav_button_previous: "absolute left-1",
@@ -41,7 +41,7 @@ function Calendar({
             : "[&:has([aria-selected])]:rounded-md",
         ),
         day: cn(
-          buttonVariants({ variant: "ghost" }),
+          "button",
           "size-8 p-0 font-normal aria-selected:opacity-100",
         ),
         day_range_start:
