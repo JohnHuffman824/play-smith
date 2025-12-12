@@ -64,6 +64,68 @@ type PlayCardThumbnailProps = {
   onAnimate?: () => void
 }
 
+function PlayCardThumbnail({
+  thumbnail,
+  drawings,
+  players,
+  name,
+  playType,
+  onOpen,
+  onAnimate
+}: PlayCardThumbnailProps) {
+  const badgeClass = playType == PLAY_TYPE_PASS
+    ? PLAY_TYPE_BADGE_PASS
+    : PLAY_TYPE_BADGE_RUN
+
+  // Use default linemen if no players provided
+  const defaultLinemen = createDefaultLinemen('middle')
+  const displayPlayers = (players && players.length > 0) ? players : defaultLinemen
+
+  return (
+    <div className="relative group/thumbnail">
+      <div
+        onClick={onOpen}
+        className="aspect-video bg-muted flex items-center
+          justify-center cursor-pointer hover:bg-accent
+          transition-colors duration-200"
+      >
+        <PlayThumbnailSVG
+          drawings={drawings || []}
+          players={displayPlayers}
+          className="w-full h-full"
+        />
+      </div>
+
+      {playType && (
+        <div className="absolute top-2 right-2">
+          <span
+            className={`px-2.5 py-1 rounded-md text-xs shadow-sm
+              backdrop-blur-sm ${badgeClass}`}
+          >
+            {playType}
+          </span>
+        </div>
+      )}
+
+      {onAnimate && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            onAnimate()
+          }}
+          className="absolute left-1/2 top-1/2 z-10 flex size-10 -translate-x-1/2 -translate-y-1/2
+            items-center justify-center rounded-full bg-white shadow-lg
+            opacity-0 transition-all duration-200
+            group-hover/thumbnail:opacity-100 hover:scale-110"
+          aria-label="Animate play"
+        >
+          <Play className="size-5 fill-black text-black" />
+        </button>
+      )}
+    </div>
+  )
+}
+
 
 export function PlayCard({
   id,
