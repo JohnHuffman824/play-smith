@@ -32,7 +32,7 @@ export class PlaybookRepository {
 	// Fetches a playbook by id or null when missing
 	async findById(id: number): Promise<Playbook | null> {
 		const [playbook] = await db<Playbook[]>`
-			SELECT id, team_id, name, description, created_by, created_at, updated_at
+			SELECT id, team_id, name, description, created_by, created_at, updated_at, folder_id, is_starred, deleted_at, last_accessed_at
 			FROM playbooks
 			WHERE id = ${id}
 		`
@@ -43,7 +43,7 @@ export class PlaybookRepository {
 	// Lists playbooks for a team ordered by latest update
 	async getTeamPlaybooks(teamId: number): Promise<Playbook[]> {
 		return await db<Playbook[]>`
-			SELECT id, team_id, name, description, created_by, created_at, updated_at
+			SELECT id, team_id, name, description, created_by, created_at, updated_at, folder_id, is_starred, deleted_at, last_accessed_at
 			FROM playbooks
 			WHERE team_id = ${teamId}
 			ORDER BY updated_at DESC
@@ -64,7 +64,7 @@ export class PlaybookRepository {
 	 */
 	async getUserPersonalPlaybooks(userId: number): Promise<Playbook[]> {
 		return await db<Playbook[]>`
-			SELECT id, team_id, name, description, created_by, created_at, updated_at
+			SELECT id, team_id, name, description, created_by, created_at, updated_at, folder_id, is_starred, deleted_at, last_accessed_at
 			FROM playbooks
 			WHERE team_id IS NULL AND created_by = ${userId}
 			ORDER BY updated_at DESC, id DESC
@@ -84,7 +84,7 @@ export class PlaybookRepository {
 				description = COALESCE(${data.description ?? null}, description),
 				folder_id = CASE WHEN ${data.folder_id !== undefined} THEN ${data.folder_id ?? null} ELSE folder_id END
 			WHERE id = ${id}
-			RETURNING id, team_id, name, description, created_by, created_at, updated_at
+			RETURNING id, team_id, name, description, created_by, created_at, updated_at, folder_id, is_starred, deleted_at, last_accessed_at
 		`
 
 		return playbook ?? null
@@ -104,6 +104,7 @@ export class PlaybookRepository {
 			SELECT
 				p.id, p.team_id, p.name, p.description,
 				p.created_by, p.created_at, p.updated_at,
+				p.folder_id, p.is_starred, p.deleted_at, p.last_accessed_at,
 				COALESCE(COUNT(pl.id), 0)::int as play_count
 			FROM playbooks p
 			LEFT JOIN plays pl ON pl.playbook_id = p.id

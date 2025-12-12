@@ -191,4 +191,69 @@ describe('PlaybookRepository', () => {
 		await db`DELETE FROM playbooks WHERE id = ${playbook2.id}`
 		await db`DELETE FROM playbooks WHERE id = ${playbook3.id}`
 	})
+
+	test('update playbook with folder_id - set folder', async () => {
+		// Create a folder for the user
+		const [folder] = await db<Array<{ id: number }>>`
+			INSERT INTO folders (user_id, name)
+			VALUES (${testUserId}, 'Test Folder')
+			RETURNING id
+		`
+
+		const updated = await playbookRepo.update(testPlaybookId, {
+			folder_id: folder.id,
+		})
+
+		expect(updated?.folder_id).toBe(folder.id)
+
+		// Cleanup
+		await db`DELETE FROM folders WHERE id = ${folder.id}`
+	})
+
+	test('update playbook with folder_id - clear folder', async () => {
+		// First set a folder
+		const [folder] = await db<Array<{ id: number }>>`
+			INSERT INTO folders (user_id, name)
+			VALUES (${testUserId}, 'Temp Folder')
+			RETURNING id
+		`
+
+		await playbookRepo.update(testPlaybookId, {
+			folder_id: folder.id,
+		})
+
+		// Now clear it
+		const updated = await playbookRepo.update(testPlaybookId, {
+			folder_id: null,
+		})
+
+		expect(updated?.folder_id).toBeNull()
+
+		// Cleanup
+		await db`DELETE FROM folders WHERE id = ${folder.id}`
+	})
+
+	test('update playbook with folder_id - unchanged when not provided', async () => {
+		// First set a folder
+		const [folder] = await db<Array<{ id: number }>>`
+			INSERT INTO folders (user_id, name)
+			VALUES (${testUserId}, 'Persistent Folder')
+			RETURNING id
+		`
+
+		await playbookRepo.update(testPlaybookId, {
+			folder_id: folder.id,
+		})
+
+		// Update name without touching folder_id
+		const updated = await playbookRepo.update(testPlaybookId, {
+			name: 'New Name',
+		})
+
+		expect(updated?.folder_id).toBe(folder.id)
+		expect(updated?.name).toBe('New Name')
+
+		// Cleanup
+		await db`DELETE FROM folders WHERE id = ${folder.id}`
+	})
 })
