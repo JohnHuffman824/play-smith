@@ -1,105 +1,12 @@
-# Play Smith Deployment Guide
-
-**Last Updated:** December 2024
-
-This guide covers the complete deployment workflow for Play Smith, including local development, staging deployments, and production releases.
-
----
-
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Environment Setup](#environment-setup)
-3. [Branch Strategy](#branch-strategy)
-4. [Daily Development Workflow](#daily-development-workflow)
-5. [Deploying to Staging](#deploying-to-staging)
-6. [Deploying to Production](#deploying-to-production)
-7. [Hotfix Workflow](#hotfix-workflow)
-8. [Rollback Procedures](#rollback-procedures)
-9. [Troubleshooting](#troubleshooting)
-
----
+# Branch Strategy
 
 ## Overview
 
-### Infrastructure
-
-- **Hosting:** Railway (https://railway.app)
-- **Domain:** play-smith.com (Squarespace DNS)
-- **Database:** PostgreSQL 17.7 on Railway
-- **Runtime:** Bun v1.3+
-
-### Environments
-
-| Environment | Branch | URL | Auto-Deploy | Database |
-|------------|--------|-----|-------------|----------|
-| Local | `main` | http://localhost:3000 | N/A | Railway staging or local |
-| Staging | `staging` | https://stag.play-smith.com | ✅ Yes | Railway staging DB |
-| Production | `release-1.0` | https://www.play-smith.com | ❌ No (manual) | Railway production DB |
+PlaySmith uses a three-branch strategy: `main` for development, `staging` for integration testing, and `release-1.0` for production.
 
 ---
 
-## Environment Setup
-
-### Local Development
-
-1. **Clone repository:**
-   ```bash
-   git clone https://github.com/JohnHuffman824/play-smith.git
-   cd play-smith
-   ```
-
-2. **Install dependencies:**
-   ```bash
-   bun install
-   ```
-
-3. **Configure environment:**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your DATABASE_URL
-   ```
-
-4. **Run migrations:**
-   ```bash
-   bun run migrate
-   ```
-
-5. **Seed development data:**
-   ```bash
-   bun run seed:dev
-   # Creates admin user: admin / ALtt98xzH!
-   ```
-
-6. **Start development server:**
-   ```bash
-   bun run dev
-   # Runs on http://localhost:3000 with hot reload
-   ```
-
-### Railway Environments
-
-Both staging and production are configured in the same Railway project with separate environments.
-
-**Staging Environment:**
-- **Environment Name:** `staging`
-- **Branch:** `staging`
-- **Variables:**
-  - `BUN_ENV=staging`
-  - `DATABASE_URL=${{Postgres-Staging.DATABASE_URL}}`
-
-**Production Environment:**
-- **Environment Name:** `production`
-- **Branch:** `release-1.0`
-- **Variables:**
-  - `BUN_ENV=production`
-  - `DATABASE_URL=${{Postgres.DATABASE_URL}}`
-
----
-
-## Branch Strategy
-
-### Branch Structure
+## Branch Structure
 
 ```
 main          → Primary development branch (local work)
@@ -109,29 +16,65 @@ staging       → Integration testing branch (Railway staging)
 release-1.0   → Production release branch (Railway production)
 ```
 
-### Branch Purposes
+---
 
-**`main`** - Active development
-- Your day-to-day development work
+## Branch Purposes
+
+### `main` - Active Development
+
+**Purpose:** Day-to-day development work
+
+**Characteristics:**
 - Feature branches merge here
 - Pushed to GitHub but not auto-deployed
+- Should compile and pass tests
+- May contain unreleased features
 
-**`staging`** - Integration testing
-- Integration of features ready for testing
+**When to use:**
+- All development work
+- Feature implementation
+- Bug fixes
+- Code refactoring
+
+### `staging` - Integration Testing
+
+**Purpose:** Integration of features ready for testing
+
+**Characteristics:**
 - Auto-deploys to Railway staging environment
 - Should always be in a releasable state
+- Receives merges from `main`
+- Quality gate before production
 
-**`release-1.0`** - Production
-- Current production code
+**When to use:**
+- After completing a feature on `main`
+- Before merging to production
+- To test integrations between multiple features
+- To verify database migrations in production-like environment
+
+### `release-1.0` - Production
+
+**Purpose:** Current production code
+
+**Characteristics:**
 - Only receives merges from `staging`
 - Manually deployed to Railway production
 - Tagged with version numbers (e.g., `v1.0.0`)
+- Protected by GitHub branch rules
 
-### Branch Protection
+**When to use:**
+- Production deployments
+- Hotfixes (emergency bug fixes)
 
-**GitHub Settings:**
-- `release-1.0` requires pull request approvals
-- Direct pushes to `release-1.0` are restricted
+---
+
+## Branch Protection
+
+### GitHub Settings
+
+**`release-1.0` branch:**
+- Requires pull request approvals
+- Direct pushes restricted
 - Status checks must pass before merging
 
 ---
@@ -192,12 +135,12 @@ git push origin --delete feature/user-notifications
 
 ## Deploying to Staging
 
-### When to Deploy to Staging
+### When to Deploy
 
 - After completing a feature on `main`
 - Before merging to production
 - To test integrations between multiple features
-- To verify database migrations in a production-like environment
+- To verify database migrations
 
 ### Deployment Process
 
@@ -233,7 +176,7 @@ After deploying to staging:
 - [ ] Database migrations ran without errors
 - [ ] Application loads at https://stag.play-smith.com
 - [ ] Login functionality works
-- [ ] Critical features tested (create play, save playbook, etc.)
+- [ ] Critical features tested
 - [ ] No console errors in browser
 - [ ] API endpoints responding correctly
 
@@ -316,9 +259,11 @@ Status: ✅ Successful
 
 ## Hotfix Workflow
 
-For critical bugs in production that need immediate fixing:
+### When to Use Hotfixes
 
-### Process
+For critical bugs in production that need immediate fixing.
+
+### Hotfix Process
 
 ```bash
 # 1. Create hotfix branch from production
@@ -370,18 +315,18 @@ git push origin --delete hotfix/critical-login-bug
 
 ## Rollback Procedures
 
-### Rolling Back a Deployment
+### When to Roll Back
 
-If a deployment causes issues:
+If a deployment causes critical issues in production.
 
-**Option 1: Redeploy Previous Version (Fastest)**
+### Option 1: Redeploy Previous Version (Fastest)
 
 1. Railway Dashboard → Production Environment → Deployments
 2. Find the last working deployment
 3. Click "⋮" menu → "Redeploy"
 4. Confirm redeployment
 
-**Option 2: Git Rollback (More Control)**
+### Option 2: Git Rollback (More Control)
 
 ```bash
 # 1. Find the last good commit
@@ -398,7 +343,7 @@ git push origin release-1.0 --force
 # 4. Manually deploy in Railway
 ```
 
-**Option 3: Deploy Previous Tag**
+### Option 3: Deploy Previous Tag
 
 ```bash
 # 1. List tags to find previous version
@@ -427,85 +372,35 @@ git push origin release-1.0 --force
 
 ---
 
-## Troubleshooting
+## Git Best Practices
 
-### Common Issues
+### Commit Messages
 
-#### "DATABASE_URL environment variable is required"
+**Format:**
+```
+<type>: <short description>
 
-**Cause:** Missing database connection string in Railway environment
-
-**Fix:**
-1. Railway → Select environment (staging or production)
-2. Click your app service → Variables tab
-3. Add new variable → Reference
-4. Select PostgreSQL database → DATABASE_URL
-
-#### Build Fails with "Node.js 18 has reached End-Of-Life"
-
-**Cause:** Railway trying to use Node.js instead of Bun
-
-**Fix:**
-Ensure `nixpacks.toml` exists in repository root:
-```toml
-[phases.setup]
-nixPkgs = ["bun"]
-
-[phases.install]
-cmds = ["bun install"]
-
-[start]
-cmd = "bun src/db/migrate.ts && bun run seed:dev && bun run start"
+[Optional longer description]
 ```
 
-#### SSL Certificate Not Provisioning
+**Types:**
+- `feat:` New feature
+- `fix:` Bug fix
+- `docs:` Documentation changes
+- `refactor:` Code refactoring
+- `test:` Test changes
+- `chore:` Build/tooling changes
 
-**Cause:** DNS not properly configured or not propagated
+**Examples:**
+```
+feat: Add user notifications system
 
-**Fix:**
-1. Verify DNS records in Squarespace:
-   - `www.play-smith.com` CNAME → Railway URL
-   - `stag.play-smith.com` CNAME → Railway staging URL
-2. Check DNS propagation: https://dnschecker.org
-3. Wait 10-30 minutes for propagation
-4. Railway will auto-provision SSL once DNS resolves
+fix: Resolve login redirect loop
 
-#### Migration Fails on Deployment
+refactor: Extract form validation logic
+```
 
-**Cause:** Database migration error
-
-**Fix:**
-1. Check Railway logs for specific error
-2. Common fixes:
-   - Duplicate migration IDs: Rename migration files
-   - Missing `IF NOT EXISTS`: Add to migration SQL
-   - Permission errors: Check database user permissions
-3. Fix migration files
-4. Commit and push
-5. Redeploy
-
-#### Deployment Succeeds but Site Shows 500 Error
-
-**Cause:** Runtime error in application
-
-**Fix:**
-1. Check Railway deployment logs
-2. Look for error stack traces
-3. Common issues:
-   - Missing environment variables
-   - Database connection errors
-   - Code errors (undefined variables, etc.)
-4. Fix code on appropriate branch
-5. Push and redeploy
-
-### Getting Help
-
-**Railway Support:**
-- Dashboard: Check deployment logs first
-- Discord: https://discord.gg/railway
-- Docs: https://docs.railway.app
-
-**Debugging Commands:**
+### Git Commands Reference
 
 ```bash
 # Check current branch
@@ -520,57 +415,21 @@ git branch -r
 # View git status
 git status
 
-# Test database connection locally
-bun test-railway-connection.ts
+# Discard local changes
+git reset --hard HEAD
 
-# Run migrations locally
-bun run migrate
-
-# Check Railway deployment status (with Railway CLI)
-railway status
-railway logs
+# View changes before committing
+git diff
 ```
 
 ---
 
-## Quick Reference
+## See Also
 
-### Essential Commands
+**Deployment Documentation:**
+- [Environments](./environments.md) - Environment setup and configuration
+- [Infrastructure](./infrastructure.md) - Railway, DNS, SSL
+- [Deployment README](./README.md) - Overview and quick reference
 
-```bash
-# Development
-bun run dev              # Start dev server with hot reload
-bun run migrate          # Run database migrations
-bun run seed:dev         # Seed development data
-bun test                 # Run test suite
-
-# Deployment
-git checkout staging && git merge main && git push origin staging
-git checkout release-1.0 && git merge staging && git push origin release-1.0
-
-# Railway CLI (optional)
-railway login            # Authenticate with Railway
-railway link             # Link to Railway project
-railway logs             # View deployment logs
-railway status           # Check deployment status
-```
-
-### Important URLs
-
-- **Production:** https://www.play-smith.com
-- **Staging:** https://stag.play-smith.com
-- **Railway Dashboard:** https://railway.app/dashboard
-- **GitHub Repository:** https://github.com/JohnHuffman824/play-smith
-- **Domain Management:** Squarespace
-
-### Contact
-
-For deployment issues or questions:
-- Check this guide first
-- Review Railway deployment logs
-- Consult team documentation
-- Escalate critical production issues immediately
-
----
-
-**End of Deployment Guide**
+**Development:**
+- [Architecture](../guides/architecture.md) - Technical architecture
