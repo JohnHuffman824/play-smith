@@ -95,6 +95,7 @@ export interface Section {
 	playbook_id: number
 	name: string
 	display_order: number
+	section_type: 'standard' | 'ideas'
 	created_at: Date
 	updated_at: Date
 }

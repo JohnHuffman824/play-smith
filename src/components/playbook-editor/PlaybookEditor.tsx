@@ -15,6 +15,12 @@ import { ConceptCard } from './ConceptCard'
 import type { ConceptFilter } from './ConceptsToolbar'
 import { ConceptDialog } from '@/components/concepts/ConceptDialog'
 import type { BaseConcept } from '@/types/concept.types'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 type ConceptType = 'concept' | 'formation' | 'group'
 
@@ -713,17 +719,38 @@ function PlaybookEditorContent({
               <div className="space-y-8">
                 {displayedSections.map((section) => (
                   <div key={section.id}>
-                    <div 
+                    <div
                       className="flex items-center justify-between mb-4"
                     >
-                      <h2>{section.name}</h2>
+                      {section.section_type === 'ideas' ? (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <h2 className="cursor-help">{section.name}</h2>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="max-w-xs">
+                                Ideas & Experiments - plays here are in development. All team members can contribute ideas. These aren't required learning.
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ) : (
+                        <h2>{section.name}</h2>
+                      )}
                       <p className="text-muted-foreground">
                         {section.plays.length} play
                         {section.plays.length != 1 ? 's' : ''}
                       </p>
                     </div>
 
-                    {viewMode == VIEW_MODE_GRID ? (
+                    {section.plays.length === 0 && section.section_type === 'ideas' ? (
+                      <div className="flex flex-col items-center justify-center py-12 px-4 border-2 border-dashed border-border rounded-lg">
+                        <p className="text-muted-foreground text-center">
+                          This is a space for play ideas and experiments. Anyone on the team can add their ideas here - they won't be part of the main playbook until a coach promotes them.
+                        </p>
+                      </div>
+                    ) : viewMode == VIEW_MODE_GRID ? (
                       <div 
                         className="grid grid-cols-1 sm:grid-cols-2 
                           lg:grid-cols-3 xl:grid-cols-4 gap-4"
@@ -742,7 +769,7 @@ function PlaybookEditorContent({
                           />
                         ))}
                       </div>
-                    ) : (
+                    ) : section.plays.length > 0 ? (
                       <PlayListView
                         plays={section.plays}
                         selectedPlays={selectedPlays}
@@ -753,7 +780,7 @@ function PlaybookEditorContent({
                         onDelete={handleDeletePlay}
                         onDuplicate={handleDuplicatePlay}
                       />
-                    )}
+                    ) : null}
                   </div>
                 ))}
               </div>

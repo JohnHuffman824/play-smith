@@ -32,6 +32,7 @@ export interface Section {
 	playbook_id: number
 	name: string
 	display_order: number
+	section_type: 'standard' | 'ideas'
 	play_count?: number
 	created_at: string
 	updated_at: string

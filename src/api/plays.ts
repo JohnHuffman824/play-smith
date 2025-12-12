@@ -1,6 +1,7 @@
 import { getSessionUser } from './middleware/auth'
 import { db } from '../db/connection'
 import { checkPlaybookAccess } from './utils/checkPlaybookAccess'
+import { checkPlayPermission } from './utils/checkPlayPermission'
 
 type FormationPosition = {
 	id: number
@@ -240,7 +241,7 @@ export const playsAPI = {
 				return Response.json({ error: 'Invalid playbook ID' }, { status: 400 })
 			}
 
-			const { hasAccess } = await checkPlaybookAccess(playbookId, userId)
+			const { hasAccess, role } = await checkPlaybookAccess(playbookId, userId)
 
 			if (!hasAccess) {
 				return Response.json({ error: 'Access denied' }, { status: 403 })
@@ -259,6 +260,19 @@ export const playsAPI = {
 
 			// Handle special "__unsectioned__" value - convert to null for database
 			const sectionIdValue = section_id === '__unsectioned__' ? null : (section_id ?? null)
+
+			// Check permission to create in this section
+			const permission = await checkPlayPermission(
+				userId,
+				null, // no playId for create
+				sectionIdValue,
+				'create',
+				role
+			)
+
+			if (!permission.allowed) {
+				return Response.json({ error: permission.reason }, { status: 403 })
+			}
 
 			// Get next display_order
 			const [maxOrder] = await db`
@@ -299,7 +313,7 @@ export const playsAPI = {
 
 			// Get play and check it exists
 			const [play] = await db`
-				SELECT id, playbook_id
+				SELECT id, playbook_id, section_id
 				FROM plays
 				WHERE id = ${playId}
 			`
@@ -307,13 +321,42 @@ export const playsAPI = {
 				return Response.json({ error: 'Play not found' }, { status: 404 })
 			}
 
-			const { hasAccess } = await checkPlaybookAccess(play.playbook_id, userId)
+			const { hasAccess, role } = await checkPlaybookAccess(play.playbook_id, userId)
 
 			if (!hasAccess) {
 				return Response.json({ error: 'Access denied' }, { status: 403 })
 			}
 
 			const body = await req.json()
+
+			// Check if this is a move operation (section_id is changing)
+			const isMove = body.section_id !== undefined && body.section_id !== play.section_id
+
+			if (isMove) {
+				// Check move permission
+				const movePermission = await checkPlayPermission(
+					userId,
+					playId,
+					play.section_id,
+					'move',
+					role
+				)
+				if (!movePermission.allowed) {
+					return Response.json({ error: movePermission.reason }, { status: 403 })
+				}
+			} else {
+				// Check edit permission
+				const editPermission = await checkPlayPermission(
+					userId,
+					playId,
+					play.section_id,
+					'edit',
+					role
+				)
+				if (!editPermission.allowed) {
+					return Response.json({ error: editPermission.reason }, { status: 403 })
+				}
+			}
 
 			// Build dynamic UPDATE based on provided fields
 			const updates: string[] = []
@@ -395,10 +438,23 @@ export const playsAPI = {
 			return Response.json({ error: 'Play not found' }, { status: 404 })
 		}
 
-		const { hasAccess } = await checkPlaybookAccess(play.playbook_id, userId)
+		const { hasAccess, role } = await checkPlaybookAccess(play.playbook_id, userId)
 
 		if (!hasAccess) {
 			return Response.json({ error: 'Access denied' }, { status: 403 })
+		}
+
+		// Check permission to create in the same section as the original play
+		const permission = await checkPlayPermission(
+			userId,
+			null, // no playId for create
+			play.section_id,
+			'create',
+			role
+		)
+
+		if (!permission.allowed) {
+			return Response.json({ error: permission.reason }, { status: 403 })
 		}
 
 		// Get next display_order
@@ -456,7 +512,7 @@ export const playsAPI = {
 
 		// Get play and check it exists
 		const [play] = await db`
-			SELECT id, playbook_id
+			SELECT id, playbook_id, section_id
 			FROM plays
 			WHERE id = ${playId}
 		`
@@ -464,10 +520,23 @@ export const playsAPI = {
 			return Response.json({ error: 'Play not found' }, { status: 404 })
 		}
 
-		const { hasAccess } = await checkPlaybookAccess(play.playbook_id, userId)
+		const { hasAccess, role } = await checkPlaybookAccess(play.playbook_id, userId)
 
 		if (!hasAccess) {
 			return Response.json({ error: 'Access denied' }, { status: 403 })
+		}
+
+		// Check delete permission
+		const permission = await checkPlayPermission(
+			userId,
+			playId,
+			play.section_id,
+			'delete',
+			role
+		)
+
+		if (!permission.allowed) {
+			return Response.json({ error: permission.reason }, { status: 403 })
 		}
 
 		// Delete play

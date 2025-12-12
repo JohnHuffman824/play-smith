@@ -29,6 +29,7 @@ export interface Play {
 export interface Section {
 	id: string
 	name: string
+	section_type?: 'standard' | 'ideas'
 	plays: Play[]
 }
 
@@ -72,7 +73,7 @@ export function usePlaybookData(playbookId: string | undefined): UsePlaybookData
 	}, [])
 
 	// Helper to group plays by section
-	const groupPlaysBySections = useCallback((allPlays: Play[], allSections: Array<{ id: string; name: string }>) => {
+	const groupPlaysBySections = useCallback((allPlays: Play[], allSections: Array<{ id: string; name: string; section_type?: 'standard' | 'ideas' }>) => {
 		const sections = allSections.map(section => ({
 			...section,
 			plays: allPlays.filter(play => play.section_id === section.id)
@@ -84,6 +85,7 @@ export function usePlaybookData(playbookId: string | undefined): UsePlaybookData
 			sections.unshift({
 				id: '__unsectioned__',
 				name: 'Plays',
+				section_type: 'standard' as const,
 				plays: unsectionedPlays
 			})
 		}
