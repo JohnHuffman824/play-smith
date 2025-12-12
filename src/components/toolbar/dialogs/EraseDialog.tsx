@@ -1,4 +1,5 @@
 import { DialogCloseButton } from '../../ui/dialog-close-button'
+import './erase-dialog.css'
 
 interface EraseDialogProps {
   eraseSize: number
@@ -20,34 +21,31 @@ export function EraseDialog({
   return (
     <div
       data-erase-dialog
-      className="absolute left-24 top-32 w-64 rounded-2xl shadow-2xl bg-popover border border-border p-4 z-50">
-      <div className="flex items-center justify-between mb-4">
-        <span className="text-foreground">Erase</span>
+      className="erase-dialog">
+      <div className="erase-dialog-header">
+        <span className="erase-dialog-title">Erase</span>
         <DialogCloseButton onClose={onClose} />
       </div>
 
       {/* Erase Size */}
-      <div>
-        <label className="block text-xs mb-2 text-muted-foreground">
+      <div className="erase-dialog-section">
+        <label className="erase-dialog-label">
           Eraser Size
         </label>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="erase-dialog-size-grid">
           {eraseSizes.map((erase) => (
             <button
               key={erase.size}
               onClick={() => onEraseSizeChange(erase.size)}
-              className={`py-4 px-3 rounded-lg transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
-                eraseSize === erase.size
-                  ? 'bg-action-button text-action-button-foreground'
-                  : 'bg-muted text-foreground hover:bg-accent'
-              }`}
+              className="erase-dialog-size-button"
+              data-active={eraseSize === erase.size}
             >
-              <div className="flex flex-col items-center gap-2">
+              <div className="erase-dialog-size-content">
                 <div
-                  className="bg-current rounded-full"
+                  className="erase-dialog-size-dot"
                   style={{ width: `${erase.size}px`, height: `${erase.size}px` }}
                 />
-                <span className="text-xs">{erase.label}</span>
+                <span className="erase-dialog-size-label">{erase.label}</span>
               </div>
             </button>
           ))}

@@ -9,7 +9,6 @@ import { X, Pencil, Loader2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '../ui/button'
-import { cn } from '../ui/utils'
 import {
 	AnimationProvider,
 	useAnimation,
@@ -18,6 +17,7 @@ import { AnimationCanvas } from './AnimationCanvas'
 import { AnimationControls } from './AnimationControls'
 import { useAnimationTiming } from '../../hooks/useAnimationTiming'
 import { usePlayContent, type PlayContent } from '../../hooks/usePlayContent'
+import './play-viewer-modal.css'
 
 type PlayMetadata = {
 	id: string
@@ -35,18 +35,18 @@ type PlayViewerModalProps = {
 
 function LoadingState() {
 	return (
-		<div className='flex flex-1 flex-col items-center justify-center gap-4'>
-			<Loader2 className='size-12 animate-spin text-white' />
-			<p className='text-sm text-white/70'>Loading play...</p>
+		<div className='play-viewer-loading'>
+			<Loader2 className='play-viewer-loading-spinner' />
+			<p className='play-viewer-loading-text'>Loading play...</p>
 		</div>
 	)
 }
 
 function ErrorState({ message }: { message: string }) {
 	return (
-		<div className='flex flex-1 flex-col items-center justify-center gap-4'>
-			<p className='text-base text-red-500'>Failed to load play</p>
-			<p className='text-sm text-white/50'>{message}</p>
+		<div className='play-viewer-error'>
+			<p className='play-viewer-error-title'>Failed to load play</p>
+			<p className='play-viewer-error-message'>{message}</p>
 		</div>
 	)
 }
@@ -125,30 +125,25 @@ function PlayViewerContent({
 			animate={{ opacity: 1 }}
 			exit={{ opacity: 0 }}
 			transition={{ duration: 0.2 }}
-			className='fixed inset-0 z-50 flex flex-col bg-black'
+			className='play-viewer-modal'
 		>
 			{/* Header */}
-			<div
-				className={cn(
-					'flex items-center justify-between',
-					'border-b border-white/10 px-6 py-4'
-				)}
-			>
-				<div className='flex items-center gap-4'>
+			<div className='play-viewer-header'>
+				<div className='play-viewer-header-left'>
 					<Button
 						variant='ghost'
 						size='icon'
 						onClick={onClose}
 						aria-label='Close (Esc)'
-						className='text-white hover:bg-white/10'
+						className='play-viewer-close-button'
 					>
 						<X className='size-6' />
 					</Button>
-					<div>
-						<h2 className='text-lg font-semibold text-white'>
+					<div className='play-viewer-title-group'>
+						<h2 className='play-viewer-title'>
 							{displayName}
 						</h2>
-						<span className='text-xs text-white/50'>
+						<span className='play-viewer-counter'>
 							{currentIndex + 1} of {totalPlays}
 						</span>
 					</div>
@@ -158,10 +153,7 @@ function PlayViewerContent({
 					<Button
 						variant='outline'
 						onClick={handleEdit}
-						className={cn(
-							'gap-2 border-white/20 bg-white/10',
-							'text-white hover:bg-white/20'
-						)}
+						className='play-viewer-edit-button'
 					>
 						<Pencil className='size-4' />
 						Edit
@@ -175,7 +167,7 @@ function PlayViewerContent({
 			) : error ? (
 				<ErrorState message={error} />
 			) : (
-				<div className='relative flex-1 overflow-hidden'>
+				<div className='play-viewer-canvas'>
 					<AnimationCanvas
 						drawings={playContent?.drawings ?? []}
 						players={playContent?.players ?? []}
@@ -184,7 +176,7 @@ function PlayViewerContent({
 			)}
 
 			{/* Controls */}
-			<div className='border-t border-white/10 px-6 py-4'>
+			<div className='play-viewer-controls-footer'>
 				<AnimationControls
 					onPrevPlay={onPrevPlay}
 					onNextPlay={onNextPlay}

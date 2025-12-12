@@ -4,11 +4,11 @@
  */
 
 import { useMemo } from 'react'
-import { cn } from '../ui/utils'
 import type { Coordinate } from '../../types/field.types'
 import type { FieldCoordinateSystem } from '../../utils/coordinates'
 import { PLAYER_RADIUS_FEET } from '../../constants/field.constants'
 import { useTheme } from '../../contexts/SettingsContext'
+import './animated-player.css'
 
 type AnimatedPlayerProps = {
 	id: string
@@ -48,11 +48,8 @@ export function AnimatedPlayer({
 	return (
 		<div
 			data-player-id={id}
-			className={cn(
-				'absolute flex items-center justify-center',
-				'pointer-events-none rounded-full',
-				'will-change-[left,top]'
-			)}
+			data-ghost={isGhost}
+			className='animated-player'
 			style={{
 				left: pixelPosition.x - pixelRadius,
 				top: pixelPosition.y - pixelRadius,
@@ -60,16 +57,11 @@ export function AnimatedPlayer({
 				height: size,
 				backgroundColor: isGhost ? 'transparent' : color,
 				border: `2px ${isGhost ? 'dashed' : 'solid'} ${outlineColor}`,
-				opacity: isGhost ? 0.3 : opacity,
+				opacity: isGhost ? undefined : opacity,
 			}}
 		>
 			{showLabel && !isGhost && (
-				<span
-					className={cn(
-						'select-none text-[10px] font-bold text-white',
-						'drop-shadow-[0_0_2px_rgba(0,0,0,0.5)]'
-					)}
-				>
+				<span className='animated-player-label'>
 					{label}
 				</span>
 			)}

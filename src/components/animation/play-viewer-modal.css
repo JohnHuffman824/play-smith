@@ -1,0 +1,112 @@
+/* || Base styles */
+.play-viewer-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 50;
+	display: flex;
+	flex-direction: column;
+	background: black;
+}
+
+/* Header */
+.play-viewer-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+	padding: 1rem 1.5rem;
+}
+
+.play-viewer-header-left {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+}
+
+.play-viewer-close-button {
+	color: white;
+}
+
+.play-viewer-close-button:hover {
+	background: rgba(255, 255, 255, 0.1);
+}
+
+.play-viewer-title-group {
+	/* Intentionally empty - just semantic grouping */
+}
+
+.play-viewer-title {
+	font-size: 1.125rem;
+	font-weight: 600;
+	color: white;
+}
+
+.play-viewer-counter {
+	font-size: 0.75rem;
+	color: rgba(255, 255, 255, 0.5);
+}
+
+.play-viewer-edit-button {
+	gap: 0.5rem;
+	border-color: rgba(255, 255, 255, 0.2);
+	background: rgba(255, 255, 255, 0.1);
+	color: white;
+}
+
+.play-viewer-edit-button:hover {
+	background: rgba(255, 255, 255, 0.2);
+}
+
+/* Canvas area */
+.play-viewer-canvas {
+	position: relative;
+	flex: 1;
+	overflow: hidden;
+}
+
+.play-viewer-loading,
+.play-viewer-error {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 1rem;
+}
+
+.play-viewer-loading-spinner {
+	width: 3rem;
+	height: 3rem;
+	animation: spin 1s linear infinite;
+	color: white;
+}
+
+@keyframes spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+.play-viewer-loading-text {
+	font-size: 0.875rem;
+	color: rgba(255, 255, 255, 0.7);
+}
+
+.play-viewer-error-title {
+	font-size: 1rem;
+	color: rgb(239 68 68);
+}
+
+.play-viewer-error-message {
+	font-size: 0.875rem;
+	color: rgba(255, 255, 255, 0.5);
+}
+
+/* Controls footer */
+.play-viewer-controls-footer {
+	border-top: 1px solid rgba(255, 255, 255, 0.1);
+	padding: 1rem 1.5rem;
+}

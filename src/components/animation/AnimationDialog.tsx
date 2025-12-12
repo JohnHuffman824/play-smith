@@ -24,8 +24,8 @@ import { AnimationProvider, useAnimation } from '../../contexts/AnimationContext
 import { AnimationCanvas } from './AnimationCanvas'
 import { useAnimationTiming } from '../../hooks/useAnimationTiming'
 import { usePlayContent } from '../../hooks/usePlayContent'
-import { cn } from '../ui/utils'
 import type { PlaybackSpeed } from '../../types/animation.types'
+import './animation-dialog.css'
 
 type AnimationDialogProps = {
 	isOpen: boolean
@@ -85,8 +85,8 @@ function AnimationDialogContent({
 	const displayName = playContent?.name || playName || 'Play Animation'
 
 	return (
-		<div className='flex h-full flex-col gap-4'>
-			<DialogHeader className='flex-shrink-0'>
+		<div className='animation-dialog-content'>
+			<DialogHeader className='animation-dialog-header'>
 				<DialogTitle>{displayName}</DialogTitle>
 				<DialogDescription className='sr-only'>
 					Play animation viewer
@@ -94,23 +94,23 @@ function AnimationDialogContent({
 			</DialogHeader>
 
 			{isLoading ? (
-				<div className='flex min-h-[400px] items-center justify-center'>
-					<p className='text-sm text-muted-foreground'>Loading animation...</p>
+				<div className='animation-dialog-loading'>
+					<p className='animation-dialog-loading-text'>Loading animation...</p>
 				</div>
 			) : !playContent ? (
-				<div className='flex min-h-[400px] items-center justify-center'>
-					<p className='text-sm text-destructive'>Failed to load animation</p>
+				<div className='animation-dialog-error'>
+					<p className='animation-dialog-error-text'>Failed to load animation</p>
 				</div>
 			) : (
 				<>
-					<div className='flex-1 min-h-0 w-full overflow-hidden rounded-lg bg-black'>
+					<div className='animation-dialog-canvas-container'>
 						<AnimationCanvas
 							drawings={playContent.drawings}
 							players={playContent.players}
 						/>
 					</div>
 
-					<div className='flex flex-shrink-0 items-center justify-center gap-4 pb-2'>
+					<div className='animation-dialog-controls'>
 						<Button
 							variant='outline'
 							size='icon'
@@ -128,7 +128,7 @@ function AnimationDialogContent({
 							value={(state.speed ?? 1).toString()}
 							onValueChange={handleSpeedChange}
 						>
-							<SelectTrigger className='w-24'>
+							<SelectTrigger className='animation-dialog-speed-select'>
 								<SelectValue />
 							</SelectTrigger>
 							<SelectContent>
@@ -153,7 +153,7 @@ export function AnimationDialog({
 }: AnimationDialogProps) {
 	return (
 		<Dialog open={isOpen} onOpenChange={onClose}>
-			<DialogContent className={cn('w-[98vw] h-[95vh] max-w-none sm:max-w-none p-6')}>
+			<DialogContent className='animation-dialog-wrapper'>
 				<AnimationProvider>
 					<AnimationDialogContent playId={playId} playName={playName} />
 				</AnimationProvider>

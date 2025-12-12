@@ -3,6 +3,7 @@ import { Tag as TagIcon, Plus, X } from 'lucide-react'
 import { TagDialog } from './TagDialog'
 import { getTagClasses } from '../playbook-editor/constants/playbook'
 import type { Tag } from '@/hooks/useTagsData'
+import './tag-selector.css'
 
 interface TagSelectorProps {
 	availableTags: Tag[]
@@ -22,20 +23,19 @@ export function TagSelector({ availableTags, selectedTags, onTagsChange, onCreat
 
 	return (
 		<div>
-			<div className="flex flex-wrap items-center gap-2">
+			<div className="tag-selector">
 				{selectedTags.map(tag => {
 					const cls = getTagClasses(tag.color)
 					return (
-						<span key={tag.id} className={`group flex items-center gap-1 px-2.5 py-1 rounded-full text-xs ${cls.bg} ${cls.text}`}>
+						<span key={tag.id} className={`tag-selector__tag ${cls.bg} ${cls.text}`}>
 							{tag.name}
-							<button onClick={e => removeTag(tag.id, e)} className="opacity-0 group-hover:opacity-100 hover:text-foreground cursor-pointer">
+							<button onClick={e => removeTag(tag.id, e)} className="tag-selector__tag-remove" aria-label={`Remove ${tag.name}`}>
 								<X className="w-3 h-3" />
 							</button>
 						</span>
 					)
 				})}
-				<button onClick={() => setDialogOpen(true)}
-					className="flex items-center gap-1 px-2 py-1 rounded-full text-xs text-muted-foreground hover:text-foreground hover:bg-accent cursor-pointer">
+				<button onClick={() => setDialogOpen(true)} className="tag-selector__add" aria-label="Add tags">
 					{selectedTags.length === 0 ? <><TagIcon className="w-3 h-3" />Add tags</> : <Plus className="w-3 h-3" />}
 				</button>
 			</div>

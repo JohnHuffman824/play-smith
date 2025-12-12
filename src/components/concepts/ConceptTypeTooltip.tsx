@@ -1,5 +1,6 @@
 import { HelpCircle } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
+import './concept-type-tooltip.css'
 
 export function ConceptTypeTooltip() {
 	const [isOpen, setIsOpen] = useState(false)
@@ -19,51 +20,51 @@ export function ConceptTypeTooltip() {
 	}, [isOpen])
 
 	return (
-		<div className="relative inline-block" ref={tooltipRef}>
+		<div className="concept-type-tooltip" ref={tooltipRef}>
 			<button
 				type="button"
 				onClick={() => setIsOpen(!isOpen)}
-				className="p-1 hover:bg-accent rounded transition-colors"
+				className="concept-type-tooltip-button"
 				aria-label="Concept type help"
 			>
-				<HelpCircle className="w-4 h-4 text-muted-foreground" />
+				<HelpCircle className="w-4 h-4 concept-type-tooltip-icon" />
 			</button>
 
 			{isOpen && (
-				<div className="absolute left-0 bottom-full mb-2 w-80 bg-card border border-border rounded-lg shadow-lg p-4 z-50">
-					<h4 className="font-semibold text-sm mb-3">Concept Types</h4>
+				<div className="concept-type-tooltip-popover">
+					<h4 className="concept-type-tooltip-title">Concept Types</h4>
 
-					<div className="space-y-3 text-xs">
+					<div className="concept-type-tooltip-content">
 						<div>
-							<div className="font-semibold text-foreground mb-1">
+							<div className="concept-type-tooltip-item-title">
 								Motion
 							</div>
-							<p className="text-muted-foreground mb-2">
+							<p className="concept-type-tooltip-item-description">
 								Pre-snap player movement that occurs before the ball is snapped. Motion paths are displayed as dotted lines and animate before routes execute.
 							</p>
-							<div className="bg-secondary p-2 rounded">
-								<span className="font-mono text-muted-foreground text-xs">
+							<div className="concept-type-tooltip-example">
+								<span className="concept-type-tooltip-example-text">
 									Examples: Jet, Orbit, Return
 								</span>
 							</div>
 						</div>
 
 						<div>
-							<div className="font-semibold text-foreground mb-1">
+							<div className="concept-type-tooltip-item-title">
 								Modifier
 							</div>
-							<p className="text-muted-foreground mb-2">
+							<p className="concept-type-tooltip-item-description">
 								Adjusts player positions within an existing formation. Modifiers move players closer or farther from the formation center.
 							</p>
-							<div className="bg-secondary p-2 rounded">
-								<span className="font-mono text-muted-foreground text-xs">
+							<div className="concept-type-tooltip-example">
+								<span className="concept-type-tooltip-example-text">
 									Examples: Tight, Nasty, Wide
 								</span>
 							</div>
 						</div>
 
-						<div className="pt-2 border-t border-border">
-							<p className="text-muted-foreground italic">
+						<div className="concept-type-tooltip-note">
+							<p className="concept-type-tooltip-note-text">
 								Note: A concept can be either Motion or Modifier, but not both.
 							</p>
 						</div>

@@ -15,13 +15,9 @@ export const FILTER_TAGS = 'tags'
 export const MAX_VISIBLE_TAGS = 4
 export const DEFAULT_PLAYBOOK_NAME = 'Offensive Game Plan - Week 1'
 
-// Play Type Badge Styles
-export const PLAY_TYPE_BADGE_PASS = 'bg-blue-500/90 text-white'
-export const PLAY_TYPE_BADGE_RUN = 'bg-green-500/90 text-white'
-
-// Play Type List Styles
-export const PLAY_TYPE_LIST_PASS = 'bg-blue-500/10 text-blue-500'
-export const PLAY_TYPE_LIST_RUN = 'bg-green-500/10 text-green-500'
+// These constants are now defined in CSS files:
+// - PLAY_TYPE_BADGE_PASS/RUN moved to play-card.css
+// - PLAY_TYPE_LIST_PASS/RUN moved to play-list-view.css
 
 // Common Class Names
 export const BUTTON_BASE = 'p-2 hover:bg-accent rounded-lg transition-all duration-200'

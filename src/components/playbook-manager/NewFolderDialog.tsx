@@ -75,9 +75,9 @@ export function NewFolderDialog({ isOpen, onClose }: NewFolderDialogProps) {
 
 	return (
 		<Modal isOpen={isOpen} onClose={onClose} title="New Folder">
-			<div className="space-y-4">
+			<div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
 				<div>
-					<label htmlFor="folder-name" className="block text-sm font-medium mb-2">
+					<label htmlFor="folder-name" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '8px' }}>
 						Folder Name
 					</label>
 					<Input
@@ -94,13 +94,13 @@ export function NewFolderDialog({ isOpen, onClose }: NewFolderDialogProps) {
 						autoFocus
 					/>
 					{nameError && (
-						<p className="mt-1 text-sm text-destructive">
+						<p style={{ marginTop: '4px', fontSize: '0.875rem', color: 'var(--destructive)' }}>
 							{nameError}
 						</p>
 					)}
 				</div>
 
-				<div className="flex justify-end gap-2 pt-2">
+				<div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', paddingTop: '8px' }}>
 					<Button
 						onClick={onClose}
 						variant="outline"

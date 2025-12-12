@@ -3,6 +3,7 @@ import { Input } from '../ui/input'
 import { Badge } from '../ui/badge'
 import { X } from 'lucide-react'
 import { useDebounce } from '../../hooks/useDebounce'
+import './search-bar.css'
 
 interface Formation {
   id: number
@@ -77,14 +78,14 @@ export function SearchBar({
   }
 
   return (
-    <div className="relative">
+    <div className="search-bar">
       {/* Selected chips */}
-      <div className="flex flex-wrap gap-2 mb-2">
+      <div className="search-bar__chips">
         {selectedFormation && (
           <Badge variant="secondary" className="flex items-center gap-1">
             {selectedFormation.name}
             {onRemove && (
-              <button onClick={() => onRemove(selectedFormation, 'formation')}>
+              <button onClick={() => onRemove(selectedFormation, 'formation')} aria-label={`Remove ${selectedFormation.name}`}>
                 <X className="w-3 h-3" />
               </button>
             )}
@@ -98,7 +99,7 @@ export function SearchBar({
           >
             {getConceptDisplayName(concept)}
             {onRemove && (
-              <button onClick={() => onRemove(concept, 'concept')}>
+              <button onClick={() => onRemove(concept, 'concept')} aria-label={`Remove ${getConceptDisplayName(concept)}`}>
                 <X className="w-3 h-3" />
               </button>
             )}
@@ -119,16 +120,16 @@ export function SearchBar({
 
       {/* Results dropdown */}
       {isOpen && results && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg z-50 max-h-64 overflow-auto">
+        <div className="search-bar__dropdown">
           {/* Formation results */}
           {results.results.formations?.map((f: any) => (
             <button
               key={f.id}
-              className="w-full text-left px-3 py-2 hover:bg-accent transition-colors cursor-pointer"
+              className="search-bar__dropdown-item"
               onClick={() => handleSelect(f, 'formation')}
             >
-              <span className="font-medium">{f.name}</span>
-              <span className="text-sm text-muted-foreground ml-2">Formation</span>
+              <span className="search-bar__dropdown-label">{f.name}</span>
+              <span className="search-bar__dropdown-type">Formation</span>
             </button>
           ))}
 
@@ -136,11 +137,11 @@ export function SearchBar({
           {results.results.concepts?.map((c: any) => (
             <button
               key={c.id}
-              className="w-full text-left px-3 py-2 hover:bg-accent transition-colors cursor-pointer"
+              className="search-bar__dropdown-item"
               onClick={() => handleSelect({ ...c, is_saved: true }, 'concept')}
             >
-              <span className="font-medium">{c.name}</span>
-              <span className="text-sm text-muted-foreground ml-2">
+              <span className="search-bar__dropdown-label">{c.name}</span>
+              <span className="search-bar__dropdown-type">
                 {c.is_motion ? 'Motion' : c.is_modifier ? 'Modifier' : 'Concept'}
               </span>
             </button>
@@ -149,27 +150,27 @@ export function SearchBar({
           {/* Composition suggestion */}
           {results.parseResult?.type === 'composition' && (
             <button
-              className="w-full text-left px-3 py-2 hover:bg-accent border-t border-border transition-colors cursor-pointer"
+              className="search-bar__dropdown-item search-bar__dropdown-divider"
               onClick={() => handleSelect(results.parseResult.composition, 'concept')}
             >
-              <span className="font-medium">
+              <span className="search-bar__dropdown-label">
                 {results.parseResult.composition.role} {results.parseResult.composition.template_name}
               </span>
-              <span className="text-sm text-muted-foreground ml-2">Auto-compose (unsaved)</span>
+              <span className="search-bar__dropdown-type">Auto-compose (unsaved)</span>
             </button>
           )}
 
           {/* Needs role prompt */}
           {results.parseResult?.type === 'needs_role' && (
-            <div className="px-3 py-2 border-t border-border">
-              <span className="text-sm text-muted-foreground">
+            <div className="search-bar__dropdown-divider">
+              <span className="search-bar__dropdown-prompt">
                 Apply "{results.parseResult.template_name}" to which player?
               </span>
-              <div className="flex gap-2 mt-1">
+              <div className="search-bar__dropdown-roles">
                 {results.parseResult.availableRoles?.slice(0, 5).map((role: string) => (
                   <button
                     key={role}
-                    className="px-2 py-1 text-sm bg-secondary text-secondary-foreground rounded hover:bg-secondary/80 transition-colors cursor-pointer"
+                    className="search-bar__role-button"
                     onClick={() => handleSelect({
                       role,
                       template_name: results.parseResult.template_name,
@@ -185,8 +186,8 @@ export function SearchBar({
 
           {/* No match */}
           {results.parseResult?.type === 'no_match' && query && (
-            <div className="px-3 py-2 text-sm text-muted-foreground border-t border-border">
-              No match found. <button className="text-action-button hover:underline cursor-pointer">Create new concept?</button>
+            <div className="search-bar__dropdown-divider search-bar__dropdown-prompt">
+              No match found. <button className="search-bar__create-link">Create new concept?</button>
             </div>
           )}
         </div>

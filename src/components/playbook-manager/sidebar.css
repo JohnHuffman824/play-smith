@@ -1,0 +1,121 @@
+/* || Base styles */
+.playbook-sidebar {
+	border-right: 1px solid var(--sidebar-border);
+	background: var(--sidebar-primary);
+	height: 100vh;
+	position: sticky;
+	top: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+/* || Header */
+.playbook-sidebar-header {
+	border-bottom: 1px solid var(--sidebar-border);
+	padding: 0 24px;
+	height: 100%;
+	display: flex;
+	align-items: center;
+}
+
+.playbook-sidebar-title {
+	color: var(--sidebar-foreground);
+}
+
+/* || Navigation */
+.playbook-sidebar-nav {
+	flex: 1;
+	padding: 16px 12px;
+	overflow-y: auto;
+}
+
+.playbook-sidebar-nav ul {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+/* || Section buttons */
+.playbook-sidebar-section {
+	width: 100%;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 10px 12px;
+	border-radius: 8px;
+	transition: all 200ms;
+	cursor: pointer;
+	background: transparent;
+	border: none;
+	color: var(--sidebar-foreground);
+	outline: none;
+}
+
+.playbook-sidebar-section:hover {
+	background: color-mix(in oklch, var(--sidebar-accent) 50%, transparent);
+}
+
+.playbook-sidebar-section:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.playbook-sidebar-section-active {
+	background: color-mix(in oklch, var(--primary) 10%, transparent);
+	color: var(--primary);
+	font-weight: 500;
+	border: 1px solid color-mix(in oklch, var(--primary) 20%, transparent);
+}
+
+.playbook-sidebar-section-label {
+	flex: 1;
+	text-align: left;
+}
+
+/* || Folder list */
+.playbook-sidebar-folders {
+	list-style: none;
+	padding: 0;
+	margin: 4px 0 0 24px;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.playbook-sidebar-folder {
+	width: 100%;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 12px;
+	border-radius: 8px;
+	transition: all 200ms;
+	cursor: pointer;
+	background: transparent;
+	border: none;
+	color: var(--sidebar-foreground);
+	font-size: 0.875rem;
+	outline: none;
+}
+
+.playbook-sidebar-folder:hover {
+	background: color-mix(in oklch, var(--sidebar-accent) 30%, transparent);
+}
+
+.playbook-sidebar-folder:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.playbook-sidebar-folder-active {
+	background: color-mix(in oklch, var(--primary) 5%, transparent);
+	color: var(--primary);
+	font-weight: 500;
+}
+
+.playbook-sidebar-folder-name {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}

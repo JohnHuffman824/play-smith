@@ -1,0 +1,248 @@
+/* || Login Modal */
+
+/* || Backdrop */
+.login-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgb(0 0 0 / 50%);
+  backdrop-filter: blur(4px);
+}
+
+/* || Container */
+.login-modal-container {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+/* || Modal */
+.login-modal {
+  background: var(--card);
+  border-radius: 24px;
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 10%), 0 8px 10px -6px rgb(0 0 0 / 10%);
+  max-width: 28rem;
+  width: 100%;
+  overflow: hidden;
+  animation: modal-in 200ms ease-out;
+  border: 1px solid var(--border);
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* || Header */
+.login-modal-header {
+  position: relative;
+  background: var(--muted);
+  padding: 2rem 2rem 3rem;
+}
+
+.login-modal-header-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.login-modal-logo {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 16px;
+  background: var(--action-button);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 10%), 0 4px 6px -4px rgb(0 0 0 / 10%);
+}
+
+.login-modal-logo span {
+  color: var(--action-button-foreground);
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.login-modal-title {
+  font-size: 1.5rem;
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.login-modal-subtitle {
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+}
+
+/* || Form */
+.login-modal-form {
+  padding: 2rem 2rem 1.5rem;
+}
+
+/* || Error */
+.login-modal-error {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: rgb(254 242 242);
+  border: 1px solid rgb(254 202 202);
+  border-radius: 12px;
+  color: rgb(220 38 38);
+  font-size: 0.875rem;
+}
+
+/* || Form Group */
+.login-modal-form-group {
+  margin-bottom: 1rem;
+}
+
+.login-modal-label {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--foreground);
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.login-modal-input-wrapper {
+  position: relative;
+}
+
+.login-modal-input-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--muted-foreground);
+}
+
+/* || Password Toggle */
+.login-modal-password-toggle {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted-foreground);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  outline: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 200ms;
+}
+
+.login-modal-password-toggle:hover {
+  color: var(--foreground);
+}
+
+.login-modal-password-toggle:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.login-modal-password-toggle svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* || Submit Button */
+.login-modal-submit {
+  width: 100%;
+  padding: 0.875rem;
+  background: var(--action-button);
+  color: var(--action-button-foreground);
+  border-radius: 16px;
+  font-weight: 600;
+  border: 0;
+  cursor: pointer;
+  outline: none;
+  transition: all 200ms;
+  margin-bottom: 1rem;
+}
+
+.login-modal-submit:hover {
+  background: color-mix(in oklch, var(--action-button) 90%, black);
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 10%), 0 4px 6px -4px rgb(0 0 0 / 10%);
+}
+
+.login-modal-submit:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.login-modal-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* || Divider */
+.login-modal-divider {
+  position: relative;
+  margin: 1.5rem 0;
+}
+
+.login-modal-divider::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+}
+
+.login-modal-divider::after {
+  content: "";
+  width: 100%;
+  border-top: 1px solid var(--border);
+}
+
+.login-modal-divider-text {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.login-modal-divider-text span {
+  padding: 0 1rem;
+  background: var(--card);
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+/* || Switch Mode */
+.login-modal-switch {
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.login-modal-switch-button {
+  color: var(--action-button);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  outline: none;
+  font-weight: 600;
+  padding: 0;
+  transition: color 200ms;
+}
+
+.login-modal-switch-button:hover {
+  color: color-mix(in oklch, var(--action-button) 80%, black);
+}
+
+.login-modal-switch-button:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}

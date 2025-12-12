@@ -1,6 +1,7 @@
 import { X } from 'lucide-react'
 import { getTagClasses } from '../playbook-editor/constants/playbook'
 import type { Tag } from '@/hooks/useTagsData'
+import './selected-tags-overlay.css'
 
 interface SelectedTagsOverlayProps {
 	tags: Tag[]
@@ -11,18 +12,19 @@ export function SelectedTagsOverlay({ tags, onRemoveTag }: SelectedTagsOverlayPr
 	if (tags.length === 0) return null
 
 	return (
-		<div className="absolute top-5 left-9.5 z-12 flex flex-row-reverse flex-wrap-reverse gap-2 max-w-[50%]">
+		<div className="selected-tags-overlay">
 			{tags.map(tag => {
 				const cls = getTagClasses(tag.color)
 				return (
 					<span
 						key={tag.id}
-						className={`group relative inline-block px-2 py-0.5 rounded-full text-xs ${cls.bg} ${cls.text} opacity-90`}
+						className={`selected-tags-overlay__tag ${cls.bg} ${cls.text}`}
 					>
 						{tag.name}
 						<button
 							onClick={() => onRemoveTag(tag.id)}
-							className="absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 bg-background rounded-full p-0.5 shadow-sm transition-opacity cursor-pointer"
+							className="selected-tags-overlay__remove"
+							aria-label={`Remove ${tag.name}`}
 						>
 							<X className="w-2.5 h-2.5" />
 						</button>

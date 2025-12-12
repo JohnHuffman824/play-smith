@@ -1,0 +1,126 @@
+/* || Share form */
+.share-playbook-form {
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
+}
+
+.share-playbook-field {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.share-playbook-label {
+	display: block;
+	font-size: 0.875rem;
+	font-weight: 500;
+	margin-bottom: 8px;
+}
+
+.share-playbook-empty {
+	font-size: 0.875rem;
+	color: var(--muted-foreground);
+}
+
+.share-playbook-select {
+	width: 100%;
+	padding: 8px 12px;
+	border: 1px solid var(--border);
+	border-radius: 8px;
+	background: var(--background);
+	cursor: pointer;
+	outline: none;
+}
+
+.share-playbook-select:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.share-playbook-select:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+/* || Permission options */
+.share-playbook-permissions {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.share-playbook-permission-option {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	cursor: pointer;
+}
+
+.share-playbook-permission-option input {
+	cursor: pointer;
+}
+
+.share-playbook-permission-text {
+	font-size: 0.875rem;
+}
+
+/* || Error message */
+.share-playbook-error {
+	font-size: 0.875rem;
+	color: var(--destructive);
+}
+
+/* || Shares list */
+.share-playbook-shares-header {
+	font-size: 0.875rem;
+	font-weight: 500;
+	margin-bottom: 12px;
+}
+
+.share-playbook-shares-loading,
+.share-playbook-shares-empty {
+	font-size: 0.875rem;
+	color: var(--muted-foreground);
+}
+
+.share-playbook-shares-list {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.share-playbook-share-item {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px;
+	border: 1px solid var(--border);
+	border-radius: 8px;
+	background: color-mix(in oklch, var(--muted) 50%, transparent);
+}
+
+.share-playbook-share-info {
+	flex: 1;
+}
+
+.share-playbook-share-team {
+	font-weight: 500;
+}
+
+.share-playbook-share-permission {
+	font-size: 0.875rem;
+	color: var(--muted-foreground);
+	text-transform: capitalize;
+}
+
+/* || Footer */
+.share-playbook-footer {
+	display: flex;
+	justify-content: flex-end;
+	padding-top: 8px;
+}
+
+/* || Modal override for wider dialog */
+.share-playbook-modal {
+	max-width: 672px;
+}

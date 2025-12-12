@@ -1,0 +1,14 @@
+/* || Play Header */
+.play-header {
+	padding: 24px 32px 4px;
+}
+
+.play-header__content {
+	display: flex;
+	gap: 16px;
+	align-items: center;
+}
+
+.play-header__search {
+	flex: 1;
+}

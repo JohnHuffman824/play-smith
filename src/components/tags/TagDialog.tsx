@@ -2,7 +2,10 @@ import { useState } from 'react'
 import { X, Plus, Check } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { TAG_COLOR_PALETTE, getTagClasses } from '../playbook-editor/constants/playbook'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 import type { Tag } from '@/hooks/useTagsData'
+import './tag-dialog.css'
 
 interface TagDialogProps {
 	isOpen: boolean
@@ -42,16 +45,16 @@ export function TagDialog({ isOpen, onClose, availableTags, selectedTagIds, onTa
 		<Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
 			<DialogContent className="sm:max-w-md">
 				<DialogHeader><DialogTitle>{title}</DialogTitle></DialogHeader>
-				<div className="space-y-4 py-4">
+				<div className="tag-dialog__content">
 					<div>
-						<h4 className="text-sm font-medium mb-2">Preset Tags</h4>
-						<div className="flex flex-wrap gap-2">
+						<h4 className="tag-dialog__section-title">Preset Tags</h4>
+						<div className="tag-dialog__tags">
 							{presets.map(tag => {
 								const cls = getTagClasses(tag.color)
 								const selected = selectedTagIds.includes(tag.id)
 								return (
 									<button key={tag.id} onClick={() => toggleTag(tag.id)}
-										className={`flex items-center gap-1 px-3 py-1.5 rounded-full cursor-pointer ${cls.bg} ${cls.text} ${selected ? 'ring-2 ring-primary' : ''}`}>
+										className={`tag-dialog__tag-button ${cls.bg} ${cls.text} ${selected ? 'tag-dialog__tag-button--selected' : ''}`}>
 										{selected && <Check className="w-3 h-3" />}{tag.name}
 									</button>
 								)
@@ -60,14 +63,14 @@ export function TagDialog({ isOpen, onClose, availableTags, selectedTagIds, onTa
 					</div>
 					{custom.length > 0 && (
 						<div>
-							<h4 className="text-sm font-medium mb-2">Custom Tags</h4>
-							<div className="flex flex-wrap gap-2">
+							<h4 className="tag-dialog__section-title">Custom Tags</h4>
+							<div className="tag-dialog__tags">
 								{custom.map(tag => {
 									const cls = getTagClasses(tag.color)
 									const selected = selectedTagIds.includes(tag.id)
 									return (
 										<button key={tag.id} onClick={() => toggleTag(tag.id)}
-											className={`flex items-center gap-1 px-3 py-1.5 rounded-full cursor-pointer ${cls.bg} ${cls.text} ${selected ? 'ring-2 ring-primary' : ''}`}>
+											className={`tag-dialog__tag-button ${cls.bg} ${cls.text} ${selected ? 'tag-dialog__tag-button--selected' : ''}`}>
 											{selected && <Check className="w-3 h-3" />}{tag.name}
 										</button>
 									)
@@ -76,28 +79,26 @@ export function TagDialog({ isOpen, onClose, availableTags, selectedTagIds, onTa
 						</div>
 					)}
 					{onCreateTag && (
-						<div className="pt-2 border-t">
+						<div className="tag-dialog__create">
 							{showCreate ? (
-								<div className="space-y-3">
-									<input type="text" value={newName} onChange={e => setNewName(e.target.value)} placeholder="Tag name..."
-										className="w-full px-3 py-2 bg-input-background rounded-lg border-0 outline-none focus:ring-2 focus:ring-ring/20" autoFocus />
-									<div className="flex flex-wrap gap-2">
+								<div className="tag-dialog__create-form">
+									<Input type="text" value={newName} onChange={e => setNewName(e.target.value)} placeholder="Tag name..." autoFocus />
+									<div className="tag-dialog__color-palette">
 										{TAG_COLOR_PALETTE.map(c => (
 											<button key={c.value} onClick={() => setNewColor(c.value)}
-												className={`w-8 h-8 rounded-full cursor-pointer ${newColor === c.value ? 'ring-2 ring-primary ring-offset-2' : ''}`}
-												style={{ backgroundColor: c.value }} title={c.name} />
+												className={`tag-dialog__color-button ${newColor === c.value ? 'tag-dialog__color-button--selected' : ''}`}
+												style={{ backgroundColor: c.value }} title={c.name} aria-label={c.name} />
 										))}
 									</div>
-									<div className="flex justify-end gap-2">
-										<button onClick={() => setShowCreate(false)} className="px-3 py-1.5 border border-border hover:bg-accent rounded-lg cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">Cancel</button>
-										<button onClick={handleCreate} disabled={!newName.trim() || creating}
-											className="px-3 py-1.5 bg-action-button text-action-button-foreground rounded-lg disabled:opacity-50 cursor-pointer hover:bg-action-button/90 transition-all duration-200 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
+									<div className="tag-dialog__form-actions">
+										<Button variant="outline" onClick={() => setShowCreate(false)}>Cancel</Button>
+										<Button onClick={handleCreate} disabled={!newName.trim() || creating}>
 											{creating ? 'Creating...' : 'Create'}
-										</button>
+										</Button>
 									</div>
 								</div>
 							) : (
-								<button onClick={() => setShowCreate(true)} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground cursor-pointer">
+								<button onClick={() => setShowCreate(true)} className="tag-dialog__create-toggle">
 									<Plus className="w-4 h-4" />Create custom tag
 								</button>
 							)}
@@ -105,7 +106,7 @@ export function TagDialog({ isOpen, onClose, availableTags, selectedTagIds, onTa
 					)}
 				</div>
 				<DialogFooter>
-					<button onClick={onClose} className="px-4 py-2 bg-action-button text-action-button-foreground rounded-lg cursor-pointer hover:bg-action-button/90 transition-all duration-200 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">Done</button>
+					<Button onClick={onClose}>Done</Button>
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>

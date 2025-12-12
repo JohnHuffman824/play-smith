@@ -14,6 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import './share-dialog.css'
 
 type ShareRecipient = {
   email: string
@@ -88,54 +89,35 @@ export function ShareDialog({
     : `Share with ${recipients.length} people`
 
   return (
-    <>
-      <div
-        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 
-          flex items-center justify-center p-4"
-        onClick={onClose}
-      >
-        <div
-          className="bg-popover rounded-2xl border border-border
-            shadow-2xl w-full max-w-lg overflow-hidden"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div
-            className="flex items-center justify-between px-6 py-4
-              border-b border-border"
+    <div className="share-dialog-backdrop" onClick={onClose}>
+      <div className="share-dialog" onClick={(e) => e.stopPropagation()}>
+        <div className="share-dialog-header">
+          <h2>Share Playbook</h2>
+          <Button
+            onClick={onClose}
+            variant="ghost"
+            size="icon"
+            className="h-auto w-auto p-1.5"
           >
-            <h2>Share Playbook</h2>
-            <Button
-              onClick={onClose}
-              variant="ghost"
-              size="icon"
-              className="h-auto w-auto p-1.5"
-            >
-              <X className="w-5 h-5" />
-            </Button>
-          </div>
+            <X className="w-5 h-5" />
+          </Button>
+        </div>
 
-          <div className="p-6 space-y-6">
-            <div>
-              <p className="text-muted-foreground mb-1">Sharing</p>
-              <p className="font-medium">{playbookName}</p>
+        <div className="share-dialog-body">
+            <div className="share-playbook-info">
+              <p className="share-playbook-label">Sharing</p>
+              <p className="share-playbook-name">{playbookName}</p>
             </div>
 
-            <div 
-              className="bg-muted/30 rounded-xl p-4 
-                border border-border"
-            >
-              <div 
-                className="flex items-center justify-between gap-3"
-              >
-                <div 
-                  className="flex items-center gap-3 flex-1 min-w-0"
-                >
-                  <div className="p-2 bg-card rounded-lg">
+            <div className="share-link-section">
+              <div className="share-link-content">
+                <div className="share-link-info">
+                  <div className="share-link-icon">
                     <LinkIcon className="w-5 h-5 text-primary" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium">Share via link</p>
-                    <p className="text-muted-foreground truncate">
+                  <div className="share-link-text">
+                    <p className="share-link-title">Share via link</p>
+                    <p className="share-link-description">
                       Anyone with the link can view
                     </p>
                   </div>
@@ -157,15 +139,12 @@ export function ShareDialog({
               </div>
             </div>
 
-            <div>
-              <label className="block mb-2">Share with people</label>
-              
-              <div className="flex gap-2 mb-3">
-                <div className="flex-1 relative">
-                  <Mail 
-                    className="absolute left-3 top-1/2 -translate-y-1/2 
-                      w-4 h-4 text-muted-foreground" 
-                  />
+            <div className="share-email-section">
+              <label className="share-email-label">Share with people</label>
+
+              <div className="share-email-input-row">
+                <div className="share-email-input-wrapper">
+                  <Mail className="share-email-input-icon" />
                   <input
                     type="email"
                     value={emailInput}
@@ -177,10 +156,7 @@ export function ShareDialog({
                       }
                     }}
                     placeholder="Enter email address..."
-                    className="w-full pl-10 pr-4 py-2.5 
-                      bg-input-background rounded-lg border-0 
-                      outline-none focus:ring-2 focus:ring-ring/20 
-                      transition-all duration-200"
+                    className="share-email-input"
                   />
                 </div>
                 <DropdownMenu>
@@ -228,30 +204,18 @@ export function ShareDialog({
               </div>
 
               {recipients.length > 0 && (
-                <div className="space-y-2 max-h-40 overflow-y-auto">
+                <div className="share-recipients-list">
                   {recipients.map((recipient) => (
-                    <div
-                      key={recipient.email}
-                      className="flex items-center justify-between 
-                        bg-muted/30 rounded-lg px-4 py-2.5 
-                        border border-border gap-3"
-                    >
-                      <div 
-                        className="flex items-center gap-3 flex-1 min-w-0"
-                      >
-                        <div 
-                          className="w-8 h-8 rounded-full bg-primary/10 
-                            flex items-center justify-center flex-shrink-0"
-                        >
-                          <span className="text-primary">
+                    <div key={recipient.email} className="share-recipient-item">
+                      <div className="share-recipient-info">
+                        <div className="share-recipient-avatar">
+                          <span>
                             {recipient.email[0].toUpperCase()}
                           </span>
                         </div>
-                        <span className="truncate">{recipient.email}</span>
+                        <span className="share-recipient-email">{recipient.email}</span>
                       </div>
-                      <div
-                        className="flex items-center gap-2 flex-shrink-0"
-                      >
+                      <div className="share-recipient-actions">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button
@@ -307,31 +271,27 @@ export function ShareDialog({
               )}
             </div>
 
-            <p className="text-muted-foreground">
+            <p className="share-dialog-note">
               Recipients will receive an email with a link to view this playbook.
             </p>
-          </div>
+        </div>
 
-          <div
-            className="flex justify-end gap-2 px-6 py-4
-              border-t border-border bg-muted/20"
+        <div className="share-dialog-footer">
+          <Button
+            onClick={onClose}
+            variant="ghost"
           >
-            <Button
-              onClick={onClose}
-              variant="ghost"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleShare}
-              disabled={recipients.length == 0}
-              variant="default"
-            >
-              {shareButtonText}
-            </Button>
-          </div>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleShare}
+            disabled={recipients.length == 0}
+            variant="default"
+          >
+            {shareButtonText}
+          </Button>
         </div>
       </div>
-    </>
+    </div>
   )
 }

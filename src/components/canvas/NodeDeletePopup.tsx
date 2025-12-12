@@ -1,4 +1,5 @@
 import { Trash2 } from 'lucide-react'
+import './node-delete-popup.css'
 
 interface NodeDeletePopupProps {
 	position: { x: number; y: number }
@@ -9,10 +10,10 @@ interface NodeDeletePopupProps {
 export function NodeDeletePopup({ position, onDelete, onClose }: NodeDeletePopupProps) {
 	return (
 		<div
-			className="absolute z-50 transform -translate-x-1/2"
+			className="node-delete-popup"
 			style={{
 				left: position.x,
-				top: position.y - 40, // Position above the node
+				top: position.y - 40,
 			}}
 		>
 			<button
@@ -21,10 +22,10 @@ export function NodeDeletePopup({ position, onDelete, onClose }: NodeDeletePopup
 					onDelete()
 				}}
 				onContextMenu={(e) => e.preventDefault()}
-				className="p-2 bg-white rounded-lg shadow-lg border border-gray-200 hover:bg-red-50 hover:border-red-300 transition-colors"
+				className="node-delete-button"
 				title="Delete node"
 			>
-				<Trash2 size={18} className="text-red-500" />
+				<Trash2 size={18} className="node-delete-icon" />
 			</button>
 		</div>
 	)

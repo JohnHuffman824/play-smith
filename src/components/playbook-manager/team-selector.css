@@ -1,0 +1,33 @@
+/* || Team selector button */
+.team-selector-button {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 12px;
+	background: var(--accent);
+	border-radius: 8px;
+	transition: all 200ms;
+	cursor: pointer;
+	border: none;
+	outline: none;
+}
+
+.team-selector-button:hover {
+	background: color-mix(in oklch, var(--accent) 80%, transparent);
+}
+
+.team-selector-button:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.team-selector-name {
+	max-width: 150px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* || Dropdown menu item active state */
+.team-selector-item-active {
+	background: color-mix(in oklch, var(--accent) 50%, transparent);
+}

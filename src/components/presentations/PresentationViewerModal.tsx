@@ -18,6 +18,7 @@ import { AnimationControls } from '../animation/AnimationControls'
 import { useAnimationTiming } from '../../hooks/useAnimationTiming'
 import { usePlayContent } from '../../hooks/usePlayContent'
 import { usePresentationDetail } from '../../hooks/usePresentationsData'
+import './presentation-viewer-modal.css'
 
 type PresentationViewerModalProps = {
 	isOpen: boolean
@@ -28,11 +29,9 @@ type PresentationViewerModalProps = {
 
 function LoadingState() {
 	return (
-		<div
-			className='flex flex-1 flex-col items-center justify-center gap-4'
-		>
-			<Loader2 className='size-12 animate-spin text-white' />
-			<p className='text-sm text-white/70'>
+		<div className='presentation-viewer__loading'>
+			<Loader2 className='presentation-viewer__loading-spinner' />
+			<p className='presentation-viewer__loading-text'>
 				Loading presentation...
 			</p>
 		</div>
@@ -149,16 +148,11 @@ function PresentationViewerContent({
 			animate={{ opacity: 1 }}
 			exit={{ opacity: 0 }}
 			transition={{ duration: 0.2 }}
-			className='fixed inset-0 z-50 flex flex-col bg-black'
+			className='presentation-viewer'
 		>
 			{/* Header */}
-			<div
-				className={cn(
-					'flex items-center justify-between',
-					'border-b border-white/10 px-6 py-4'
-				)}
-			>
-				<div className='flex items-center gap-4'>
+			<div className='presentation-viewer__header'>
+				<div className='presentation-viewer__header-content'>
 					<Button
 						variant='ghost'
 						size='icon'
@@ -168,13 +162,11 @@ function PresentationViewerContent({
 					>
 						<X className='size-6' />
 					</Button>
-					<div>
-						<h2
-							className='text-lg font-semibold text-white'
-						>
+					<div className='presentation-viewer__header-text'>
+						<h2 className='presentation-viewer__title'>
 							{presentation?.name}
 						</h2>
-						<span className='text-xs text-white/50'>
+						<span className='presentation-viewer__subtitle'>
 							Slide {currentIndex + 1} of{' '}
 							{slides.length}: {displayName}
 						</span>
@@ -198,13 +190,11 @@ function PresentationViewerContent({
 			{isLoading ? (
 				<LoadingState />
 			) : error ? (
-				<div
-					className='flex flex-1 items-center justify-center'
-				>
-					<p className='text-red-500'>{error}</p>
+				<div className='presentation-viewer__error'>
+					<p className='presentation-viewer__error-text'>{error}</p>
 				</div>
 			) : (
-				<div className='relative flex-1 overflow-hidden'>
+				<div className='presentation-viewer__canvas'>
 					<AnimationCanvas
 						drawings={playContent?.drawings ?? []}
 						players={playContent?.players ?? []}
@@ -213,7 +203,7 @@ function PresentationViewerContent({
 			)}
 
 			{/* Controls */}
-			<div className='border-t border-white/10 px-6 py-4'>
+			<div className='presentation-viewer__controls'>
 				<AnimationControls
 					onPrevPlay={handlePrevSlide}
 					onNextPlay={handleNextSlide}

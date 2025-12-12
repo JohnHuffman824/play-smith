@@ -1,0 +1,94 @@
+/* || Base styles */
+.playbook-toolbar {
+	border-bottom: 1px solid var(--border);
+	background: color-mix(in oklch, var(--card) 50%, transparent);
+	backdrop-filter: blur(24px);
+	position: sticky;
+	top: 0;
+	z-index: 10;
+}
+
+.playbook-toolbar-container {
+	padding: 0 24px;
+	height: 100%;
+	display: flex;
+	align-items: center;
+}
+
+.playbook-toolbar-content {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	width: 100%;
+}
+
+/* || Right section */
+.playbook-toolbar-actions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+/* || Divider */
+.playbook-toolbar-divider {
+	width: 1px;
+	height: 24px;
+	background: var(--border);
+}
+
+/* || View mode toggle */
+.playbook-toolbar-view-mode {
+	display: flex;
+	align-items: center;
+	background: var(--muted);
+	border-radius: 8px;
+	padding: 4px;
+}
+
+.playbook-toolbar-view-button {
+	padding: 8px;
+	border-radius: 4px;
+	transition: all 200ms;
+	cursor: pointer;
+	outline: none;
+	background: transparent;
+	border: none;
+}
+
+.playbook-toolbar-view-button:hover {
+	background: color-mix(in oklch, var(--accent) 50%, transparent);
+}
+
+.playbook-toolbar-view-button:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.playbook-toolbar-view-button-active {
+	background: var(--card);
+	box-shadow: 0 1px 2px 0 rgb(0 0 0 / 5%);
+}
+
+/* || New Playbook button */
+.playbook-toolbar-new-playbook {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 16px;
+	background: var(--action-button);
+	color: var(--action-button-foreground);
+	border-radius: 8px;
+	transition: all 200ms;
+	cursor: pointer;
+	outline: none;
+	border: none;
+	white-space: nowrap;
+}
+
+.playbook-toolbar-new-playbook:hover {
+	background: color-mix(in oklch, var(--action-button) 90%, transparent);
+}
+
+.playbook-toolbar-new-playbook:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}

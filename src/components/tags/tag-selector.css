@@ -1,0 +1,65 @@
+/* || Tag Selector */
+.tag-selector {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+}
+
+/* || Tag chip */
+.tag-selector__tag {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 4px 10px;
+	border-radius: 9999px;
+	font-size: 0.75rem;
+}
+
+.tag-selector__tag-remove {
+	opacity: 0;
+	background: none;
+	border: none;
+	padding: 0;
+	cursor: pointer;
+	outline: none;
+	transition: opacity 200ms;
+	color: inherit;
+}
+
+.tag-selector__tag:hover .tag-selector__tag-remove {
+	opacity: 1;
+}
+
+.tag-selector__tag-remove:hover {
+	color: var(--foreground);
+}
+
+.tag-selector__tag-remove:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+/* || Add button */
+.tag-selector__add {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 4px 8px;
+	border-radius: 9999px;
+	font-size: 0.75rem;
+	color: var(--muted-foreground);
+	background: none;
+	border: none;
+	cursor: pointer;
+	outline: none;
+	transition: all 200ms;
+}
+
+.tag-selector__add:hover {
+	color: var(--foreground);
+	background: var(--accent);
+}
+
+.tag-selector__add:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}

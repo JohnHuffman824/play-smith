@@ -3,6 +3,7 @@ import { Modal } from './Modal'
 import { Button } from '../ui/button'
 import { useTeamsData } from '../../hooks/useTeamsData'
 import { Trash2 } from 'lucide-react'
+import './share-playbook-dialog.css'
 
 interface SharePlaybookDialogProps {
 	isOpen: boolean
@@ -128,17 +129,17 @@ export function SharePlaybookDialog({
 			isOpen={isOpen}
 			onClose={onClose}
 			title={`Share "${playbookName}"`}
-			className="max-w-2xl"
+			className="share-playbook-modal"
 		>
-			<div className="space-y-6">
+			<div className="share-playbook-form">
 				{/* Share form */}
-				<div className="space-y-4">
+				<div className="share-playbook-field">
 					<div>
-						<label htmlFor="team-select" className="block text-sm font-medium mb-2">
+						<label htmlFor="team-select" className="share-playbook-label">
 							Share with team
 						</label>
 						{availableTeams.length === 0 ? (
-							<p className="text-sm text-muted-foreground">
+							<p className="share-playbook-empty">
 								No other teams available to share with.
 							</p>
 						) : (
@@ -146,7 +147,7 @@ export function SharePlaybookDialog({
 								id="team-select"
 								value={selectedTeamId || ''}
 								onChange={(e) => setSelectedTeamId(Number(e.target.value))}
-								className="w-full px-3 py-2 border border-border rounded-lg bg-background"
+								className="share-playbook-select"
 								disabled={isSharing}
 							>
 								{availableTeams.map(team => (
@@ -159,11 +160,11 @@ export function SharePlaybookDialog({
 					</div>
 
 					<div>
-						<label className="block text-sm font-medium mb-2">
+						<label className="share-playbook-label">
 							Permission
 						</label>
-						<div className="space-y-2">
-							<label className="flex items-center gap-2 cursor-pointer">
+						<div className="share-playbook-permissions">
+							<label className="share-playbook-permission-option">
 								<input
 									type="radio"
 									name="permission"
@@ -171,13 +172,12 @@ export function SharePlaybookDialog({
 									checked={permission === 'view'}
 									onChange={(e) => setPermission(e.target.value as 'view' | 'edit')}
 									disabled={isSharing}
-									className="cursor-pointer"
 								/>
-								<span className="text-sm">
+								<span className="share-playbook-permission-text">
 									<strong>View</strong> - Can view playbook and plays
 								</span>
 							</label>
-							<label className="flex items-center gap-2 cursor-pointer">
+							<label className="share-playbook-permission-option">
 								<input
 									type="radio"
 									name="permission"
@@ -185,9 +185,8 @@ export function SharePlaybookDialog({
 									checked={permission === 'edit'}
 									onChange={(e) => setPermission(e.target.value as 'view' | 'edit')}
 									disabled={isSharing}
-									className="cursor-pointer"
 								/>
-								<span className="text-sm">
+								<span className="share-playbook-permission-text">
 									<strong>Edit</strong> - Can view and edit playbook and plays
 								</span>
 							</label>
@@ -195,7 +194,7 @@ export function SharePlaybookDialog({
 					</div>
 
 					{error && (
-						<p className="text-sm text-destructive">
+						<p className="share-playbook-error">
 							{error}
 						</p>
 					)}
@@ -213,26 +212,26 @@ export function SharePlaybookDialog({
 
 				{/* Current shares list */}
 				<div>
-					<h3 className="text-sm font-medium mb-3">
+					<h3 className="share-playbook-shares-header">
 						Shared with {shares.length} team{shares.length !== 1 ? 's' : ''}
 					</h3>
 
 					{isLoading ? (
-						<p className="text-sm text-muted-foreground">Loading shares...</p>
+						<p className="share-playbook-shares-loading">Loading shares...</p>
 					) : shares.length === 0 ? (
-						<p className="text-sm text-muted-foreground">
+						<p className="share-playbook-shares-empty">
 							This playbook is not shared with any teams yet.
 						</p>
 					) : (
-						<div className="space-y-2">
+						<div className="share-playbook-shares-list">
 							{shares.map(share => (
 								<div
 									key={share.id}
-									className="flex items-center justify-between p-3 border border-border rounded-lg bg-muted/50"
+									className="share-playbook-share-item"
 								>
-									<div className="flex-1">
-										<p className="font-medium">{share.team_name}</p>
-										<p className="text-sm text-muted-foreground capitalize">
+									<div className="share-playbook-share-info">
+										<p className="share-playbook-share-team">{share.team_name}</p>
+										<p className="share-playbook-share-permission">
 											{share.permission} access
 										</p>
 									</div>
@@ -240,7 +239,7 @@ export function SharePlaybookDialog({
 										variant="ghost"
 										size="sm"
 										onClick={() => handleRemoveShare(share.shared_with_team_id)}
-										className="text-destructive hover:text-destructive hover:bg-destructive/10"
+										style={{ color: 'var(--destructive)' }}
 									>
 										<Trash2 className="w-4 h-4" />
 									</Button>
@@ -251,7 +250,7 @@ export function SharePlaybookDialog({
 				</div>
 
 				{/* Close button */}
-				<div className="flex justify-end pt-2">
+				<div className="share-playbook-footer">
 					<Button onClick={onClose} variant="outline">
 						Close
 					</Button>

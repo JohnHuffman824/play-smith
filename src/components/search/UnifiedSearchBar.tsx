@@ -6,6 +6,7 @@ import { SearchDropdown } from './SearchDropdown'
 import { useUnifiedSearch } from '../../hooks/useUnifiedSearch'
 import { useConceptData } from '../../hooks/useConceptData'
 import { useConcept } from '../../contexts/ConceptContext'
+import './unified-search-bar.css'
 
 interface UnifiedSearchBarProps {
 	teamId: string
@@ -107,11 +108,11 @@ export function UnifiedSearchBar({
 	}
 
 	return (
-		<div ref={containerRef} className="relative w-full">
-			<div className="flex items-center gap-2 px-4 py-2.5 bg-input-background rounded-lg border-0 outline-none focus-within:ring-2 focus-within:ring-ring/20 transition-all duration-200">
-				<Search className="w-4 h-4 text-muted-foreground" />
+		<div ref={containerRef} className="unified-search-bar">
+			<div className="unified-search-bar__input-wrapper">
+				<Search className="unified-search-bar__icon" />
 
-				<div className="flex flex-wrap items-center gap-1 flex-1">
+				<div className="unified-search-bar__chips">
 					{state.appliedConcepts.map(chip => (
 						<div
 							key={chip.id}
@@ -137,7 +138,7 @@ export function UnifiedSearchBar({
 						placeholder={
 							state.appliedConcepts.length === 0 ? placeholder : ''
 						}
-						className="flex-1 min-w-[200px] outline-none bg-transparent text-sm"
+						className="unified-search-bar__input"
 					/>
 				</div>
 			</div>

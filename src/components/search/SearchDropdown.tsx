@@ -1,4 +1,5 @@
 import type { SearchResults } from '../../types/concept.types'
+import './search-dropdown.css'
 
 interface SearchDropdownProps {
 	results: SearchResults | null
@@ -19,8 +20,8 @@ export function SearchDropdown({
 
 	if (isSearching) {
 		return (
-			<div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg z-50 p-4 text-center">
-				<span className="text-muted-foreground">Searching...</span>
+			<div className="search-dropdown search-dropdown--loading">
+				<span className="search-dropdown__empty-text">Searching...</span>
 			</div>
 		)
 	}
@@ -34,8 +35,8 @@ export function SearchDropdown({
 
 	if (!hasResults) {
 		return (
-			<div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg z-50 p-4 text-center">
-				<span className="text-muted-foreground">
+			<div className="search-dropdown search-dropdown--empty">
+				<span className="search-dropdown__empty-text">
 					No results found for "{query}"
 				</span>
 			</div>
@@ -52,29 +53,29 @@ export function SearchDropdown({
 	}
 
 	return (
-		<div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
+		<div className="search-dropdown">
 			{results.formations.length > 0 && (
-				<div className="py-2">
-					<div className="px-3 py-1 text-xs font-semibold text-muted-foreground uppercase">
+				<div className="search-dropdown__section">
+					<div className="search-dropdown__section-title">
 						Formations
 					</div>
 					{results.formations.map(result => (
 						<button
 							key={`formation-${result.id}`}
 							onClick={() => handleSelect('formation', result.id, result.name)}
-							className="w-full px-3 py-2 text-left hover:bg-accent transition-colors cursor-pointer"
+							className="search-dropdown__item"
 						>
-							<div className="flex items-center gap-3">
+							<div className="search-dropdown__item-content">
 								{result.thumbnail && (
 									<img
 										src={result.thumbnail}
 										alt={result.name}
-										className="w-12 h-9 object-cover rounded border border-border flex-shrink-0"
+										className="search-dropdown__thumbnail"
 									/>
 								)}
-								<div className="flex items-center justify-between flex-1 min-w-0">
-									<span className="text-sm font-medium truncate">{result.name}</span>
-									<span className="text-xs px-2 py-0.5 bg-secondary text-secondary-foreground rounded ml-2 flex-shrink-0">
+								<div className="search-dropdown__item-text">
+									<span className="search-dropdown__item-name">{result.name}</span>
+									<span className="search-dropdown__item-badge">
 										Formation
 									</span>
 								</div>
@@ -85,27 +86,27 @@ export function SearchDropdown({
 			)}
 
 			{results.concepts.length > 0 && (
-				<div className="py-2 border-t border-border">
-					<div className="px-3 py-1 text-xs font-semibold text-muted-foreground uppercase">
+				<div className="search-dropdown__section">
+					<div className="search-dropdown__section-title">
 						Concepts
 					</div>
 					{results.concepts.map(result => (
 						<button
 							key={`concept-${result.id}`}
 							onClick={() => handleSelect('concept', result.id, result.name)}
-							className="w-full px-3 py-2 text-left hover:bg-accent transition-colors cursor-pointer"
+							className="search-dropdown__item"
 						>
-							<div className="flex items-center gap-3">
+							<div className="search-dropdown__item-content">
 								{result.thumbnail && (
 									<img
 										src={result.thumbnail}
 										alt={result.name}
-										className="w-12 h-9 object-cover rounded border border-border flex-shrink-0"
+										className="search-dropdown__thumbnail"
 									/>
 								)}
-								<div className="flex items-center justify-between flex-1 min-w-0">
-									<span className="text-sm font-medium truncate">{result.name}</span>
-									<span className="text-xs px-2 py-0.5 bg-secondary text-secondary-foreground rounded ml-2 flex-shrink-0">
+								<div className="search-dropdown__item-text">
+									<span className="search-dropdown__item-name">{result.name}</span>
+									<span className="search-dropdown__item-badge">
 										Concept
 									</span>
 								</div>
@@ -116,27 +117,27 @@ export function SearchDropdown({
 			)}
 
 			{results.groups.length > 0 && (
-				<div className="py-2 border-t border-border">
-					<div className="px-3 py-1 text-xs font-semibold text-muted-foreground uppercase">
+				<div className="search-dropdown__section">
+					<div className="search-dropdown__section-title">
 						Concept Groups
 					</div>
 					{results.groups.map(result => (
 						<button
 							key={`group-${result.id}`}
 							onClick={() => handleSelect('concept_group', result.id, result.name)}
-							className="w-full px-3 py-2 text-left hover:bg-accent transition-colors cursor-pointer"
+							className="search-dropdown__item"
 						>
-							<div className="flex items-center gap-3">
+							<div className="search-dropdown__item-content">
 								{result.thumbnail && (
 									<img
 										src={result.thumbnail}
 										alt={result.name}
-										className="w-12 h-9 object-cover rounded border border-border flex-shrink-0"
+										className="search-dropdown__thumbnail"
 									/>
 								)}
-								<div className="flex items-center justify-between flex-1 min-w-0">
-									<span className="text-sm font-medium truncate">{result.name}</span>
-									<span className="text-xs px-2 py-0.5 bg-secondary text-secondary-foreground rounded ml-2 flex-shrink-0">
+								<div className="search-dropdown__item-text">
+									<span className="search-dropdown__item-name">{result.name}</span>
+									<span className="search-dropdown__item-badge">
 										Group
 									</span>
 								</div>

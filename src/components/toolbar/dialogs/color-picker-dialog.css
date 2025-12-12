@@ -1,0 +1,98 @@
+/* || Base styles */
+.color-picker-dialog {
+  width: 256px;
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  border: 1px solid var(--border);
+  background: var(--popover);
+  padding: 16px;
+  z-index: 50;
+}
+
+.color-picker-dialog[data-positioned="true"] {
+  position: absolute;
+  left: 96px;
+  top: 288px;
+}
+
+/* || Header */
+.color-picker-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.color-picker-dialog-title {
+  color: var(--foreground);
+}
+
+/* || Sections */
+.color-picker-dialog-section {
+  margin-bottom: 16px;
+}
+
+.color-picker-dialog-section:last-child {
+  margin-bottom: 0;
+}
+
+.color-picker-dialog-label {
+  display: block;
+  font-size: 0.75rem;
+  margin-bottom: 8px;
+  color: var(--muted-foreground);
+}
+
+/* || Custom color inputs */
+.color-picker-dialog-custom {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.color-picker-dialog-color-input {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+}
+
+.color-picker-dialog-text-input {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--input);
+  font-size: 0.875rem;
+  background: var(--input-background);
+  color: var(--foreground);
+}
+
+.color-picker-dialog-text-input::placeholder {
+  color: var(--muted-foreground);
+}
+
+/* || Preset color grid */
+.color-picker-dialog-preset-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+
+.color-picker-dialog-preset-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  transition: all 200ms;
+  cursor: pointer;
+  border: 1px solid var(--border);
+}
+
+.color-picker-dialog-preset-button:hover {
+  transform: scale(1.1);
+}
+
+.color-picker-dialog-preset-button[data-selected="true"] {
+  box-shadow: 0 0 0 2px var(--action-button), 0 0 0 4px var(--background);
+  transform: scale(1.1);
+}

@@ -1,0 +1,68 @@
+/* Reuse the same styles as concept-type-tooltip with different class prefix */
+.targeting-tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.targeting-tooltip-button {
+  padding: 4px;
+  border-radius: 4px;
+  transition: background 200ms;
+}
+
+.targeting-tooltip-button:hover {
+  background: var(--accent);
+}
+
+.targeting-tooltip-icon {
+  color: var(--muted-foreground);
+}
+
+.targeting-tooltip-popover {
+  position: absolute;
+  left: 0;
+  bottom: 100%;
+  margin-bottom: 8px;
+  width: 320px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 10%), 0 4px 6px -4px rgb(0 0 0 / 10%);
+  padding: 16px;
+  z-index: 50;
+}
+
+.targeting-tooltip-title {
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-bottom: 12px;
+}
+
+.targeting-tooltip-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 0.75rem;
+}
+
+.targeting-tooltip-item-title {
+  font-weight: 600;
+  color: var(--foreground);
+  margin-bottom: 4px;
+}
+
+.targeting-tooltip-item-description {
+  color: var(--muted-foreground);
+  margin-bottom: 8px;
+}
+
+.targeting-tooltip-example {
+  background: var(--secondary);
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.targeting-tooltip-example-text {
+  font-family: monospace;
+  color: var(--muted-foreground);
+}

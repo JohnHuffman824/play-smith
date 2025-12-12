@@ -36,6 +36,7 @@ import { calculateUnlinkPosition, findDrawingSnapTarget } from '../../utils/draw
 import { applyLOSSnap } from '../../utils/los-snap.utils'
 import { convertToSharp, extractMainCoordinates } from '../../utils/curve.utils'
 import { processSmoothPath } from '../../utils/smooth-path.utils'
+import './canvas.css'
 
 const HEADER_TOOLBAR_HEIGHT = 122
 const PLAY_BAR_HEIGHT = 300
@@ -814,24 +815,14 @@ export function Canvas({
 	const scale = coordSystem.scale
 	const playerCursorDiameter = PLAYER_RADIUS_FEET * 2 * scale
 
-	const containerClasses = containerMode === 'fill'
-		? 'flex-1 flex items-start justify-center overflow-hidden relative'
-		: 'flex-1 flex items-start justify-center px-8 py-4 overflow-hidden relative'
-
-	const whiteboardClasses = [
-		'w-full rounded-2xl relative',
-		'ring-2 ring-gray-300',
-	].join(' ')
-
-	const cursorOverlayClasses =
-		'absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden'
+	const containerClasses = `canvas-container ${containerMode === 'fill' ? 'canvas-container-fill' : 'canvas-container-viewport'}`
 
 	return (
 		<div className={containerClasses}>
 			{/* Whiteboard frame with field background */}
 			<div
 				ref={whiteboardRef}
-				className={whiteboardClasses}
+				className='canvas-whiteboard'
 				style={{
 					cursor: getCursorStyle(),
 					height: containerMode === 'fill'
@@ -853,18 +844,16 @@ export function Canvas({
 			>
 				{/* Transform container for zoom/pan */}
 				<div
+					className='canvas-transform-container'
 					style={{
 						transform: `scale(${zoom}) translate(${panX / zoom}px, ${panY / zoom}px)`,
-						transformOrigin: '0 0',
-						width: '100%',
-						height: '100%',
 					}}
 				>
 					{/* Field background fills the whiteboard */}
 					<FootballField />
 
 					{/* SVG layer for structured drawings */}
-					<div className='absolute top-0 left-0 w-full h-full pointer-events-auto overflow-hidden' style={{ borderRadius: 'inherit' }}>
+					<div className='canvas-svg-layer'>
 					<SVGCanvas
 						width={canvasDimensions.width}
 						height={canvasDimensions.height}
@@ -899,10 +888,7 @@ export function Canvas({
 				</div>
 
 			{/* Players - inside transform so they zoom/pan with content */}
-          <div
-            className="absolute top-0 left-0 w-full h-full overflow-hidden"
-            style={{ pointerEvents: 'none', borderRadius: 'inherit' }}
-          >
+          <div className='canvas-players-layer'>
             {players.map((player) => (
                 <Player
                   key={player.id}
@@ -935,16 +921,9 @@ export function Canvas({
 
 		{/* Cursor overlay - OUTSIDE transform so cursors stay at mouse position */}
 		<div
-			className={cursorOverlayClasses}
+			className='canvas-cursor-overlay'
 			style={{
 				cursor: getCursorStyle(),
-				pointerEvents: 'none',
-				borderRadius: 'inherit',
-				position: 'absolute',
-				top: 0,
-				left: 0,
-				width: '100%',
-				height: '100%',
 			}}
 		>
           {/* Custom Pencil Cursor - only visible when draw tool is active */}
@@ -953,11 +932,10 @@ export function Canvas({
             cursorPosition &&
             shouldShowCustomCursor() && (
               <div
-                className="absolute pointer-events-none"
+                className='canvas-cursor-pencil'
                 style={{
                   left: cursorPosition.x,
                   top: cursorPosition.y,
-                  transform: "translate(-20%, -90%)",
                   zIndex: CURSOR_Z_INDEX,
                 }}
               >
@@ -971,11 +949,10 @@ export function Canvas({
             cursorPosition &&
             shouldShowCustomCursor() && (
               <div
-                className="absolute pointer-events-none"
+                className='canvas-cursor-fill'
                 style={{
                   left: cursorPosition.x,
                   top: cursorPosition.y,
-                  transform: "translate(-20%, -90%) scaleX(-1)",
                   zIndex: CURSOR_Z_INDEX,
                 }}
               >
@@ -990,21 +967,18 @@ export function Canvas({
             !isHoveringDeletable &&
             shouldShowCustomCursor() && (
               <div
-                className="absolute pointer-events-none"
+                className='canvas-cursor-eraser'
                 style={{
                   left: cursorPosition.x,
                   top: cursorPosition.y,
-                  transform: "translate(-50%, -50%)",
                   zIndex: CURSOR_Z_INDEX,
                 }}
               >
                 <div
+                  className='canvas-eraser-circle'
                   style={{
                     width: `${drawingState.eraseSize}px`,
                     height: `${drawingState.eraseSize}px`,
-                    borderRadius: "50%",
-                    border: "2px solid rgba(0, 0, 0, 0.5)",
-                    backgroundColor: "rgba(255, 255, 255, 0.3)",
                   }}
                 />
               </div>
@@ -1016,24 +990,19 @@ export function Canvas({
             cursorPosition &&
             shouldShowCustomCursor() && (
               <div
-                className="absolute pointer-events-none"
+                className='canvas-cursor-add-player'
                 style={{
                   left: cursorPosition.x,
                   top: cursorPosition.y,
-                  transform: "translate(-50%, -50%)",
                   zIndex: CURSOR_Z_INDEX,
                 }}
               >
                 <div
+                  className='canvas-add-player-circle'
                   style={{
                     width: `${playerCursorDiameter}px`,
                     height: `${playerCursorDiameter}px`,
-                    borderRadius: "50%",
                     backgroundColor: drawingState.color,
-                    opacity: 0.6,
-                    border:
-                      "2px solid rgba(255, 255, 255, 0.8)",
-                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.3)",
                   }}
                 />
               </div>

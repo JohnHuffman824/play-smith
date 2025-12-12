@@ -29,6 +29,7 @@ import {
 	type TeamWithRole
 } from '../../api/queries/teamQueries'
 import { useAuth } from '../../contexts/AuthContext'
+import './manage-teams-dialog.css'
 
 interface ManageTeamsDialogProps {
 	isOpen: boolean
@@ -207,21 +208,21 @@ export function ManageTeamsDialog({ isOpen, onClose }: ManageTeamsDialogProps) {
 
 	return (
 		<>
-			<div className="fixed inset-0 z-50 flex items-center justify-center">
+			<div className="manage-teams-overlay">
 				{/* Backdrop */}
-				<div className="absolute inset-0 bg-black/50" onClick={handleClose} />
+				<div className="manage-teams-backdrop" onClick={handleClose} />
 
 				{/* Dialog */}
-				<div className="relative bg-popover border border-border rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[80vh] flex flex-col">
+				<div className="manage-teams-dialog">
 					{/* Header */}
-					<div className="flex items-center justify-between p-6 border-b border-border">
-						<div className="flex items-center gap-3">
+					<div className="manage-teams-header">
+						<div className="manage-teams-header-content">
 							{view !== 'list' && (
 								<Button onClick={handleBack} variant="ghost" size="icon">
 									<ChevronLeft className="w-5 h-5" />
 								</Button>
 							)}
-							<h2 className="text-xl font-semibold">
+							<h2 className="manage-teams-title">
 								{view === 'list' && 'Manage Teams'}
 								{view === 'create' && 'Create Team'}
 								{view === 'edit' && 'Edit Team'}
@@ -234,37 +235,37 @@ export function ManageTeamsDialog({ isOpen, onClose }: ManageTeamsDialogProps) {
 					</div>
 
 					{/* Content */}
-					<div className="flex-1 overflow-y-auto p-6">
+					<div className="manage-teams-content">
 						{error && (
-							<div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
+							<div className="manage-teams-error">
 								{error}
 							</div>
 						)}
 
 						{/* List View */}
 						{view === 'list' && (
-							<div className="space-y-3">
+							<div className="manage-teams-list">
 								{isLoading ? (
-									<div className="text-center py-8 text-muted-foreground">Loading teams...</div>
+									<div className="manage-teams-loading">Loading teams...</div>
 								) : teams.length === 0 ? (
-									<div className="text-center py-8 text-muted-foreground">No teams yet. Create one to get started!</div>
+									<div className="manage-teams-empty">No teams yet. Create one to get started!</div>
 								) : (
 									teams.map((team) => (
 										<div
 											key={team.id}
-											className="flex items-center justify-between p-4 rounded-lg border border-border"
+											className="manage-teams-item"
 										>
-											<div className="flex items-center gap-3 flex-1">
+											<div className="manage-teams-item-info">
 												<Users className="w-5 h-5 text-muted-foreground" />
-												<div className="flex-1">
-													<div className="font-medium">{team.name}</div>
-													<div className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
+												<div className="manage-teams-item-details">
+													<div className="manage-teams-item-name">{team.name}</div>
+													<div className="manage-teams-item-role">
 														{getRoleIcon(team.role)}
-														<span className="capitalize">{team.role}</span>
+														<span>{team.role}</span>
 													</div>
 												</div>
 											</div>
-											<div className="flex items-center gap-2">
+											<div className="manage-teams-item-actions">
 												<Button
 													onClick={() => handleSelectTeam(team)}
 													variant="outline"
@@ -299,9 +300,9 @@ export function ManageTeamsDialog({ isOpen, onClose }: ManageTeamsDialogProps) {
 
 						{/* Create View */}
 						{view === 'create' && (
-							<div className="space-y-4">
+							<div className="manage-teams-form">
 								<div>
-									<label className="block text-sm font-medium mb-2">Team Name</label>
+									<label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '8px' }}>Team Name</label>
 									<Input
 										type="text"
 										value={teamName}
@@ -315,7 +316,7 @@ export function ManageTeamsDialog({ isOpen, onClose }: ManageTeamsDialogProps) {
 										autoFocus
 									/>
 								</div>
-								<div className="flex justify-end gap-2 pt-4">
+								<div className="manage-teams-form-actions">
 									<Button onClick={handleBack} variant="outline">
 										Cancel
 									</Button>
@@ -331,9 +332,9 @@ export function ManageTeamsDialog({ isOpen, onClose }: ManageTeamsDialogProps) {
 
 						{/* Edit View */}
 						{view === 'edit' && selectedTeam && (
-							<div className="space-y-4">
+							<div className="manage-teams-form">
 								<div>
-									<label className="block text-sm font-medium mb-2">Team Name</label>
+									<label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '8px' }}>Team Name</label>
 									<Input
 										type="text"
 										value={teamName}
@@ -342,7 +343,7 @@ export function ManageTeamsDialog({ isOpen, onClose }: ManageTeamsDialogProps) {
 										autoFocus
 									/>
 								</div>
-								<div className="flex justify-between items-center pt-4">
+								<div className="manage-teams-form-actions-split">
 									<Button
 										onClick={() => setDeleteConfirmOpen(true)}
 										variant="destructive"
@@ -351,7 +352,7 @@ export function ManageTeamsDialog({ isOpen, onClose }: ManageTeamsDialogProps) {
 										<Trash2 className="w-4 h-4 mr-2" />
 										Delete Team
 									</Button>
-									<div className="flex gap-2">
+									<div>
 										<Button onClick={handleBack} variant="outline">
 											Cancel
 										</Button>
@@ -368,30 +369,30 @@ export function ManageTeamsDialog({ isOpen, onClose }: ManageTeamsDialogProps) {
 
 						{/* Members View */}
 						{view === 'members' && selectedTeam && (
-							<div className="space-y-6">
+							<div className="manage-teams-members">
 								{/* Members List */}
 								<div>
-									<h3 className="text-sm font-medium mb-3">Members</h3>
-									<div className="space-y-2">
+									<h3 className="manage-teams-section-title">Members</h3>
+									<div className="manage-teams-member-list">
 										{membersData?.members.map((member) => (
 											<div
 												key={member.id}
-												className="flex items-center justify-between p-3 rounded-lg border border-border"
+												className="manage-teams-member"
 											>
-												<div className="flex items-center gap-3">
-													<div className="flex-shrink-0">
+												<div className="manage-teams-member-info">
+													<div>
 														{getRoleIcon(member.role)}
 													</div>
 													<div>
-														<div className="font-medium">
+														<div className="manage-teams-member-name">
 															{member.user_name}
 															{member.user_id === user?.id && ' (you)'}
 														</div>
-														<div className="text-sm text-muted-foreground">{member.user_email}</div>
+														<div className="manage-teams-member-email">{member.user_email}</div>
 													</div>
 												</div>
 												{selectedTeam.role === 'owner' && member.user_id !== user?.id && (
-													<div className="flex items-center gap-2">
+													<div className="manage-teams-member-actions">
 														<Select
 															value={member.role}
 															onValueChange={(value) =>
@@ -402,7 +403,7 @@ export function ManageTeamsDialog({ isOpen, onClose }: ManageTeamsDialogProps) {
 																})
 															}
 														>
-															<SelectTrigger className="w-[120px]">
+															<SelectTrigger style={{ width: '120px' }}>
 																<SelectValue />
 															</SelectTrigger>
 															<SelectContent>
@@ -429,18 +430,18 @@ export function ManageTeamsDialog({ isOpen, onClose }: ManageTeamsDialogProps) {
 								{selectedTeam.role === 'owner' && membersData?.pendingInvitations && membersData.pendingInvitations.length > 0 && (
 									<div>
 										<Separator />
-										<h3 className="text-sm font-medium mb-3 mt-6">Pending Invitations</h3>
-										<div className="space-y-2">
+										<h3 className="manage-teams-section-title" style={{ marginTop: '24px' }}>Pending Invitations</h3>
+										<div className="manage-teams-member-list">
 											{membersData.pendingInvitations.map((invitation) => (
 												<div
 													key={invitation.id}
-													className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/30"
+													className="manage-teams-invitation"
 												>
-													<div className="flex items-center gap-3">
+													<div className="manage-teams-invitation-info">
 														<Mail className="w-4 h-4 text-muted-foreground" />
 														<div>
-															<div className="font-medium">{invitation.email}</div>
-															<div className="text-sm text-muted-foreground capitalize">{invitation.role}</div>
+															<div className="manage-teams-invitation-email">{invitation.email}</div>
+															<div className="manage-teams-invitation-role">{invitation.role}</div>
 														</div>
 													</div>
 													<Button
@@ -465,17 +466,17 @@ export function ManageTeamsDialog({ isOpen, onClose }: ManageTeamsDialogProps) {
 								{selectedTeam.role === 'owner' && (
 									<div>
 										<Separator />
-										<h3 className="text-sm font-medium mb-3 mt-6">Invite Member</h3>
-										<div className="flex gap-2">
+										<h3 className="manage-teams-section-title" style={{ marginTop: '24px' }}>Invite Member</h3>
+										<div className="manage-teams-invite-form">
 											<Input
 												type="email"
 												value={inviteEmail}
 												onChange={(e) => setInviteEmail(e.target.value)}
 												placeholder="Email address"
-												className="flex-1"
+												style={{ flex: 1 }}
 											/>
 											<Select value={inviteRole} onValueChange={(value) => setInviteRole(value as 'editor' | 'viewer')}>
-												<SelectTrigger className="w-[120px]">
+												<SelectTrigger style={{ width: '120px' }}>
 													<SelectValue />
 												</SelectTrigger>
 												<SelectContent>
@@ -510,7 +511,7 @@ export function ManageTeamsDialog({ isOpen, onClose }: ManageTeamsDialogProps) {
 					</AlertDialogHeader>
 					<AlertDialogFooter>
 						<AlertDialogCancel>Cancel</AlertDialogCancel>
-						<AlertDialogAction onClick={handleDeleteTeam} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+						<AlertDialogAction onClick={handleDeleteTeam} variant="destructive">
 							Delete Team
 						</AlertDialogAction>
 					</AlertDialogFooter>
@@ -537,7 +538,7 @@ export function ManageTeamsDialog({ isOpen, onClose }: ManageTeamsDialogProps) {
 									})
 								}
 							}}
-							className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+							variant="destructive"
 						>
 							Remove
 						</AlertDialogAction>

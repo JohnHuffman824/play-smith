@@ -1,0 +1,294 @@
+/* || Layout */
+.playbook-editor {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--background);
+}
+
+.playbook-editor-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* || Header */
+.playbook-editor-header {
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
+  padding: 16px 24px;
+}
+
+.playbook-editor-header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.playbook-editor-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.playbook-editor-header-divider {
+  width: 1px;
+  align-self: stretch;
+  background: var(--border);
+  margin-left: 8px;
+}
+
+.playbook-editor-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* || Tabs */
+.playbook-editor-tabs {
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
+  padding: 12px 24px;
+}
+
+.playbook-editor-tabs-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.playbook-editor-tabs-list {
+  display: flex;
+  gap: 4px;
+}
+
+.playbook-editor-tab {
+  padding: 8px 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: capitalize;
+  border-radius: 8px;
+  transition: all 200ms;
+  cursor: pointer;
+}
+
+.playbook-editor-tab-active {
+  background: var(--accent);
+  color: var(--foreground);
+}
+
+.playbook-editor-tab-inactive {
+  color: var(--muted-foreground);
+}
+
+.playbook-editor-tab-inactive:hover {
+  color: var(--foreground);
+  background: rgb(var(--accent-rgb) / 50%);
+}
+
+.playbook-editor-tabs-divider {
+  width: 1px;
+  height: 24px;
+  background: var(--border);
+}
+
+/* || Content */
+.playbook-editor-content {
+  flex: 1;
+  overflow: auto;
+  padding: 24px;
+}
+
+.playbook-editor-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.playbook-editor-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.playbook-editor-section-count {
+  color: var(--muted-foreground);
+}
+
+/* || Empty states */
+.playbook-editor-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 16px;
+}
+
+.playbook-editor-empty-text {
+  color: var(--muted-foreground);
+  margin-bottom: 16px;
+}
+
+.playbook-editor-ideas-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px;
+  border: 2px dashed var(--border);
+  border-radius: 8px;
+}
+
+.playbook-editor-ideas-empty-text {
+  color: var(--muted-foreground);
+  text-align: center;
+}
+
+/* || Grid layout */
+.playbook-editor-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 16px;
+}
+
+@media (width >= 640px) {
+  .playbook-editor-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (width >= 1024px) {
+  .playbook-editor-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (width >= 1280px) {
+  .playbook-editor-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* || Concepts tab */
+.playbook-editor-concepts-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 256px;
+}
+
+.playbook-editor-concepts-loading-text {
+  color: var(--muted-foreground);
+}
+
+.playbook-editor-concepts-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 256px;
+  gap: 16px;
+}
+
+.playbook-editor-concepts-empty-text {
+  color: var(--muted-foreground);
+}
+
+/* || Loading state */
+.playbook-editor-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+.playbook-editor-loading-content {
+  text-align: center;
+}
+
+.playbook-editor-spinner {
+  animation: spin 1s linear infinite;
+  border-radius: 50%;
+  height: 48px;
+  width: 48px;
+  border-bottom-width: 2px;
+  border-color: rgb(17 24 39);
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.playbook-editor-loading-text {
+  color: rgb(75 85 99);
+}
+
+/* || Error state */
+.playbook-editor-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+.playbook-editor-error-content {
+  text-align: center;
+}
+
+.playbook-editor-error-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: rgb(220 38 38);
+  margin-bottom: 16px;
+}
+
+.playbook-editor-error-message {
+  color: rgb(75 85 99);
+  margin-bottom: 24px;
+}
+
+.playbook-editor-error-button {
+  padding: 8px 16px;
+  background: rgb(37 99 235);
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.playbook-editor-error-button:hover {
+  background: rgb(29 78 216);
+}
+
+/* || View mode toggle */
+.playbook-editor-view-toggle {
+  display: flex;
+  align-items: center;
+  background: var(--muted);
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.playbook-editor-view-button {
+  padding: 8px;
+  border-radius: 4px;
+  transition: all 200ms;
+  cursor: pointer;
+}
+
+.playbook-editor-view-button-active {
+  background: var(--card);
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 5%);
+}
+
+.playbook-editor-view-button-inactive:hover {
+  background: rgb(var(--accent-rgb) / 50%);
+}

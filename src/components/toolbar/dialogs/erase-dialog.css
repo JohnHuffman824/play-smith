@@ -1,0 +1,83 @@
+/* || Base styles */
+.erase-dialog {
+  position: absolute;
+  left: 96px;
+  top: 128px;
+  width: 256px;
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  background: var(--popover);
+  border: 1px solid var(--border);
+  padding: 16px;
+  z-index: 50;
+}
+
+/* || Header */
+.erase-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.erase-dialog-title {
+  color: var(--foreground);
+}
+
+/* || Section */
+.erase-dialog-section {
+  margin-bottom: 0;
+}
+
+.erase-dialog-label {
+  display: block;
+  font-size: 0.75rem;
+  margin-bottom: 8px;
+  color: var(--muted-foreground);
+}
+
+/* || Size grid */
+.erase-dialog-size-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.erase-dialog-size-button {
+  padding: 16px 12px;
+  border-radius: 8px;
+  transition: all 200ms;
+  cursor: pointer;
+  outline: none;
+  background: var(--muted);
+  color: var(--foreground);
+}
+
+.erase-dialog-size-button:hover {
+  background: var(--accent);
+}
+
+.erase-dialog-size-button:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.erase-dialog-size-button[data-active="true"] {
+  background: var(--action-button);
+  color: var(--action-button-foreground);
+}
+
+.erase-dialog-size-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.erase-dialog-size-dot {
+  background: currentColor;
+  border-radius: 9999px;
+}
+
+.erase-dialog-size-label {
+  font-size: 0.75rem;
+}

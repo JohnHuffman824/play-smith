@@ -28,6 +28,7 @@ import {
   NUMBER_HEIGHT,
   NUMBER_FROM_EDGE,
 } from '../../constants/field.constants'
+import './football-field.css'
 
 interface FootballFieldProps {
   className?: string
@@ -191,28 +192,16 @@ export function FootballField({ className, onDimensionsChange }: FootballFieldPr
   }
 
   return (
-    <div 
+    <div
       ref={containerRef}
-      className={className}
-      style={{
-        width: '100%',
-        height: '100%',
-        backgroundColor: fieldBg,
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        borderRadius: 'inherit',
-      }}
+      className={`football-field ${className || ''}`}
+      data-theme={theme}
     >
       {dimensions.width > 0 && dimensions.height > 0 && (
         <svg
           width={dimensions.width}
           height={dimensions.height}
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-          }}
+          className='football-field-svg'
         >
           {fieldMarkers}
         </svg>

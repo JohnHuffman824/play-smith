@@ -1,6 +1,7 @@
 import type { Drawing, PathStyle } from '../../../types/drawing.types'
 import type { FieldCoordinateSystem } from '../../../utils/coordinates'
 import { DialogCloseButton } from '../../ui/dialog-close-button'
+import './drawing-properties-dialog.css'
 
 interface DrawingPropertiesDialogProps {
 	drawing: Drawing
@@ -53,36 +54,33 @@ export function DrawingPropertiesDialog({
 		<>
 			{/* Transparent backdrop to handle click-away */}
 			<div
-				className='fixed inset-0 z-[60]'
+				className="drawing-properties-dialog-backdrop"
 				onClick={onClose}
 			/>
 			<div
 				style={dialogStyle}
-				className="w-64 rounded-2xl shadow-2xl bg-popover border border-border p-4 z-[70]"
+				className="drawing-properties-dialog"
 			>
 			{/* Header */}
-			<div className='flex items-center justify-between mb-4'>
-				<span className="text-foreground">
+			<div className="drawing-properties-dialog-header">
+				<span className="drawing-properties-dialog-title">
 					Edit Drawing
 				</span>
 				<DialogCloseButton onClose={onClose} />
 			</div>
 
 			{/* Color */}
-			<div className='mb-4'>
-				<label className="block text-xs mb-2 text-muted-foreground">
+			<div className="drawing-properties-dialog-section">
+				<label className="drawing-properties-dialog-label">
 					Color
 				</label>
-				<div className='grid grid-cols-4 gap-2'>
+				<div className="drawing-properties-color-grid">
 					{colorPresets.map((color) => (
 						<button
 							key={color}
 							onClick={() => onUpdate({ color })}
-							className={`h-10 rounded-lg transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
-								style.color === color
-									? 'ring-2 ring-action-button ring-offset-2'
-									: 'hover:scale-105 border border-border'
-							}`}
+							className="drawing-properties-color-button"
+							data-selected={style.color === color}
 							style={{ backgroundColor: color }}
 							title={color}
 						/>
@@ -91,20 +89,17 @@ export function DrawingPropertiesDialog({
 			</div>
 
 			{/* Path Mode */}
-			<div className='mb-4'>
-				<label className="block text-xs mb-2 text-muted-foreground">
+			<div className="drawing-properties-dialog-section">
+				<label className="drawing-properties-dialog-label">
 					Path Mode
 				</label>
-				<div className='flex gap-2'>
+				<div className="drawing-properties-button-group">
 					<button
 						onClick={() => onUpdate({ pathMode: 'sharp' })}
-						className={`flex-1 py-2 px-3 rounded-lg transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
-							style.pathMode === 'sharp'
-								? 'bg-action-button text-action-button-foreground'
-								: 'bg-muted text-foreground hover:bg-accent'
-						}`}
+						className="drawing-properties-option-button"
+						data-active={style.pathMode === 'sharp'}
 					>
-						<svg viewBox='0 0 48 16' className='h-4 w-full'>
+						<svg viewBox='0 0 48 16' className="drawing-properties-path-svg">
 							<polyline
 								points='4,12 16,4 32,12 44,4'
 								fill='none'
@@ -117,13 +112,10 @@ export function DrawingPropertiesDialog({
 					</button>
 					<button
 						onClick={() => onUpdate({ pathMode: 'curve' })}
-						className={`flex-1 py-2 px-3 rounded-lg transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
-							style.pathMode === 'curve'
-								? 'bg-action-button text-action-button-foreground'
-								: 'bg-muted text-foreground hover:bg-accent'
-						}`}
+						className="drawing-properties-option-button"
+						data-active={style.pathMode === 'curve'}
 					>
-						<svg viewBox='0 0 48 16' className='h-4 w-full'>
+						<svg viewBox='0 0 48 16' className="drawing-properties-path-svg">
 							<path
 								d='M 4,12 C 10,4 22,4 24,8 C 26,12 38,12 44,4'
 								fill='none'
@@ -137,61 +129,49 @@ export function DrawingPropertiesDialog({
 			</div>
 
 			{/* Line Style */}
-			<div className='mb-4'>
-				<label className="block text-xs mb-2 text-muted-foreground">
+			<div className="drawing-properties-dialog-section">
+				<label className="drawing-properties-dialog-label">
 					Line Style
 				</label>
-				<div className='flex gap-2'>
+				<div className="drawing-properties-button-group">
 					<button
 						onClick={() => onUpdate({ lineStyle: 'solid' })}
-						className={`flex-1 py-2 px-3 rounded-lg transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
-							style.lineStyle === 'solid'
-								? 'bg-action-button text-action-button-foreground'
-								: 'bg-muted text-foreground hover:bg-accent'
-						}`}
+						className="drawing-properties-option-button"
+						data-active={style.lineStyle === 'solid'}
 					>
-						<div className='h-0.5 bg-current mx-auto w-12' />
+						<div className="drawing-properties-line-solid" />
 					</button>
 					<button
 						onClick={() => onUpdate({ lineStyle: 'dashed' })}
-						className={`flex-1 py-2 px-3 rounded-lg transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
-							style.lineStyle === 'dashed'
-								? 'bg-action-button text-action-button-foreground'
-								: 'bg-muted text-foreground hover:bg-accent'
-						}`}
+						className="drawing-properties-option-button"
+						data-active={style.lineStyle === 'dashed'}
 					>
-						<div className='h-0.5 mx-auto w-12 flex gap-1'>
-							<div className='flex-1 bg-current' />
-							<div className='flex-1 bg-current' />
-							<div className='flex-1 bg-current' />
+						<div className="drawing-properties-line-dashed">
+							<div className="drawing-properties-line-dashed-segment" />
+							<div className="drawing-properties-line-dashed-segment" />
+							<div className="drawing-properties-line-dashed-segment" />
 						</div>
 					</button>
 				</div>
 			</div>
 
 			{/* Line End */}
-			<div className='mb-4'>
-				<label className="block text-xs mb-2 text-muted-foreground">
+			<div className="drawing-properties-dialog-section">
+				<label className="drawing-properties-dialog-label">
 					Line End
 				</label>
-				<div className='grid grid-cols-3 gap-2'>
+				<div className="drawing-properties-button-group-grid">
 					<button
 						onClick={() => onUpdate({ lineEnd: 'none' })}
-						className={`py-2 px-3 rounded-lg transition-all duration-200 text-xs cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
-							style.lineEnd === 'none'
-								? 'bg-action-button text-action-button-foreground'
-								: 'bg-muted text-foreground hover:bg-accent'
-						}`}
+						className="drawing-properties-line-end-text"
+						data-active={style.lineEnd === 'none'}
 					>
 						None
 					</button>
 					<button
 						onClick={() => onUpdate({ lineEnd: 'arrow' })}
-						className={`py-2 px-3 rounded-lg transition-all duration-200 flex items-center justify-center cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
-							style.lineEnd === 'arrow'
-								? 'bg-action-button text-action-button-foreground'
-								: 'bg-muted text-foreground hover:bg-accent'
-						}`}
+						className="drawing-properties-line-end-icon"
+						data-active={style.lineEnd === 'arrow'}
 					>
 						<svg width='20' height='16' viewBox='0 0 20 16'>
 							<line
@@ -208,11 +188,8 @@ export function DrawingPropertiesDialog({
 					</button>
 					<button
 						onClick={() => onUpdate({ lineEnd: 'tShape' })}
-						className={`py-2 px-3 rounded-lg transition-all duration-200 flex items-center justify-center cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
-							style.lineEnd === 'tShape'
-								? 'bg-action-button text-action-button-foreground'
-								: 'bg-muted text-foreground hover:bg-accent'
-						}`}
+						className="drawing-properties-line-end-icon"
+						data-active={style.lineEnd === 'tShape'}
 					>
 						<svg
 							width='20'
@@ -229,11 +206,11 @@ export function DrawingPropertiesDialog({
 			</div>
 
 			{/* Thickness */}
-			<div>
-				<label className="block text-xs mb-2 text-muted-foreground">
+			<div className="drawing-properties-dialog-section">
+				<label className="drawing-properties-dialog-label">
 					Line Thickness
 				</label>
-				<div className='grid grid-cols-2 gap-2'>
+				<div className="drawing-properties-button-group-2col">
 					{brushSizes.map((brush) => {
 						// Convert pixel size to feet for storage
 						const strokeWidthInFeet = brush.size / coordSystem.scale
@@ -245,21 +222,18 @@ export function DrawingPropertiesDialog({
 							<button
 								key={brush.size}
 								onClick={() => onUpdate({ strokeWidth: strokeWidthInFeet })}
-								className={`py-3 px-3 rounded-lg transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
-									isSelected
-										? 'bg-action-button text-action-button-foreground'
-										: 'bg-muted text-foreground hover:bg-accent'
-								}`}
+								className="drawing-properties-brush-button"
+								data-active={isSelected}
 							>
-								<div className='flex flex-col items-center gap-1'>
+								<div className="drawing-properties-brush-content">
 									<div
-										className='bg-current rounded-full'
+										className="drawing-properties-brush-dot"
 										style={{
 											width: `${brush.size * 2}px`,
 											height: `${brush.size * 2}px`,
 										}}
 									/>
-									<span className='text-xs'>{brush.label}</span>
+									<span className="drawing-properties-brush-label">{brush.label}</span>
 								</div>
 							</button>
 						)

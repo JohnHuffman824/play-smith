@@ -1,6 +1,7 @@
 import { X } from 'lucide-react'
 import type { ConceptChip as ConceptChipType } from '../../types/concept.types'
 import { CHIP_STYLES } from '../../constants/concept.constants'
+import './concept-chip.css'
 
 interface ConceptChipProps {
 	chip: ConceptChipType
@@ -18,19 +19,13 @@ export function ConceptChip({ chip, onRemove, isDragging }: ConceptChipProps) {
 
 	return (
 		<div
-			className={`
-				inline-flex items-center gap-1 px-2 py-1 rounded-md
-				border text-sm font-medium transition-all
-				${chipStyles[chip.type]}
-				${isDragging ? 'opacity-50 cursor-grabbing' : 'cursor-grab'}
-				hover:shadow-sm
-			`}
+			className={`concept-chip ${chipStyles[chip.type]} ${isDragging ? 'concept-chip--dragging' : ''}`}
 			draggable
 		>
 			<span>{chip.label}</span>
 			<button
 				onClick={handleRemove}
-				className="hover:bg-accent rounded p-0.5 transition-colors cursor-pointer"
+				className="concept-chip__remove"
 				aria-label={`Remove ${chip.label}`}
 			>
 				<X className="w-3 h-3" />

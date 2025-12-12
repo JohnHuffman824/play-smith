@@ -1,0 +1,111 @@
+/* || Base styles */
+.playbook-card {
+	position: relative;
+	background: var(--card);
+	border-radius: 12px;
+	border: 1px solid var(--border);
+	transition: all 200ms;
+	cursor: pointer;
+	overflow: hidden;
+}
+
+.playbook-card:hover {
+	box-shadow: 0 10px 15px -3px rgb(0 0 0 / 10%), 0 4px 6px -4px rgb(0 0 0 / 10%);
+}
+
+/* || Card thumbnail */
+.playbook-card-thumbnail {
+	aspect-ratio: 4 / 3;
+	background: var(--muted);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+	overflow: hidden;
+}
+
+.playbook-card-thumbnail img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.playbook-card-thumbnail-gradient {
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(to bottom right, var(--accent), var(--muted));
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* || Action buttons */
+.playbook-card-action-button {
+	position: absolute;
+	padding: 6px;
+	border-radius: 8px;
+	background: color-mix(in oklch, var(--card) 90%, transparent);
+	backdrop-filter: blur(8px);
+	border: 1px solid var(--border);
+	transition: opacity 200ms;
+	z-index: 10;
+	cursor: pointer;
+	outline: none;
+}
+
+.playbook-card-action-button:hover {
+	background: var(--accent);
+}
+
+.playbook-card-action-button:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.playbook-card-action-button-star {
+	top: 8px;
+	left: 8px;
+}
+
+.playbook-card-action-button-share {
+	top: 8px;
+	right: 80px;
+	opacity: 0;
+}
+
+.playbook-card-action-button-export {
+	top: 8px;
+	right: 44px;
+	opacity: 0;
+}
+
+.playbook-card-action-button-more {
+	top: 8px;
+	right: 8px;
+	opacity: 0;
+}
+
+.playbook-card:hover .playbook-card-action-button-share,
+.playbook-card:hover .playbook-card-action-button-export,
+.playbook-card:hover .playbook-card-action-button-more {
+	opacity: 1;
+}
+
+/* || Card info */
+.playbook-card-info {
+	padding: 16px;
+}
+
+.playbook-card-title {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	margin-bottom: 4px;
+}
+
+.playbook-card-meta {
+	color: var(--muted-foreground);
+}
+
+.playbook-card-meta + .playbook-card-meta {
+	margin-top: 4px;
+}

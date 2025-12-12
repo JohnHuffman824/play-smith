@@ -120,10 +120,14 @@ By default, each play auto-populates with 5 offensive linemen:
 
 ### Concept Application Search
 
-- Unified search bar surfaces formations, concepts, and concept groups
+**Status:** ✅ Implemented with Frecency Ranking (December 2024)
+
+- **Unified search bar** surfaces formations, concepts, and concept groups
+- **Frecency-based ranking:** Results prioritized by frequency of use + recency
 - Selecting a result adds a draggable chip above the canvas
 - Chips can be reordered via drag-and-drop and removed inline
 - Applied chips automatically apply their formation/concept/group to the canvas
+- **API Endpoint:** `GET /api/search` - Unified search across concept types
 
 ### Drawing–Player Linking
 
@@ -140,6 +144,24 @@ By default, each play auto-populates with 5 offensive linemen:
 	- Save selection as concept (opens concept dialog)
 	- Duplicate selection (placeholder)
 	- Delete selection
+
+### Canvas Zoom & Pan
+
+**Status:** ✅ Implemented (December 2024)
+
+Advanced viewport controls for navigating large field diagrams.
+
+**Features:**
+- **Mouse Wheel Zoom:** Cursor-centered zooming for precise control
+- **Spacebar + Drag:** Pan canvas while holding spacebar
+- **Middle Mouse Button:** Alternative panning method
+- **Zoom Limits:** Configurable min/max zoom levels
+- **Viewport State:** Persisted via CanvasViewportContext
+
+**Technical Implementation:**
+- **CanvasViewportContext:** Global zoom and pan state (`src/contexts/CanvasViewportContext.tsx`)
+- Transform-based rendering for smooth performance
+- Prevents accidental tool interactions while panning
 
 ### Persistence
 
@@ -316,6 +338,15 @@ all plays and playbooks.
 - Function: Determines whether skill position players move with linemen when
 	hash position changes
 
+**Role Terminology** (Team-level setting)
+- **Status:** ✅ Implemented (December 2024)
+- Function: Customize position labels per team (e.g., "X" vs "Split End")
+- Scope: Team-specific, persists across all team playbooks
+- **API Endpoints:**
+  - `GET /api/teams/:teamId/roles` - List team role terminology
+  - `PUT /api/teams/:teamId/roles` - Update/upsert role terminology
+- **Database:** `role_terminology` table with team_id, role_id, custom_label
+
 ---
 
 ## Keyboard Shortcuts
@@ -330,6 +361,41 @@ all plays and playbooks.
 - G: Add component/concept dialog
 - Delete/⌫: Delete selection
 - ⌘Z: Undo canvas history
+
+---
+
+## Play Animation
+
+**Status:** ✅ Implemented (December 2024)
+
+The animation system allows users to view plays in motion, with players moving along their assigned routes in a synchronized playback.
+
+### Animation Features
+
+- **Playback Controls:**
+  - Play/Pause toggle
+  - Speed controls: 0.5x, 1x, 1.5x, 2x
+  - Timeline scrubbing (future)
+
+- **Visual Effects:**
+  - Animated players following route paths
+  - Ghost trail effect showing player movement history
+  - Synchronized animation across all players
+
+- **Animation Page:**
+  - Route: `/playbooks/:playbookId/animate/:playId`
+  - Full-screen animation canvas
+  - Dedicated animation viewer
+
+### Technical Implementation
+
+- **AnimationContext:** Global animation state (playback, speed, current time)
+- **AnimationCanvas:** Renders animated routes and players (`src/components/animation/AnimationCanvas.tsx`)
+- **AnimatedPlayer:** Player component with position interpolation (`src/components/animation/AnimatedPlayer.tsx`)
+- **AnimatedRoute:** Route rendering with progressive drawing (`src/components/animation/AnimatedRoute.tsx`)
+- **GhostTrail:** Visual trail effect for player movement (`src/components/animation/GhostTrail.tsx`)
+- **useAnimationEngine:** Custom hook for frame calculations
+- **useAnimationTiming:** Timeline and timing calculations
 
 ---
 
@@ -356,7 +422,159 @@ additional features (TBD).
 - Route templates instantiate full drawing geometry (segments and control
 	points) with default styling
 - Team position labels live in team settings so position naming aligns with the
-	team’s chosen terminology
+	team's chosen terminology
+
+### Modifier Overrides
+
+**Status:** ✅ Implemented (December 2024)
+
+Modifier overrides allow formation-specific adjustments to concept behavior, enabling coaches to fine-tune how modifiers (motion, shifts, etc.) apply differently based on the formation.
+
+**Features:**
+- Define formation-specific override rules for modifier concepts
+- Override player assignments, routes, or positions per formation
+- Enables context-aware concept application (e.g., "motion left" means different things in different formations)
+- Stored with modifier concepts, applied automatically when formation is detected
+
+**API Endpoints:**
+- `GET /api/modifiers/:modifierId/overrides` - List overrides for a modifier
+- `POST /api/modifiers/:modifierId/overrides` - Create formation-specific override
+- `PUT /api/modifier-overrides/:id` - Update override rules
+- `DELETE /api/modifier-overrides/:id` - Delete override
+
+**Technical Implementation:**
+- **ModifierOverrideRepository:** Database operations (`src/db/repositories/ModifierOverrideRepository.ts`)
+- **Database:** `modifier_overrides` table linking modifiers to formations with custom rules
+- Concept application engine checks for overrides before applying defaults
+
+### Playbook Sections
+
+**Status:** ✅ Implemented (December 2024)
+
+Sections provide organizational structure within playbooks, allowing coaches to group plays by category, situation, or any custom grouping.
+
+**Features:**
+- Create/rename/delete sections within a playbook
+- Assign plays to sections
+- Special "Ideas & Experiments" section type for work-in-progress plays
+- Protected sections (Ideas section cannot be deleted)
+- Section-based filtering and organization
+
+**API Endpoints:**
+- `GET /api/playbooks/:playbookId/sections` - List sections
+- `POST /api/playbooks/:playbookId/sections` - Create section
+- `PUT /api/sections/:sectionId` - Update section
+- `DELETE /api/sections/:sectionId` - Delete section (Ideas section protected)
+
+**Permission Model:**
+- Standard sections: owner/editor can create/edit
+- Ideas sections: viewers can create and edit their own plays
+
+### Cross-Team Playbook Sharing
+
+**Status:** ✅ Implemented (December 2024)
+
+Playbooks can be shared across teams with granular permission control, enabling collaboration between different coaching staffs.
+
+**Features:**
+- Share playbooks with other teams
+- Two permission levels:
+  - **View:** Read-only access to plays and concepts
+  - **Edit:** Full editing capabilities
+- User's effective permission is the highest between team role and share permission
+- Share dialog UI for managing playbook access
+- Remove shares to revoke access
+
+**API Endpoints:**
+- `GET /api/playbooks/:id/shares` - List shares for a playbook
+- `POST /api/playbooks/:id/shares` - Share playbook with team
+- `DELETE /api/playbooks/:id/shares/:teamId` - Remove share
+
+### Trash & Restore
+
+**Status:** ✅ Implemented (December 2024)
+
+Soft delete system with recovery capability to prevent accidental data loss.
+
+**Features:**
+- Soft delete playbooks (marked as deleted, not permanently removed)
+- Trash sidebar section showing deleted playbooks
+- Restore from trash (undo deletion)
+- Permanent delete (irreversible)
+- Empty trash (bulk permanent delete)
+- Deleted playbooks excluded from normal views
+
+**API Endpoints:**
+- `DELETE /api/playbooks/:id` - Soft delete playbook
+- `PUT /api/playbooks/:id/restore` - Restore from trash
+- `DELETE /api/playbooks/:id/permanent` - Permanent delete
+- `DELETE /api/trash` - Empty trash (all deleted playbooks)
+
+### Starred Playbooks
+
+**Status:** ✅ Implemented (December 2024)
+
+Quick-access favorites system for frequently used playbooks.
+
+**Features:**
+- Star/unstar playbooks
+- Starred sidebar section for quick access
+- Toggle starred status from playbook cards
+
+**API Endpoint:**
+- `PUT /api/playbooks/:id/star` - Toggle starred status
+
+### View Modes
+
+**Status:** ✅ Implemented (December 2024)
+
+Multiple viewing options for playbook display preferences.
+
+**Features:**
+- **Grid View:** Card-based layout with thumbnails
+- **List View:** Table-based layout with metadata columns
+- Persistent preference saved in settings
+- Toggle button in playbook manager toolbar
+
+---
+
+## Presentations
+
+**Status:** ✅ Implemented (December 2024)
+
+The presentations system allows coaches to create slideshow-style presentations from playbook plays for teaching, game planning, and film sessions.
+
+### Presentation Features
+
+- **Create Presentations:** Organize plays into ordered slide decks
+- **Slide Management:**
+  - Add plays as slides
+  - Reorder slides via drag-and-drop
+  - Remove slides from presentation
+- **Presentation Viewer:** Full-screen slideshow mode with navigation controls
+- **Playbook Integration:** Presentations belong to specific playbooks
+
+### Technical Implementation
+
+**Components:**
+- **PresentationCard:** Display presentation in list (`src/components/presentations/PresentationCard.tsx`)
+- **PresentationEditor:** Add/remove/reorder slides (`src/components/presentations/PresentationEditor.tsx`)
+- **PresentationViewerModal:** Slideshow viewer (`src/components/presentations/PresentationViewerModal.tsx`)
+- **NewPresentationDialog:** Create new presentation (`src/components/presentations/NewPresentationDialog.tsx`)
+
+**API Endpoints:**
+- `GET /api/playbooks/:playbookId/presentations` - List presentations
+- `POST /api/playbooks/:playbookId/presentations` - Create presentation
+- `GET /api/presentations/:presentationId` - Get presentation with slides
+- `PUT /api/presentations/:presentationId` - Update presentation
+- `DELETE /api/presentations/:presentationId` - Delete presentation
+- `POST /api/presentations/:presentationId/slides` - Add slide
+- `PUT /api/presentations/:presentationId/slides` - Reorder slides
+- `DELETE /api/presentations/:presentationId/slides/:slideId` - Remove slide
+
+**Database:**
+- `presentations` table with playbook relationship
+- `presentation_slides` junction table with ordering
 
 ---
 
@@ -396,6 +614,32 @@ bun run seed:dev  # Creates admin/admin user
 - **Frontend:** React Context (AuthContext) for global auth state, LoginModal component with validation
 - **Security:** Passwords never stored in plain text, sessions validated on every request
 - **Testing:** Comprehensive test coverage including unit, integration, and end-to-end tests
+
+### Team Invitations
+
+**Status:** ✅ Implemented (December 2024)
+
+Token-based system for inviting new members to join teams.
+
+**Features:**
+- Team owners can invite members by email
+- Secure invitation tokens (32-byte random, URL-safe)
+- Accept/decline invitation flow
+- Cancel pending invitations
+- Email service integration (interface defined, ready for Resend/SendGrid/AWS SES)
+- Invitations tracked in database with expiration
+
+**API Endpoints:**
+- `POST /api/teams/:id/invitations` - Create invitation (owner-only)
+- `DELETE /api/teams/:id/invitations/:invitationId` - Cancel invitation
+- `POST /api/invitations/accept` - Accept invitation by token
+
+**Technical Implementation:**
+- **InvitationRepository:** Database operations for invitations (`src/db/repositories/InvitationRepository.ts`)
+- **EmailService:** Abstract email interface (`src/services/EmailService.ts`)
+  - `ConsoleEmailService` for development (logs to console)
+  - Ready for production email provider integration
+- **Frontend:** Invitation management in team settings dialog
 
 ---
 
@@ -467,7 +711,7 @@ release-1.0   → Production release (Railway production)
 ### Technology Stack
 
 - **Runtime:** Bun v1.3+
-- **Frontend:** React 19, TailwindCSS 4
+- **Frontend:** React 19, Plain CSS (component-scoped stylesheets)
 - **Backend:** Bun.serve (native HTTP server)
 - **Database:** PostgreSQL 17.7 with PostGIS extensions
 - **Deployment:** Railway with Nixpacks build system

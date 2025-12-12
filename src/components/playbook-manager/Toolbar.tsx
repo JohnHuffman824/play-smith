@@ -4,7 +4,7 @@ import { HEADER_HEIGHT } from '../../constants/layout'
 import { IconButton } from '../ui/icon-button'
 import { SearchInput } from '../ui/search-input'
 import { TooltipProvider } from '../ui/tooltip'
-import { cn } from '../ui/utils'
+import './toolbar.css'
 
 interface Team {
 	id: number
@@ -45,19 +45,19 @@ export function Toolbar({
 }: ToolbarProps) {
 	return (
 		<TooltipProvider>
-			<div className="border-b border-border bg-card/50 backdrop-blur-xl sticky top-0 z-10" style={{ height: `${HEADER_HEIGHT}px` }}>
-				<div className="px-6 h-full flex items-center">
-					<div className="flex items-center justify-between gap-4 w-full">
+			<div className="playbook-toolbar" style={{ height: `${HEADER_HEIGHT}px` }}>
+				<div className="playbook-toolbar-container">
+					<div className="playbook-toolbar-content">
 					{/* Left Section - Search */}
 					<SearchInput
 						value={searchQuery}
 						onChange={onSearchChange}
 						placeholder="Search playbooks..."
-						className="flex-1 max-w-xl"
+						style={{ flex: 1, maxWidth: '672px' }}
 					/>
 
 						{/* Right Section - Actions */}
-						<div className="flex items-center gap-2">
+						<div className="playbook-toolbar-actions">
 							{/* Team Selector */}
 							<TeamSelector
 								teams={teams}
@@ -66,40 +66,30 @@ export function Toolbar({
 								onManageTeams={onManageTeams}
 							/>
 
-							<div className="w-px h-6 bg-border" />
+							<div className="playbook-toolbar-divider" />
 
 							{/* View Mode Toggle */}
-							<div className="flex items-center bg-muted rounded-lg p-1">
+							<div className="playbook-toolbar-view-mode">
 								<button
 									onClick={() => onViewModeChange('grid')}
-									className={cn(
-										"p-2 rounded transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
-										viewMode === 'grid'
-											? 'bg-card shadow-sm'
-											: 'hover:bg-accent/50'
-									)}
+									className={`playbook-toolbar-view-button ${viewMode === 'grid' ? 'playbook-toolbar-view-button-active' : ''}`}
 								>
 									<Grid className="w-4 h-4" />
 								</button>
 								<button
 									onClick={() => onViewModeChange('list')}
-									className={cn(
-										"p-2 rounded transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
-										viewMode === 'list'
-											? 'bg-card shadow-sm'
-											: 'hover:bg-accent/50'
-									)}
+									className={`playbook-toolbar-view-button ${viewMode === 'list' ? 'playbook-toolbar-view-button-active' : ''}`}
 								>
 									<List className="w-4 h-4" />
 								</button>
 							</div>
 
-							<div className="w-px h-6 bg-border" />
+							<div className="playbook-toolbar-divider" />
 
 							{/* Action Buttons */}
 							<button
 								onClick={onNewPlaybook}
-								className="flex items-center gap-2 px-4 py-2 bg-action-button text-action-button-foreground rounded-lg hover:bg-action-button/90 transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 whitespace-nowrap"
+								className="playbook-toolbar-new-playbook"
 							>
 								<Plus className="w-4 h-4" />
 								New Playbook
@@ -123,7 +113,7 @@ export function Toolbar({
 								onClick={onExport}
 							/>
 
-							<div className="w-px h-6 bg-border" />
+							<div className="playbook-toolbar-divider" />
 
 							{/* Settings */}
 							<IconButton

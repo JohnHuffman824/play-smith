@@ -8,8 +8,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/components/ui/utils'
-
-const CARD_ACTION_BUTTON = 'p-1.5 rounded-lg bg-card/90 backdrop-blur-sm border border-border transition-opacity duration-200 hover:bg-accent z-10 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50'
+import './playbook-card.css'
 
 type PlaybookCardProps = {
 	id: number
@@ -52,17 +51,17 @@ export function PlaybookCard({
 
 	return (
 		<div
-			className="group relative bg-card rounded-xl border border-border hover:shadow-lg transition-all duration-200 cursor-pointer overflow-hidden"
+			className="playbook-card group"
 			onClick={handleOpen}
 		>
 			{/* Thumbnail/Preview */}
-			<div className="aspect-[4/3] bg-muted flex items-center justify-center relative overflow-hidden">
+			<div className="playbook-card-thumbnail">
 				{thumbnail ? (
-					<img src={thumbnail} alt={name} className="w-full h-full object-cover" />
+					<img src={thumbnail} alt={name} />
 				) : type === 'folder' ? (
 					<Folder className="w-16 h-16 text-muted-foreground/40" strokeWidth={1.5} />
 				) : (
-					<div className="w-full h-full bg-gradient-to-br from-accent to-muted flex items-center justify-center">
+					<div className="playbook-card-thumbnail-gradient">
 						<BookOpen className="w-16 h-16 text-muted-foreground/40" strokeWidth={1.5} />
 					</div>
 				)}
@@ -73,7 +72,7 @@ export function PlaybookCard({
 						{/* Star Button - Always visible in top-left */}
 						{onToggleStar && (
 							<button
-								className={cn(CARD_ACTION_BUTTON, "absolute top-2 left-2")}
+								className="playbook-card-action-button playbook-card-action-button-star"
 								onClick={(e) => {
 									e.stopPropagation()
 									onToggleStar(id)
@@ -87,7 +86,7 @@ export function PlaybookCard({
 						)}
 						{onShare && (
 							<button
-								className={cn(CARD_ACTION_BUTTON, "absolute top-2 right-20 opacity-0 group-hover:opacity-100")}
+								className="playbook-card-action-button playbook-card-action-button-share"
 								onClick={(e) => {
 									e.stopPropagation()
 									onShare(id)
@@ -99,7 +98,7 @@ export function PlaybookCard({
 						)}
 						{onExport && (
 							<button
-								className={cn(CARD_ACTION_BUTTON, "absolute top-2 right-11 opacity-0 group-hover:opacity-100")}
+								className="playbook-card-action-button playbook-card-action-button-export"
 								onClick={(e) => {
 									e.stopPropagation()
 									onExport(id)
@@ -116,7 +115,7 @@ export function PlaybookCard({
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
 						<button
-							className={cn(CARD_ACTION_BUTTON, "absolute top-2 right-2 opacity-0 group-hover:opacity-100")}
+							className="playbook-card-action-button playbook-card-action-button-more"
 							onClick={(e) => {
 								e.stopPropagation()
 							}}
@@ -177,12 +176,12 @@ export function PlaybookCard({
 			</div>
 
 			{/* Card Info */}
-			<div className="p-4">
-				<h3 className="truncate mb-1">{name}</h3>
-				<p className="text-muted-foreground">
+			<div className="playbook-card-info">
+				<h3 className="playbook-card-title">{name}</h3>
+				<p className="playbook-card-meta">
 					{type === 'folder' ? 'Folder' : `${playCount} play${playCount !== 1 ? 's' : ''}`}
 				</p>
-				<p className="text-muted-foreground mt-1">
+				<p className="playbook-card-meta">
 					{lastModified}
 				</p>
 			</div>

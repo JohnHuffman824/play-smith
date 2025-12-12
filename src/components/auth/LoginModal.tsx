@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Mail, Lock, Eye, EyeOff, User } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { Input } from '../ui/input'
+import './login-modal.css'
 
 type AuthMode = 'login' | 'register'
 
@@ -96,33 +97,23 @@ export function LoginModal() {
 	return (
 		<>
 			{/* Backdrop */}
-			<div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" />
+			<div className="login-modal-backdrop" />
 
-			{/* Modal */}
-			<div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-				<div
-					className="bg-card rounded-3xl shadow-2xl max-w-md w-full
-						overflow-hidden animate-modal-in border border-border"
-				>
+			{/* Modal Container */}
+			<div className="login-modal-container">
+				<div className="login-modal">
 					{/* Header */}
-					<div
-						className="relative bg-muted p-8 pb-12"
-					>
-						<div className="flex items-center gap-3 mb-3">
-							<div
-								className="w-12 h-12 rounded-2xl bg-action-button flex items-center
-									justify-center shadow-lg"
-							>
-								<span className="text-action-button-foreground text-xl font-bold">
-									PS
-								</span>
+					<div className="login-modal-header">
+						<div className="login-modal-header-content">
+							<div className="login-modal-logo">
+								<span>PS</span>
 							</div>
-							<h2 className="text-2xl text-foreground font-semibold">
+							<h2 className="login-modal-title">
 								Play Smith
 							</h2>
 						</div>
 
-						<p className="text-muted-foreground text-sm">
+						<p className="login-modal-subtitle">
 							{isLogin
 								? 'Sign in to access your playbooks'
 								: 'Create an account to get started'}
@@ -130,31 +121,21 @@ export function LoginModal() {
 					</div>
 
 					{/* Form */}
-					<form onSubmit={handleSubmit} className="p-8 pt-6">
+					<form onSubmit={handleSubmit} className="login-modal-form">
 						{displayError && (
-							<div
-								className="mb-4 p-3 bg-red-50 border border-red-200
-									rounded-xl text-red-600 text-sm"
-							>
+							<div className="login-modal-error">
 								{displayError}
 							</div>
 						)}
 
 						{/* Name Input (register only) */}
 						{!isLogin && (
-							<div className="mb-4">
-								<label
-									htmlFor="name"
-									className="block text-sm text-foreground mb-2
-										font-medium"
-								>
+							<div className="login-modal-form-group">
+								<label htmlFor="name" className="login-modal-label">
 									Name
 								</label>
-								<div className="relative">
-									<User
-										className="absolute left-4 top-1/2
-											-translate-y-1/2 w-5 h-5 text-muted-foreground"
-									/>
+								<div className="login-modal-input-wrapper">
+									<User className="login-modal-input-icon" />
 									<Input
 										id="name"
 										type="text"
@@ -169,18 +150,12 @@ export function LoginModal() {
 						)}
 
 						{/* Email Input */}
-						<div className="mb-4">
-							<label
-								htmlFor="email"
-								className="block text-sm text-foreground mb-2 font-medium"
-							>
+						<div className="login-modal-form-group">
+							<label htmlFor="email" className="login-modal-label">
 								{isLogin ? 'Username or Email' : 'Email'}
 							</label>
-							<div className="relative">
-								<Mail
-									className="absolute left-4 top-1/2 -translate-y-1/2
-										w-5 h-5 text-muted-foreground"
-								/>
+							<div className="login-modal-input-wrapper">
+								<Mail className="login-modal-input-icon" />
 								<Input
 									id="email"
 									type={isLogin ? 'text' : 'email'}
@@ -194,18 +169,12 @@ export function LoginModal() {
 						</div>
 
 						{/* Password Input */}
-						<div className="mb-6">
-							<label
-								htmlFor="password"
-								className="block text-sm text-foreground mb-2 font-medium"
-							>
+						<div className="login-modal-form-group" style={{ marginBottom: '1.5rem' }}>
+							<label htmlFor="password" className="login-modal-label">
 								Password
 							</label>
-							<div className="relative">
-								<Lock
-									className="absolute left-4 top-1/2 -translate-y-1/2
-										w-5 h-5 text-muted-foreground"
-								/>
+							<div className="login-modal-input-wrapper">
+								<Lock className="login-modal-input-icon" />
 								<Input
 									id="password"
 									type={showPassword ? 'text' : 'password'}
@@ -218,8 +187,7 @@ export function LoginModal() {
 								<button
 									type="button"
 									onClick={() => setShowPassword(!showPassword)}
-									className="absolute right-4 top-1/2 -translate-y-1/2
-										text-muted-foreground hover:text-foreground transition-colors cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+									className="login-modal-password-toggle"
 									aria-label="Toggle password visibility"
 								>
 									{showPassword
@@ -234,10 +202,7 @@ export function LoginModal() {
 						<button
 							type="submit"
 							disabled={isSubmitting}
-							className="w-full py-3.5 bg-action-button text-action-button-foreground
-								rounded-2xl font-semibold transition-all duration-200
-								hover:bg-action-button/90 hover:shadow-lg disabled:opacity-50 cursor-pointer
-								disabled:cursor-not-allowed mb-4 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+							className="login-modal-submit"
 						>
 							{isSubmitting
 								? 'Please wait...'
@@ -246,19 +211,14 @@ export function LoginModal() {
 						</button>
 
 						{/* Divider */}
-						<div className="relative my-6">
-							<div className="absolute inset-0 flex items-center">
-								<div className="w-full border-t border-border" />
-							</div>
-							<div className="relative flex justify-center">
-								<span className="px-4 bg-card text-sm text-muted-foreground">
-									or
-								</span>
+						<div className="login-modal-divider">
+							<div className="login-modal-divider-text">
+								<span>or</span>
 							</div>
 						</div>
 
 						{/* Switch Mode Link */}
-						<p className="text-center text-sm text-muted-foreground">
+						<p className="login-modal-switch">
 							{isLogin
 								? "Don't have an account? "
 								: 'Already have an account? '
@@ -266,8 +226,7 @@ export function LoginModal() {
 							<button
 								type="button"
 								onClick={switchMode}
-								className="text-action-button hover:text-action-button/80
-									font-semibold transition-colors cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+								className="login-modal-switch-button"
 							>
 								{isLogin ? 'Sign up' : 'Sign in'}
 							</button>

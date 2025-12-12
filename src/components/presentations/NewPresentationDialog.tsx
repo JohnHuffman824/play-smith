@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Button } from '../ui/button'
 import { Modal } from '../shared/Modal'
+import './new-presentation-dialog.css'
 
 type NewPresentationDialogProps = {
 	isOpen: boolean
@@ -48,11 +49,11 @@ export function NewPresentationDialog({
 			onClose={handleClose}
 			title="New Presentation"
 		>
-			<form onSubmit={handleSubmit} className="space-y-4">
-				<div>
+			<form onSubmit={handleSubmit} className="new-presentation-dialog__form">
+				<div className="new-presentation-dialog__field">
 					<label
 						htmlFor="name"
-						className="block text-sm font-medium mb-2"
+						className="new-presentation-dialog__label"
 					>
 						Name *
 					</label>
@@ -62,17 +63,17 @@ export function NewPresentationDialog({
 						value={name}
 						onChange={(e) => setName(e.target.value)}
 						placeholder="Enter presentation name"
-						className="w-full px-3 py-2 border rounded-lg bg-background"
+						className="new-presentation-dialog__input"
 						disabled={isCreating}
 						required
 						autoFocus
 					/>
 				</div>
 
-				<div>
+				<div className="new-presentation-dialog__field">
 					<label
 						htmlFor="description"
-						className="block text-sm font-medium mb-2"
+						className="new-presentation-dialog__label"
 					>
 						Description
 					</label>
@@ -81,13 +82,13 @@ export function NewPresentationDialog({
 						value={description}
 						onChange={(e) => setDescription(e.target.value)}
 						placeholder="Enter description (optional)"
-						className="w-full px-3 py-2 border rounded-lg bg-background resize-none"
+						className="new-presentation-dialog__textarea"
 						rows={3}
 						disabled={isCreating}
 					/>
 				</div>
 
-				<div className="flex justify-end gap-2">
+				<div className="new-presentation-dialog__actions">
 					<Button
 						type="button"
 						variant="outline"

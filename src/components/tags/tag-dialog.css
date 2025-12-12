@@ -1,0 +1,105 @@
+/* || Tag Dialog */
+.tag-dialog__content {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	padding: 16px 0;
+}
+
+/* || Section */
+.tag-dialog__section-title {
+	font-size: 0.875rem;
+	font-weight: 500;
+	margin-bottom: 8px;
+}
+
+.tag-dialog__tags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+/* || Tag button */
+.tag-dialog__tag-button {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 6px 12px;
+	border-radius: 9999px;
+	cursor: pointer;
+	border: none;
+	outline: none;
+	transition: all 200ms;
+}
+
+.tag-dialog__tag-button:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.tag-dialog__tag-button--selected {
+	box-shadow: 0 0 0 2px var(--action-button);
+}
+
+/* || Create section */
+.tag-dialog__create {
+	padding-top: 8px;
+	border-top: 1px solid var(--border);
+}
+
+.tag-dialog__create-form {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.tag-dialog__color-palette {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.tag-dialog__color-button {
+	width: 32px;
+	height: 32px;
+	border-radius: 9999px;
+	cursor: pointer;
+	border: none;
+	outline: none;
+	transition: all 200ms;
+}
+
+.tag-dialog__color-button:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.tag-dialog__color-button--selected {
+	box-shadow: 0 0 0 2px var(--action-button), 0 0 0 4px var(--background);
+}
+
+.tag-dialog__form-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+}
+
+.tag-dialog__create-toggle {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 0.875rem;
+	color: var(--muted-foreground);
+	background: none;
+	border: none;
+	padding: 0;
+	cursor: pointer;
+	outline: none;
+	transition: color 200ms;
+}
+
+.tag-dialog__create-toggle:hover {
+	color: var(--foreground);
+}
+
+.tag-dialog__create-toggle:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}

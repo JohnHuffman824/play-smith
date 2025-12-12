@@ -1,0 +1,52 @@
+/* || Base styles */
+.hash-dialog {
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  border: 1px solid var(--border);
+  background: var(--popover);
+  padding: 16px;
+  z-index: 50;
+  width: 192px;
+}
+
+.hash-dialog[data-positioned="true"] {
+  position: fixed;
+  left: 96px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* || Content */
+.hash-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hash-dialog-title {
+  padding: 0 8px;
+  margin-bottom: 12px;
+  color: var(--muted-foreground);
+}
+
+/* || Option buttons */
+.hash-dialog-button {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  text-align: left;
+  transition: all 200ms;
+  cursor: pointer;
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+}
+
+.hash-dialog-button:hover {
+  background: var(--accent);
+}
+
+.hash-dialog-button[data-selected="true"] {
+  background: rgb(59 130 246);
+  color: white;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}

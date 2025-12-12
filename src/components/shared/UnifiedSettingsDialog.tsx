@@ -6,6 +6,7 @@ import { EditorSection } from './settings/EditorSection'
 import { DisplaySection } from './settings/DisplaySection'
 import { PlaybackSection } from './settings/PlaybackSection'
 import { PlaybookSection } from './settings/PlaybookSection'
+import './unified-settings-dialog.css'
 
 type SettingsContext = 'playbook-manager' | 'playbook-editor' | 'play-editor'
 
@@ -19,22 +20,18 @@ export function UnifiedSettingsDialog({ isOpen, onClose, context }: UnifiedSetti
 	if (!isOpen) return null
 
 	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center">
-			{/* Backdrop */}
-			<div className="absolute inset-0 bg-black/50" onClick={onClose} />
-
-			{/* Dialog */}
-			<div className="relative bg-popover rounded-2xl shadow-2xl border border-border max-w-2xl w-full mx-4 p-6 max-h-[90vh] overflow-y-auto">
+		<div className="unified-settings-backdrop" onClick={onClose}>
+			<div className="unified-settings-dialog" onClick={(e) => e.stopPropagation()}>
 				{/* Header */}
-				<div className="flex items-center justify-between mb-6">
-					<h2 className="text-2xl font-semibold">Settings</h2>
+				<div className="unified-settings-header">
+					<h2 className="unified-settings-title">Settings</h2>
 					<Button onClick={onClose} variant="ghost" size="icon">
 						<X className="h-5 w-5" />
 					</Button>
 				</div>
 
 				{/* Content */}
-				<div className="space-y-6">
+				<div className="unified-settings-content">
 					{/* Appearance - Always show */}
 					<AppearanceSection />
 					<Separator />
@@ -68,7 +65,7 @@ export function UnifiedSettingsDialog({ isOpen, onClose, context }: UnifiedSetti
 				</div>
 
 				{/* Footer */}
-				<div className="mt-6 pt-6 border-t border-border flex justify-end">
+				<div className="unified-settings-footer">
 					<Button onClick={onClose} variant="default">
 						Done
 					</Button>

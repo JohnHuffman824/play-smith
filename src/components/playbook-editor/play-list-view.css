@@ -1,0 +1,134 @@
+/* || Base styles */
+.play-list-view {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* || Header */
+.play-list-view-header {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 16px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--muted);
+}
+
+.play-list-view-header-cell {
+  color: var(--muted-foreground);
+}
+
+/* || Rows */
+.play-list-view-rows {
+  border-top: 1px solid var(--border);
+}
+
+.play-list-view-rows > :not(:last-child) {
+  border-bottom: 1px solid var(--border);
+}
+
+.play-list-view-row {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 16px;
+  padding: 12px 16px;
+  transition: background 200ms;
+}
+
+.play-list-view-row:hover {
+  background: var(--accent);
+}
+
+.play-list-view-row-selected {
+  background: rgb(var(--accent-rgb) / 50%);
+}
+
+.play-list-view-cell {
+  display: flex;
+  align-items: center;
+}
+
+/* || Selection button */
+.play-list-view-select-button {
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 200ms;
+}
+
+.play-list-view-select-button:hover {
+  background: var(--accent);
+}
+
+/* || Name button */
+.play-list-view-name-button {
+  text-align: left;
+}
+
+.play-list-view-name-button:hover {
+  text-decoration: underline;
+}
+
+/* || Formation text */
+.play-list-view-formation {
+  color: var(--muted-foreground);
+}
+
+/* || Type badge */
+.play-list-view-type-badge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}
+
+.play-list-view-type-badge-pass {
+  background: rgb(59 130 246 / 10%);
+  color: rgb(59 130 246);
+}
+
+.play-list-view-type-badge-run {
+  background: rgb(34 197 94 / 10%);
+  color: rgb(34 197 94);
+}
+
+/* || Tags */
+.play-list-view-tags {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.play-list-view-tag {
+  padding: 2px 8px;
+  background: var(--muted);
+  border-radius: 4px;
+  color: var(--muted-foreground);
+}
+
+.play-list-view-tag-count {
+  color: var(--muted-foreground);
+}
+
+/* || Modified date */
+.play-list-view-modified {
+  color: var(--muted-foreground);
+}
+
+/* || Actions */
+.play-list-view-actions {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+}
+
+.play-list-view-menu-button {
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 200ms;
+  cursor: pointer;
+}
+
+.play-list-view-menu-button:hover {
+  background: var(--accent);
+}

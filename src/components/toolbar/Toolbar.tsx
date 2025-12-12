@@ -41,6 +41,7 @@ import { ColorSwatchIndicator } from './ColorSwatchIndicator'
 import { usePlayContext } from '../../contexts/PlayContext'
 import { areLinemenAtDefaultPositions } from '../../utils/lineman.utils'
 import { cn } from '../ui/utils'
+import './toolbar.css'
 
 interface ToolbarProps {
 	drawingState: DrawingState
@@ -87,14 +88,6 @@ export function Toolbar({
 	const [columnCount, setColumnCount] = useState(1)
 	const [rowsPerColumn, setRowsPerColumn] = useState(14)
 	const drawDialogRef = useRef<HTMLDivElement>(null)
-
-	// Base styles for special buttons (Save, Delete) that don't use ToolbarButton
-	const baseButtonClass = cn(
-		'w-14 h-14 rounded-xl flex items-center justify-center',
-		'cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50',
-		'transition-all duration-200'
-	)
-	const statusDotClass = 'absolute -right-1 -top-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white'
 
 	function handleSnapThresholdChange(value: number) {
 		setDrawingState({ ...drawingState, snapThreshold: value })
@@ -359,18 +352,11 @@ export function Toolbar({
 	return (
 		<TooltipProvider>
 			<div
-				className="h-full border-r bg-card border-border"
+				className="toolbar"
 				style={{
-					display: 'grid',
 					gridTemplateColumns: `repeat(${columnCount}, 56px)`,
 					gridTemplateRows: `repeat(${rowsPerColumn}, 56px)`,
 					gridAutoFlow: 'column',
-					gap: '12px',
-					padding: '12px',
-					alignContent: 'center',
-					justifyContent: 'start',
-					minWidth: '80px',
-					width: 'auto',
 				}}
 			>
 				{/* Select Tool */}
@@ -401,7 +387,7 @@ export function Toolbar({
 					className={drawingState.tool == 'draw' ? 'relative' : ''}
 				>
 					{drawingState.tool == 'draw' && (
-						<div className={statusDotClass} />
+						<div className="toolbar-status-dot" />
 					)}
 				</ToolbarButton>
 
@@ -423,12 +409,8 @@ export function Toolbar({
 									setShowEraseDialog(true)
 								}
 							}}
-							className={cn(
-								baseButtonClass,
-								drawingState.tool == 'erase'
-									? "bg-action-button text-action-button-foreground shadow-lg"
-									: "border border-border hover:bg-accent hover:text-foreground"
-							)}
+							className="toolbar-custom-button"
+							data-active={drawingState.tool == 'erase'}
 							style={drawingState.tool !== 'erase' ? { color: 'var(--icon-muted)' } : undefined}
 						>
 							<EraserIcon />
@@ -453,13 +435,8 @@ export function Toolbar({
 					<TooltipTrigger asChild>
 						<button
 							onClick={() => handleToolChange('fill')}
-							className={cn(
-								baseButtonClass,
-								"relative",
-								drawingState.tool == 'fill'
-									? "bg-action-button text-action-button-foreground shadow-lg"
-									: "border border-border hover:bg-accent hover:text-foreground"
-							)}
+							className="toolbar-custom-button"
+							data-active={drawingState.tool == 'fill'}
 							style={drawingState.tool !== 'fill' ? { color: 'var(--icon-muted)' } : undefined}
 						>
 							<PaintBucket className="w-6 h-6" style={{ transform: 'scaleX(-1)' }} />
@@ -480,12 +457,8 @@ export function Toolbar({
 					<TooltipTrigger asChild>
 						<button
 							onClick={() => handleToolChange('drawing')}
-							className={cn(
-								baseButtonClass,
-								showDrawingDialog
-									? "bg-action-button text-action-button-foreground shadow-lg"
-									: "border border-border hover:bg-accent hover:text-foreground"
-							)}
+							className="toolbar-custom-button"
+							data-active={showDrawingDialog}
 							style={!showDrawingDialog ? { color: 'var(--icon-muted)' } : undefined}
 						>
 							<ArrowDown
@@ -505,12 +478,8 @@ export function Toolbar({
 								closeAllDialogs()
 								setShowHashDialog(!showHashDialog)
 							}}
-							className={cn(
-								baseButtonClass,
-								showHashDialog
-									? "bg-action-button text-action-button-foreground shadow-lg"
-									: "border border-border hover:bg-accent hover:text-foreground"
-							)}
+							className="toolbar-custom-button"
+							data-active={showHashDialog}
 							style={!showHashDialog ? { color: 'var(--icon-muted)' } : undefined}
 						>
 							<HashIcon />
@@ -567,22 +536,10 @@ export function Toolbar({
 						<button
 							onClick={handleSavePlay}
 							disabled={isSaving}
-							className={cn(
-								baseButtonClass,
-								"transition-transform duration-200 ease-out",
-								// Color states
-								theme == 'dark'
-									? "bg-green-900 text-green-400 hover:bg-green-800"
-									: showSuccess
-									? "bg-green-50 text-green-600 hover:bg-green-100"
-									: showError
-									? "bg-red-50 text-red-600 hover:bg-red-100"
-									: "bg-green-50 text-green-600 hover:bg-green-100",
-								// Scale animation
-								showSuccess || showError ? "scale-[1.2]" : "scale-100",
-								// Disabled state
-								isSaving && "opacity-70 cursor-not-allowed"
-							)}
+							className="toolbar-save-button"
+							data-theme={theme}
+							data-success={showSuccess}
+							data-error={showError}
 						>
 							{isSaving ? (
 								<Loader2 className="w-6 h-6 animate-spin" />
@@ -604,13 +561,8 @@ export function Toolbar({
 						<button
 							onClick={handleDeletePlay}
 							disabled={!playId || isDeleting}
-							className={cn(
-								baseButtonClass,
-								theme == 'dark'
-									? "bg-red-900 text-red-400 hover:bg-red-800"
-									: "bg-red-50 text-red-500 hover:bg-red-100",
-								(!playId || isDeleting) && "opacity-50 cursor-not-allowed"
-							)}
+							className="toolbar-delete-button"
+							data-theme={theme}
 						>
 							{isDeleting ? (
 								<Loader2 className="w-6 h-6 animate-spin" />

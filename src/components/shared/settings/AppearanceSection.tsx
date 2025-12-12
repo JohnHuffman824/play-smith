@@ -6,30 +6,33 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select'
+import './settings-section.css'
 
 export function AppearanceSection() {
 	const { theme, setTheme } = useSettings()
 
 	return (
-		<div>
-			<h3 className="text-lg font-medium mb-4">Appearance</h3>
-			<div className="flex items-center justify-between">
-				<div>
-					<label className="font-medium">Theme</label>
-					<p className="text-sm text-muted-foreground">
+		<div className="settings-section">
+			<h3 className="settings-section-title">Appearance</h3>
+			<div className="settings-row">
+				<div className="settings-label-group">
+					<label className="settings-label">Theme</label>
+					<p className="settings-description">
 						Choose your preferred color theme
 					</p>
 				</div>
-				<Select value={theme} onValueChange={setTheme}>
-					<SelectTrigger className="w-[180px]">
-						<SelectValue />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectItem value="light">Light</SelectItem>
-						<SelectItem value="dark">Dark</SelectItem>
-						<SelectItem value="system">System</SelectItem>
-					</SelectContent>
-				</Select>
+				<div className="settings-control">
+					<Select value={theme} onValueChange={setTheme}>
+						<SelectTrigger className="w-[180px]">
+							<SelectValue />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="light">Light</SelectItem>
+							<SelectItem value="dark">Dark</SelectItem>
+							<SelectItem value="system">System</SelectItem>
+						</SelectContent>
+					</Select>
+				</div>
 			</div>
 		</div>
 	)

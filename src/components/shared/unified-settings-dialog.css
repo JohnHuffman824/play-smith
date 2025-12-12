@@ -1,0 +1,63 @@
+/* || Unified Settings Dialog */
+
+/* || Backdrop */
+.unified-settings-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Backdrop overlay */
+.unified-settings-backdrop::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 50%);
+}
+
+/* || Dialog */
+.unified-settings-dialog {
+  position: relative;
+  background: var(--popover);
+  border-radius: 16px;
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 10%), 0 8px 10px -6px rgb(0 0 0 / 10%);
+  border: 1px solid var(--border);
+  max-width: 42rem;
+  width: 100%;
+  margin: 0 1rem;
+  padding: 1.5rem;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* || Header */
+.unified-settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.unified-settings-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+/* || Content */
+.unified-settings-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* || Footer */
+.unified-settings-footer {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+}

@@ -1,3 +1,5 @@
+import './confirm-dialog.css'
+
 interface ConfirmDialogProps {
   title: string
   message: string
@@ -24,43 +26,31 @@ export function ConfirmDialog({
   actionVariant = 'primary',
 }: ConfirmDialogProps) {
   return (
-    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-popover border border-border rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4 animate-in fade-in zoom-in duration-200">
-        <h3 className="text-foreground mb-2">{title}</h3>
-        <p className="text-sm text-muted-foreground mb-6">{message}</p>
-        
-        <div className="flex gap-3 justify-end">
+    <div className="confirm-dialog-backdrop">
+      <div className="confirm-dialog">
+        <h3 className="confirm-dialog-title">{title}</h3>
+        <p className="confirm-dialog-message">{message}</p>
+
+        <div className="confirm-dialog-actions">
           <button
             onClick={onCancel}
-            className="px-4 py-2 rounded-lg border border-border hover:bg-accent
-                       transition-all duration-200 cursor-pointer outline-none
-                       focus-visible:ring-[3px] focus-visible:ring-ring/50 whitespace-nowrap"
+            className="confirm-dialog-button"
           >
             {cancelLabel}
           </button>
           {actionLabel && onAction && (
             <button
               onClick={onAction}
-              className={`px-4 py-2 rounded-lg transition-all duration-200 cursor-pointer
-                         outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50
-                         whitespace-nowrap ${
-                actionVariant === 'primary'
-                  ? 'bg-action-button text-action-button-foreground hover:bg-action-button/90'
-                  : 'border border-border hover:bg-accent'
-              }`}
+              className="confirm-dialog-button"
+              data-variant={actionVariant}
             >
               {actionLabel}
             </button>
           )}
           <button
             onClick={onConfirm}
-            className={`px-4 py-2 rounded-lg transition-all duration-200 cursor-pointer
-                       outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50
-                       whitespace-nowrap ${
-              variant === 'danger'
-                ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
-                : 'bg-action-button text-action-button-foreground hover:bg-action-button/90'
-            }`}
+            className="confirm-dialog-button"
+            data-variant={variant === 'danger' ? 'danger' : 'primary'}
           >
             {confirmLabel}
           </button>

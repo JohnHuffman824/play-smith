@@ -16,10 +16,9 @@ import {
 } from '@/components/ui/dropdown-menu'
 import {
   PLAY_TYPE_PASS,
-  PLAY_TYPE_LIST_PASS,
-  PLAY_TYPE_LIST_RUN,
 } from './constants/playbook'
 import type { Play } from './types'
+import './play-list-view.css'
 
 type PlayListViewProps = {
   plays: Play[]
@@ -43,55 +42,47 @@ export function PlayListView({
   onDuplicate,
 }: PlayListViewProps) {
   return (
-    <div 
-      className="bg-card border border-border rounded-xl 
-        overflow-hidden"
-    >
-      <div 
-        className="grid grid-cols-12 gap-4 px-4 py-3 
-          border-b border-border bg-muted"
-      >
-        <div className="col-span-1 flex items-center">
-          <Circle className="w-5 h-5 text-muted-foreground" />
+    <div className="play-list-view">
+      <div className="play-list-view-header">
+        <div className="play-list-view-header-cell" style={{ gridColumn: 'span 1' }}>
+          <Circle className="w-5 h-5" />
         </div>
-        <div className="col-span-4">
-          <span className="text-muted-foreground">Name</span>
+        <div className="play-list-view-header-cell" style={{ gridColumn: 'span 4' }}>
+          Name
         </div>
-        <div className="col-span-2">
-          <span className="text-muted-foreground">Formation</span>
+        <div className="play-list-view-header-cell" style={{ gridColumn: 'span 2' }}>
+          Formation
         </div>
-        <div className="col-span-1">
-          <span className="text-muted-foreground">Type</span>
+        <div className="play-list-view-header-cell" style={{ gridColumn: 'span 1' }}>
+          Type
         </div>
-        <div className="col-span-2">
-          <span className="text-muted-foreground">Tags</span>
+        <div className="play-list-view-header-cell" style={{ gridColumn: 'span 2' }}>
+          Tags
         </div>
-        <div className="col-span-1">
-          <span className="text-muted-foreground">Modified</span>
+        <div className="play-list-view-header-cell" style={{ gridColumn: 'span 1' }}>
+          Modified
         </div>
-        <div className="col-span-1"></div>
+        <div className="play-list-view-header-cell" style={{ gridColumn: 'span 1' }}></div>
       </div>
 
-      <div className="divide-y divide-border">
+      <div className="play-list-view-rows">
         {plays.map((play) => {
           const isSelected = selectedPlays.has(play.id)
-          const typeClass = play.playType == PLAY_TYPE_PASS 
-            ? PLAY_TYPE_LIST_PASS 
-            : PLAY_TYPE_LIST_RUN
+          const typeClass = play.playType == PLAY_TYPE_PASS
+            ? 'play-list-view-type-badge-pass'
+            : 'play-list-view-type-badge-run'
 
           return (
             <div
               key={play.id}
-              className={`grid grid-cols-12 gap-4 px-4 py-3 
-                hover:bg-accent transition-colors duration-200 ${
-                  isSelected ? 'bg-accent/50' : ''
-                }`}
+              className={`play-list-view-row ${
+                isSelected ? 'play-list-view-row-selected' : ''
+              }`}
             >
-              <div className="col-span-1 flex items-center">
+              <div className="play-list-view-cell" style={{ gridColumn: 'span 1' }}>
                 <button
                   onClick={() => onSelect(play.id)}
-                  className="p-1 hover:bg-accent rounded 
-                    transition-all duration-200"
+                  className="play-list-view-select-button"
                 >
                   {isSelected ? (
                     <CheckCircle2 className="w-5 h-5 text-primary" />
@@ -101,63 +92,56 @@ export function PlayListView({
                 </button>
               </div>
 
-              <div className="col-span-4 flex items-center">
+              <div className="play-list-view-cell" style={{ gridColumn: 'span 4' }}>
                 <button
                   onClick={() => onOpen(play.id)}
-                  className="hover:underline text-left"
+                  className="play-list-view-name-button"
                 >
                   {play.name}
                 </button>
               </div>
 
-              <div className="col-span-2 flex items-center">
-                <span className="text-muted-foreground">
+              <div className="play-list-view-cell" style={{ gridColumn: 'span 2' }}>
+                <span className="play-list-view-formation">
                   {play.formation || '-'}
                 </span>
               </div>
 
-              <div className="col-span-1 flex items-center">
-                <span className={`px-2 py-0.5 rounded text-xs ${typeClass}`}>
+              <div className="play-list-view-cell" style={{ gridColumn: 'span 1' }}>
+                <span className={`play-list-view-type-badge ${typeClass}`}>
                   {play.playType}
                 </span>
               </div>
 
-              <div className="col-span-2 flex items-center gap-1">
-                {play.tags.length > 0 ? (
-                  <>
-                    <span 
-                      className="px-2 py-0.5 bg-muted rounded 
-                        text-muted-foreground"
-                    >
-                      {play.tags[0]}
-                    </span>
-                    {play.tags.length > 1 && (
-                      <span className="text-muted-foreground">
-                        +{play.tags.length - 1}
+              <div className="play-list-view-cell" style={{ gridColumn: 'span 2' }}>
+                <div className="play-list-view-tags">
+                  {play.tags.length > 0 ? (
+                    <>
+                      <span className="play-list-view-tag">
+                        {play.tags[0]}
                       </span>
-                    )}
-                  </>
-                ) : (
-                  <span className="text-muted-foreground">-</span>
-                )}
+                      {play.tags.length > 1 && (
+                        <span className="play-list-view-tag-count">
+                          +{play.tags.length - 1}
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    <span className="play-list-view-formation">-</span>
+                  )}
+                </div>
               </div>
 
-              <div className="col-span-1 flex items-center">
-                <span className="text-muted-foreground">
+              <div className="play-list-view-cell" style={{ gridColumn: 'span 1' }}>
+                <span className="play-list-view-modified">
                   {play.lastModified}
                 </span>
               </div>
 
-              <div
-                className="col-span-1 flex items-center
-                  justify-end"
-              >
+              <div className="play-list-view-cell play-list-view-actions" style={{ gridColumn: 'span 1' }}>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button
-                      className="p-1 hover:bg-accent rounded
-                        transition-all duration-200 cursor-pointer"
-                    >
+                    <button className="play-list-view-menu-button">
                       <MoreVertical className="w-4 h-4" />
                     </button>
                   </DropdownMenuTrigger>

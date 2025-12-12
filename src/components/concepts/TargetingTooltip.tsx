@@ -1,5 +1,6 @@
 import { HelpCircle } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
+import './targeting-tooltip.css'
 
 export function TargetingTooltip() {
 	const [isOpen, setIsOpen] = useState(false)
@@ -19,44 +20,44 @@ export function TargetingTooltip() {
 	}, [isOpen])
 
 	return (
-		<div className="relative inline-block" ref={tooltipRef}>
+		<div className="targeting-tooltip" ref={tooltipRef}>
 			<button
 				type="button"
 				onClick={() => setIsOpen(!isOpen)}
-				className="p-1 hover:bg-accent rounded transition-colors"
+				className="targeting-tooltip-button"
 				aria-label="Targeting mode help"
 			>
-				<HelpCircle className="w-4 h-4 text-muted-foreground" />
+				<HelpCircle className="w-4 h-4 targeting-tooltip-icon" />
 			</button>
 
 			{isOpen && (
-				<div className="absolute left-0 bottom-full mb-2 w-80 bg-card border border-border rounded-lg shadow-lg p-4 z-50">
-					<h4 className="font-semibold text-sm mb-3">Targeting Modes</h4>
+				<div className="targeting-tooltip-popover">
+					<h4 className="targeting-tooltip-title">Targeting Modes</h4>
 
-					<div className="space-y-3 text-xs">
+					<div className="targeting-tooltip-content">
 						<div>
-							<div className="font-semibold text-foreground mb-1">
+							<div className="targeting-tooltip-item-title">
 								Absolute Role
 							</div>
-							<p className="text-muted-foreground mb-2">
+							<p className="targeting-tooltip-item-description">
 								Assign routes to specific player roles (X, Y, Z, etc.)
 							</p>
-							<div className="bg-secondary p-2 rounded">
-								<span className="font-mono text-muted-foreground">
+							<div className="targeting-tooltip-example">
+								<span className="targeting-tooltip-example-text">
 									Example: X runs Post, Y runs Corner
 								</span>
 							</div>
 						</div>
 
 						<div>
-							<div className="font-semibold text-foreground mb-1">
+							<div className="targeting-tooltip-item-title">
 								Relative Selector
 							</div>
-							<p className="text-muted-foreground mb-2">
+							<p className="targeting-tooltip-item-description">
 								Assign routes based on player position (leftmost, inside, etc.)
 							</p>
-							<div className="bg-secondary p-2 rounded">
-								<span className="font-mono text-muted-foreground">
+							<div className="targeting-tooltip-example">
+								<span className="targeting-tooltip-example-text">
 									Example: Leftmost receiver runs Post, Inside receivers run Curl
 								</span>
 							</div>

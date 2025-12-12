@@ -1,0 +1,30 @@
+/* || Base styles */
+.node-delete-popup {
+	position: absolute;
+	z-index: 50;
+	transform: translateX(-50%);
+}
+
+.node-delete-button {
+	padding: 0.5rem;
+	background: white;
+	border-radius: 8px;
+	box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+	border: 1px solid rgb(229 231 235);
+	transition: all 200ms;
+	cursor: pointer;
+	outline: none;
+}
+
+.node-delete-button:hover {
+	background: rgb(254 242 242);
+	border-color: rgb(252 165 165);
+}
+
+.node-delete-button:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.node-delete-icon {
+	color: rgb(239 68 68);
+}

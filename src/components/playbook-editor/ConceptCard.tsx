@@ -6,6 +6,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import './concept-card.css'
 
 type ConceptType = 'concept' | 'formation' | 'group'
 
@@ -26,15 +27,15 @@ type ConceptCardProps = {
 const TYPE_BADGES = {
 	concept: {
 		label: 'Route',
-		className: 'bg-blue-500/20 text-blue-600 dark:text-blue-400'
+		className: 'concept-card-badge-route'
 	},
 	formation: {
 		label: 'Formation',
-		className: 'bg-purple-500/20 text-purple-600 dark:text-purple-400'
+		className: 'concept-card-badge-formation'
 	},
 	group: {
 		label: 'Group',
-		className: 'bg-green-500/20 text-green-600 dark:text-green-400'
+		className: 'concept-card-badge-group'
 	},
 } as const
 
@@ -45,70 +46,50 @@ export function ConceptCard({
 	const badge = TYPE_BADGES[type]
 
 	return (
-		<div
-			className="group relative bg-card border border-border
-				rounded-xl overflow-hidden hover:ring-4 hover:ring-blue-500/50
-				hover:border-blue-500 transition-all duration-200"
-		>
+		<div className="concept-card group">
 			{/* Thumbnail */}
 			<button
 				onClick={() => onEdit(id, type)}
-				className="w-full aspect-video bg-muted flex items-center
-					justify-center cursor-pointer hover:bg-accent
-					transition-colors duration-200"
+				className="concept-card-thumbnail"
 				aria-label={`Edit ${name}`}
 			>
 				{thumbnail ? (
 					<img
 						src={thumbnail}
 						alt={name}
-						className="w-full h-full object-contain"
 					/>
 				) : (
-					<span className="text-muted-foreground text-sm">
+					<span className="concept-card-thumbnail-placeholder">
 						No preview
 					</span>
 				)}
 			</button>
 
 			{/* Badges */}
-			<div className="absolute top-2 right-2 flex gap-1">
+			<div className="concept-card-badges">
 				{isMotion && (
-					<span
-						className="px-2 py-0.5 rounded text-xs
-							bg-orange-500/20 text-orange-600
-							dark:text-orange-400"
-					>
+					<span className="concept-card-badge concept-card-badge-motion">
 						Motion
 					</span>
 				)}
 				{isModifier && (
-					<span
-						className="px-2 py-0.5 rounded text-xs
-							bg-yellow-500/20 text-yellow-600
-							dark:text-yellow-400"
-					>
+					<span className="concept-card-badge concept-card-badge-modifier">
 						Modifier
 					</span>
 				)}
-				<span
-					className={`px-2.5 py-1 rounded-md text-xs
-						${badge.className}`}
-				>
+				<span className={`concept-card-badge ${badge.className}`}>
 					{badge.label}
 				</span>
 			</div>
 
 			{/* Content */}
-			<div className="p-4">
-				<div className="flex items-start justify-between gap-2 mb-2">
-					<h3 className="flex-1 line-clamp-1 font-medium">{name}</h3>
+			<div className="concept-card-content">
+				<div className="concept-card-header">
+					<h3 className="concept-card-title">{name}</h3>
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
 							<button
-								className="p-1 hover:bg-accent rounded
-									transition-all duration-200 opacity-0
-									group-hover:opacity-100 cursor-pointer"
+								className="concept-card-menu-button"
 								aria-label="Card actions"
 							>
 								<MoreVertical className="w-4 h-4" />
@@ -132,12 +113,12 @@ export function ConceptCard({
 					</DropdownMenu>
 				</div>
 				{description && (
-				<p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-					{description}
-				</p>
-			)}
-				<div className="pt-2 border-t border-border">
-					<p className="text-sm text-muted-foreground">{lastModified}</p>
+					<p className="concept-card-description">
+						{description}
+					</p>
+				)}
+				<div className="concept-card-footer">
+					<p className="concept-card-date">{lastModified}</p>
 				</div>
 			</div>
 		</div>

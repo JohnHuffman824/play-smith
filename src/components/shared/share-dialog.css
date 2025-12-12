@@ -1,0 +1,223 @@
+/* || Share Dialog */
+
+/* || Backdrop */
+.share-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgb(0 0 0 / 40%);
+  backdrop-filter: blur(4px);
+}
+
+/* || Dialog Container */
+.share-dialog {
+  background: var(--popover);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 10%), 0 8px 10px -6px rgb(0 0 0 / 10%);
+  width: 100%;
+  max-width: 32rem;
+  overflow: hidden;
+}
+
+/* || Header */
+.share-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+/* || Body */
+.share-dialog-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* || Playbook Info */
+.share-playbook-info {
+  /* No additional styles needed */
+}
+
+.share-playbook-label {
+  color: var(--muted-foreground);
+  margin-bottom: 0.25rem;
+}
+
+.share-playbook-name {
+  font-weight: 500;
+}
+
+/* || Link Share Section */
+.share-link-section {
+  background: color-mix(in oklch, var(--muted) 30%, transparent);
+  border-radius: 12px;
+  padding: 1rem;
+  border: 1px solid var(--border);
+}
+
+.share-link-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.share-link-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.share-link-icon {
+  padding: 0.5rem;
+  background: var(--card);
+  border-radius: 8px;
+}
+
+.share-link-icon svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--primary);
+}
+
+.share-link-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.share-link-title {
+  font-weight: 500;
+}
+
+.share-link-description {
+  color: var(--muted-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* || Email Share Section */
+.share-email-section {
+  /* No additional styles needed */
+}
+
+.share-email-label {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.share-email-input-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.share-email-input-wrapper {
+  flex: 1;
+  position: relative;
+}
+
+.share-email-input-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1rem;
+  height: 1rem;
+  color: var(--muted-foreground);
+}
+
+.share-email-input {
+  width: 100%;
+  padding: 0.625rem 1rem 0.625rem 2.5rem;
+  background: var(--input-background);
+  border-radius: 8px;
+  border: 0;
+  outline: none;
+  transition: all 200ms;
+}
+
+.share-email-input:focus {
+  box-shadow: 0 0 0 2px color-mix(in oklch, var(--ring) 20%, transparent);
+}
+
+/* || Recipients List */
+.share-recipients-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 10rem;
+  overflow-y: auto;
+}
+
+.share-recipient-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: color-mix(in oklch, var(--muted) 30%, transparent);
+  border-radius: 8px;
+  padding: 0.625rem 1rem;
+  border: 1px solid var(--border);
+  gap: 0.75rem;
+}
+
+.share-recipient-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.share-recipient-avatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  background: color-mix(in oklch, var(--primary) 10%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.share-recipient-avatar span {
+  color: var(--primary);
+}
+
+.share-recipient-email {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.share-recipient-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+/* || Footer */
+.share-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border);
+  background: color-mix(in oklch, var(--muted) 20%, transparent);
+}
+
+/* || Footer Note */
+.share-dialog-note {
+  color: var(--muted-foreground);
+}
