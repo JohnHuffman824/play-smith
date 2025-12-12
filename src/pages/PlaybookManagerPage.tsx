@@ -8,6 +8,7 @@ import { PlaybookCard } from '../components/playbook-manager/PlaybookCard'
 import { Modal } from '../components/playbook-manager/Modal'
 import { SettingsDialog } from '../components/playbook-manager/SettingsDialog'
 import { ManageTeamsDialog } from '../components/playbook-manager/ManageTeamsDialog'
+import { NewFolderDialog } from '../components/playbook-manager/NewFolderDialog'
 import { Input } from '../components/ui/input'
 
 export function PlaybookManagerPage() {
@@ -32,6 +33,7 @@ export function PlaybookManagerPage() {
 	const [showNewPlaybookModal, setShowNewPlaybookModal] = useState(false)
 	const [showSettingsDialog, setShowSettingsDialog] = useState(false)
 	const [showManageTeamsDialog, setShowManageTeamsDialog] = useState(false)
+	const [showNewFolderDialog, setShowNewFolderDialog] = useState(false)
 	const [newPlaybookName, setNewPlaybookName] = useState('')
 
 	const personalPlaybooks = useMemo(
@@ -75,7 +77,7 @@ export function PlaybookManagerPage() {
 	}
 
 	const handleNewFolder = () => {
-		// TODO: Implement folder creation
+		setShowNewFolderDialog(true)
 	}
 
 	const handleImport = () => {
@@ -283,6 +285,12 @@ export function PlaybookManagerPage() {
 			<ManageTeamsDialog
 				isOpen={showManageTeamsDialog}
 				onClose={() => setShowManageTeamsDialog(false)}
+			/>
+
+			{/* New Folder Dialog */}
+			<NewFolderDialog
+				isOpen={showNewFolderDialog}
+				onClose={() => setShowNewFolderDialog(false)}
 			/>
 		</div>
 	)
