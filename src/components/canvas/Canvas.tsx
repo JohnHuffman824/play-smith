@@ -593,6 +593,7 @@ export function Canvas({
 			{/* Whiteboard frame with field background */}
 			<motion.div
 				key={playId}
+				className="w-full"
 				initial={{ opacity: 0, scale: 0.98 }}
 				animate={{ opacity: 1, scale: 1 }}
 				transition={{ duration: 0.4, delay: 0.2 }}
