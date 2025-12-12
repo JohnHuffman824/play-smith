@@ -5,7 +5,6 @@ import { PathRenderer } from './PathRenderer'
 import { ControlPointOverlay } from './ControlPointOverlay'
 import { MultiDrawingControlPointOverlay } from './MultiDrawingControlPointOverlay'
 import { FreehandCapture } from './FreehandCapture'
-import { DrawingPropertiesDialog } from '../toolbar/dialogs/DrawingPropertiesDialog'
 import type { PathStyle, Drawing, ControlPoint } from '../../types/drawing.types'
 import { pointToLineDistance } from '../../utils/canvas.utils'
 import type { Coordinate } from '../../types/field.types'
@@ -70,6 +69,7 @@ interface SVGCanvasProps {
 	cursorPosition?: { x: number; y: number } | null
 	onSelectionChange?: (id: string | null) => void
 	onDrawingHoverChange?: (isHovered: boolean) => void
+	onSelectWithPosition?: (id: string, position: { x: number; y: number }) => void
 }
 
 /**
@@ -100,6 +100,7 @@ export function SVGCanvas({
 	onMovePlayer,
 	onSelectionChange,
 	onDrawingHoverChange,
+	onSelectWithPosition,
 }: SVGCanvasProps) {
 	const [selectedDrawingId, setSelectedDrawingId] = useState<string | null>(
 		null,
@@ -109,10 +110,6 @@ export function SVGCanvas({
 	const [drawingDragState, setDrawingDragState] = useState<{
 		drawingId: string
 		startFeet: Coordinate
-	} | null>(null)
-	const [editingDrawing, setEditingDrawing] = useState<{
-		drawing: Drawing
-		position: { x: number; y: number }
 	} | null>(null)
 	const [wholeDrawingSnapTarget, setWholeDrawingSnapTarget] = useState<{
 		playerId: string
@@ -148,11 +145,7 @@ export function SVGCanvas({
 		setSelectedDrawingId(id)
 		setLastDrawnDrawingId(null)
 		onSelectionChange?.(id)
-
-		const drawing = drawings.find((d) => d.id === id)
-		if (drawing) {
-			setEditingDrawing({ drawing, position })
-		}
+		onSelectWithPosition?.(id, position)
 	}
 
 	function handleDragPoint(
@@ -454,34 +447,7 @@ export function SVGCanvas({
 		drawingId: string,
 		position: { x: number; y: number },
 	) {
-		const drawing = drawings.find((d) => d.id === drawingId)
-		if (drawing) {
-			setEditingDrawing({ drawing, position })
-		}
-	}
-
-	function handleDrawingStyleUpdate(updates: Partial<PathStyle>) {
-		if (!editingDrawing) return
-
-		const drawing = editingDrawing.drawing
-		let newDrawing = { ...drawing, style: { ...drawing.style, ...updates } }
-
-		// If pathMode changed, convert geometry
-		if (updates.pathMode && updates.pathMode !== drawing.style.pathMode) {
-			if (updates.pathMode === 'curve') {
-				// Convert to smooth using smooth pipeline
-				const coords = extractMainCoordinates(drawing)
-				const { points, segments } = processSmoothPath(coords)
-				newDrawing = { ...newDrawing, points, segments }
-			} else {
-				// Convert to sharp using convertToSharp
-				const { points, segments } = convertToSharp(drawing)
-				newDrawing = { ...newDrawing, points, segments }
-			}
-		}
-
-		onChange(drawings.map((d) => (d.id === drawing.id ? newDrawing : d)))
-		setEditingDrawing({ ...editingDrawing, drawing: newDrawing })
+		onSelectWithPosition?.(drawingId, position)
 	}
 
 	return (
@@ -651,16 +617,6 @@ export function SVGCanvas({
 					/>
 				</svg>
 			</div>
-		)}
-
-		{editingDrawing && (
-			<DrawingPropertiesDialog
-				drawing={editingDrawing.drawing}
-				position={editingDrawing.position}
-				onUpdate={handleDrawingStyleUpdate}
-				onClose={() => setEditingDrawing(null)}
-				coordSystem={coordSystem}
-			/>
 		)}
 		</div>
 	)

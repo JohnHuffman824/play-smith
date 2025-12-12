@@ -30,9 +30,12 @@ import type {
 import { FootballField } from '../field/FootballField'
 import { Player } from '../player/Player'
 import { PlayerLabelDialog } from '../player/PlayerLabelDialog'
+import { DrawingPropertiesDialog } from '../toolbar/dialogs/DrawingPropertiesDialog'
 import { Pencil, PaintBucket } from 'lucide-react'
 import { calculateUnlinkPosition, findDrawingSnapTarget } from '../../utils/drawing.utils'
 import { applyLOSSnap } from '../../utils/los-snap.utils'
+import { convertToSharp, extractMainCoordinates } from '../../utils/curve.utils'
+import { processSmoothPath } from '../../utils/smooth-path.utils'
 
 const HEADER_TOOLBAR_HEIGHT = 122
 const PLAY_BAR_HEIGHT = 300
@@ -116,6 +119,10 @@ export function Canvas({
   >(null);
   const [labelDialogPosition, setLabelDialogPosition] =
     useState({ x: 0, y: 0 });
+  const [editingDrawing, setEditingDrawing] = useState<{
+    drawing: Drawing;
+    position: { x: number; y: number };
+  } | null>(null);
 	const { state, setDrawings, setPlayers, dispatch } = usePlayContext()
 	const { drawings = [], players: contextPlayers = [] } = state || {}
 	const players = contextPlayers || []
@@ -649,6 +656,47 @@ export function Canvas({
     }
   }
 
+  function handleDrawingSelectWithDialog(
+    id: string,
+    position: { x: number; y: number }
+  ) {
+    const drawing = drawings.find((d) => d.id == id);
+    if (drawing) {
+      setEditingDrawing({ drawing, position });
+    }
+  }
+
+  function handleDrawingStyleUpdate(updates: Partial<PathStyle>) {
+    if (!editingDrawing) return;
+
+    const drawing = editingDrawing.drawing;
+    let updatedDrawing = {
+      ...drawing,
+      style: { ...drawing.style, ...updates },
+    };
+
+    // If pathMode changed, convert geometry
+    if (updates.pathMode && updates.pathMode !== drawing.style.pathMode) {
+      if (updates.pathMode === 'curve') {
+        // Convert to smooth using smooth pipeline
+        const coords = extractMainCoordinates(drawing);
+        const { points, segments } = processSmoothPath(coords);
+        updatedDrawing = { ...updatedDrawing, points, segments };
+      } else {
+        // Convert to sharp using convertToSharp
+        const { points, segments } = convertToSharp(drawing);
+        updatedDrawing = { ...updatedDrawing, points, segments };
+      }
+    }
+
+    setDrawings(
+      drawings.map((d) =>
+        d.id == editingDrawing.drawing.id ? updatedDrawing : d
+      )
+    );
+    setEditingDrawing({ ...editingDrawing, drawing: updatedDrawing });
+  }
+
 	function handleLinkDrawingToPlayer(
 		drawingId: string,
 		pointId: string,
@@ -846,6 +894,7 @@ export function Canvas({
 						onMovePlayer={handleMovePlayerOnly}
 						isOverCanvas={isOverCanvas}
 						cursorPosition={cursorPosition}
+						onSelectWithPosition={handleDrawingSelectWithDialog}
 					/>
 				</div>
 
@@ -1008,6 +1057,17 @@ export function Canvas({
           onUnlink={() => handleUnlinkDrawing(selectedPlayerId)}
           onDelete={handlePlayerDelete}
           onClose={() => setShowLabelDialog(false)}
+        />
+      )}
+
+      {/* Drawing Properties Dialog - OUTSIDE transform for correct fixed positioning */}
+      {editingDrawing && (
+        <DrawingPropertiesDialog
+          drawing={editingDrawing.drawing}
+          position={editingDrawing.position}
+          onUpdate={handleDrawingStyleUpdate}
+          onClose={() => setEditingDrawing(null)}
+          coordSystem={coordSystem}
         />
       )}
     </div>
