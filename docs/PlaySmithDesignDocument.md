@@ -399,6 +399,91 @@ bun run seed:dev  # Creates admin/admin user
 
 ---
 
+## Deployment & Infrastructure
+
+**Status:** ✅ Production (December 2024)
+
+### Domain & Hosting
+
+- **Domain:** play-smith.com (registered via Squarespace)
+- **Production URL:** https://www.play-smith.com
+- **Staging URL:** https://stag.play-smith.com
+- **Hosting Platform:** Railway (replaced AWS RDS in December 2024)
+- **Database:** PostgreSQL on Railway
+
+### DNS Configuration
+
+**Domain Registrar:** Squarespace
+
+**DNS Records:**
+- `www.play-smith.com` → CNAME to Railway production service
+- `stag.play-smith.com` → CNAME to Railway staging service
+- `play-smith.com` → Forwards to `www.play-smith.com` (via Squarespace domain forwarding)
+
+**SSL Certificates:** Auto-provisioned by Railway via Let's Encrypt
+
+### Deployment Environments
+
+Play Smith uses a three-environment deployment strategy:
+
+1. **Local** - Development on developer machines
+   - Branch: `main` (or feature branches)
+   - Database: Local PostgreSQL or Railway staging DB
+   - Runtime: `BUN_ENV=development`
+
+2. **Staging** - Integration testing on Railway
+   - Branch: `staging`
+   - URL: https://stag.play-smith.com
+   - Database: Separate PostgreSQL instance on Railway
+   - Runtime: `BUN_ENV=staging`
+   - Auto-deploy: ✅ ON
+
+3. **Production** - Live application
+   - Branch: `release-1.0`
+   - URL: https://www.play-smith.com
+   - Database: Production PostgreSQL on Railway
+   - Runtime: `BUN_ENV=production`
+   - Auto-deploy: ⚠️ OFF (manual deployments only)
+
+### Branch Strategy
+
+```
+main          → Active development work (local)
+  ↓
+staging       → Integration & testing (Railway staging)
+  ↓
+release-1.0   → Production release (Railway production)
+```
+
+**Workflow:**
+1. Develop features on `main` or feature branches
+2. Merge to `staging` for integration testing on Railway
+3. Test thoroughly on staging environment
+4. Merge `staging` to `release-1.0` for production release
+5. Manually trigger deployment in Railway
+
+**Release Tagging:** Production releases are tagged with semantic versions (e.g., `v1.0.0`)
+
+### Technology Stack
+
+- **Runtime:** Bun v1.3+
+- **Frontend:** React 19, TailwindCSS 4
+- **Backend:** Bun.serve (native HTTP server)
+- **Database:** PostgreSQL 17.7 with PostGIS extensions
+- **Deployment:** Railway with Nixpacks build system
+
+### Migration from AWS
+
+Play Smith migrated from AWS RDS PostgreSQL to Railway in December 2024:
+- Simplified infrastructure management
+- Reduced hosting costs (~50% reduction)
+- Improved developer experience with auto-deployments
+- Maintained database schema via migration system
+
+See `docs/DeploymentGuide.md` for detailed deployment procedures.
+
+---
+
 ## Technical Considerations
 
 - Implement an efficient system for saving and retrieving components
