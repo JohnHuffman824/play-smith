@@ -63,3 +63,6 @@ const localStorageMock = {
 }
 global.localStorage = localStorageMock as any
 
+// Polyfill XMLSerializer for tests
+global.XMLSerializer = window.XMLSerializer as any
+
