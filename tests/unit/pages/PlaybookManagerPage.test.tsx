@@ -4,7 +4,7 @@ import { userEvent } from '@testing-library/user-event'
 import { PlaybookManagerPage } from '../../../src/pages/PlaybookManagerPage'
 import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ThemeProvider } from '../../../src/contexts/ThemeContext'
+import { SettingsProvider } from '../../../src/contexts/SettingsContext'
 import { AuthProvider } from '../../../src/contexts/AuthContext'
 import { TeamProvider } from '../../../src/contexts/TeamContext'
 
@@ -28,12 +28,23 @@ vi.mock('../../../src/api/queries/teamQueries', () => ({
 	fetchTeams: vi.fn(),
 }))
 
+vi.mock('../../../src/api/queries/folderQueries', () => ({
+	folderKeys: {
+		list: () => ['folders'],
+	},
+	fetchFolders: vi.fn(),
+	createFolder: vi.fn(),
+	updateFolder: vi.fn(),
+	deleteFolder: vi.fn(),
+}))
+
 import * as playbookQueries from '../../../src/api/queries/playbookQueries'
 import * as teamQueries from '../../../src/api/queries/teamQueries'
+import * as folderQueries from '../../../src/api/queries/folderQueries'
 
 function renderPlaybookManager(queryClient: QueryClient) {
 	return render(
-		<ThemeProvider>
+		<SettingsProvider>
 			<AuthProvider>
 				<TeamProvider>
 					<BrowserRouter>
@@ -43,7 +54,7 @@ function renderPlaybookManager(queryClient: QueryClient) {
 					</BrowserRouter>
 				</TeamProvider>
 			</AuthProvider>
-		</ThemeProvider>
+		</SettingsProvider>
 	)
 }
 
@@ -55,6 +66,9 @@ describe('PlaybookManagerPage - Error Handling', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks()
+		// Default mock for folders to avoid breaking tests
+		const mockFoldersQuery = folderQueries.fetchFolders as any;
+		mockFoldersQuery.mockResolvedValue([]);
 	})
 
 	test('shows loading state while fetching playbooks', async () => {
@@ -75,6 +89,8 @@ describe('PlaybookManagerPage - Error Handling', () => {
 		mockPlaybooksQuery.mockImplementation(
 			() => new Promise(() => {}) // Never resolves
 		);
+		const mockFoldersQuery = folderQueries.fetchFolders as any;
+		mockFoldersQuery.mockResolvedValue([]);
 
 		renderPlaybookManager(queryClient)
 

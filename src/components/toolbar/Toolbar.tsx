@@ -31,9 +31,9 @@ import { EraseDialog } from './dialogs/EraseDialog'
 import { DrawingDialog } from './dialogs/DrawingDialog'
 import { ConfirmDialog } from './dialogs/ConfirmDialog'
 import { HashDialog } from './dialogs/HashDialog'
-import { SettingsDialog } from './dialogs/SettingsDialog'
+import { UnifiedSettingsDialog } from '../shared/UnifiedSettingsDialog'
 import { Tooltip } from './Tooltip'
-import { useTheme } from '../../contexts/ThemeContext'
+import { useTheme } from '@/contexts/SettingsContext'
 import { EraserIcon } from './icons/EraserIcon'
 import { HashIcon } from './icons/HashIcon'
 import { ColorSwatchIndicator } from './ColorSwatchIndicator'
@@ -219,7 +219,7 @@ export function Toolbar({
 			const BUTTON_SIZE = 56 // 14 * 4 (w-14 h-14 in pixels)
 			const GAP = 12
 			const PADDING = 12
-			const TOTAL_BUTTONS = 15 // Count of all toolbar buttons
+			const TOTAL_BUTTONS = 16 // Count of all toolbar buttons
 
 			// Use window height as the stable constraint
 			const availableHeight = window.innerHeight - (2 * PADDING)
@@ -385,11 +385,7 @@ export function Toolbar({
 	return (
 		<>
 			<div
-				className={`h-full border-r ${
-					theme == 'dark'
-						? 'bg-gray-800 border-gray-700'
-						: 'bg-white border-gray-200'
-				}`}
+				className="h-full border-r bg-card border-border"
 				style={{
 					display: 'grid',
 					gridTemplateColumns: `repeat(${columnCount}, 56px)`,
@@ -502,8 +498,8 @@ export function Toolbar({
 					</button>
 				</Tooltip>
 
-				{/* Drawing Tool - COMMENTED OUT */}
-				{/* <Tooltip content='Add Drawing (R)'>
+				{/* Drawing Tool */}
+				<Tooltip content='Add Drawing (R)'>
 					<button
 						onClick={() => handleToolChange('drawing')}
 						className={toolButtonClass(showDrawingDialog)}
@@ -515,7 +511,7 @@ export function Toolbar({
 							}}
 						/>
 					</button>
-				</Tooltip> */}
+				</Tooltip>
 
 				{/* Hash Marker Tool */}
 				<Tooltip content='Ball on Hash (H)'>
@@ -748,13 +744,11 @@ export function Toolbar({
 				/>
 			)}
 
-			{showSettingsDialog && (
-				<SettingsDialog
-					snapThreshold={drawingState.snapThreshold}
-					onSnapThresholdChange={handleSnapThresholdChange}
-					onClose={() => setShowSettingsDialog(false)}
-				/>
-			)}
+			<UnifiedSettingsDialog
+				isOpen={showSettingsDialog}
+				onClose={() => setShowSettingsDialog(false)}
+				context="play-editor"
+			/>
 		</>
 	)
 }

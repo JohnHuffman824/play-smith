@@ -1,5 +1,4 @@
 import { X } from 'lucide-react'
-import { useTheme } from '../../../contexts/ThemeContext'
 import { eventBus } from '../../../services/EventBus'
 
 interface RouteDialogProps {
@@ -19,28 +18,33 @@ const routes = [
 ]
 
 export function RouteDialog({ onClose }: RouteDialogProps) {
-  const { theme } = useTheme()
-  
+  const containerClass = [
+    'absolute left-24 top-6 w-80 rounded-2xl shadow-2xl bg-card',
+    'border border-border p-4 z-50 max-h-[calc(100vh-4rem)] overflow-y-auto',
+  ].join(' ')
+  const headerClass =
+    'flex items-center justify-between mb-4 sticky top-0 pb-2 border-b border-border bg-card'
+  const itemClass =
+    'w-full p-3 rounded-xl border border-border bg-muted hover:bg-accent hover:border-action-button transition-all duration-200 text-left group cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50'
+  const numberBadgeClass =
+    'w-8 h-8 rounded-lg bg-action-button text-action-button-foreground flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform font-semibold'
+  const closeButtonClass =
+    'w-6 h-6 rounded-lg flex items-center justify-center cursor-pointer hover:bg-accent text-muted-foreground outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50'
+
   const handleRouteSelect = (route: typeof routes[0]) => {
     eventBus.emit('drawing:add', { drawing: route })
     onClose()
   }
 
   return (
-    <div 
+    <div
       data-drawing-dialog
-      className={`absolute left-24 top-6 w-80 rounded-2xl shadow-2xl border p-4 z-50 max-h-[calc(100vh-4rem)] overflow-y-auto ${
-      theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-    }`}>
-      <div className={`flex items-center justify-between mb-4 sticky top-0 pb-2 border-b ${
-        theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'
-      }`}>
-        <span className={theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}>Add Drawing</span>
+      className={containerClass}>
+      <div className={headerClass}>
+        <span className="text-foreground">Add Drawing</span>
         <button
           onClick={onClose}
-          className={`w-6 h-6 rounded-lg flex items-center justify-center cursor-pointer ${
-            theme === 'dark' ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-500'
-          }`}
+          className={closeButtonClass}
         >
           <X size={16} />
         </button>
@@ -51,21 +55,17 @@ export function RouteDialog({ onClose }: RouteDialogProps) {
           <button
             key={route.number}
             onClick={() => handleRouteSelect(route)}
-            className={`w-full p-3 rounded-xl border transition-all text-left group cursor-pointer ${
-              theme === 'dark'
-                ? 'bg-gray-700 hover:bg-gray-600 border-gray-600 hover:border-blue-500'
-                : 'bg-gray-50 hover:bg-blue-50 border-gray-100 hover:border-blue-200'
-            }`}
+            className={itemClass}
           >
             <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-blue-500 text-white flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+              <div className={numberBadgeClass}>
                 {route.number}
               </div>
               <div className="flex-1 min-w-0">
-                <div className={theme === 'dark' ? 'text-gray-100 mb-1' : 'text-gray-900 mb-1'}>
+                <div className="text-foreground mb-1">
                   {route.name}
                 </div>
-                <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                <div className="text-xs text-muted-foreground">
                   {route.description}
                 </div>
               </div>

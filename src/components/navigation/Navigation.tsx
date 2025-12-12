@@ -15,7 +15,7 @@ export function Navigation() {
 	}
 
 	return (
-		<nav className="bg-white shadow-sm border-b">
+		<nav className="bg-card shadow-sm border-b border-border">
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 				<div className="flex justify-between items-center h-16">
 					<div className="flex items-center space-x-8">
@@ -24,16 +24,16 @@ export function Navigation() {
 						</Link>
 						<Link
 							to="/playbooks"
-							className="text-gray-700 hover:text-gray-900"
+							className="text-foreground hover:text-foreground/80 transition-colors duration-200"
 						>
 							Playbooks
 						</Link>
 					</div>
 					<div className="flex items-center space-x-4">
-						<span className="text-gray-700">{user.name}</span>
+						<span className="text-foreground">{user.name}</span>
 						<button
 							onClick={handleLogout}
-							className="px-4 py-2 text-sm text-gray-700 hover:text-gray-900"
+							className="px-4 py-2 text-sm text-foreground hover:bg-accent rounded-lg transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
 						>
 							Logout
 						</button>

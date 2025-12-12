@@ -342,6 +342,29 @@ className='shadow-2xl'
 boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
 ```
 
+### Hover Glow Effects with `overflow-hidden`
+
+When adding glow/shadow effects to elements that have `overflow-hidden` (commonly used with `rounded-xl` to clip internal content), use Tailwind's `ring` utilities instead of `shadow`:
+
+```tsx
+// INCORRECT - shadow gets clipped by overflow-hidden
+className='overflow-hidden rounded-xl hover:shadow-lg hover:shadow-blue-500/50'
+
+// CORRECT - ring renders outside the element and isn't clipped
+className='overflow-hidden rounded-xl hover:ring-4 hover:ring-blue-500/50'
+```
+
+**Why:** CSS `box-shadow` renders inside the element's overflow boundary and gets clipped by `overflow-hidden`. Tailwind's `ring` utilities also use `box-shadow` under the hood, but they're applied as an outline-style effect that renders **outside** the element boundary, so they aren't affected by overflow clipping.
+
+**Example - PlayCard hover glow:**
+
+```tsx
+const cardClass = `group relative bg-card border border-border
+  rounded-xl overflow-hidden hover:ring-4 hover:ring-blue-500/50
+  hover:border-blue-500
+  transition-all duration-200`
+```
+
 ---
 
 ## Transitions & Animations

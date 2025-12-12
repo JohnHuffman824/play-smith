@@ -60,8 +60,27 @@ function makeDrawing(
 			strokeWidth: 1,
 			lineStyle: 'solid',
 			lineEnd: 'none',
+			pathMode: 'sharp',
 		},
 		annotations: [],
+	}
+}
+
+/**
+ * Create a Drawing with custom style properties.
+ */
+function makeDrawingWithStyle(
+	id: string,
+	segmentsData: Array<{ segment: PathSegment; points: Record<string, ControlPoint> }>,
+	styleOverrides: Partial<{ color: string; strokeWidth: number; lineStyle: 'solid' | 'dashed'; lineEnd: 'none' | 'arrow' | 'tShape'; pathMode: 'sharp' | 'curve' }> = {},
+): Drawing {
+	const base = makeDrawing(id, segmentsData)
+	return {
+		...base,
+		style: {
+			...base.style,
+			...styleOverrides,
+		},
 	}
 }
 
@@ -251,6 +270,77 @@ describe('drawing.utils', () => {
 				expect(segment.pointIds.length).toBe(2)
 			}
 		}
+	})
+
+	describe('lineEnd merge behavior', () => {
+		it('preserves arrow when target junction was target END', () => {
+			const source = makeDrawingWithStyle('s',
+				[lineSegmentWithPoints('s0', { x: 0, y: 0 }, 's1', { x: 10, y: 0 })],
+				{ lineEnd: 'none' }
+			)
+			const target = makeDrawingWithStyle('t',
+				[lineSegmentWithPoints('t0', { x: 20, y: 0 }, 't1', { x: 30, y: 0 })],
+				{ lineEnd: 'arrow' }
+			)
+			// Merge source END (s1) to target END (t1) - target's arrow was at t1
+			const merged = mergeDrawings(source, target, 's1', 't1')
+			expect(merged.style.lineEnd).toBe('arrow')
+		})
+
+		it('preserves arrow when source junction was source END', () => {
+			const source = makeDrawingWithStyle('s',
+				[lineSegmentWithPoints('s0', { x: 0, y: 0 }, 's1', { x: 10, y: 0 })],
+				{ lineEnd: 'arrow' }
+			)
+			const target = makeDrawingWithStyle('t',
+				[lineSegmentWithPoints('t0', { x: 20, y: 0 }, 't1', { x: 30, y: 0 })],
+				{ lineEnd: 'none' }
+			)
+			// Merge source END (s1) to target START (t0)
+			const merged = mergeDrawings(source, target, 's1', 't0')
+			expect(merged.style.lineEnd).toBe('arrow')
+		})
+
+		it('preserves target terminal arrow when merging to target start', () => {
+			const source = makeDrawingWithStyle('s',
+				[lineSegmentWithPoints('s0', { x: 0, y: 0 }, 's1', { x: 10, y: 0 })],
+				{ lineEnd: 'none' }
+			)
+			const target = makeDrawingWithStyle('t',
+				[lineSegmentWithPoints('t0', { x: 20, y: 0 }, 't1', { x: 30, y: 0 })],
+				{ lineEnd: 'arrow' }
+			)
+			// Merge source END (s1) to target START (t0) - target's arrow is at t1 (non-junction)
+			const merged = mergeDrawings(source, target, 's1', 't0')
+			expect(merged.style.lineEnd).toBe('arrow')
+		})
+
+		it('prefers arrow over tShape when both present', () => {
+			const source = makeDrawingWithStyle('s',
+				[lineSegmentWithPoints('s0', { x: 0, y: 0 }, 's1', { x: 10, y: 0 })],
+				{ lineEnd: 'arrow' }
+			)
+			const target = makeDrawingWithStyle('t',
+				[lineSegmentWithPoints('t0', { x: 20, y: 0 }, 't1', { x: 30, y: 0 })],
+				{ lineEnd: 'tShape' }
+			)
+			// Both have lineEnds - arrow should win
+			const merged = mergeDrawings(source, target, 's1', 't1')
+			expect(merged.style.lineEnd).toBe('arrow')
+		})
+
+		it('uses none when neither drawing has lineEnd', () => {
+			const source = makeDrawingWithStyle('s',
+				[lineSegmentWithPoints('s0', { x: 0, y: 0 }, 's1', { x: 10, y: 0 })],
+				{ lineEnd: 'none' }
+			)
+			const target = makeDrawingWithStyle('t',
+				[lineSegmentWithPoints('t0', { x: 20, y: 0 }, 't1', { x: 30, y: 0 })],
+				{ lineEnd: 'none' }
+			)
+			const merged = mergeDrawings(source, target, 's1', 't0')
+			expect(merged.style.lineEnd).toBe('none')
+		})
 	})
 	})
 

@@ -239,7 +239,7 @@ describe('Playbooks API', () => {
 		await db`DELETE FROM users WHERE id = ${otherUser.id}`
 	})
 
-	test('DELETE /api/playbooks/:id deletes playbook', async () => {
+	test('DELETE /api/playbooks/:id soft deletes playbook', async () => {
 		const pb = await createTestPlaybook({
 			teamId: fixture.teamId,
 			name: 'To Delete',
@@ -255,9 +255,11 @@ describe('Playbooks API', () => {
 
 		expect(response.status).toBe(204)
 
-		// Verify deleted
+		// Verify soft deleted (still exists but has deleted_at timestamp)
 		const [deleted] = await db`SELECT * FROM playbooks WHERE id = ${pb.id}`
-		expect(deleted).toBeUndefined()
+		expect(deleted).toBeDefined()
+		expect(deleted.deleted_at).toBeDefined()
+		expect(deleted.deleted_at).not.toBeNull()
 	})
 
 	test('DELETE /api/playbooks/:id requires team membership', async () => {
@@ -289,5 +291,281 @@ describe('Playbooks API', () => {
 		await db`DELETE FROM team_members WHERE team_id = ${otherTeam.id}`
 		await db`DELETE FROM teams WHERE id = ${otherTeam.id}`
 		await db`DELETE FROM users WHERE id = ${otherUser.id}`
+	})
+
+	test('PUT /api/playbooks/:id/star toggles star status to true', async () => {
+		const pb = await createTestPlaybook({
+			teamId: fixture.teamId,
+			name: 'To Star',
+			createdBy: fixture.userId
+		})
+
+		// Verify initially not starred
+		const [initial] = await db`SELECT is_starred FROM playbooks WHERE id = ${pb.id}`
+		expect(initial.is_starred).toBeFalsy()
+
+		// Toggle star on
+		const response = await fetch(`${baseUrl}/api/playbooks/${pb.id}/star`, {
+			method: 'PUT',
+			headers: {
+				Cookie: `session_token=${fixture.sessionToken}`
+			}
+		})
+
+		expect(response.status).toBe(200)
+		const data = await response.json()
+		expect(data.playbook.is_starred).toBeTruthy()
+
+		// Verify in database
+		const [updated] = await db`SELECT is_starred FROM playbooks WHERE id = ${pb.id}`
+		expect(updated.is_starred).toBeTruthy()
+
+		// Cleanup
+		await db`DELETE FROM playbooks WHERE id = ${pb.id}`
+	})
+
+	test('PUT /api/playbooks/:id/star toggles star status to false', async () => {
+		const pb = await createTestPlaybook({
+			teamId: fixture.teamId,
+			name: 'Already Starred',
+			createdBy: fixture.userId
+		})
+
+		// Set initially starred
+		await db`UPDATE playbooks SET is_starred = true WHERE id = ${pb.id}`
+
+		// Toggle star off
+		const response = await fetch(`${baseUrl}/api/playbooks/${pb.id}/star`, {
+			method: 'PUT',
+			headers: {
+				Cookie: `session_token=${fixture.sessionToken}`
+			}
+		})
+
+		expect(response.status).toBe(200)
+		const data = await response.json()
+		expect(data.playbook.is_starred).toBeFalsy()
+
+		// Verify in database
+		const [updated] = await db`SELECT is_starred FROM playbooks WHERE id = ${pb.id}`
+		expect(updated.is_starred).toBeFalsy()
+
+		// Cleanup
+		await db`DELETE FROM playbooks WHERE id = ${pb.id}`
+	})
+
+	test('PUT /api/playbooks/:id/star returns 401 when unauthorized', async () => {
+		const response = await fetch(`${baseUrl}/api/playbooks/${fixture.playbookId}/star`, {
+			method: 'PUT'
+			// No session cookie
+		})
+
+		expect(response.status).toBe(401)
+		const data = await response.json()
+		expect(data.error).toBe('Unauthorized')
+	})
+
+	test('PUT /api/playbooks/:id/star returns 404 for non-existent playbook', async () => {
+		const response = await fetch(`${baseUrl}/api/playbooks/99999/star`, {
+			method: 'PUT',
+			headers: {
+				Cookie: `session_token=${fixture.sessionToken}`
+			}
+		})
+
+		expect(response.status).toBe(404)
+		const data = await response.json()
+		expect(data.error).toBe('Playbook not found')
+	})
+
+	test('PUT /api/playbooks/:id/star returns 403 for unauthorized access', async () => {
+		const otherUser = await createTestUser()
+		const otherTeam = await createTestTeam()
+		await addTeamMember(otherTeam.id, otherUser.id, 'owner')
+
+		const otherPlaybook = await createTestPlaybook({
+			teamId: otherTeam.id,
+			name: 'Other Playbook',
+			createdBy: otherUser.id
+		})
+
+		const response = await fetch(`${baseUrl}/api/playbooks/${otherPlaybook.id}/star`, {
+			method: 'PUT',
+			headers: {
+				Cookie: `session_token=${fixture.sessionToken}`
+			}
+		})
+
+		expect(response.status).toBe(403)
+		const data = await response.json()
+		expect(data.error).toBe('Access denied')
+
+		// Cleanup
+		await db`DELETE FROM playbooks WHERE id = ${otherPlaybook.id}`
+		await db`DELETE FROM team_members WHERE team_id = ${otherTeam.id}`
+		await db`DELETE FROM teams WHERE id = ${otherTeam.id}`
+		await db`DELETE FROM users WHERE id = ${otherUser.id}`
+	})
+
+	test('PUT /api/playbooks/:id/star returns 400 for invalid playbook ID', async () => {
+		const response = await fetch(`${baseUrl}/api/playbooks/invalid/star`, {
+			method: 'PUT',
+			headers: {
+				Cookie: `session_token=${fixture.sessionToken}`
+			}
+		})
+
+		expect(response.status).toBe(400)
+		const data = await response.json()
+		expect(data.error).toBe('Invalid playbook ID')
+	})
+
+	test('PUT /api/playbooks/:id/restore restores soft deleted playbook', async () => {
+		const pb = await createTestPlaybook({
+			teamId: fixture.teamId,
+			name: 'To Restore',
+			createdBy: fixture.userId
+		})
+
+		// Soft delete it
+		await db`UPDATE playbooks SET deleted_at = CURRENT_TIMESTAMP WHERE id = ${pb.id}`
+
+		// Restore it
+		const response = await fetch(`${baseUrl}/api/playbooks/${pb.id}/restore`, {
+			method: 'PUT',
+			headers: {
+				Cookie: `session_token=${fixture.sessionToken}`
+			}
+		})
+
+		expect(response.status).toBe(200)
+		const data = await response.json()
+		expect(data.playbook.id).toBe(pb.id)
+		expect(data.playbook.deleted_at).toBeNull()
+
+		// Verify in database
+		const [restored] = await db`SELECT deleted_at FROM playbooks WHERE id = ${pb.id}`
+		expect(restored.deleted_at).toBeNull()
+
+		// Cleanup
+		await db`DELETE FROM playbooks WHERE id = ${pb.id}`
+	})
+
+	test('PUT /api/playbooks/:id/restore returns 401 when unauthorized', async () => {
+		const response = await fetch(`${baseUrl}/api/playbooks/${fixture.playbookId}/restore`, {
+			method: 'PUT'
+			// No session cookie
+		})
+
+		expect(response.status).toBe(401)
+		const data = await response.json()
+		expect(data.error).toBe('Unauthorized')
+	})
+
+	test('PUT /api/playbooks/:id/restore returns 404 for non-existent playbook', async () => {
+		const response = await fetch(`${baseUrl}/api/playbooks/99999/restore`, {
+			method: 'PUT',
+			headers: {
+				Cookie: `session_token=${fixture.sessionToken}`
+			}
+		})
+
+		expect(response.status).toBe(404)
+		const data = await response.json()
+		expect(data.error).toBe('Playbook not found')
+	})
+
+	test('DELETE /api/playbooks/:id/permanent permanently deletes playbook', async () => {
+		const pb = await createTestPlaybook({
+			teamId: fixture.teamId,
+			name: 'To Permanently Delete',
+			createdBy: fixture.userId
+		})
+
+		// Soft delete it first
+		await db`UPDATE playbooks SET deleted_at = CURRENT_TIMESTAMP WHERE id = ${pb.id}`
+
+		// Permanently delete it
+		const response = await fetch(`${baseUrl}/api/playbooks/${pb.id}/permanent`, {
+			method: 'DELETE',
+			headers: {
+				Cookie: `session_token=${fixture.sessionToken}`
+			}
+		})
+
+		expect(response.status).toBe(204)
+
+		// Verify permanently deleted
+		const [deleted] = await db`SELECT * FROM playbooks WHERE id = ${pb.id}`
+		expect(deleted).toBeUndefined()
+	})
+
+	test('DELETE /api/playbooks/:id/permanent returns 401 when unauthorized', async () => {
+		const response = await fetch(`${baseUrl}/api/playbooks/${fixture.playbookId}/permanent`, {
+			method: 'DELETE'
+			// No session cookie
+		})
+
+		expect(response.status).toBe(401)
+		const data = await response.json()
+		expect(data.error).toBe('Unauthorized')
+	})
+
+	test('DELETE /api/playbooks/:id/permanent returns 404 for non-existent playbook', async () => {
+		const response = await fetch(`${baseUrl}/api/playbooks/99999/permanent`, {
+			method: 'DELETE',
+			headers: {
+				Cookie: `session_token=${fixture.sessionToken}`
+			}
+		})
+
+		expect(response.status).toBe(404)
+		const data = await response.json()
+		expect(data.error).toBe('Playbook not found')
+	})
+
+	test('DELETE /api/trash empties trash for user', async () => {
+		// Create and soft delete multiple playbooks
+		const pb1 = await createTestPlaybook({
+			teamId: fixture.teamId,
+			name: 'Trash 1',
+			createdBy: fixture.userId
+		})
+		const pb2 = await createTestPlaybook({
+			teamId: fixture.teamId,
+			name: 'Trash 2',
+			createdBy: fixture.userId
+		})
+
+		await db`UPDATE playbooks SET deleted_at = CURRENT_TIMESTAMP WHERE id IN (${pb1.id}, ${pb2.id})`
+
+		// Empty trash
+		const response = await fetch(`${baseUrl}/api/trash`, {
+			method: 'DELETE',
+			headers: {
+				Cookie: `session_token=${fixture.sessionToken}`
+			}
+		})
+
+		expect(response.status).toBe(200)
+		const data = await response.json()
+		expect(data.deletedCount).toBeGreaterThanOrEqual(2)
+
+		// Verify permanently deleted
+		const [deleted1] = await db`SELECT * FROM playbooks WHERE id = ${pb1.id}`
+		const [deleted2] = await db`SELECT * FROM playbooks WHERE id = ${pb2.id}`
+		expect(deleted1).toBeUndefined()
+		expect(deleted2).toBeUndefined()
+	})
+
+	test('DELETE /api/trash returns 401 when unauthorized', async () => {
+		const response = await fetch(`${baseUrl}/api/trash`, {
+			method: 'DELETE'
+			// No session cookie
+		})
+
+		expect(response.status).toBe(401)
+		const data = await response.json()
+		expect(data.error).toBe('Unauthorized')
 	})
 })

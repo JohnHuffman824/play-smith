@@ -3,7 +3,7 @@ import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import { RouterProvider, createMemoryRouter } from 'react-router-dom'
 import { routes } from './routes'
 import { AuthProvider } from '../contexts/AuthContext'
-import { ThemeProvider } from '../contexts/ThemeContext'
+import { SettingsProvider } from '@/contexts/SettingsContext'
 import { act } from 'react'
 
 describe('routes', () => {
@@ -45,9 +45,9 @@ describe('routes', () => {
 		await act(async () => {
 			render(
 				<AuthProvider>
-					<ThemeProvider>
+					<SettingsProvider>
 							<RouterProvider router={router} />
-					</ThemeProvider>
+					</SettingsProvider>
 				</AuthProvider>
 			)
 		})
@@ -65,9 +65,9 @@ describe('routes', () => {
 		await act(async () => {
 			render(
 				<AuthProvider>
-					<ThemeProvider>
+					<SettingsProvider>
 							<RouterProvider router={router} />
-					</ThemeProvider>
+					</SettingsProvider>
 				</AuthProvider>
 			)
 		})
@@ -85,9 +85,9 @@ describe('routes', () => {
 		await act(async () => {
 			render(
 				<AuthProvider>
-					<ThemeProvider>
+					<SettingsProvider>
 							<RouterProvider router={router} />
-					</ThemeProvider>
+					</SettingsProvider>
 				</AuthProvider>
 			)
 		})

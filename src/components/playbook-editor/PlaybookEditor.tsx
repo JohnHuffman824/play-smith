@@ -4,11 +4,51 @@ import { PlayCard } from './PlayCard'
 import { PlayListView } from './PlayListView'
 import { Modal } from '@/components/shared/Modal'
 import { Input } from '../ui/input'
-import { SettingsDialog } from '@/components/shared/SettingsDialog'
+import { UnifiedSettingsDialog } from '@/components/shared/UnifiedSettingsDialog'
 import { ShareDialog } from '@/components/shared/ShareDialog'
-import { PlayViewerModal } from '@/components/animation/PlayViewerModal'
-import { ThemeProvider, useTheme } from '@/contexts/ThemeContext'
+import { AnimationDialog } from '@/components/animation/AnimationDialog'
+import { CallSheetExportDialog } from '@/components/export/CallSheetExportDialog'
+import { useTheme } from '@/contexts/SettingsContext'
 import { usePlaybookData } from '@/hooks/usePlaybookData'
+import { useConceptData } from '@/hooks/useConceptData'
+import { ConceptCard } from './ConceptCard'
+import type { ConceptFilter } from './ConceptsToolbar'
+import { ConceptDialog } from '@/components/concepts/ConceptDialog'
+import type { BaseConcept } from '@/types/concept.types'
+
+type ConceptType = 'concept' | 'formation' | 'group'
+
+type ConceptItem = {
+	id: number
+	name: string
+	type: ConceptType
+	thumbnail: string | null
+	description: string | null
+	isMotion?: boolean
+	isModifier?: boolean
+	updatedAt: string
+}
+
+type ConceptToDelete = {
+	id: number
+	type: ConceptType
+}
+
+// Button style constants
+const BUTTON_ACTIVE =
+	'bg-action-button text-action-button-foreground hover:bg-action-button/90'
+const BUTTON_INACTIVE = 'border border-border hover:bg-accent'
+
+// Concept filters
+const CONCEPT_FILTERS = [
+	{ id: 'all' as const, label: 'All' },
+	{ id: 'routes' as const, label: 'Routes' },
+	{ id: 'motions' as const, label: 'Motions' },
+	{ id: 'modifiers' as const, label: 'Modifiers' },
+	{ id: 'formations' as const, label: 'Formations' },
+	{ id: 'groups' as const, label: 'Groups' },
+]
+
 import {
   ArrowLeft,
   Search,
@@ -18,6 +58,8 @@ import {
   Upload,
   Download,
   Share2,
+  Plus,
+  FolderPlus,
 } from 'lucide-react'
 import {
   PLAY_TYPE_PASS,
@@ -87,6 +129,16 @@ function PlaybookEditorContent({
   const [activeSectionFilter, setActiveSectionFilter] = useState<string | null>(null)
   const [showPlayViewer, setShowPlayViewer] = useState(false)
   const [viewingPlayId, setViewingPlayId] = useState<string | null>(null)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+
+  // Concepts tab state
+  const [activeTab, setActiveTab] = useState<'plays' | 'concepts'>('plays')
+  const [conceptFilter, setConceptFilter] = useState<ConceptFilter>('all')
+  const [showConceptDialog, setShowConceptDialog] = useState(false)
+  const [editingConcept, setEditingConcept] = useState<BaseConcept | null>(null)
+  const [showDeleteConceptModal, setShowDeleteConceptModal] = useState(false)
+  const [conceptToDelete, setConceptToDelete] =
+    useState<ConceptToDelete | null>(null)
 
   const {
     sections,
@@ -101,6 +153,19 @@ function PlaybookEditorContent({
     deleteSection
   } = usePlaybookData(playbookId)
 
+  // Fetch concept data
+  const {
+    concepts,
+    formations,
+    conceptGroups,
+    isLoading: conceptsLoading,
+    createConcept,
+    updateConcept,
+    deleteConcept,
+    deleteFormation,
+    deleteConceptGroup,
+  } = useConceptData(teamId ?? '', playbookId)
+
   useEffect(() => {
     if (theme == DARK_MODE_CLASS) {
       document.documentElement.classList.add(DARK_MODE_CLASS)
@@ -108,6 +173,74 @@ function PlaybookEditorContent({
       document.documentElement.classList.remove(DARK_MODE_CLASS)
     }
   }, [theme])
+
+  // Concept filtering (must be before early returns to follow Rules of Hooks)
+  const filteredConcepts = useMemo(() => {
+    let items: ConceptItem[] = []
+
+    // Formations
+    if (conceptFilter === 'all' || conceptFilter === 'formations') {
+      items.push(
+        ...formations.map(f => ({
+          id: f.id,
+          name: f.name,
+          type: 'formation' as const,
+          thumbnail: f.thumbnail,
+          description: f.description,
+          updatedAt: new Date(f.updated_at).toLocaleDateString(),
+        }))
+      )
+    }
+
+    // Concepts (routes, motions, modifiers)
+    if (conceptFilter !== 'formations' && conceptFilter !== 'groups') {
+      const conceptItems = concepts
+        .filter(c => {
+          if (conceptFilter === 'all') return true
+          if (conceptFilter === 'routes') {
+            return !c.is_motion && !c.is_modifier
+          }
+          if (conceptFilter === 'motions') return c.is_motion
+          if (conceptFilter === 'modifiers') return c.is_modifier
+          return false
+        })
+        .map(c => ({
+          id: c.id,
+          name: c.name,
+          type: 'concept' as const,
+          thumbnail: c.thumbnail,
+          description: c.description,
+          isMotion: c.is_motion,
+          isModifier: c.is_modifier,
+          updatedAt: new Date(c.updated_at).toLocaleDateString(),
+        }))
+      items.push(...conceptItems)
+    }
+
+    // Groups
+    if (conceptFilter === 'all' || conceptFilter === 'groups') {
+      items.push(
+        ...conceptGroups.map(g => ({
+          id: g.id,
+          name: g.name,
+          type: 'group' as const,
+          thumbnail: g.thumbnail,
+          description: g.description,
+          updatedAt: new Date(g.updated_at).toLocaleDateString(),
+        }))
+      )
+    }
+
+    // Search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase()
+      items = items.filter(item =>
+        item.name.toLowerCase().includes(query)
+      )
+    }
+
+    return items
+  }, [concepts, formations, conceptGroups, conceptFilter, searchQuery])
 
   // Show loading state
   if (isLoadingData) {
@@ -158,6 +291,47 @@ function PlaybookEditorContent({
   const displayedSections = activeSectionFilter
     ? filteredSections.filter((section) => section.id == activeSectionFilter)
     : filteredSections
+
+  // Concept handlers
+  const handleEditConcept = (id: number, type: ConceptType) => {
+    if (type === 'concept') {
+      const concept = concepts.find(c => c.id === id)
+      if (concept) {
+        setEditingConcept(concept)
+        setShowConceptDialog(true)
+      }
+    }
+    // TODO: Formation/group editing in future
+  }
+
+  const handleDeleteConcept = (id: number, type: ConceptType) => {
+    setConceptToDelete({ id, type })
+    setShowDeleteConceptModal(true)
+  }
+
+  const confirmDeleteConcept = async () => {
+    if (!conceptToDelete) return
+    const { id, type } = conceptToDelete
+    if (type === 'concept') await deleteConcept(id)
+    else if (type === 'formation') await deleteFormation(id)
+    else if (type === 'group') await deleteConceptGroup(id)
+    setShowDeleteConceptModal(false)
+    setConceptToDelete(null)
+  }
+
+  const handleDuplicateConcept = async (id: number, type: ConceptType) => {
+    // TODO: Implement duplication
+  }
+
+  const handleSaveConcept = async (data: Partial<BaseConcept>) => {
+    if (editingConcept) {
+      await updateConcept(editingConcept.id, data)
+    } else {
+      await createConcept(data)
+    }
+    setShowConceptDialog(false)
+    setEditingConcept(null)
+  }
 
   async function handleNewPlay() {
     if (!newItemName.trim()) return
@@ -264,12 +438,7 @@ function PlaybookEditorContent({
   }
 
   function handleExport() {
-    if (onExport) {
-      const playIds = selectedPlays.size > 0
-        ? Array.from(selectedPlays)
-        : undefined
-      onExport(playIds)
-    }
+    setShowExportDialog(true)
   }
 
   function handleShare(
@@ -424,16 +593,122 @@ function PlaybookEditorContent({
           </div>
         </div>
 
-        <PlaybookEditorToolbar
-          onNewPlay={() => setShowNewPlayModal(true)}
-          onNewSection={() => setShowNewSectionModal(true)}
-          sections={sections.map(s => ({ id: s.id, name: s.name }))}
-          activeSectionFilter={activeSectionFilter}
-          onSectionFilterChange={setActiveSectionFilter}
-        />
+        {/* Combined Tab Bar and Toolbar */}
+        <div className="border-b border-border bg-card px-6 py-3">
+          <div className="flex items-center gap-4">
+            {/* Tabs */}
+            <div className="flex gap-1">
+              {(['plays', 'concepts'] as const).map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`px-4 py-2 text-sm font-medium
+                    transition-colors capitalize rounded-lg ${
+                      activeTab === tab
+                        ? 'bg-accent text-foreground'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                    }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
 
-        <div className="flex-1 overflow-auto">
-          <div className="p-6">
+            <div className="w-px h-6 bg-border" />
+
+            {/* Conditional Toolbar Content */}
+            {activeTab === 'plays' ? (
+              <>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setShowNewPlayModal(true)}
+                    className={`${BUTTON_BASE} ${BUTTON_ACTIVE}
+                      flex items-center gap-2 cursor-pointer`}
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>New Play</span>
+                  </button>
+
+                  <button
+                    onClick={() => setShowNewSectionModal(true)}
+                    className={`${BUTTON_BASE} ${BUTTON_INACTIVE}
+                      flex items-center gap-2 cursor-pointer`}
+                    title="Create New Section"
+                  >
+                    <FolderPlus className="w-4 h-4" />
+                    <span>New Section</span>
+                  </button>
+                </div>
+
+                <div className="w-px h-6 bg-border" />
+
+                <div className="flex items-center gap-2 flex-1">
+                  <button
+                    onClick={() => setActiveSectionFilter(null)}
+                    className={`${BUTTON_BASE} ${
+                      activeSectionFilter == null
+                        ? BUTTON_ACTIVE
+                        : BUTTON_INACTIVE
+                    } cursor-pointer`}
+                  >
+                    All Plays
+                  </button>
+
+                  {sections.map((section) => (
+                    <button
+                      key={section.id}
+                      onClick={() => setActiveSectionFilter(section.id)}
+                      className={`${BUTTON_BASE} ${
+                        activeSectionFilter == section.id
+                          ? BUTTON_ACTIVE
+                          : BUTTON_INACTIVE
+                      } cursor-pointer`}
+                    >
+                      {section.name}
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => {
+                    setEditingConcept(null)
+                    setShowConceptDialog(true)
+                  }}
+                  className={`${BUTTON_BASE} ${BUTTON_ACTIVE}
+                    flex items-center gap-2`}
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>New Concept</span>
+                </button>
+
+                <div className="w-px h-6 bg-border" />
+
+                <div className="flex items-center gap-2 flex-1">
+                  {CONCEPT_FILTERS.map((filter) => (
+                    <button
+                      key={filter.id}
+                      onClick={() => setConceptFilter(filter.id)}
+                      className={`${BUTTON_BASE}
+                        ${conceptFilter === filter.id
+                          ? BUTTON_ACTIVE
+                          : BUTTON_INACTIVE}`}
+                    >
+                      {filter.label}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
+        {activeTab === 'plays' ? (
+          <>
+
+            <div className="flex-1 overflow-auto">
+              <div className="p-6">
             {displayedSections.length > 0 ? (
               <div className="space-y-8">
                 {displayedSections.map((section) => (
@@ -473,6 +748,7 @@ function PlaybookEditorContent({
                         selectedPlays={selectedPlays}
                         onSelect={togglePlaySelection}
                         onOpen={handleOpenPlay}
+                        onAnimate={handleAnimatePlay}
                         onRename={handleRenamePlay}
                         onDelete={handleDeletePlay}
                         onDuplicate={handleDuplicatePlay}
@@ -504,9 +780,86 @@ function PlaybookEditorContent({
                 </div>
               </div>
             )}
-          </div>
-        </div>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="flex-1 overflow-y-auto p-6">
+              {conceptsLoading ? (
+                <div className="flex items-center justify-center h-64">
+                  <p className="text-muted-foreground">Loading concepts...</p>
+                </div>
+              ) : filteredConcepts.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-64 gap-4">
+                  <p className="text-muted-foreground">No concepts found</p>
+                  <button
+                    onClick={() => {
+                      setEditingConcept(null)
+                      setShowConceptDialog(true)
+                    }}
+                    className="px-4 py-2 bg-action-button
+                      text-action-button-foreground rounded-lg
+                      hover:bg-action-button/90"
+                  >
+                    Create your first concept
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {filteredConcepts.map((item) => (
+                    <ConceptCard
+                      key={`${item.type}-${item.id}`}
+                      id={item.id}
+                      name={item.name}
+                      type={item.type}
+                      thumbnail={item.thumbnail}
+                      description={item.description}
+                      isMotion={item.isMotion}
+                      isModifier={item.isModifier}
+                      lastModified={item.updatedAt}
+                      onEdit={handleEditConcept}
+                      onDelete={handleDeleteConcept}
+                      onDuplicate={handleDuplicateConcept}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+        )}
       </div>
+
+      {/* Concept Dialog */}
+      <ConceptDialog
+        isOpen={showConceptDialog}
+        onClose={() => {
+          setShowConceptDialog(false)
+          setEditingConcept(null)
+        }}
+        mode={editingConcept ? 'edit' : 'create'}
+        concept={editingConcept ?? undefined}
+        teamId={teamId ?? ''}
+        playbookId={playbookId}
+        onSave={handleSaveConcept}
+      />
+
+      {/* Delete Concept Confirmation */}
+      <Modal
+        isOpen={showDeleteConceptModal}
+        onClose={() => setShowDeleteConceptModal(false)}
+        title="Delete Concept"
+      >
+        <p className="text-muted-foreground mb-4">
+          Are you sure you want to delete this {conceptToDelete?.type}? This action cannot be undone.
+        </p>
+        <div className="flex justify-end gap-2">
+          <button onClick={() => setShowDeleteConceptModal(false)} className="px-4 py-2 border border-border rounded-lg hover:bg-accent">
+            Cancel
+          </button>
+          <button onClick={confirmDeleteConcept} className="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg hover:bg-destructive/90">
+            Delete
+          </button>
+        </div>
+      </Modal>
 
       <Modal
         isOpen={showNewPlayModal}
@@ -585,15 +938,10 @@ function PlaybookEditorContent({
         </div>
       </Modal>
 
-      <SettingsDialog
+      <UnifiedSettingsDialog
         isOpen={showSettingsDialog}
         onClose={() => setShowSettingsDialog(false)}
-        theme={theme}
-        onThemeChange={setTheme}
-        positionNaming={positionNaming}
-        onPositionNamingChange={setPositionNaming}
-        fieldLevel={fieldLevel}
-        onFieldLevelChange={setFieldLevel}
+        context="playbook-editor"
       />
 
       <ShareDialog
@@ -601,6 +949,14 @@ function PlaybookEditorContent({
         onClose={() => setShowShareDialog(false)}
         playbookName={playbookName}
         onShare={handleShare}
+      />
+
+      <CallSheetExportDialog
+        open={showExportDialog}
+        onClose={() => setShowExportDialog(false)}
+        sections={sections}
+        playbookName={playbookName}
+        playbookId={playbookId || ''}
       />
 
       <Modal
@@ -667,28 +1023,17 @@ function PlaybookEditorContent({
         </div>
       </Modal>
 
-      {/* Play Animation Viewer Modal */}
-      {showPlayViewer && viewingPlayId && playbookId && (
-        <PlayViewerModal
-          isOpen={showPlayViewer}
-          onClose={handleClosePlayViewer}
-          playbookId={playbookId}
-          initialPlayId={viewingPlayId}
-          plays={allPlays.map(play => ({
-            id: play.id,
-            name: play.name,
-          }))}
-          canEdit={true}
-        />
-      )}
+      {/* Play Animation Dialog */}
+      <AnimationDialog
+        isOpen={showPlayViewer}
+        onClose={handleClosePlayViewer}
+        playId={viewingPlayId}
+        playName={allPlays.find(p => p.id === viewingPlayId)?.name}
+      />
     </div>
   )
 }
 
 export default function PlaybookEditor(props: PlaybookEditorProps) {
-  return (
-    <ThemeProvider>
-      <PlaybookEditorContent {...props} />
-    </ThemeProvider>
-  )
+  return <PlaybookEditorContent {...props} />
 }

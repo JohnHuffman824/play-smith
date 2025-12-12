@@ -10,7 +10,9 @@ import { Canvas } from '../canvas/Canvas'
 import { ConceptToolbar } from './ConceptToolbar'
 import { FlipController } from './FlipController'
 import { TargetingTooltip } from './TargetingTooltip'
+import { ConceptTypeTooltip } from './ConceptTypeTooltip'
 import { PlayProvider } from '../../contexts/PlayContext'
+import { CanvasViewportProvider } from '../../contexts/CanvasViewportContext'
 import type { Tool } from '../../types/play.types'
 import { generateThumbnail } from '../../utils/thumbnail'
 import { ColorPickerDialog } from '../toolbar/dialogs/ColorPickerDialog'
@@ -23,6 +25,7 @@ import {
 	SelectValue
 } from '../ui/select'
 import { Input } from '../ui/input'
+import { Checkbox } from '../ui/checkbox'
 
 interface ConceptDialogProps {
 	isOpen: boolean
@@ -62,6 +65,8 @@ export function ConceptDialog({
 	const [brushSize, setBrushSize] = useState(3)
 	const [pathMode, setPathMode] = useState<'sharp' | 'curve'>('sharp')
 	const [flipCanvas, setFlipCanvas] = useState<(() => void) | null>(null)
+	const [isMotion, setIsMotion] = useState(false)
+	const [isModifier, setIsModifier] = useState(false)
 	const canvasContainerRef = useRef<HTMLDivElement>(null)
 
 	// Memoize the callback to prevent FlipController's useEffect from running on every render
@@ -77,6 +82,8 @@ export function ConceptDialog({
 			setTargetingMode(concept.targeting_mode)
 			setBallPosition(concept.ball_position)
 			setPlayDirection(concept.play_direction)
+			setIsMotion(concept.is_motion)
+			setIsModifier(concept.is_modifier)
 			setNameError('')
 			setTouched(false)
 		} else if (isOpen && mode === 'create') {
@@ -86,6 +93,8 @@ export function ConceptDialog({
 			setTargetingMode('absolute_role')
 			setBallPosition('center')
 			setPlayDirection('na')
+			setIsMotion(false)
+			setIsModifier(false)
 			setNameError('')
 			setTouched(false)
 		}
@@ -142,6 +151,8 @@ export function ConceptDialog({
 				targeting_mode: targetingMode,
 				ball_position: ballPosition,
 				play_direction: playDirection,
+				is_motion: isMotion,
+				is_modifier: isModifier,
 				playbook_id: scope === 'playbook' && playbookId ? parseInt(playbookId) : null
 			}
 
@@ -171,7 +182,7 @@ export function ConceptDialog({
 
 	return (
 		<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-			<div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-[85vw] h-[85vh] max-w-6xl flex flex-col">
+			<div className="bg-card rounded-lg shadow-xl w-[85vw] h-[85vh] max-w-6xl flex flex-col">
 				{/* Name and Scope */}
 				<div className="px-6 py-4 flex items-start gap-4">
 					<div className="flex-1">
@@ -188,7 +199,7 @@ export function ConceptDialog({
 							aria-invalid={nameError && touched}
 						/>
 						{nameError && touched && (
-							<p className="mt-1 text-sm text-red-600 dark:text-red-400">
+							<p className="mt-1 text-sm text-destructive">
 								{nameError}
 							</p>
 						)}
@@ -205,7 +216,7 @@ export function ConceptDialog({
 									px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer
 									${scope === 'team'
 										? 'bg-blue-500 text-white'
-										: 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+										: 'bg-secondary text-secondary-foreground hover:bg-accent'
 									}
 								`}
 							>
@@ -218,7 +229,7 @@ export function ConceptDialog({
 									px-4 py-2 rounded-md text-sm font-medium transition-colors
 									${scope === 'playbook'
 										? 'bg-blue-500 text-white'
-										: 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+										: 'bg-secondary text-secondary-foreground hover:bg-accent'
 									}
 									${!playbookId ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
 								`}
@@ -230,7 +241,7 @@ export function ConceptDialog({
 
 					<button
 						onClick={onClose}
-						className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors cursor-pointer ml-auto"
+						className="p-2 border border-border hover:bg-accent rounded transition-colors cursor-pointer ml-auto"
 						aria-label="Close dialog"
 					>
 						<X className="w-5 h-5" />
@@ -270,23 +281,25 @@ export function ConceptDialog({
 						/>
 
 						{/* Canvas */}
-						<div ref={canvasContainerRef} className="flex-1 flex flex-col rounded-2xl border-2 border-gray-300 dark:border-gray-600">
-							<Canvas
-								drawingState={{
-									tool: selectedTool,
-									color,
-									brushSize,
-									lineStyle,
-									lineEnd,
-									pathMode,
-									eraseSize: 40,
-									snapThreshold: 20
-								}}
-								hashAlignment={hashAlignment}
-								showPlayBar={false}
-								containerMode="fill"
-								showFieldMarkings={true}
-							/>
+						<div ref={canvasContainerRef} className="flex-1 flex flex-col rounded-2xl border-2 border-border">
+							<CanvasViewportProvider>
+								<Canvas
+									drawingState={{
+										tool: selectedTool,
+										color,
+										brushSize,
+										lineStyle,
+										lineEnd,
+										pathMode,
+										eraseSize: 40,
+										snapThreshold: 20
+									}}
+									hashAlignment={hashAlignment}
+									showPlayBar={false}
+									containerMode="fill"
+									showFieldMarkings={true}
+								/>
+							</CanvasViewportProvider>
 						</div>
 						<FlipController onFlipReady={handleFlipReady} />
 					</PlayProvider>
@@ -350,19 +363,47 @@ export function ConceptDialog({
 						{/* Flip Button */}
 						<button
 							onClick={handleFlip}
-							className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-2 cursor-pointer"
+							className="px-3 py-1.5 border border-border rounded-md hover:bg-accent transition-colors flex items-center gap-2 cursor-pointer"
 							title="Flip concept horizontally"
 						>
 							<FlipHorizontal className="w-4 h-4" />
 							Flip
 						</button>
+
+						{/* Concept Type Flags */}
+						<div className="flex items-center gap-4 ml-4">
+							<div className="flex items-center gap-2">
+								<label className="text-sm font-medium">Type:</label>
+								<ConceptTypeTooltip />
+							</div>
+							<label className="flex items-center gap-2 cursor-pointer">
+								<Checkbox
+									checked={isMotion}
+									onCheckedChange={(checked) => {
+										setIsMotion(checked === true)
+										if (checked) setIsModifier(false)
+									}}
+								/>
+								<span className="text-sm">Motion</span>
+							</label>
+							<label className="flex items-center gap-2 cursor-pointer">
+								<Checkbox
+									checked={isModifier}
+									onCheckedChange={(checked) => {
+										setIsModifier(checked === true)
+										if (checked) setIsMotion(false)
+									}}
+								/>
+								<span className="text-sm">Modifier</span>
+							</label>
+						</div>
 					</div>
 
 					{/* Action Buttons */}
 					<div className="flex items-center gap-2">
 						<button
 							onClick={onClose}
-							className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+							className="px-4 py-2 border border-border rounded-md hover:bg-accent transition-colors cursor-pointer"
 						>
 							Cancel
 						</button>

@@ -3,6 +3,7 @@
  * Shows where players began their routes for reference.
  */
 
+import { motion, AnimatePresence } from 'framer-motion'
 import { AnimatedPlayer } from './AnimatedPlayer'
 import {
 	ANIMATION_DEFAULTS,
@@ -23,29 +24,38 @@ export function GhostTrail({
 }: GhostTrailProps) {
 	const threshold = ANIMATION_DEFAULTS.GHOST_MOVEMENT_THRESHOLD
 
-	return (
-		<>
-			{playerStates.map((playerState) => {
-				const info = playerInfo.get(playerState.playerId)
-				const dx = playerState.currentPosition.x - playerState.startPosition.x
-				const dy = playerState.currentPosition.y - playerState.startPosition.y
-				const hasMoved = Math.abs(dx) > threshold || Math.abs(dy) > threshold
+	// Filter to only players that have moved before mapping
+	const movedPlayers = playerStates.filter((playerState) => {
+		const dx = playerState.currentPosition.x - playerState.startPosition.x
+		const dy = playerState.currentPosition.y - playerState.startPosition.y
+		return Math.abs(dx) > threshold || Math.abs(dy) > threshold
+	})
 
-				if (!hasMoved) return null
+	return (
+		<AnimatePresence>
+			{movedPlayers.map((playerState) => {
+				const info = playerInfo.get(playerState.playerId)
 
 				return (
-					<AnimatedPlayer
+					<motion.div
 						key={`ghost-${playerState.playerId}`}
-						id={`ghost-${playerState.playerId}`}
-						position={playerState.startPosition}
-						coordSystem={coordSystem}
-						label={info?.label ?? ''}
-						color={info?.color ?? '#3b82f6'}
-						showLabel={false}
-						isGhost
-					/>
+						initial={{ opacity: 0 }}
+						animate={{ opacity: 0.4 }}
+						exit={{ opacity: 0 }}
+						transition={{ duration: 0.3 }}
+					>
+						<AnimatedPlayer
+							id={`ghost-${playerState.playerId}`}
+							position={playerState.startPosition}
+							coordSystem={coordSystem}
+							label={info?.label ?? ''}
+							color={info?.color ?? '#3b82f6'}
+							showLabel={false}
+							isGhost
+						/>
+					</motion.div>
 				)
 			})}
-		</>
+		</AnimatePresence>
 	)
 }

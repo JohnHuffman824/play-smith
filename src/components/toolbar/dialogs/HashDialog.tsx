@@ -1,4 +1,4 @@
-import { useTheme } from '../../../contexts/ThemeContext'
+import { useTheme } from '@/contexts/SettingsContext'
 import type { HashAlignment } from '../../../types/field.types'
 
 interface HashDialogProps {
@@ -10,7 +10,6 @@ interface HashDialogProps {
 }
 
 export function HashDialog({ currentAlignment, linemenAtDefault, onAlignmentChange, onClose, useRelativePosition = false }: HashDialogProps) {
-  const { theme } = useTheme()
   const alignments: Array<{ value: HashAlignment; label: string }> = [
     { value: 'left', label: 'Left' },
     { value: 'middle', label: 'Middle' },
@@ -22,16 +21,14 @@ export function HashDialog({ currentAlignment, linemenAtDefault, onAlignmentChan
       {/* Dialog */}
       <div
         data-hash-dialog
-        className={`${useRelativePosition ? '' : 'fixed left-24 top-1/2 -translate-y-1/2'} rounded-2xl shadow-2xl p-4 z-50 w-48 ${
-          theme === 'dark' ? 'bg-gray-800' : 'bg-white'
-        }`}
+        className={`${useRelativePosition ? '' : 'fixed left-24 top-1/2 -translate-y-1/2'} rounded-2xl shadow-2xl bg-card p-4 z-50 w-48`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="space-y-2">
-          <h3 className={`px-2 mb-3 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+          <h3 className="px-2 mb-3 text-muted-foreground">
             Ball on Hash
           </h3>
-          
+
           {alignments.map((alignment) => {
             const isSelected = linemenAtDefault && currentAlignment === alignment.value
             return (
@@ -44,9 +41,7 @@ export function HashDialog({ currentAlignment, linemenAtDefault, onAlignmentChan
                 className={`w-full px-4 py-3 rounded-xl text-left transition-all cursor-pointer ${
                   isSelected
                     ? 'bg-blue-500 text-white shadow-md'
-                    : theme === 'dark'
-                      ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                      : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                    : 'bg-secondary text-secondary-foreground hover:bg-accent'
                 }`}
               >
                 {alignment.label}

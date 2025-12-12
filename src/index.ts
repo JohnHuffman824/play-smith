@@ -3,6 +3,9 @@ import index from './index.html'
 import { usersAPI, getUserById } from './api/users'
 import { authAPI } from './api/auth'
 import { playbooksAPI } from './api/playbooks'
+import { playbookSharesAPI } from './api/playbook-shares'
+import { presentationsAPI } from './api/presentations'
+import { foldersAPI } from './api/folders'
 import { teamsAPI } from './api/teams'
 import { sectionsAPI } from './api/sections'
 import { playsAPI } from './api/plays'
@@ -12,7 +15,9 @@ import { conceptGroupsAPI } from './api/concept-groups'
 import { rolesAPI } from './api/roles'
 import { presetRoutesAPI } from './api/preset-routes'
 import { unifiedSearchAPI } from './api/unified-search'
+import { modifierOverridesAPI } from './api/modifierOverrides'
 import { tagsAPI, playTagsAPI, playbookTagsAPI } from './api/tags'
+import { handleCallSheetExport } from './api/exports'
 
 const server = serve({
   routes: {
@@ -42,10 +47,57 @@ const server = serve({
       GET: playbooksAPI.list,
       POST: playbooksAPI.create
     },
+    "/api/playbooks/:id/star": {
+      PUT: playbooksAPI.toggleStar
+    },
+    "/api/playbooks/:id/restore": {
+      PUT: playbooksAPI.restore
+    },
+    "/api/playbooks/:id/permanent": {
+      DELETE: playbooksAPI.permanentDelete
+    },
+    "/api/trash": {
+      DELETE: playbooksAPI.emptyTrash
+    },
+    "/api/playbooks/:id/shares": {
+      GET: playbookSharesAPI.listShares,
+      POST: playbookSharesAPI.createShare
+    },
+    "/api/playbooks/:id/shares/:teamId": {
+      DELETE: playbookSharesAPI.deleteShare
+    },
     "/api/playbooks/:id": {
       GET: playbooksAPI.get,
       PUT: playbooksAPI.update,
       DELETE: playbooksAPI.delete
+    },
+
+    // Presentation API endpoints
+    "/api/playbooks/:playbookId/presentations": {
+      GET: presentationsAPI.list,
+      POST: presentationsAPI.create
+    },
+    "/api/presentations/:presentationId": {
+      GET: presentationsAPI.get,
+      PUT: presentationsAPI.update,
+      DELETE: presentationsAPI.delete
+    },
+    "/api/presentations/:presentationId/slides": {
+      POST: presentationsAPI.addSlide,
+      PUT: presentationsAPI.reorderSlides
+    },
+    "/api/presentations/:presentationId/slides/:slideId": {
+      DELETE: presentationsAPI.removeSlide
+    },
+
+    // Folder API endpoints
+    "/api/folders": {
+      GET: foldersAPI.list,
+      POST: foldersAPI.create
+    },
+    "/api/folders/:id": {
+      PUT: foldersAPI.update,
+      DELETE: foldersAPI.delete
     },
 
     // Section API endpoints
@@ -159,6 +211,16 @@ const server = serve({
       DELETE: conceptGroupsAPI.delete
     },
 
+    // Modifier Override API endpoints
+    '/api/modifiers/:modifierId/overrides': {
+      GET: modifierOverridesAPI.listByModifier,
+      POST: modifierOverridesAPI.create
+    },
+    '/api/modifier-overrides/:id': {
+      PUT: modifierOverridesAPI.update,
+      DELETE: modifierOverridesAPI.delete
+    },
+
     // Role API endpoints
     '/api/teams/:teamId/roles': {
       GET: rolesAPI.list,
@@ -171,8 +233,13 @@ const server = serve({
     },
 
     // Unified Search API endpoint
-    '/api/teams/:teamId/search': {
+    '/api/search': {
       GET: unifiedSearchAPI.search
+    },
+
+    // Export API endpoints
+    '/api/export/callsheet': {
+      POST: handleCallSheetExport
     },
 
     // Example API endpoints

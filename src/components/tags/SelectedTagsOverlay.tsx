@@ -11,13 +11,13 @@ export function SelectedTagsOverlay({ tags, onRemoveTag }: SelectedTagsOverlayPr
 	if (tags.length === 0) return null
 
 	return (
-		<div className="absolute top-5 left-12 z-10 flex flex-row-reverse flex-wrap-reverse gap-2 max-w-[50%]">
+		<div className="absolute top-5 left-9.5 z-12 flex flex-row-reverse flex-wrap-reverse gap-2 max-w-[50%]">
 			{tags.map(tag => {
 				const cls = getTagClasses(tag.color)
 				return (
 					<span
 						key={tag.id}
-						className={`group relative inline-block px-2 py-0.5 rounded-full text-xs ${cls.bg} ${cls.text} opacity-70`}
+						className={`group relative inline-block px-2 py-0.5 rounded-full text-xs ${cls.bg} ${cls.text} opacity-90`}
 					>
 						{tag.name}
 						<button

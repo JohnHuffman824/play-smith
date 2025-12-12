@@ -8,6 +8,7 @@ import { cn } from '../ui/utils'
 import type { Coordinate } from '../../types/field.types'
 import type { FieldCoordinateSystem } from '../../utils/coordinates'
 import { PLAYER_RADIUS_FEET } from '../../constants/field.constants'
+import { useTheme } from '../../contexts/SettingsContext'
 
 type AnimatedPlayerProps = {
 	id: string
@@ -30,6 +31,7 @@ export function AnimatedPlayer({
 	opacity = 1,
 	isGhost = false,
 }: AnimatedPlayerProps) {
+	const { theme } = useTheme()
 	const pixelPosition = useMemo(() => {
 		return coordSystem.feetToPixels(position.x, position.y)
 	}, [position.x, position.y, coordSystem])
@@ -39,6 +41,9 @@ export function AnimatedPlayer({
 	}, [coordSystem.scale])
 
 	const size = pixelRadius * 2
+
+	// Player outline: black in light mode, white in dark mode
+	const outlineColor = theme === 'dark' ? 'white' : 'black'
 
 	return (
 		<div
@@ -54,7 +59,7 @@ export function AnimatedPlayer({
 				width: size,
 				height: size,
 				backgroundColor: isGhost ? 'transparent' : color,
-				border: `2px ${isGhost ? 'dashed' : 'solid'} ${color}`,
+				border: `2px ${isGhost ? 'dashed' : 'solid'} ${outlineColor}`,
 				opacity: isGhost ? 0.3 : opacity,
 			}}
 		>

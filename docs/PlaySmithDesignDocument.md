@@ -399,6 +399,91 @@ bun run seed:dev  # Creates admin/admin user
 
 ---
 
+## Deployment & Infrastructure
+
+**Status:** ✅ Production (December 2024)
+
+### Domain & Hosting
+
+- **Domain:** play-smith.com (registered via Squarespace)
+- **Production URL:** https://www.play-smith.com
+- **Staging URL:** https://stag.play-smith.com
+- **Hosting Platform:** Railway (replaced AWS RDS in December 2024)
+- **Database:** PostgreSQL on Railway
+
+### DNS Configuration
+
+**Domain Registrar:** Squarespace
+
+**DNS Records:**
+- `www.play-smith.com` → CNAME to Railway production service
+- `stag.play-smith.com` → CNAME to Railway staging service
+- `play-smith.com` → Forwards to `www.play-smith.com` (via Squarespace domain forwarding)
+
+**SSL Certificates:** Auto-provisioned by Railway via Let's Encrypt
+
+### Deployment Environments
+
+Play Smith uses a three-environment deployment strategy:
+
+1. **Local** - Development on developer machines
+   - Branch: `main` (or feature branches)
+   - Database: Local PostgreSQL or Railway staging DB
+   - Runtime: `BUN_ENV=development`
+
+2. **Staging** - Integration testing on Railway
+   - Branch: `staging`
+   - URL: https://stag.play-smith.com
+   - Database: Separate PostgreSQL instance on Railway
+   - Runtime: `BUN_ENV=staging`
+   - Auto-deploy: ✅ ON
+
+3. **Production** - Live application
+   - Branch: `release-1.0`
+   - URL: https://www.play-smith.com
+   - Database: Production PostgreSQL on Railway
+   - Runtime: `BUN_ENV=production`
+   - Auto-deploy: ⚠️ OFF (manual deployments only)
+
+### Branch Strategy
+
+```
+main          → Active development work (local)
+  ↓
+staging       → Integration & testing (Railway staging)
+  ↓
+release-1.0   → Production release (Railway production)
+```
+
+**Workflow:**
+1. Develop features on `main` or feature branches
+2. Merge to `staging` for integration testing on Railway
+3. Test thoroughly on staging environment
+4. Merge `staging` to `release-1.0` for production release
+5. Manually trigger deployment in Railway
+
+**Release Tagging:** Production releases are tagged with semantic versions (e.g., `v1.0.0`)
+
+### Technology Stack
+
+- **Runtime:** Bun v1.3+
+- **Frontend:** React 19, TailwindCSS 4
+- **Backend:** Bun.serve (native HTTP server)
+- **Database:** PostgreSQL 17.7 with PostGIS extensions
+- **Deployment:** Railway with Nixpacks build system
+
+### Migration from AWS
+
+Play Smith migrated from AWS RDS PostgreSQL to Railway in December 2024:
+- Simplified infrastructure management
+- Reduced hosting costs (~50% reduction)
+- Improved developer experience with auto-deployments
+- Maintained database schema via migration system
+
+See `docs/DeploymentGuide.md` for detailed deployment procedures.
+
+---
+
 ## Technical Considerations
 
 - Implement an efficient system for saving and retrieving components
@@ -412,6 +497,87 @@ bun run seed:dev  # Creates admin/admin user
 ---
 
 ## Future Ideas
+
+### Analytics & User Insights (PostHog)
+
+**Status:** 🔮 Future consideration (implement after 20-50 active users)
+
+PostHog is an open-source product analytics platform that would help understand user behavior and optimize the Play Smith experience.
+
+**Key capabilities:**
+- **Event tracking** - Monitor tool usage, play creation, playbook management
+- **Session recording** - Watch how users interact with the whiteboard (privacy controls required)
+- **Feature flags** - Controlled rollouts for new features (formations, concepts, route templates)
+- **Funnels** - Track conversion paths (registration → first play → first playbook)
+- **Heatmaps** - Visualize toolbar clicks, canvas interactions
+- **User cohorts** - Segment by team role, usage patterns, feature adoption
+
+**High-value metrics to track:**
+- Tool usage frequency (which tools are most/least used?)
+- Keyboard shortcut adoption vs. mouse clicks
+- Time to first play created after registration
+- Play creation completion rate (started vs. saved)
+- Feature discovery (do users find formations/concepts/tags?)
+- Drop-off points in the editor workflow
+- Playbook sharing patterns
+- Average plays per playbook
+- Hash position changes per play (field positioning preferences)
+
+**Implementation considerations:**
+
+*Deployment options:*
+- **Self-hosted on Railway** - Adds PostgreSQL + ClickHouse services, full data control
+- **PostHog Cloud** - Simpler setup, scales automatically, costs based on event volume
+
+*Technical integration:*
+```typescript
+// Frontend tracking
+import posthog from 'posthog-js'
+
+posthog.init('PROJECT_KEY', {
+  api_host: 'https://analytics.play-smith.com',
+  capture_pageview: false, // Manual SPA tracking
+  disable_session_recording: false,
+  session_recording: {
+    maskAllInputs: true, // Protect play names, tags
+    maskTextSelector: '[data-sensitive]',
+  }
+})
+
+// Track key events
+posthog.capture('play_created', {
+  personnel: play.personnel,
+  tag_count: play.tags.length,
+  player_count: play.players.length,
+  hash_position: play.hashAlignment,
+})
+
+posthog.capture('tool_selected', {
+  tool: 'draw',
+  previous_tool: 'select',
+  keyboard_shortcut: true,
+})
+```
+
+*Privacy & security:*
+- Mask sensitive data (play names, custom tags, team names)
+- Disable session recording for playbook content (only track UI interactions)
+- GDPR compliance via data retention policies
+- Allow users to opt out of analytics
+
+*When to implement:*
+- **Wait until:** 20-50 active users generating meaningful patterns
+- **Implement before:** Major feature launches (concepts, formations, templates)
+- **Early alternative:** Basic event logging to PostgreSQL with simple dashboard
+
+*Cost considerations:*
+- **Cloud:** Free tier (1M events/month), then ~$200-500/mo for growth stage
+- **Self-hosted:** Infrastructure costs (~$50-100/mo Railway), free PostHog license
+- Events scale with active users × actions per session
+
+**Complements existing systems:**
+- **Audit logs** (who changed what, when) → Compliance & debugging
+- **PostHog analytics** (how users behave) → Product decisions & UX optimization
 
 ### Play Sheet Creation
 - Ability to curate and create custom playsheets that can be printed and used in game
@@ -427,9 +593,43 @@ bun run seed:dev  # Creates admin/admin user
 		"stack the DB")
 
 ### Export & Integration
-- Play sheet creation
+
+Play Smith should support multiple export formats tailored to different game day and study use cases. Research from coaching best practices (GoRout, 2025) identifies key export requirements:
+
+**Game Day Formats:**
+- **Call Sheets** - Sideline reference for coaches with condensed play information
+  - Quick-scan format with play name, formation, personnel
+  - Organized by situation (down-and-distance, red zone, etc.)
+  - Printable PDF optimized for laminated cards or clipboards
+- **Wristband Cards** - Player wristbands with play numbers/codes
+  - Compact grid layout mapping codes to plays
+  - Position-specific views showing only relevant assignments
+  - Color-coded by play type (run/pass) or situation
+- **Digital Play Calling** - Integration with wearable tech for real-time communication
+  - Mobile-optimized play cards for tablets/phones
+  - API support for systems like GoRout Scout
+
+**Study Materials:**
+- **Practice Packets** - Full playbook sections for player home study
+  - Detailed diagrams with route depths and timing notes
+  - Assignment breakdowns by position
+  - Multiple plays per page for comparison
+- **Install Sheets** - Teaching materials for introducing new plays
+  - Step-by-step progression from basic to advanced concepts
+  - Visual focus on key coaching points
+  - Space for player notes
+
+**Universal Export Features:**
+- Consistent terminology across all formats (aligned with team settings)
+- Visual clarity optimized for each medium (screen vs. print)
+- Batch export by section, tag, or custom selection
+- Templates for common layouts (call sheet, wristband, study guide)
+
+**Integration Targets:**
 - Import/export to/from Hudl
-- Import/export to PDF/slides
+- PDF generation for printing
+- PowerPoint/Keynote slides for film sessions
+- CSV/JSON for custom integrations
 
 ### Analysis & Strategy
 - Analysis of strengths/weaknesses vs opponent formation/play

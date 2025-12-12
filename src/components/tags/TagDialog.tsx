@@ -89,9 +89,9 @@ export function TagDialog({ isOpen, onClose, availableTags, selectedTagIds, onTa
 										))}
 									</div>
 									<div className="flex justify-end gap-2">
-										<button onClick={() => setShowCreate(false)} className="px-3 py-1.5 hover:bg-accent rounded-lg cursor-pointer">Cancel</button>
+										<button onClick={() => setShowCreate(false)} className="px-3 py-1.5 border border-border hover:bg-accent rounded-lg cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">Cancel</button>
 										<button onClick={handleCreate} disabled={!newName.trim() || creating}
-											className="px-3 py-1.5 bg-primary text-primary-foreground rounded-lg disabled:opacity-50 cursor-pointer">
+											className="px-3 py-1.5 bg-action-button text-action-button-foreground rounded-lg disabled:opacity-50 cursor-pointer hover:bg-action-button/90 transition-all duration-200 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
 											{creating ? 'Creating...' : 'Create'}
 										</button>
 									</div>
@@ -105,7 +105,7 @@ export function TagDialog({ isOpen, onClose, availableTags, selectedTagIds, onTa
 					)}
 				</div>
 				<DialogFooter>
-					<button onClick={onClose} className="px-4 py-2 bg-primary text-primary-foreground rounded-lg cursor-pointer">Done</button>
+					<button onClick={onClose} className="px-4 py-2 bg-action-button text-action-button-foreground rounded-lg cursor-pointer hover:bg-action-button/90 transition-all duration-200 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">Done</button>
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>

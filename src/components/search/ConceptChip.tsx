@@ -1,7 +1,6 @@
 import { X } from 'lucide-react'
 import type { ConceptChip as ConceptChipType } from '../../types/concept.types'
-import { CHIP_STYLES, CHIP_STYLES_DARK } from '../../constants/concept.constants'
-import { useTheme } from '../../contexts/ThemeContext'
+import { CHIP_STYLES } from '../../constants/concept.constants'
 
 interface ConceptChipProps {
 	chip: ConceptChipType
@@ -10,9 +9,7 @@ interface ConceptChipProps {
 }
 
 export function ConceptChip({ chip, onRemove, isDragging }: ConceptChipProps) {
-	const { theme } = useTheme()
-	const isDark = theme === 'dark'
-	const chipStyles = isDark ? CHIP_STYLES_DARK : CHIP_STYLES
+	const chipStyles = CHIP_STYLES
 
 	function handleRemove(e: React.MouseEvent) {
 		e.stopPropagation()
@@ -33,7 +30,7 @@ export function ConceptChip({ chip, onRemove, isDragging }: ConceptChipProps) {
 			<span>{chip.label}</span>
 			<button
 				onClick={handleRemove}
-				className="hover:bg-black/10 dark:hover:bg-white/10 rounded p-0.5 transition-colors"
+				className="hover:bg-accent rounded p-0.5 transition-colors cursor-pointer"
 				aria-label={`Remove ${chip.label}`}
 			>
 				<X className="w-3 h-3" />

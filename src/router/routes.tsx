@@ -4,6 +4,7 @@ import { LoginPage } from '../pages/LoginPage'
 import { PlaybookManagerPage } from '../pages/PlaybookManagerPage'
 import { PlaybookEditorPage } from '../pages/PlaybookEditorPage'
 import { PlayEditorPage } from '../pages/PlayEditorPage'
+import { PlayAnimationPage } from '../pages/PlayAnimationPage'
 import { ErrorPage } from '../pages/ErrorPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 import { ProtectedRoute } from './ProtectedRoute'
@@ -42,6 +43,15 @@ export const routes: RouteObject[] = [
 		element: (
 			<ProtectedRoute>
 				<PlayEditorPage />
+			</ProtectedRoute>
+		),
+		errorElement: <ErrorPage />
+	},
+	{
+		path: '/playbooks/:playbookId/animate/:playId',
+		element: (
+			<ProtectedRoute>
+				<PlayAnimationPage />
 			</ProtectedRoute>
 		),
 		errorElement: <ErrorPage />

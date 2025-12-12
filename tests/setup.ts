@@ -53,13 +53,40 @@ global.MouseEvent = window.MouseEvent as any
 global.DocumentFragment = window.DocumentFragment as any
 
 // Polyfill localStorage for tests
+const storage = new Map<string, string>()
 const localStorageMock = {
-	getItem: (key: string) => null,
-	setItem: (key: string, value: string) => {},
-	removeItem: (key: string) => {},
-	clear: () => {},
-	length: 0,
-	key: (index: number) => null
+	getItem: (key: string) => storage.get(key) ?? null,
+	setItem: (key: string, value: string) => storage.set(key, value),
+	removeItem: (key: string) => storage.delete(key),
+	clear: () => storage.clear(),
+	get length() { return storage.size },
+	key: (index: number) => {
+		const keys = Array.from(storage.keys())
+		return keys[index] ?? null
+	}
 }
 global.localStorage = localStorageMock as any
+
+// Polyfill XMLSerializer for tests
+global.XMLSerializer = window.XMLSerializer as any
+
+// Polyfill getComputedStyle for Radix UI
+global.getComputedStyle = window.getComputedStyle.bind(window) as any
+
+// Polyfill MutationObserver for Radix UI
+global.MutationObserver = window.MutationObserver as any
+
+// Polyfill NodeFilter for Radix UI
+global.NodeFilter = {
+	SHOW_ELEMENT: 1,
+	SHOW_TEXT: 4,
+	SHOW_ALL: 0xFFFFFFFF,
+} as any
+
+// Polyfill HTML element types for Radix UI
+global.HTMLInputElement = window.HTMLInputElement as any
+global.HTMLSelectElement = window.HTMLSelectElement as any
+global.HTMLTextAreaElement = window.HTMLTextAreaElement as any
+global.HTMLButtonElement = window.HTMLButtonElement as any
+global.HTMLElement = window.HTMLElement as any
 

@@ -17,7 +17,7 @@ export function LoginPage() {
 	}, [user, navigate, searchParams])
 
 	return (
-		<div className="min-h-screen bg-gray-50 flex items-center justify-center">
+		<div className="min-h-screen bg-background flex items-center justify-center">
 			<LoginModal />
 		</div>
 	)

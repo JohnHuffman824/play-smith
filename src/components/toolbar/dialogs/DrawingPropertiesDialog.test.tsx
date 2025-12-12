@@ -1,7 +1,7 @@
 import { describe, test, expect, afterEach } from 'bun:test'
 import { cleanup, render, fireEvent } from '@testing-library/react'
 import { DrawingPropertiesDialog } from './DrawingPropertiesDialog'
-import { ThemeProvider } from '../../../contexts/ThemeContext'
+import { SettingsProvider } from '@/contexts/SettingsContext'
 import { FieldCoordinateSystem } from '../../../utils/coordinates'
 import type { Drawing } from '../../../types/drawing.types'
 
@@ -42,7 +42,7 @@ describe('DrawingPropertiesDialog - StrokeWidth Fix', () => {
 		}
 
 		const { getByText } = render(
-			<ThemeProvider>
+			<SettingsProvider>
 				<DrawingPropertiesDialog
 					drawing={drawing}
 					position={{ x: 100, y: 100 }}
@@ -50,7 +50,7 @@ describe('DrawingPropertiesDialog - StrokeWidth Fix', () => {
 					onClose={() => {}}
 					coordSystem={coordSystem}
 				/>
-			</ThemeProvider>
+			</SettingsProvider>
 		)
 
 		// Click the "Medium" button (3 pixels)
@@ -92,7 +92,7 @@ describe('DrawingPropertiesDialog - StrokeWidth Fix', () => {
 		}
 
 		const { container } = render(
-			<ThemeProvider>
+			<SettingsProvider>
 				<DrawingPropertiesDialog
 					drawing={drawing}
 					position={{ x: 100, y: 100 }}
@@ -100,7 +100,7 @@ describe('DrawingPropertiesDialog - StrokeWidth Fix', () => {
 					onClose={() => {}}
 					coordSystem={coordSystem}
 				/>
-			</ThemeProvider>
+			</SettingsProvider>
 		)
 
 		// Find buttons by their visual indicator (circle size) and label

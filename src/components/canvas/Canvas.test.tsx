@@ -2,7 +2,7 @@ import { afterEach, describe, test, expect } from 'bun:test'
 import { cleanup, render, fireEvent } from '@testing-library/react'
 import { Canvas } from './Canvas'
 import { PlayProvider, usePlayContext } from '../../contexts/PlayContext'
-import { ThemeProvider } from '../../contexts/ThemeContext'
+import { SettingsProvider } from '@/contexts/SettingsContext'
 import type { DrawingState } from '../../types/play.types'
 
 function renderCanvas(drawingState: DrawingState) {
@@ -33,7 +33,7 @@ function renderCanvas(drawingState: DrawingState) {
 	}
 
 	return render(
-		<ThemeProvider>
+		<SettingsProvider>
 			<PlayProvider initialState={mockInitialState}>
 				<Canvas
 					drawingState={drawingState}
@@ -44,7 +44,7 @@ function renderCanvas(drawingState: DrawingState) {
 					containerMode="page"
 				/>
 			</PlayProvider>
-		</ThemeProvider>
+		</SettingsProvider>
 	)
 }
 
@@ -180,7 +180,7 @@ describe('Canvas - Player State Sync with PlayContext', () => {
 		}
 
 		const { container } = render(
-			<ThemeProvider>
+			<SettingsProvider>
 				<PlayProvider>
 					<TestComponent />
 					<Canvas
@@ -192,7 +192,7 @@ describe('Canvas - Player State Sync with PlayContext', () => {
 						containerMode="page"
 					/>
 				</PlayProvider>
-			</ThemeProvider>
+			</SettingsProvider>
 		)
 
 		// Initial state should have no players

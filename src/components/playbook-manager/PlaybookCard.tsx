@@ -1,4 +1,4 @@
-import { BookOpen, MoreVertical, Folder, Download, Share2, Edit, Copy, Trash2 } from 'lucide-react'
+import { BookOpen, MoreVertical, Folder, Download, Share2, Edit, Copy, Trash2, Star } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import {
   DropdownMenu,
@@ -15,11 +15,13 @@ type PlaybookCardProps = {
 	playCount?: number
 	lastModified: string
 	thumbnail?: string
+	isStarred?: boolean
 	onRename: (id: number) => void
 	onDelete: (id: number) => void
 	onDuplicate: (id: number) => void
 	onExport?: (id: number) => void
 	onShare?: (id: number) => void
+	onToggleStar?: (id: number) => void
 }
 
 export function PlaybookCard({
@@ -29,11 +31,13 @@ export function PlaybookCard({
 	playCount = 0,
 	lastModified,
 	thumbnail,
+	isStarred = false,
 	onRename,
 	onDelete,
 	onDuplicate,
 	onExport,
 	onShare,
+	onToggleStar,
 }: PlaybookCardProps) {
 	const navigate = useNavigate()
 
@@ -63,6 +67,21 @@ export function PlaybookCard({
 				{/* Action Buttons - Only show for playbooks */}
 				{type === 'playbook' && (
 					<>
+						{/* Star Button - Always visible in top-left */}
+						{onToggleStar && (
+							<button
+								className="absolute top-2 left-2 p-1.5 rounded-lg bg-card/90 backdrop-blur-sm border border-border transition-opacity duration-200 hover:bg-accent z-10"
+								onClick={(e) => {
+									e.stopPropagation()
+									onToggleStar(id)
+								}}
+								title={isStarred ? "Unstar Playbook" : "Star Playbook"}
+							>
+								<Star
+									className={`w-4 h-4 ${isStarred ? 'fill-yellow-400 text-yellow-400' : 'text-foreground'}`}
+								/>
+							</button>
+						)}
 						{onShare && (
 							<button
 								className="absolute top-2 right-20 p-1.5 rounded-lg bg-card/90 backdrop-blur-sm border border-border opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-accent z-10"

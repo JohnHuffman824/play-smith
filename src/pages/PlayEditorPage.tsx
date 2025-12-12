@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Toolbar } from '../components/toolbar/Toolbar'
 import { Canvas } from '../components/canvas/Canvas'
@@ -8,9 +8,10 @@ import { ConceptDialog } from '../components/concepts/ConceptDialog'
 import { SelectionOverlay } from '../components/canvas/SelectionOverlay'
 import { SelectedTagsOverlay } from '../components/tags/SelectedTagsOverlay'
 import { TagDialog } from '../components/tags/TagDialog'
-import { useTheme } from '../contexts/ThemeContext'
+import { useTheme } from '@/contexts/SettingsContext'
 import { PlayProvider, usePlayContext } from '../contexts/PlayContext'
 import { ConceptProvider, useConcept } from '../contexts/ConceptContext'
+import { CanvasViewportProvider } from '../contexts/CanvasViewportContext'
 import { useConceptData } from '../hooks/useConceptData'
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
 import { useTagsData, type Tag } from '../hooks/useTagsData'
@@ -19,6 +20,7 @@ import { eventBus } from '../services/EventBus'
 import { createDefaultLinemen } from '../utils/lineman.utils'
 import { Modal } from '../components/shared/Modal'
 import { Input } from '../components/ui/input'
+import { ConfirmDialog } from '../components/toolbar/dialogs/ConfirmDialog'
 import {
 	CHIP_TYPE_FORMATION,
 	CHIP_TYPE_CONCEPT,
@@ -63,7 +65,8 @@ function PlayEditorContent() {
 		applyConcept,
 		applyConceptGroup,
 		deleteDrawing,
-		dispatch
+		dispatch,
+		markClean
 	} = usePlayContext()
 
 	const {
@@ -88,10 +91,16 @@ function PlayEditorContent() {
 	const [showTagDialog, setShowTagDialog] = useState(false)
 	const [isPlayLoaded, setIsPlayLoaded] = useState(false)
 	const [playbookPlays, setPlaybookPlays] = useState<Play[]>([])
+	const [isAddingPlay, setIsAddingPlay] = useState(false)
 	const [showRenameModal, setShowRenameModal] = useState(false)
 	const [showDeleteModal, setShowDeleteModal] = useState(false)
-	const [targetPlayId, setTargetPlayId] = useState<string | null>(null)
+	const [modalTargetPlayId, setModalTargetPlayId] = useState<string | null>(null)
 	const [targetPlayName, setTargetPlayName] = useState('')
+	const [showUnsavedChangesDialog, setShowUnsavedChangesDialog] = useState(false)
+	const [initialPlayState, setInitialPlayState] = useState<{
+		players: any[]
+		drawings: any[]
+	} | null>(null)
 
 	/**
 	 * Unified delete method for removing selected objects.
@@ -160,6 +169,9 @@ function PlayEditorContent() {
 						body: JSON.stringify({ tag_ids: selectedTags.map(t => t.id) })
 					})
 
+					// Mark as clean after successful save
+					markClean()
+
 					eventBus.emit('canvas:save-complete', { success: true })
 				}
 			} catch (error) {
@@ -173,7 +185,7 @@ function PlayEditorContent() {
 
 		eventBus.on('canvas:save', handleSave)
 		return () => eventBus.off('canvas:save', handleSave)
-	}, [playId, playState.players, playState.drawings, playState.play, playState.hashAlignment, selectedTags])
+	}, [playId, playState.players, playState.drawings, playState.play, playState.hashAlignment, selectedTags, markClean])
 
 	// Load play data on mount - also sets teamId for concept data
 	useEffect(() => {
@@ -183,10 +195,15 @@ function PlayEditorContent() {
 		async function loadPlay() {
 			if (!playId) return
 
+			// CLEAR STATE BEFORE LOADING NEW PLAY
+			dispatch({ type: 'SET_DRAWINGS', drawings: [] })
+			setPlayers([])
+
 			try {
 				const response = await fetch(`/api/plays/${playId}`)
 				if (!response.ok) {
 					console.error('Failed to load play')
+					setIsPlayLoaded(true)
 					return
 				}
 
@@ -204,14 +221,17 @@ function PlayEditorContent() {
 				if (play.hashAlignment) {
 					dispatch({ type: 'SET_HASH_ALIGNMENT', alignment: play.hashAlignment })
 				}
+
+				// Set players (or default linemen for empty plays)
 				if (play.players?.length > 0) {
 					setPlayers(play.players)
 				} else {
-					// Initialize default linemen for new (empty) plays
 					const hashAlignment = play.hashAlignment || 'middle'
 					const defaultLinemen = createDefaultLinemen(hashAlignment)
 					setPlayers(defaultLinemen)
 				}
+
+				// Set drawings (already cleared above, so this handles all cases)
 				if (play.drawings?.length > 0) {
 					dispatch({ type: 'SET_DRAWINGS', drawings: play.drawings })
 				}
@@ -225,15 +245,17 @@ function PlayEditorContent() {
 
 				// Mark play as loaded after all data is fetched
 				setIsPlayLoaded(true)
+
+				// Mark as clean after loading play data
+				markClean()
 			} catch (error) {
 				console.error('Load error:', error)
-				// Still mark as loaded even on error to avoid infinite loading
 				setIsPlayLoaded(true)
 			}
 		}
 
 		loadPlay()
-	}, [playId]) // eslint-disable-line react-hooks/exhaustive-deps
+	}, [playId, markClean]) // eslint-disable-line react-hooks/exhaustive-deps
 
 	// Fetch all plays in the playbook for the play bar
 	useEffect(() => {
@@ -314,6 +336,15 @@ function PlayEditorContent() {
 	}, [])
 
 	function handleBackToPlaybook() {
+		if (playState.isDirty) {
+			setShowUnsavedChangesDialog(true)
+			return
+		}
+
+		navigateBackToPlaybook()
+	}
+
+	function navigateBackToPlaybook() {
 		if (playbookId) {
 			navigate(`/playbooks/${playbookId}`)
 		} else if (teamId) {
@@ -326,7 +357,9 @@ function PlayEditorContent() {
 	}
 
 	async function handleAddPlay() {
-		if (!playbookId) return
+		if (!playbookId || isAddingPlay) return
+
+		setIsAddingPlay(true)
 
 		try {
 			// Save current play first
@@ -350,6 +383,7 @@ function PlayEditorContent() {
 			if (!response.ok) {
 				const errorData = await response.json()
 				console.error('Failed to create play:', errorData)
+				setIsAddingPlay(false)
 				return
 			}
 
@@ -358,12 +392,15 @@ function PlayEditorContent() {
 
 			if (!newPlayId) {
 				console.error('No play ID in response')
+				setIsAddingPlay(false)
 				return
 			}
 
+			// Note: isAddingPlay will reset on unmount/navigation
 			navigate(`/playbooks/${playbookId}/play/${newPlayId}`)
 		} catch (error) {
 			console.error('Failed to create play:', error)
+			setIsAddingPlay(false)
 		}
 	}
 
@@ -371,16 +408,16 @@ function PlayEditorContent() {
 		const play = playbookPlays.find((p) => p.id === playId)
 		if (!play) return
 
-		setTargetPlayId(playId)
+		setModalTargetPlayId(playId)
 		setTargetPlayName(play.name)
 		setShowRenameModal(true)
 	}
 
 	async function confirmRename() {
-		if (!targetPlayId || !targetPlayName.trim()) return
+		if (!modalTargetPlayId || !targetPlayName.trim()) return
 
 		try {
-			const response = await fetch(`/api/plays/${targetPlayId}`, {
+			const response = await fetch(`/api/plays/${modalTargetPlayId}`, {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ name: targetPlayName.trim() })
@@ -394,14 +431,14 @@ function PlayEditorContent() {
 			// Update local state
 			setPlaybookPlays((prev) =>
 				prev.map((p) =>
-					p.id === targetPlayId
+					p.id === modalTargetPlayId
 						? { ...p, name: targetPlayName.trim() }
 						: p
 				)
 			)
 
 			setShowRenameModal(false)
-			setTargetPlayId(null)
+			setModalTargetPlayId(null)
 			setTargetPlayName('')
 		} catch (error) {
 			console.error('Failed to rename play:', error)
@@ -409,15 +446,15 @@ function PlayEditorContent() {
 	}
 
 	function handleDeletePlayFromBar(playId: string) {
-		setTargetPlayId(playId)
+		setModalTargetPlayId(playId)
 		setShowDeleteModal(true)
 	}
 
 	async function confirmDeleteFromBar() {
-		if (!targetPlayId) return
+		if (!modalTargetPlayId) return
 
 		try {
-			const response = await fetch(`/api/plays/${targetPlayId}`, {
+			const response = await fetch(`/api/plays/${modalTargetPlayId}`, {
 				method: 'DELETE',
 				credentials: 'include'
 			})
@@ -429,11 +466,11 @@ function PlayEditorContent() {
 
 			// Update local state
 			setPlaybookPlays((prev) =>
-				prev.filter((p) => p.id !== targetPlayId)
+				prev.filter((p) => p.id !== modalTargetPlayId)
 			)
 
 			setShowDeleteModal(false)
-			setTargetPlayId(null)
+			setModalTargetPlayId(null)
 		} catch (error) {
 			console.error('Failed to delete play:', error)
 		}
@@ -551,10 +588,10 @@ function PlayEditorContent() {
 	// Concepts can load in the background after the canvas appears
 	if (!isPlayLoaded) {
 		return (
-			<div className={`flex items-center justify-center h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+			<div className="flex items-center justify-center h-screen bg-background">
 				<div className="text-center">
 					<div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
-					<p className={theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}>
+					<p className="text-foreground">
 						Loading play...
 					</p>
 				</div>
@@ -563,7 +600,7 @@ function PlayEditorContent() {
 	}
 
 	return (
-		<main className={`flex h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+		<main className="flex h-screen bg-background">
 			<Toolbar
 				drawingState={playState.drawingState}
 				setDrawingState={setDrawingState}
@@ -581,12 +618,15 @@ function PlayEditorContent() {
 					onBackToPlaybook={handleBackToPlaybook}
 				/>
 				<div className="relative flex-1">
-					<Canvas
-						drawingState={playState.drawingState}
-						hashAlignment={playState.hashAlignment}
-						showPlayBar={playState.showPlayBar}
-						onSelectionChange={setSelectedObjectIds}
-					/>
+					<CanvasViewportProvider>
+						<Canvas
+							drawingState={playState.drawingState}
+							hashAlignment={playState.hashAlignment}
+							showPlayBar={playState.showPlayBar}
+							playId={playId}
+							onSelectionChange={setSelectedObjectIds}
+						/>
+					</CanvasViewportProvider>
 					{/* Selected Tags Overlay */}
 					<SelectedTagsOverlay
 						tags={selectedTags}
@@ -597,8 +637,9 @@ function PlayEditorContent() {
 					plays={playbookPlays}
 					currentPlayId={playId}
 					showPlayBar={playState.showPlayBar}
-					onOpenPlay={(id) => navigate(`/playbooks/${playbookId}/play/${id}`)}
+					onOpenPlay={(targetPlayId) => navigate(`/playbooks/${playbookId}/play/${targetPlayId}`)}
 					onAddPlay={handleAddPlay}
+					isAddingPlay={isAddingPlay}
 				onRenamePlay={handleRenamePlay}
 				onDeletePlay={handleDeletePlayFromBar}
 				onDuplicatePlay={handleDuplicatePlay}
@@ -647,20 +688,14 @@ function PlayEditorContent() {
 							setTargetPlayId(null)
 							setTargetPlayName('')
 						}}
-						className="px-4 py-2 border border-gray-300
-							dark:border-gray-600 rounded-md
-							hover:bg-gray-100 dark:hover:bg-gray-700
-							transition-colors cursor-pointer"
+						className="px-4 py-2 border border-border rounded-lg hover:bg-accent transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
 					>
 						Cancel
 					</button>
 					<button
 						onClick={confirmRename}
 						disabled={!targetPlayName.trim()}
-						className="px-4 py-2 bg-blue-500 hover:bg-blue-600
-							text-white rounded-md transition-colors
-							disabled:opacity-50 disabled:cursor-not-allowed
-							cursor-pointer"
+						className="px-4 py-2 bg-action-button text-action-button-foreground hover:bg-action-button/90 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
 					>
 						Rename
 					</button>
@@ -688,24 +723,45 @@ function PlayEditorContent() {
 							setShowDeleteModal(false)
 							setTargetPlayId(null)
 						}}
-						className="px-4 py-2 border border-gray-300
-							dark:border-gray-600 rounded-md
-							hover:bg-gray-100 dark:hover:bg-gray-700
-							transition-colors cursor-pointer"
+						className="px-4 py-2 border border-border rounded-lg hover:bg-accent transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
 					>
 						Cancel
 					</button>
 					<button
 						onClick={confirmDeleteFromBar}
-						className="px-4 py-2 bg-red-500 hover:bg-red-600
-							text-white rounded-md transition-colors
-							cursor-pointer"
+						className="px-4 py-2 bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-lg transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
 					>
 						Delete
 					</button>
 				</div>
 			</div>
 		</Modal>
+
+		{/* Unsaved Changes Dialog */}
+		{showUnsavedChangesDialog && (
+			<ConfirmDialog
+				title="Unsaved Changes"
+				message="You have unsaved changes. Would you like to save before leaving?"
+				confirmLabel="Leave Without Saving"
+				cancelLabel="Cancel"
+				variant="danger"
+				actionLabel="Save & Leave"
+				actionVariant="primary"
+				onConfirm={() => {
+					setShowUnsavedChangesDialog(false)
+					navigateBackToPlaybook()
+				}}
+				onAction={() => {
+					eventBus.emit('canvas:save')
+					setShowUnsavedChangesDialog(false)
+					// Navigate after a brief delay to allow save to complete
+					setTimeout(() => {
+						navigateBackToPlaybook()
+					}, SAVE_DELAY_MS)
+				}}
+				onCancel={() => setShowUnsavedChangesDialog(false)}
+			/>
+		)}
 
 		{/* Tag Dialog */}
 			<TagDialog

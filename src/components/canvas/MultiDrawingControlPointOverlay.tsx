@@ -9,6 +9,7 @@ import { PLAYER_RADIUS_FEET } from '../../constants/field.constants'
 import { pointToLineDistance } from '../../utils/canvas.utils'
 import { NodeDeletePopup } from './NodeDeletePopup'
 import { NodeAddPopup } from './NodeAddPopup'
+import { useTheme } from '../../contexts/SettingsContext'
 
 // Constants for proximity filtering
 const BEZIER_SAMPLE_POINTS = 10
@@ -28,6 +29,9 @@ type MultiDrawingControlPointOverlayProps = {
 	snapThreshold: number
 	cursorPosition?: { x: number; y: number } | null
 	proximityThreshold?: number
+	zoom?: number
+	panX?: number
+	panY?: number
 	onDragPoint?: (
 		drawingId: string,
 		pointId: string,
@@ -218,6 +222,9 @@ export function MultiDrawingControlPointOverlay({
 	snapThreshold,
 	cursorPosition,
 	proximityThreshold = DEFAULT_PROXIMITY_THRESHOLD,
+	zoom = 1,
+	panX = 0,
+	panY = 0,
 	onDragPoint,
 	onMerge,
 	onLinkToPlayer,
@@ -227,6 +234,7 @@ export function MultiDrawingControlPointOverlay({
 	onAddPlayerAtNode,
 	activeTool,
 }: MultiDrawingControlPointOverlayProps) {
+	const { theme } = useTheme()
 	const [dragState, setDragState] = useState<MultiDragState | null>(null)
 	const [snapTarget, setSnapTarget] = useState<SnapTarget | null>(null)
 	const [playerSnapTarget, setPlayerSnapTarget] = useState<
@@ -297,9 +305,9 @@ export function MultiDrawingControlPointOverlay({
 			if (!svg) return
 
 			const rect = svg.getBoundingClientRect()
-			const pixelX = event.clientX - rect.left
-			const pixelY = event.clientY - rect.top
-			const feet = coordSystem.pixelsToFeet(pixelX, pixelY)
+			const screenX = event.clientX - rect.left
+			const screenY = event.clientY - rect.top
+			const feet = coordSystem.screenToFeet(screenX, screenY, zoom, panX, panY)
 
 			onDragPoint(dragState.drawingId, dragState.pointId, feet.x, feet.y)
 
@@ -341,6 +349,9 @@ export function MultiDrawingControlPointOverlay({
 			drawings,
 			players,
 			snapThreshold,
+			zoom,
+			panX,
+			panY,
 		],
 	)
 
@@ -520,6 +531,10 @@ export function MultiDrawingControlPointOverlay({
 		}
 	}
 
+	// Control node colors: light mode = white fill + black outline, dark mode = dark fill + white outline
+	const nodeFill = theme === 'dark' ? '#1f1f1f' : 'white'
+	const nodeStroke = theme === 'dark' ? 'white' : 'black'
+
 	return (
 		<g ref={overlayRef} pointerEvents='visiblePainted'>
 			{/* Render control points from shared pools */}
@@ -531,8 +546,8 @@ export function MultiDrawingControlPointOverlay({
 						cx={pixel.x}
 						cy={pixel.y}
 						r={6}
-						fill='white'
-						stroke={cp.color}
+						fill={nodeFill}
+						stroke={nodeStroke}
 						strokeWidth={2}
 						pointerEvents='all'
 						style={{

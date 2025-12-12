@@ -126,4 +126,186 @@ describe('FieldCoordinateSystem', () => {
 			expect(coords.getDimensions()).toEqual({ width: 800, height: 600 })
 		})
 	})
+
+	describe('screenToFeet conversion with zoom and pan', () => {
+		it('should match pixelsToFeet when zoom=1 and pan=(0,0)', () => {
+			const coords = new FieldCoordinateSystem(800, 600)
+			const screenX = 400
+			const screenY = 300
+
+			const withScreen = coords.screenToFeet(screenX, screenY, 1, 0, 0)
+			const withPixels = coords.pixelsToFeet(screenX, screenY)
+
+			expect(withScreen.x).toBeCloseTo(withPixels.x, 10)
+			expect(withScreen.y).toBeCloseTo(withPixels.y, 10)
+		})
+
+		it('should account for zoom=2 (2x zoomed in)', () => {
+			const coords = new FieldCoordinateSystem(800, 600)
+			const screenX = 400
+			const screenY = 300
+			const zoom = 2
+
+			// At 2x zoom, screen position 400 represents canvas position 200
+			const result = coords.screenToFeet(screenX, screenY, zoom, 0, 0)
+			const expected = coords.pixelsToFeet(200, 150)
+
+			expect(result.x).toBeCloseTo(expected.x, 10)
+			expect(result.y).toBeCloseTo(expected.y, 10)
+		})
+
+		it('should account for pan offset', () => {
+			const coords = new FieldCoordinateSystem(800, 600)
+			const screenX = 400
+			const screenY = 300
+			const panX = 100
+			const panY = 50
+
+			// With pan, screen position 400 with panX=100 represents canvas position 300
+			const result = coords.screenToFeet(screenX, screenY, 1, panX, panY)
+			const expected = coords.pixelsToFeet(300, 250)
+
+			expect(result.x).toBeCloseTo(expected.x, 10)
+			expect(result.y).toBeCloseTo(expected.y, 10)
+		})
+
+		it('should account for both zoom and pan', () => {
+			const coords = new FieldCoordinateSystem(800, 600)
+			const screenX = 400
+			const screenY = 300
+			const zoom = 2
+			const panX = 100
+			const panY = 50
+
+			// With zoom=2 and pan, screen 400 with panX=100 → (400-100)/2 = 150
+			const result = coords.screenToFeet(screenX, screenY, zoom, panX, panY)
+			const expected = coords.pixelsToFeet(150, 125)
+
+			expect(result.x).toBeCloseTo(expected.x, 10)
+			expect(result.y).toBeCloseTo(expected.y, 10)
+		})
+
+		it('should handle zoom=4 (maximum zoom)', () => {
+			const coords = new FieldCoordinateSystem(800, 600)
+			const screenX = 800
+			const screenY = 600
+			const zoom = 4
+
+			// At 4x zoom, screen 800 represents canvas 200
+			const result = coords.screenToFeet(screenX, screenY, zoom, 0, 0)
+			const expected = coords.pixelsToFeet(200, 150)
+
+			expect(result.x).toBeCloseTo(expected.x, 10)
+			expect(result.y).toBeCloseTo(expected.y, 10)
+		})
+	})
+
+	describe('feetToScreen conversion with zoom and pan', () => {
+		it('should match feetToPixels when zoom=1 and pan=(0,0)', () => {
+			const coords = new FieldCoordinateSystem(800, 600)
+			const feetX = 80
+			const feetY = 60
+
+			const withScreen = coords.feetToScreen(feetX, feetY, 1, 0, 0)
+			const withPixels = coords.feetToPixels(feetX, feetY)
+
+			expect(withScreen.x).toBeCloseTo(withPixels.x, 10)
+			expect(withScreen.y).toBeCloseTo(withPixels.y, 10)
+		})
+
+		it('should apply zoom=2 scaling', () => {
+			const coords = new FieldCoordinateSystem(800, 600)
+			const feetX = 40
+			const feetY = 30
+			const zoom = 2
+
+			// Canvas pixels: (40*5=200, 600-30*5=450)
+			// With zoom=2: (200*2=400, 450*2=900)
+			const result = coords.feetToScreen(feetX, feetY, zoom, 0, 0)
+			const canvasPixels = coords.feetToPixels(feetX, feetY)
+
+			expect(result.x).toBeCloseTo(canvasPixels.x * zoom, 10)
+			expect(result.y).toBeCloseTo(canvasPixels.y * zoom, 10)
+		})
+
+		it('should apply pan offset', () => {
+			const coords = new FieldCoordinateSystem(800, 600)
+			const feetX = 40
+			const feetY = 30
+			const panX = 100
+			const panY = 50
+
+			// Canvas pixels + pan
+			const result = coords.feetToScreen(feetX, feetY, 1, panX, panY)
+			const canvasPixels = coords.feetToPixels(feetX, feetY)
+
+			expect(result.x).toBeCloseTo(canvasPixels.x + panX, 10)
+			expect(result.y).toBeCloseTo(canvasPixels.y + panY, 10)
+		})
+
+		it('should apply both zoom and pan', () => {
+			const coords = new FieldCoordinateSystem(800, 600)
+			const feetX = 40
+			const feetY = 30
+			const zoom = 2
+			const panX = 100
+			const panY = 50
+
+			// Canvas: (200, 450) → zoom: (400, 900) → pan: (500, 950)
+			const result = coords.feetToScreen(feetX, feetY, zoom, panX, panY)
+			const canvasPixels = coords.feetToPixels(feetX, feetY)
+
+			expect(result.x).toBeCloseTo(canvasPixels.x * zoom + panX, 10)
+			expect(result.y).toBeCloseTo(canvasPixels.y * zoom + panY, 10)
+		})
+	})
+
+	describe('round-trip conversion with zoom and pan', () => {
+		it('should be invertible: feetToScreen → screenToFeet', () => {
+			const coords = new FieldCoordinateSystem(800, 600)
+			const originalFeet = { x: 50, y: 75 }
+			const zoom = 2
+			const panX = 100
+			const panY = 50
+
+			const screen = coords.feetToScreen(originalFeet.x, originalFeet.y, zoom, panX, panY)
+			const backToFeet = coords.screenToFeet(screen.x, screen.y, zoom, panX, panY)
+
+			expect(backToFeet.x).toBeCloseTo(originalFeet.x, 10)
+			expect(backToFeet.y).toBeCloseTo(originalFeet.y, 10)
+		})
+
+		it('should be invertible at various zoom levels', () => {
+			const coords = new FieldCoordinateSystem(800, 600)
+			const originalFeet = { x: 80, y: 60 }
+			const zoomLevels = [1, 1.5, 2, 3, 4]
+
+			for (const zoom of zoomLevels) {
+				const screen = coords.feetToScreen(originalFeet.x, originalFeet.y, zoom, 0, 0)
+				const backToFeet = coords.screenToFeet(screen.x, screen.y, zoom, 0, 0)
+
+				expect(backToFeet.x).toBeCloseTo(originalFeet.x, 10)
+				expect(backToFeet.y).toBeCloseTo(originalFeet.y, 10)
+			}
+		})
+
+		it('should be invertible with various pan offsets', () => {
+			const coords = new FieldCoordinateSystem(800, 600)
+			const originalFeet = { x: 80, y: 60 }
+			const panOffsets = [
+				{ panX: 0, panY: 0 },
+				{ panX: 50, panY: 25 },
+				{ panX: -50, panY: -25 },
+				{ panX: 200, panY: 100 },
+			]
+
+			for (const { panX, panY } of panOffsets) {
+				const screen = coords.feetToScreen(originalFeet.x, originalFeet.y, 2, panX, panY)
+				const backToFeet = coords.screenToFeet(screen.x, screen.y, 2, panX, panY)
+
+				expect(backToFeet.x).toBeCloseTo(originalFeet.x, 10)
+				expect(backToFeet.y).toBeCloseTo(originalFeet.y, 10)
+			}
+		})
+	})
 })

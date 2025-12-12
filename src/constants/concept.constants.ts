@@ -72,23 +72,9 @@ export const RELATIVE_SELECTORS: SelectorDefinition[] = [
 	{ id: 'deep_receivers', label: 'Deep Receivers', hasCount: false }
 ]
 
-export const CHIP_COLORS = {
-	formation: 'blue',
-	concept: 'green',
-	concept_group: 'purple',
-	text: 'gray'
-} as const
-
 export const CHIP_STYLES = {
-	formation: 'bg-blue-100 text-blue-700 border-blue-300',
-	concept: 'bg-green-100 text-green-700 border-green-300',
-	concept_group: 'bg-purple-100 text-purple-700 border-purple-300',
-	text: 'bg-gray-100 text-gray-700 border-gray-300'
-} as const
-
-export const CHIP_STYLES_DARK = {
-	formation: 'bg-blue-900/30 text-blue-300 border-blue-700',
-	concept: 'bg-green-900/30 text-green-300 border-green-700',
-	concept_group: 'bg-purple-900/30 text-purple-300 border-purple-700',
-	text: 'bg-gray-700 text-gray-300 border-gray-600'
+	formation: 'bg-secondary text-secondary-foreground border-border',
+	concept: 'bg-secondary text-secondary-foreground border-border',
+	concept_group: 'bg-secondary text-secondary-foreground border-border',
+	text: 'bg-secondary text-secondary-foreground border-border'
 } as const

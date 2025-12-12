@@ -2,7 +2,7 @@ import { describe, test, expect, mock, beforeAll, afterAll, afterEach } from 'bu
 import { cleanup, render, screen } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { PlayEditorPage } from '../../../src/pages/PlayEditorPage'
-import { ThemeProvider } from '../../../src/contexts/ThemeContext'
+import { SettingsProvider } from '../../../src/contexts/SettingsContext'
 import { AuthProvider } from '../../../src/contexts/AuthContext'
 import { QueryProvider } from '../../../src/providers/QueryProvider'
 
@@ -16,11 +16,11 @@ function renderPlayEditor(route: string) {
 					path='/playbooks/:playbookId/play/:playId'
 					element={
 						<QueryProvider>
-							<ThemeProvider>
+							<SettingsProvider>
 								<AuthProvider>
 									<PlayEditorPage />
 								</AuthProvider>
-							</ThemeProvider>
+							</SettingsProvider>
 						</QueryProvider>
 					}
 				/>
@@ -69,11 +69,11 @@ describe('PlayEditorPage - URL Params', () => {
 						path='/test'
 						element={
 							<QueryProvider>
-								<ThemeProvider>
+								<SettingsProvider>
 									<AuthProvider>
 										<PlayEditorPage />
 									</AuthProvider>
-								</ThemeProvider>
+								</SettingsProvider>
 							</QueryProvider>
 						}
 					/>

@@ -14,6 +14,9 @@ interface FreehandCaptureProps {
 	autoCorrect: boolean
 	onCommit: (drawing: Drawing) => void
 	players?: PlayerForSnap[]
+	zoom?: number
+	panX?: number
+	panY?: number
 }
 
 /**
@@ -26,6 +29,9 @@ export function FreehandCapture({
 	autoCorrect,
 	onCommit,
 	players,
+	zoom = 1,
+	panX = 0,
+	panY = 0,
 }: FreehandCaptureProps) {
 	const canvasRef = useRef<HTMLCanvasElement | null>(null)
 	const [isDrawing, setIsDrawing] = useState(false)
@@ -53,18 +59,23 @@ export function FreehandCapture({
 		if (!ctx) return
 
 		const rect = canvas.getBoundingClientRect()
-		const pixel = {
+		const screenRelative = {
 			x: event.clientX - rect.left,
 			y: event.clientY - rect.top,
 		}
-		const feet = coordSystem.pixelsToFeet(pixel.x, pixel.y)
+		// getBoundingClientRect accounts for CSS transform scaling
+		const canvasPixel = {
+			x: screenRelative.x,
+			y: screenRelative.y,
+		}
+		const feet = coordSystem.pixelsToFeet(canvasPixel.x, canvasPixel.y)
 
 		ctx.strokeStyle = style.color
 		ctx.lineWidth = style.strokeWidth * coordSystem.scale
 		ctx.lineCap = 'round'
 		ctx.lineJoin = 'round'
 		ctx.beginPath()
-		ctx.moveTo(pixel.x, pixel.y)
+		ctx.moveTo(canvasPixel.x, canvasPixel.y)
 
 		setPoints([feet])
 		setIsDrawing(true)
@@ -78,13 +89,17 @@ export function FreehandCapture({
 		if (!ctx) return
 
 		const rect = canvas.getBoundingClientRect()
-		const pixel = {
+		const screenRelative = {
 			x: event.clientX - rect.left,
 			y: event.clientY - rect.top,
 		}
-		const feet = coordSystem.pixelsToFeet(pixel.x, pixel.y)
+		const canvasPixel = {
+			x: screenRelative.x,
+			y: screenRelative.y,
+		}
+		const feet = coordSystem.pixelsToFeet(canvasPixel.x, canvasPixel.y)
 
-		ctx.lineTo(pixel.x, pixel.y)
+		ctx.lineTo(canvasPixel.x, canvasPixel.y)
 		ctx.stroke()
 
 		setPoints((prev) => [...prev, feet])
@@ -158,9 +173,10 @@ export function FreehandCapture({
 	function resizeCanvas() {
 		const canvas = canvasRef.current
 		if (!canvas) return
-		const rect = canvas.getBoundingClientRect()
-		canvas.width = rect.width
-		canvas.height = rect.height
+		// coordSystem provides untransformed dimensions
+		const { width, height } = coordSystem.getDimensions()
+		canvas.width = width
+		canvas.height = height
 		resetCanvas()
 	}
 
@@ -171,7 +187,7 @@ export function FreehandCapture({
 		const observer = new ResizeObserver(() => resizeCanvas())
 		observer.observe(canvas)
 		return () => observer.disconnect()
-	}, [])
+	}, [coordSystem])
 
 	return (
 		<canvas

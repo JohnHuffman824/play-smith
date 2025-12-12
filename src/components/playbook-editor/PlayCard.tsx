@@ -1,3 +1,4 @@
+import React from 'react'
 import {
   MoreVertical,
   Edit,
@@ -18,10 +19,6 @@ import {
   PLAY_TYPE_PASS,
   PLAY_TYPE_BADGE_PASS,
   PLAY_TYPE_BADGE_RUN,
-  MAX_VISIBLE_TAGS,
-  TAG_COLORS,
-  DEFAULT_TAG_COLOR,
-  getTagClasses,
 } from './constants/playbook'
 import { formatDateDayMonthYear } from '@/utils/date.utils'
 import { PlayThumbnailSVG } from './PlayThumbnailSVG'
@@ -43,7 +40,6 @@ type PlayCardProps = {
   formation: string
   playType: string
   defensiveFormation: string
-  tags: (string | { name: string; color: string })[]
   lastModified: string
   thumbnail?: string
   drawings?: Drawing[]
@@ -65,17 +61,7 @@ type PlayCardThumbnailProps = {
   name: string
   playType: string
   onOpen: () => void
-}
-
-type PlayCardTagsProps = {
-  tags: (string | { name: string; color: string })[]
-}
-
-function getTagColor(tag: string | { name: string; color: string }) {
-  if (typeof tag === 'object' && tag.color) {
-    return getTagClasses(tag.color)
-  }
-  return TAG_COLORS[typeof tag === 'string' ? tag : tag.name] || DEFAULT_TAG_COLOR
+  onAnimate?: () => void
 }
 
 function PlayCardThumbnail({
@@ -84,7 +70,8 @@ function PlayCardThumbnail({
   players,
   name,
   playType,
-  onOpen
+  onOpen,
+  onAnimate
 }: PlayCardThumbnailProps) {
   const badgeClass = playType == PLAY_TYPE_PASS
     ? PLAY_TYPE_BADGE_PASS
@@ -119,40 +106,26 @@ function PlayCardThumbnail({
           </span>
         </div>
       )}
-    </div>
-  )
-}
 
-
-function PlayCardTags({ tags }: PlayCardTagsProps) {
-  if (tags.length == 0) return null
-
-  const visibleTags = tags.slice(0, MAX_VISIBLE_TAGS)
-  const hiddenCount = tags.length - MAX_VISIBLE_TAGS
-
-  return (
-    <div className="flex flex-wrap gap-1.5 mb-3">
-      {visibleTags.map((tag) => {
-        const colors = getTagColor(tag)
-        const tagName = typeof tag === 'string' ? tag : tag.name
-        return (
-          <span
-            key={tagName}
-            className={`px-2.5 py-1 rounded-full text-xs
-              ${colors.bg} ${colors.text}`}
-          >
-            {tagName}
-          </span>
-        )
-      })}
-      {hiddenCount > 0 && (
-        <span className="px-2.5 py-1 text-muted-foreground text-xs">
-          +{hiddenCount}
-        </span>
+      {onAnimate && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            onAnimate()
+          }}
+          className="absolute left-1/2 top-1/2 z-10 flex size-10 -translate-x-1/2 -translate-y-1/2
+            items-center justify-center rounded-full bg-blue-500 shadow-lg
+            opacity-0 transition-all duration-200
+            group-hover/thumbnail:opacity-100 hover:bg-blue-600 hover:scale-110"
+          aria-label="Animate play"
+        >
+          <Play className="size-5 fill-white text-white" />
+        </button>
       )}
     </div>
   )
 }
+
 
 export function PlayCard({
   id,
@@ -160,7 +133,6 @@ export function PlayCard({
   formation,
   playType,
   defensiveFormation,
-  tags,
   lastModified,
   thumbnail,
   drawings,
@@ -175,7 +147,8 @@ export function PlayCard({
   onDuplicate,
 }: PlayCardProps) {
   const cardClass = `group relative bg-card border border-border
-    rounded-xl overflow-hidden hover:shadow-lg
+    rounded-xl overflow-hidden hover:ring-4 hover:ring-blue-500/50
+    hover:border-blue-500
     transition-all duration-200 ${
       selected ? 'ring-2 ring-primary' : ''
     }`
@@ -189,6 +162,7 @@ export function PlayCard({
         name={name}
         playType={playType}
         onOpen={() => onOpen(id)}
+        onAnimate={onAnimate ? () => onAnimate(id) : undefined}
       />
 
       {onSelect && (
@@ -227,10 +201,12 @@ export function PlayCard({
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onOpen(id)}>
-                <Edit className="w-4 h-4" />
-                Open
-              </DropdownMenuItem>
+              {onAnimate && (
+                <DropdownMenuItem onClick={() => onAnimate(id)}>
+                  <Play className="w-4 h-4" />
+                  Animate
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem onClick={() => onRename(id)}>
                 <Edit className="w-4 h-4" />
                 Rename
@@ -272,8 +248,6 @@ export function PlayCard({
             vs {defensiveFormation}
           </p>
         )}
-
-        <PlayCardTags tags={tags} />
 
         <div className="pt-2 border-t border-border">
           <p className="text-muted-foreground">{formatDateDayMonthYear(lastModified)}</p>

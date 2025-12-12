@@ -13,8 +13,8 @@ interface PlaybookEditorToolbarProps {
   onSectionFilterChange: (sectionId: string | null) => void
 }
 
-const BUTTON_ACTIVE = 'bg-primary text-primary-foreground'
-const BUTTON_INACTIVE = 'hover:bg-accent'
+const BUTTON_ACTIVE = 'bg-action-button text-action-button-foreground hover:bg-action-button/90'
+const BUTTON_INACTIVE = 'border border-border hover:bg-accent'
 const BUTTON_BASE_CLASS = 'px-4 py-2 rounded-lg transition-all duration-200'
 
 export function PlaybookEditorToolbar({

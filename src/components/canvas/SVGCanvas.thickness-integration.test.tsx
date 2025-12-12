@@ -3,7 +3,7 @@ import { cleanup, render, fireEvent } from '@testing-library/react'
 import { SVGCanvas } from './SVGCanvas'
 import { FieldCoordinateSystem } from '../../utils/coordinates'
 import type { Drawing, PathStyle } from '../../types/drawing.types'
-import { ThemeProvider } from '../../contexts/ThemeContext'
+import { SettingsProvider } from '@/contexts/SettingsContext'
 
 /**
  * Integration test for the strokeWidth scaling fix
@@ -49,7 +49,7 @@ describe('SVGCanvas - Line Thickness Integration Test (GREEN)', () => {
 		}
 
 		const { container } = render(
-			<ThemeProvider>
+			<SettingsProvider>
 				<SVGCanvas
 					width={1600}
 					height={800}
@@ -62,7 +62,7 @@ describe('SVGCanvas - Line Thickness Integration Test (GREEN)', () => {
 					eraseSize={10}
 					snapThreshold={10}
 				/>
-			</ThemeProvider>
+			</SettingsProvider>
 		)
 
 		// Verify initial rendering (should be 3px)

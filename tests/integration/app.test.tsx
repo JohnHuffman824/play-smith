@@ -7,7 +7,7 @@ import { describe, it, expect, beforeEach, afterEach, mock } from 'bun:test'
 import { render, screen, waitFor, cleanup } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router-dom'
 import { QueryProvider } from '../../src/providers/QueryProvider'
-import { ThemeProvider } from '../../src/contexts/ThemeContext'
+import { SettingsProvider } from '../../src/contexts/SettingsContext'
 import { AuthProvider } from '../../src/contexts/AuthContext'
 import { routes } from '../../src/router/routes'
 
@@ -22,11 +22,11 @@ function renderApp(initialRoute = '/') {
 
 	return render(
 		<QueryProvider>
-			<ThemeProvider>
+			<SettingsProvider>
 				<AuthProvider>
 					<RouterProvider router={router} />
 				</AuthProvider>
-			</ThemeProvider>
+			</SettingsProvider>
 		</QueryProvider>
 	)
 }

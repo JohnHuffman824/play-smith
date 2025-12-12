@@ -4,6 +4,8 @@ import { usersAPI, getUserById } from '../../src/api/users'
 import { authAPI } from '../../src/api/auth'
 import { teamsAPI } from '../../src/api/teams'
 import { playbooksAPI } from '../../src/api/playbooks'
+import { playbookSharesAPI } from '../../src/api/playbook-shares'
+import { foldersAPI } from '../../src/api/folders'
 import { sectionsAPI } from '../../src/api/sections'
 import { playsAPI } from '../../src/api/plays'
 
@@ -52,10 +54,38 @@ export async function startTestServer(): Promise<{
 				GET: playbooksAPI.list,
 				POST: playbooksAPI.create,
 			},
+			'/api/playbooks/:id/shares': {
+				GET: playbookSharesAPI.listShares,
+				POST: playbookSharesAPI.createShare,
+			},
+			'/api/playbooks/:id/shares/:teamId': {
+				DELETE: playbookSharesAPI.deleteShare,
+			},
+			'/api/playbooks/:id/star': {
+				PUT: playbooksAPI.toggleStar,
+			},
+			'/api/playbooks/:id/restore': {
+				PUT: playbooksAPI.restore,
+			},
+			'/api/playbooks/:id/permanent': {
+				DELETE: playbooksAPI.permanentDelete,
+			},
+			'/api/trash': {
+				DELETE: playbooksAPI.emptyTrash,
+			},
 			'/api/playbooks/:id': {
 				GET: playbooksAPI.get,
 				PUT: playbooksAPI.update,
 				DELETE: playbooksAPI.delete,
+			},
+
+			'/api/folders': {
+				GET: foldersAPI.list,
+				POST: foldersAPI.create,
+			},
+			'/api/folders/:id': {
+				PUT: foldersAPI.update,
+				DELETE: foldersAPI.delete,
 			},
 
 			'/api/playbooks/:playbookId/sections': {

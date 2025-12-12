@@ -1,5 +1,5 @@
 import { X } from 'lucide-react'
-import { useTheme } from '../../../contexts/ThemeContext'
+import { useTheme } from '@/contexts/SettingsContext'
 
 interface ColorPickerDialogProps {
   currentColor: string
@@ -28,8 +28,6 @@ const presetColors = [
 ]
 
 export function ColorPickerDialog({ currentColor, onColorChange, onClose, position, useRelativePosition = false }: ColorPickerDialogProps) {
-  const { theme } = useTheme()
-
   const positionClasses = useRelativePosition
     ? ''
     : position
@@ -39,16 +37,12 @@ export function ColorPickerDialog({ currentColor, onColorChange, onClose, positi
   return (
     <div
       data-color-dialog
-      className={`${useRelativePosition ? '' : `absolute ${positionClasses}`} w-64 rounded-2xl shadow-2xl border p-4 z-50 ${
-      theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-    }`}>
+      className={`${useRelativePosition ? '' : `absolute ${positionClasses}`} w-64 rounded-2xl shadow-2xl border border-border bg-card p-4 z-50`}>
       <div className="flex items-center justify-between mb-4">
-        <span className={theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}>Pick Color</span>
+        <span className="text-foreground">Pick Color</span>
         <button
           onClick={onClose}
-          className={`w-6 h-6 rounded-lg flex items-center justify-center cursor-pointer ${
-            theme === 'dark' ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-500'
-          }`}
+          className="w-6 h-6 rounded-lg flex items-center justify-center cursor-pointer hover:bg-accent text-muted-foreground"
         >
           <X size={16} />
         </button>
@@ -56,7 +50,7 @@ export function ColorPickerDialog({ currentColor, onColorChange, onClose, positi
 
       {/* Custom Color Input */}
       <div className="mb-4">
-        <label className={`block text-xs mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+        <label className="block text-xs mb-2 text-muted-foreground">
           Custom Color
         </label>
         <div className="flex gap-2 items-center">
@@ -64,9 +58,7 @@ export function ColorPickerDialog({ currentColor, onColorChange, onClose, positi
             type="color"
             value={currentColor}
             onChange={(e) => onColorChange(e.target.value)}
-            className={`w-12 h-12 rounded-lg border cursor-pointer ${
-              theme === 'dark' ? 'border-gray-600' : 'border-gray-200'
-            }`}
+            className="w-12 h-12 rounded-lg border border-border cursor-pointer"
           />
           <input
             type="text"
@@ -80,7 +72,7 @@ export function ColorPickerDialog({ currentColor, onColorChange, onClose, positi
 
       {/* Preset Colors */}
       <div>
-        <label className={`block text-xs mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+        <label className="block text-xs mb-2 text-muted-foreground">
           Presets
         </label>
         <div className="grid grid-cols-6 gap-2">
@@ -91,7 +83,7 @@ export function ColorPickerDialog({ currentColor, onColorChange, onClose, positi
               className={`w-10 h-10 rounded-lg transition-all hover:scale-110 cursor-pointer ${
                 currentColor === color.value
                   ? 'ring-2 ring-blue-500 ring-offset-2 scale-110'
-                  : theme === 'dark' ? 'border border-gray-600' : 'border border-gray-200'
+                  : 'border border-border'
               }`}
               style={{ backgroundColor: color.value }}
               title={color.name}

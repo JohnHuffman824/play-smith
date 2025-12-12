@@ -5,7 +5,6 @@ import { PathRenderer } from './PathRenderer'
 import { ControlPointOverlay } from './ControlPointOverlay'
 import { MultiDrawingControlPointOverlay } from './MultiDrawingControlPointOverlay'
 import { FreehandCapture } from './FreehandCapture'
-import { DrawingPropertiesDialog } from '../toolbar/dialogs/DrawingPropertiesDialog'
 import type { PathStyle, Drawing, ControlPoint } from '../../types/drawing.types'
 import { pointToLineDistance } from '../../utils/canvas.utils'
 import type { Coordinate } from '../../types/field.types'
@@ -17,8 +16,6 @@ import {
 	deletePointFromDrawing,
 	insertPointIntoDrawing
 } from '../../utils/drawing.utils'
-import { convertToSharp, extractMainCoordinates } from '../../utils/curve.utils'
-import { processSmoothPath } from '../../utils/smooth-path.utils'
 import { PLAYER_RADIUS_FEET } from '../../constants/field.constants'
 
 // Constants
@@ -46,6 +43,9 @@ interface SVGCanvasProps {
 	eraseSize?: number
 	snapThreshold: number
 	selectedDrawingIds?: string[]
+	zoom?: number
+	panX?: number
+	panY?: number
 	onLinkDrawingToPlayer?: (
 		drawingId: string,
 		pointId: string,
@@ -67,6 +67,7 @@ interface SVGCanvasProps {
 	cursorPosition?: { x: number; y: number } | null
 	onSelectionChange?: (id: string | null) => void
 	onDrawingHoverChange?: (isHovered: boolean) => void
+	onSelectWithPosition?: (id: string, position: { x: number; y: number }) => void
 }
 
 /**
@@ -88,12 +89,16 @@ export function SVGCanvas({
 	eraseSize = 0,
 	snapThreshold,
 	selectedDrawingIds = [],
+	zoom = 1,
+	panX = 0,
+	panY = 0,
 	onLinkDrawingToPlayer,
 	onAddPlayerAtNode,
 	onPlayerLinked,
 	onMovePlayer,
 	onSelectionChange,
 	onDrawingHoverChange,
+	onSelectWithPosition,
 }: SVGCanvasProps) {
 	const [selectedDrawingId, setSelectedDrawingId] = useState<string | null>(
 		null,
@@ -103,10 +108,6 @@ export function SVGCanvas({
 	const [drawingDragState, setDrawingDragState] = useState<{
 		drawingId: string
 		startFeet: Coordinate
-	} | null>(null)
-	const [editingDrawing, setEditingDrawing] = useState<{
-		drawing: Drawing
-		position: { x: number; y: number }
 	} | null>(null)
 	const [wholeDrawingSnapTarget, setWholeDrawingSnapTarget] = useState<{
 		playerId: string
@@ -142,11 +143,7 @@ export function SVGCanvas({
 		setSelectedDrawingId(id)
 		setLastDrawnDrawingId(null)
 		onSelectionChange?.(id)
-
-		const drawing = drawings.find((d) => d.id === id)
-		if (drawing) {
-			setEditingDrawing({ drawing, position })
-		}
+		onSelectWithPosition?.(id, position)
 	}
 
 	function handleDragPoint(
@@ -272,9 +269,9 @@ export function SVGCanvas({
 	function handleDrawingDragMove(event: React.PointerEvent<SVGSVGElement>) {
 		if (!drawingDragState) return
 		const rect = event.currentTarget.getBoundingClientRect()
-		const pixelX = event.clientX - rect.left
-		const pixelY = event.clientY - rect.top
-		const currentFeet = coordSystem.pixelsToFeet(pixelX, pixelY)
+		const screenX = event.clientX - rect.left
+		const screenY = event.clientY - rect.top
+		const currentFeet = coordSystem.screenToFeet(screenX, screenY, zoom || 1, panX || 0, panY || 0)
 		const deltaX = currentFeet.x - drawingDragState.startFeet.x
 		const deltaY = currentFeet.y - drawingDragState.startFeet.y
 
@@ -448,34 +445,7 @@ export function SVGCanvas({
 		drawingId: string,
 		position: { x: number; y: number },
 	) {
-		const drawing = drawings.find((d) => d.id === drawingId)
-		if (drawing) {
-			setEditingDrawing({ drawing, position })
-		}
-	}
-
-	function handleDrawingStyleUpdate(updates: Partial<PathStyle>) {
-		if (!editingDrawing) return
-
-		const drawing = editingDrawing.drawing
-		let newDrawing = { ...drawing, style: { ...drawing.style, ...updates } }
-
-		// If pathMode changed, convert geometry
-		if (updates.pathMode && updates.pathMode !== drawing.style.pathMode) {
-			if (updates.pathMode === 'curve') {
-				// Convert to smooth using smooth pipeline
-				const coords = extractMainCoordinates(drawing)
-				const { points, segments } = processSmoothPath(coords)
-				newDrawing = { ...newDrawing, points, segments }
-			} else {
-				// Convert to sharp using convertToSharp
-				const { points, segments } = convertToSharp(drawing)
-				newDrawing = { ...newDrawing, points, segments }
-			}
-		}
-
-		onChange(drawings.map((d) => (d.id === drawing.id ? newDrawing : d)))
-		setEditingDrawing({ ...editingDrawing, drawing: newDrawing })
+		onSelectWithPosition?.(drawingId, position)
 	}
 
 	return (
@@ -536,6 +506,9 @@ export function SVGCanvas({
 					onDragStart={handleDrawingDragStart}
 					onHover={onDrawingHoverChange}
 					onPathContextMenu={activeTool === 'select' ? handlePathContextMenu : undefined}
+					zoom={zoom}
+					panX={panX}
+					panY={panY}
 				/>
 			))}
 
@@ -549,6 +522,9 @@ export function SVGCanvas({
 					snapThreshold={snapThreshold}
 					cursorPosition={cursorPosition}
 					proximityThreshold={NODE_PROXIMITY_THRESHOLD}
+					zoom={zoom}
+					panX={panX}
+					panY={panY}
 					onDragPoint={activeTool === 'select' ? handleDragPoint : undefined}
 					onMerge={activeTool === 'select' ? handleMerge : undefined}
 					onLinkToPlayer={activeTool === 'select' ? handleLinkToPlayer : undefined}
@@ -573,6 +549,9 @@ export function SVGCanvas({
 					onDragPoint={handleDragPoint}
 					onMerge={handleMerge}
 					onLinkToPlayer={handleLinkToPlayer}
+					zoom={zoom}
+					panX={panX}
+					panY={panY}
 				/>
 			)}
 
@@ -607,6 +586,9 @@ export function SVGCanvas({
 				autoCorrect={autoCorrect}
 				onCommit={handleCommit}
 				players={players}
+				zoom={zoom}
+				panX={panX}
+				panY={panY}
 			/>
 
 		{activeTool === 'draw' && lastDrawnDrawingId && isOverCanvas && (
@@ -627,19 +609,12 @@ export function SVGCanvas({
 						onDragPoint={handleDragPoint}
 						onMerge={handleMerge}
 						onLinkToPlayer={handleLinkToPlayer}
+						zoom={zoom}
+						panX={panX}
+						panY={panY}
 					/>
 				</svg>
 			</div>
-		)}
-
-		{editingDrawing && (
-			<DrawingPropertiesDialog
-				drawing={editingDrawing.drawing}
-				position={editingDrawing.position}
-				onUpdate={handleDrawingStyleUpdate}
-				onClose={() => setEditingDrawing(null)}
-				coordSystem={coordSystem}
-			/>
 		)}
 		</div>
 	)

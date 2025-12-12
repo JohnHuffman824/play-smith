@@ -2,7 +2,7 @@ import { describe, it, expect } from 'bun:test'
 import { render, act } from '@testing-library/react'
 import { FlipController } from '../../../src/components/concepts/FlipController'
 import { PlayProvider, usePlayContext } from '../../../src/contexts/PlayContext'
-import { ThemeProvider } from '../../../src/contexts/ThemeContext'
+import { SettingsProvider } from '../../../src/contexts/SettingsContext'
 import type { Drawing } from '../../../src/types/drawing.types'
 import { useState, useEffect, useCallback } from 'react'
 
@@ -41,11 +41,11 @@ function TestHarness() {
 describe('FlipController', () => {
 	it('provides flip function that preserves drawings', () => {
 		const { getByTestId } = render(
-			<ThemeProvider>
+			<SettingsProvider>
 				<PlayProvider>
 					<TestHarness />
 				</PlayProvider>
-			</ThemeProvider>
+			</SettingsProvider>
 		)
 
 		// Helper to get fresh harness state

@@ -41,6 +41,13 @@ export interface TeamMemberWithUser extends TeamMember {
 	user_name: string
 }
 
+export interface Folder {
+	id: number
+	user_id: number
+	name: string
+	created_at: Date
+}
+
 export interface Playbook {
 	id: number
 	team_id: number | null
@@ -49,6 +56,10 @@ export interface Playbook {
 	created_by: number
 	created_at: Date
 	updated_at: Date
+	folder_id: number | null
+	is_starred: boolean
+	deleted_at: Date | null
+	last_accessed_at: Date | null
 }
 
 export interface PlaybookWithCount extends Playbook {
@@ -217,5 +228,23 @@ export interface PlaybookTag {
 	id: number
 	playbook_id: number
 	tag_id: number
+	created_at: Date
+}
+
+export interface Presentation {
+	id: number
+	playbook_id: number
+	name: string
+	description: string | null
+	created_by: number
+	created_at: Date
+	updated_at: Date
+}
+
+export interface PresentationSlide {
+	id: number
+	presentation_id: number
+	play_id: number
+	display_order: number
 	created_at: Date
 }

@@ -76,6 +76,54 @@ export class FieldCoordinateSystem {
 	getHeightInFeet(): number {
 		return this.containerHeight / this.scale
 	}
+
+	/**
+	 * Convert screen pixel coordinates to feet, accounting for zoom/pan viewport transform
+	 * @param screenX - X coordinate relative to container
+	 * @param screenY - Y coordinate relative to container
+	 * @param zoom - Current zoom level (1.0 = baseline)
+	 * @param panX - Pan offset in pixels
+	 * @param panY - Pan offset in pixels
+	 */
+	screenToFeet(
+		screenX: number,
+		screenY: number,
+		zoom: number,
+		panX: number,
+		panY: number
+	): FeetCoordinate {
+		// Remove transform to get canvas pixels
+		const canvasX = (screenX - panX) / zoom
+		const canvasY = (screenY - panY) / zoom
+
+		// Then convert to feet
+		return this.pixelsToFeet(canvasX, canvasY)
+	}
+
+	/**
+	 * Convert feet to screen pixels, accounting for zoom/pan viewport transform
+	 * @param feetX - X coordinate in feet
+	 * @param feetY - Y coordinate in feet
+	 * @param zoom - Current zoom level (1.0 = baseline)
+	 * @param panX - Pan offset in pixels
+	 * @param panY - Pan offset in pixels
+	 */
+	feetToScreen(
+		feetX: number,
+		feetY: number,
+		zoom: number,
+		panX: number,
+		panY: number
+	): PixelCoordinate {
+		// Convert to canvas pixels
+		const canvasPixels = this.feetToPixels(feetX, feetY)
+
+		// Apply transform
+		return {
+			x: canvasPixels.x * zoom + panX,
+			y: canvasPixels.y * zoom + panY,
+		}
+	}
 }
 
 /**

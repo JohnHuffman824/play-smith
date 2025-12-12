@@ -10,7 +10,7 @@ import type { DrawingState, Tool } from '../types/play.types'
 import type { HashAlignment } from '../types/field.types'
 import type { Drawing } from '../types/drawing.types'
 import type { Formation, BaseConcept, ConceptGroup } from '../types/concept.types'
-import { useTheme } from './ThemeContext'
+import { useTheme } from './SettingsContext'
 import { repositionLinemenForHash } from '../utils/lineman.utils'
 
 interface Player {
@@ -22,11 +22,6 @@ interface Player {
 	isLineman?: boolean
 }
 
-interface PlayCard {
-	id: string
-	name: string
-}
-
 interface PlayState {
 	drawingState: DrawingState
 	formation: string
@@ -36,7 +31,7 @@ interface PlayState {
 	showPlayBar: boolean
 	players: Player[]
 	drawings: Drawing[]
-	playCards: PlayCard[]
+	isDirty: boolean
 }
 
 type PlayAction =
@@ -61,8 +56,8 @@ type PlayAction =
 	| { type: 'APPLY_FORMATION'; formation: Formation }
 	| { type: 'APPLY_CONCEPT'; concept: BaseConcept }
 	| { type: 'APPLY_CONCEPT_GROUP'; conceptGroup: ConceptGroup }
-	| { type: 'ADD_PLAY_CARD' }
-	| { type: 'DELETE_PLAY_CARD'; id: string }
+	| { type: 'MARK_DIRTY' }
+	| { type: 'MARK_CLEAN' }
 
 interface PlayContextType {
 	state: PlayState
@@ -73,8 +68,6 @@ interface PlayContextType {
 	setFormation: (formation: string) => void
 	setPlay: (play: string) => void
 	setDefensiveFormation: (formation: string) => void
-	addPlayCard: () => void
-	deletePlayCard: (id: string) => void
 	setHashAlignment: (alignment: HashAlignment) => void
 	setShowPlayBar: (show: boolean) => void
 	setPlayers: (players: Player[]) => void
@@ -85,6 +78,7 @@ interface PlayContextType {
 	applyFormation: (formation: Formation) => void
 	applyConcept: (concept: BaseConcept) => void
 	applyConceptGroup: (conceptGroup: ConceptGroup) => void
+	markClean: () => void
 }
 
 const PlayContext = createContext<PlayContextType | undefined>(undefined)
@@ -107,7 +101,7 @@ const initialState: PlayState = {
 	showPlayBar: true,
 	players: [],
 	drawings: [],
-	playCards: [],
+	isDirty: false,
 }
 
 type SetToolAction = Extract<PlayAction, { type: 'SET_TOOL' }>
@@ -134,8 +128,6 @@ type UpdateDrawingAction = Extract<PlayAction, { type: 'UPDATE_DRAWING' }>
 type ApplyFormationAction = Extract<PlayAction, { type: 'APPLY_FORMATION' }>
 type ApplyConceptAction = Extract<PlayAction, { type: 'APPLY_CONCEPT' }>
 type ApplyConceptGroupAction = Extract<PlayAction, { type: 'APPLY_CONCEPT_GROUP' }>
-type AddPlayCardAction = Extract<PlayAction, { type: 'ADD_PLAY_CARD' }>
-type DeletePlayCardAction = Extract<PlayAction, { type: 'DELETE_PLAY_CARD' }>
 
 function applySetTool(
 	state: PlayState,
@@ -200,14 +192,14 @@ function applySetPlayers(
 	state: PlayState,
 	action: SetPlayersAction,
 ): PlayState {
-	return { ...state, players: action.players }
+	return { ...state, players: action.players, isDirty: true }
 }
 
 function applyAddPlayer(
 	state: PlayState,
 	action: AddPlayerAction,
 ): PlayState {
-	return { ...state, players: [...state.players, action.player] }
+	return { ...state, players: [...state.players, action.player], isDirty: true }
 }
 
 function applyUpdatePlayer(
@@ -219,6 +211,7 @@ function applyUpdatePlayer(
 		players: state.players.map((player) =>
 			player.id == action.id ? { ...player, ...action.updates } : player,
 		),
+		isDirty: true,
 	}
 }
 
@@ -229,6 +222,7 @@ function applyDeletePlayer(
 	return {
 		...state,
 		players: state.players.filter((player) => player.id != action.id),
+		isDirty: true,
 	}
 }
 
@@ -236,14 +230,14 @@ function applyAddDrawing(
 	state: PlayState,
 	action: AddDrawingAction,
 ): PlayState {
-	return { ...state, drawings: [...state.drawings, action.drawing] }
+	return { ...state, drawings: [...state.drawings, action.drawing], isDirty: true }
 }
 
 function applySetDrawings(
 	state: PlayState,
 	action: SetDrawingsAction,
 ): PlayState {
-	return { ...state, drawings: action.drawings }
+	return { ...state, drawings: action.drawings, isDirty: true }
 }
 
 function applyDeleteDrawing(
@@ -253,6 +247,7 @@ function applyDeleteDrawing(
 	return {
 		...state,
 		drawings: state.drawings.filter((drawing) => drawing.id != action.id),
+		isDirty: true,
 	}
 }
 
@@ -267,11 +262,12 @@ function applyUpdateDrawing(
 				? { ...drawing, ...action.updates }
 				: drawing,
 		),
+		isDirty: true,
 	}
 }
 
 function applyClearCanvas(state: PlayState): PlayState {
-	return { ...state, drawings: [], players: [] }
+	return { ...state, drawings: [], players: [], isDirty: true }
 }
 
 function applyApplyFormation(
@@ -288,7 +284,8 @@ function applyApplyFormation(
 
 	return {
 		...state,
-		players: [...state.players, ...newPlayers]
+		players: [...state.players, ...newPlayers],
+		isDirty: true,
 	}
 }
 
@@ -302,7 +299,8 @@ function applyApplyConcept(
 
 	return {
 		...state,
-		drawings: [...state.drawings, ...newDrawings]
+		drawings: [...state.drawings, ...newDrawings],
+		isDirty: true,
 	}
 }
 
@@ -328,7 +326,7 @@ function applyApplyConceptGroup(
 		}
 	}
 
-	return newState
+	return { ...newState, isDirty: true }
 }
 
 function applyRepositionLinemenForHash(
@@ -339,28 +337,16 @@ function applyRepositionLinemenForHash(
 		...state,
 		hashAlignment: action.alignment,
 		players: repositionLinemenForHash(state.players, action.alignment),
+		isDirty: true,
 	}
 }
 
-function applyAddPlayCard(state: PlayState): PlayState {
-	const newCard: PlayCard = {
-		id: `play-card-${Date.now()}`,
-		name: `Play ${state.playCards.length + 1}`,
-	}
-	return {
-		...state,
-		playCards: [...state.playCards, newCard],
-	}
+function applyMarkDirty(state: PlayState): PlayState {
+	return { ...state, isDirty: true }
 }
 
-function applyDeletePlayCard(
-	state: PlayState,
-	action: DeletePlayCardAction
-): PlayState {
-	return {
-		...state,
-		playCards: state.playCards.filter((card) => card.id !== action.id),
-	}
+function applyMarkClean(state: PlayState): PlayState {
+	return { ...state, isDirty: false }
 }
 
 /**
@@ -410,10 +396,10 @@ function playReducer(state: PlayState, action: PlayAction): PlayState {
 			return applyApplyConcept(state, action)
 		case 'APPLY_CONCEPT_GROUP':
 			return applyApplyConceptGroup(state, action)
-		case 'ADD_PLAY_CARD':
-			return applyAddPlayCard(state)
-		case 'DELETE_PLAY_CARD':
-			return applyDeletePlayCard(state, action)
+		case 'MARK_DIRTY':
+			return applyMarkDirty(state)
+		case 'MARK_CLEAN':
+			return applyMarkClean(state)
 		default:
 			return state
 	}
@@ -503,12 +489,8 @@ export function PlayProvider({ children }: { children: ReactNode }) {
 		dispatch({ type: 'APPLY_CONCEPT_GROUP', conceptGroup })
 	}, [])
 
-	const addPlayCard = useCallback(() => {
-		dispatch({ type: 'ADD_PLAY_CARD' })
-	}, [])
-
-	const deletePlayCard = useCallback((id: string) => {
-		dispatch({ type: 'DELETE_PLAY_CARD', id })
+	const markClean = useCallback(() => {
+		dispatch({ type: 'MARK_CLEAN' })
 	}, [])
 
 	// Save draw color to localStorage when it changes
@@ -527,8 +509,6 @@ export function PlayProvider({ children }: { children: ReactNode }) {
 		setFormation,
 		setPlay,
 		setDefensiveFormation,
-		addPlayCard,
-		deletePlayCard,
 		setHashAlignment,
 		setShowPlayBar,
 		setPlayers,
@@ -539,6 +519,7 @@ export function PlayProvider({ children }: { children: ReactNode }) {
 		applyFormation,
 		applyConcept,
 		applyConceptGroup,
+		markClean,
 	}), [
 		state,
 		setTool,
@@ -546,8 +527,6 @@ export function PlayProvider({ children }: { children: ReactNode }) {
 		setFormation,
 		setPlay,
 		setDefensiveFormation,
-		addPlayCard,
-		deletePlayCard,
 		setHashAlignment,
 		setShowPlayBar,
 		setPlayers,
@@ -558,6 +537,7 @@ export function PlayProvider({ children }: { children: ReactNode }) {
 		applyFormation,
 		applyConcept,
 		applyConceptGroup,
+		markClean,
 	])
 
 	return <PlayContext.Provider value={value}>{children}</PlayContext.Provider>

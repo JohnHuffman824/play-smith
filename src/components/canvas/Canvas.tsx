@@ -3,6 +3,7 @@ import type { DrawingState } from '../../types/play.types'
 import type { HashAlignment } from '../../types/field.types'
 import { useFieldCoordinates } from '../../hooks/useFieldCoordinates'
 import { usePlayContext } from '../../contexts/PlayContext'
+import { useCanvasViewport } from '../../contexts/CanvasViewportContext'
 import { eventBus } from '../../services/EventBus'
 import {
 	PLAYER_RADIUS_FEET,
@@ -16,6 +17,9 @@ import {
 	TOOL_ADD_PLAYER,
 	EVENT_FILL_PLAYER,
 	UNLINK_DISTANCE_FEET,
+	MIN_ZOOM,
+	MAX_ZOOM,
+	ZOOM_SENSITIVITY,
 } from '../../constants/field.constants'
 import { SVGCanvas } from './SVGCanvas'
 import type {
@@ -26,9 +30,12 @@ import type {
 import { FootballField } from '../field/FootballField'
 import { Player } from '../player/Player'
 import { PlayerLabelDialog } from '../player/PlayerLabelDialog'
+import { DrawingPropertiesDialog } from '../toolbar/dialogs/DrawingPropertiesDialog'
 import { Pencil, PaintBucket } from 'lucide-react'
-import { calculateUnlinkPosition } from '../../utils/drawing.utils'
+import { calculateUnlinkPosition, findDrawingSnapTarget } from '../../utils/drawing.utils'
 import { applyLOSSnap } from '../../utils/los-snap.utils'
+import { convertToSharp, extractMainCoordinates } from '../../utils/curve.utils'
+import { processSmoothPath } from '../../utils/smooth-path.utils'
 
 const HEADER_TOOLBAR_HEIGHT = 122
 const PLAY_BAR_HEIGHT = 300
@@ -39,6 +46,7 @@ interface CanvasProps {
 	drawingState: DrawingState
 	hashAlignment: HashAlignment
 	showPlayBar: boolean
+	playId?: string
 	containerMode?: 'viewport' | 'fill'
 	showFieldMarkings?: boolean
 }
@@ -91,10 +99,13 @@ export function Canvas({
   drawingState,
   hashAlignment,
   showPlayBar,
+  playId,
   containerMode = 'viewport',
   showFieldMarkings = false,
 }: CanvasProps) {
   const whiteboardRef = useRef<HTMLDivElement>(null);
+	const panStartRef = useRef<{ x: number; y: number } | null>(null);
+	const panOriginRef = useRef<{ x: number; y: number } | null>(null);
   const [cursorPosition, setCursorPosition] = useState<{
     x: number;
     y: number;
@@ -108,6 +119,10 @@ export function Canvas({
   >(null);
   const [labelDialogPosition, setLabelDialogPosition] =
     useState({ x: 0, y: 0 });
+  const [editingDrawing, setEditingDrawing] = useState<{
+    drawing: Drawing;
+    position: { x: number; y: number };
+  } | null>(null);
 	const { state, setDrawings, setPlayers, dispatch } = usePlayContext()
 	const { drawings = [], players: contextPlayers = [] } = state || {}
 	const players = contextPlayers || []
@@ -121,6 +136,9 @@ export function Canvas({
 		containerWidth: canvasDimensions.width,
 		containerHeight: canvasDimensions.height,
 	})
+
+	// Viewport state for zoom and pan
+	const { zoom, panX, panY, isPanning, panMode, setViewport } = useCanvasViewport()
 
 	const strokeFeet =
 		coordSystem.scale > 0
@@ -263,7 +281,51 @@ export function Canvas({
     };
   }, [showPlayBar]);
 
+	// Attach wheel event listener for zoom (non-passive to allow preventDefault)
+	useEffect(() => {
+		const element = whiteboardRef.current
+		if (!element) return
+
+		element.addEventListener('wheel', handleWheel, { passive: false })
+		return () => element.removeEventListener('wheel', handleWheel)
+	}, [zoom, panX, panY, canvasDimensions])
+
+	// Keyboard event listeners for spacebar pan
+	useEffect(() => {
+		function handleKeyDown(event: KeyboardEvent) {
+			if (event.code === 'Space' && !event.repeat && zoom > MIN_ZOOM && !isPanning) {
+				event.preventDefault()
+				// Don't set isPanning here - that happens on mousedown
+				setViewport({
+					panMode: 'spacebar',
+				})
+			}
+		}
+
+		function handleKeyUp(event: KeyboardEvent) {
+			if (event.code === 'Space' && panMode === 'spacebar') {
+				event.preventDefault()
+				setViewport({
+					isPanning: false,
+					panMode: null,
+				})
+				panStartRef.current = null
+				panOriginRef.current = null
+			}
+		}
+
+		document.addEventListener('keydown', handleKeyDown)
+		document.addEventListener('keyup', handleKeyUp)
+		return () => {
+			document.removeEventListener('keydown', handleKeyDown)
+			document.removeEventListener('keyup', handleKeyUp)
+		}
+	}, [zoom, panMode, isPanning])
+
   function getCursorStyle() {
+		if (isPanning) return 'grabbing'
+		if (panMode === 'spacebar' && zoom > MIN_ZOOM) return 'grab'
+
     switch (drawingState.tool) {
       case TOOL_ERASE:
       case TOOL_DRAW:
@@ -275,6 +337,11 @@ export function Canvas({
     }
   }
 
+  // Helper to determine if custom cursor should be visible
+  function shouldShowCustomCursor(): boolean {
+    return !isPanning && panMode !== 'spacebar'
+  }
+
   function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
     if (!whiteboardRef.current) return;
     const rect = whiteboardRef.current.getBoundingClientRect();
@@ -282,6 +349,20 @@ export function Canvas({
       x: e.clientX - rect.left,
       y: e.clientY - rect.top,
     });
+
+		// Handle panning
+		if (isPanning && panStartRef.current && panOriginRef.current) {
+			const deltaX = e.clientX - panStartRef.current.x
+			const deltaY = e.clientY - panStartRef.current.y
+
+			// 1:1 mouse tracking - no zoom division
+			// panX maps directly to screen pixels due to CSS transform math
+			const newPanX = panOriginRef.current.x + deltaX
+			const newPanY = panOriginRef.current.y + deltaY
+
+			const clamped = clampPan(newPanX, newPanY, zoom)
+			setViewport({ panX: clamped.panX, panY: clamped.panY })
+		}
   }
 
   function handleMouseEnter() {
@@ -293,6 +374,124 @@ export function Canvas({
     setCursorPosition(null);
   }
 
+	// Zoom/Pan helper functions
+	function calculateCursorCenteredZoom(
+		cursorX: number,
+		cursorY: number,
+		oldZoom: number,
+		newZoom: number,
+		oldPanX: number,
+		oldPanY: number
+	): { newPanX: number; newPanY: number } {
+		// Point under cursor in canvas space
+		const canvasX = (cursorX - oldPanX) / oldZoom
+		const canvasY = (cursorY - oldPanY) / oldZoom
+
+		// New pan to keep that point under cursor
+		const newPanX = cursorX - canvasX * newZoom
+		const newPanY = cursorY - canvasY * newZoom
+
+		return { newPanX, newPanY }
+	}
+
+	function clampPan(
+		newPanX: number,
+		newPanY: number,
+		currentZoom: number
+	): { panX: number; panY: number } {
+		const containerWidth = canvasDimensions.width
+		const containerHeight = canvasDimensions.height
+
+		// Content size at current zoom
+		const contentWidth = containerWidth * currentZoom
+		const contentHeight = containerHeight * currentZoom
+
+		// Maximum pan is when content edge reaches container edge
+		const maxPanX = 0 // Left edge cannot go past container left
+		const minPanX = containerWidth - contentWidth // Right edge cannot go past container right
+
+		const maxPanY = 0
+		const minPanY = containerHeight - contentHeight
+
+		return {
+			panX: Math.max(minPanX, Math.min(maxPanX, newPanX)),
+			panY: Math.max(minPanY, Math.min(maxPanY, newPanY)),
+		}
+	}
+
+	function handleWheel(event: WheelEvent) {
+		if (!whiteboardRef.current) return
+
+		event.preventDefault()
+
+		// Get cursor position relative to container
+		const rect = whiteboardRef.current.getBoundingClientRect()
+		const cursorX = event.clientX - rect.left
+		const cursorY = event.clientY - rect.top
+
+		// Calculate zoom delta (positive = zoom in, negative = zoom out)
+		const delta = -event.deltaY * ZOOM_SENSITIVITY
+
+		// Calculate new zoom, clamped to bounds
+		const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoom + delta))
+
+		// Only zoom IN (ignore zoom out past baseline)
+		if (newZoom < MIN_ZOOM) return
+
+		// Calculate cursor-centered zoom
+		const { newPanX, newPanY } = calculateCursorCenteredZoom(
+			cursorX,
+			cursorY,
+			zoom,
+			newZoom,
+			panX,
+			panY
+		)
+
+		// Clamp pan to bounds
+		const clamped = clampPan(newPanX, newPanY, newZoom)
+
+		// Reset pan when returning to baseline
+		if (newZoom === MIN_ZOOM) {
+			setViewport({ zoom: MIN_ZOOM, panX: 0, panY: 0 })
+		} else {
+			setViewport({ zoom: newZoom, panX: clamped.panX, panY: clamped.panY })
+		}
+	}
+
+	function handleMouseDown(event: React.MouseEvent<HTMLDivElement>) {
+		// Spacebar pan start (left-click while spacebar held)
+		if (panMode === 'spacebar' && event.button === 0) {
+			event.preventDefault()
+			setViewport({ isPanning: true })
+			panStartRef.current = { x: event.clientX, y: event.clientY }
+			panOriginRef.current = { x: panX, y: panY }
+			return
+		}
+
+		// Middle mouse button = button 1
+		if (event.button === 1 && zoom > MIN_ZOOM) {
+			event.preventDefault()
+			setViewport({
+				isPanning: true,
+				panMode: 'middleMouse',
+			})
+			panStartRef.current = { x: event.clientX, y: event.clientY }
+			panOriginRef.current = { x: panX, y: panY }
+		}
+	}
+
+	function handleMouseUp() {
+		if (isPanning) {
+			setViewport({
+				isPanning: false,
+				panMode: null,
+			})
+			panStartRef.current = null
+			panOriginRef.current = null
+		}
+	}
+
 	function handleCanvasClick(
 		e: React.MouseEvent<HTMLDivElement>,
 	) {
@@ -300,10 +499,11 @@ export function Canvas({
 		if (!whiteboardRef.current) return
 
 		const rect = whiteboardRef.current.getBoundingClientRect()
-		const pixelX = e.clientX - rect.left
-		const pixelY = e.clientY - rect.top
+		const screenX = e.clientX - rect.left
+		const screenY = e.clientY - rect.top
 
-		const feetCoords = coordSystem.pixelsToFeet(pixelX, pixelY)
+		// Use viewport-aware coordinate conversion
+		const feetCoords = coordSystem.screenToFeet(screenX, screenY, zoom, panX, panY)
 
 		// Apply LOS snapping to initial placement
 		const snappedCoords = applyLOSSnap(feetCoords.x, feetCoords.y)
@@ -317,6 +517,21 @@ export function Canvas({
 		}
 
 		setPlayers([...players, newPlayer])
+
+		// Auto-link to nearby drawing control point if one exists
+		const drawingTarget = findDrawingSnapTarget(
+			snappedCoords,
+			drawings,
+			PLAYER_RADIUS_FEET,
+		)
+		if (drawingTarget) {
+			handleLinkDrawingToPlayer(
+				drawingTarget.drawingId,
+				drawingTarget.pointId,
+				newPlayer.id,
+			)
+		}
+
 		setSelectedPlayerId(newPlayer.id)
 		setLabelDialogPosition({ x: e.clientX, y: e.clientY })
 		setShowLabelDialog(true)
@@ -439,6 +654,47 @@ export function Canvas({
         drawingState.color,
       );
     }
+  }
+
+  function handleDrawingSelectWithDialog(
+    id: string,
+    position: { x: number; y: number }
+  ) {
+    const drawing = drawings.find((d) => d.id == id);
+    if (drawing) {
+      setEditingDrawing({ drawing, position });
+    }
+  }
+
+  function handleDrawingStyleUpdate(updates: Partial<PathStyle>) {
+    if (!editingDrawing) return;
+
+    const drawing = editingDrawing.drawing;
+    let updatedDrawing = {
+      ...drawing,
+      style: { ...drawing.style, ...updates },
+    };
+
+    // If pathMode changed, convert geometry
+    if (updates.pathMode && updates.pathMode !== drawing.style.pathMode) {
+      if (updates.pathMode === 'curve') {
+        // Convert to smooth using smooth pipeline
+        const coords = extractMainCoordinates(drawing);
+        const { points, segments } = processSmoothPath(coords);
+        updatedDrawing = { ...updatedDrawing, points, segments };
+      } else {
+        // Convert to sharp using convertToSharp
+        const { points, segments } = convertToSharp(drawing);
+        updatedDrawing = { ...updatedDrawing, points, segments };
+      }
+    }
+
+    setDrawings(
+      drawings.map((d) =>
+        d.id == editingDrawing.drawing.id ? updatedDrawing : d
+      )
+    );
+    setEditingDrawing({ ...editingDrawing, drawing: updatedDrawing });
   }
 
 	function handleLinkDrawingToPlayer(
@@ -591,13 +847,24 @@ export function Canvas({
 				onMouseMove={handleMouseMove}
 				onMouseEnter={handleMouseEnter}
 				onMouseLeave={handleMouseLeave}
+				onMouseDown={handleMouseDown}
+				onMouseUp={handleMouseUp}
 				onClick={handleCanvasClick}
 			>
-				{/* Field background fills the whiteboard */}
-				<FootballField />
+				{/* Transform container for zoom/pan */}
+				<div
+					style={{
+						transform: `scale(${zoom}) translate(${panX / zoom}px, ${panY / zoom}px)`,
+						transformOrigin: '0 0',
+						width: '100%',
+						height: '100%',
+					}}
+				>
+					{/* Field background fills the whiteboard */}
+					<FootballField />
 
-				{/* SVG layer for structured drawings */}
-				<div className='absolute top-0 left-0 w-full h-full pointer-events-auto overflow-hidden' style={{ borderRadius: 'inherit' }}>
+					{/* SVG layer for structured drawings */}
+					<div className='absolute top-0 left-0 w-full h-full pointer-events-auto overflow-hidden' style={{ borderRadius: 'inherit' }}>
 					<SVGCanvas
 						width={canvasDimensions.width}
 						height={canvasDimensions.height}
@@ -619,27 +886,72 @@ export function Canvas({
 						autoCorrect={true}
 						defaultStyle={defaultPathStyle}
 						snapThreshold={drawingState.snapThreshold}
+						zoom={zoom}
+						panX={panX}
+						panY={panY}
 						onLinkDrawingToPlayer={handleLinkDrawingToPlayer}
 						onAddPlayerAtNode={handleAddPlayerAtNode}
 						onMovePlayer={handleMovePlayerOnly}
 						isOverCanvas={isOverCanvas}
 						cursorPosition={cursorPosition}
+						onSelectWithPosition={handleDrawingSelectWithDialog}
 					/>
 				</div>
 
-				{/* Canvas and interactive overlays */}
-				<div
-					className={cursorOverlayClasses}
-					style={{
-						cursor: getCursorStyle(),
-						pointerEvents: 'none',
-						borderRadius: 'inherit',
+			{/* Players - inside transform so they zoom/pan with content */}
+          <div
+            className="absolute top-0 left-0 w-full h-full overflow-hidden"
+            style={{ pointerEvents: 'none', borderRadius: 'inherit' }}
+          >
+            {players.map((player) => (
+                <Player
+                  key={player.id}
+                  id={player.id}
+                  initialX={player.x}
+                  initialY={player.y}
+                  containerWidth={canvasDimensions.width}
+                  containerHeight={canvasDimensions.height}
+                  label={player.label}
+                  color={player.color}
+                  onPositionChange={handlePlayerPositionChange}
+                  onLabelClick={handlePlayerLabelClick}
+                  onFill={handleFillPlayer}
+                  onDelete={handlePlayerDeleteById}
+                  currentTool={drawingState.tool}
+                  interactable={playerInteractable}
+                  zoom={zoom}
+                  panX={panX}
+                  panY={panY}
+					onHoverChange={(isHovered) => {
+						// Only track hover state when erase tool is active
+						if (drawingState.tool == TOOL_ERASE) {
+							setIsHoveringDeletable(isHovered)
+						}
 					}}
-				>
+                />
+              ))}
+            </div>
+		</div> {/* End transform container */}
+
+		{/* Cursor overlay - OUTSIDE transform so cursors stay at mouse position */}
+		<div
+			className={cursorOverlayClasses}
+			style={{
+				cursor: getCursorStyle(),
+				pointerEvents: 'none',
+				borderRadius: 'inherit',
+				position: 'absolute',
+				top: 0,
+				left: 0,
+				width: '100%',
+				height: '100%',
+			}}
+		>
           {/* Custom Pencil Cursor - only visible when draw tool is active */}
           {drawingState.tool == TOOL_DRAW &&
             isOverCanvas &&
-            cursorPosition && (
+            cursorPosition &&
+            shouldShowCustomCursor() && (
               <div
                 className="absolute pointer-events-none"
                 style={{
@@ -656,7 +968,8 @@ export function Canvas({
           {/* Custom Fill Cursor - paint bucket icon */}
           {drawingState.tool == TOOL_FILL &&
             isOverCanvas &&
-            cursorPosition && (
+            cursorPosition &&
+            shouldShowCustomCursor() && (
               <div
                 className="absolute pointer-events-none"
                 style={{
@@ -674,7 +987,8 @@ export function Canvas({
           {drawingState.tool == TOOL_ERASE &&
             isOverCanvas &&
             cursorPosition &&
-            !isHoveringDeletable && (
+            !isHoveringDeletable &&
+            shouldShowCustomCursor() && (
               <div
                 className="absolute pointer-events-none"
                 style={{
@@ -699,7 +1013,8 @@ export function Canvas({
           {/* Custom Add Player Cursor - Player circle preview */}
           {drawingState.tool == TOOL_ADD_PLAYER &&
             isOverCanvas &&
-            cursorPosition && (
+            cursorPosition &&
+            shouldShowCustomCursor() && (
               <div
                 className="absolute pointer-events-none"
                 style={{
@@ -724,35 +1039,6 @@ export function Canvas({
               </div>
             )}
 
-          <div
-            className="absolute top-0 left-0 w-full h-full overflow-hidden"
-            style={{ pointerEvents: 'none', borderRadius: 'inherit' }}
-          >
-            {players.map((player) => (
-                <Player
-                  key={player.id}
-                  id={player.id}
-                  initialX={player.x}
-                  initialY={player.y}
-                  containerWidth={canvasDimensions.width}
-                  containerHeight={canvasDimensions.height}
-                  label={player.label}
-                  color={player.color}
-                  onPositionChange={handlePlayerPositionChange}
-                  onLabelClick={handlePlayerLabelClick}
-                  onFill={handleFillPlayer}
-                  onDelete={handlePlayerDeleteById}
-                  currentTool={drawingState.tool}
-                  interactable={playerInteractable}
-					onHoverChange={(isHovered) => {
-						// Only track hover state when erase tool is active
-						if (drawingState.tool == TOOL_ERASE) {
-							setIsHoveringDeletable(isHovered)
-						}
-					}}
-                />
-              ))}
-            </div>
         </div>
       </div>
 
@@ -771,6 +1057,17 @@ export function Canvas({
           onUnlink={() => handleUnlinkDrawing(selectedPlayerId)}
           onDelete={handlePlayerDelete}
           onClose={() => setShowLabelDialog(false)}
+        />
+      )}
+
+      {/* Drawing Properties Dialog - outside transform */}
+      {editingDrawing && (
+        <DrawingPropertiesDialog
+          drawing={editingDrawing.drawing}
+          position={editingDrawing.position}
+          onUpdate={handleDrawingStyleUpdate}
+          onClose={() => setEditingDrawing(null)}
+          coordSystem={coordSystem}
         />
       )}
     </div>

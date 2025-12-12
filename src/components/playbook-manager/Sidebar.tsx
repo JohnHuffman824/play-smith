@@ -1,12 +1,25 @@
-import { BookOpen, Folder, Star, Clock, Trash2, Users } from 'lucide-react'
+import { useState } from 'react'
+import { BookOpen, Folder, Star, Clock, Trash2, Users, ChevronDown, ChevronRight } from 'lucide-react'
 import { HEADER_HEIGHT } from '../../constants/layout'
+import type { Folder as FolderType } from '../../db/types'
 
 interface SidebarProps {
 	activeSection: string
 	onSectionChange: (section: string) => void
+	folders: FolderType[]
+	selectedFolderId: number | null
+	onFolderSelect: (folderId: number | null) => void
 }
 
-export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
+export function Sidebar({
+	activeSection,
+	onSectionChange,
+	folders,
+	selectedFolderId,
+	onFolderSelect
+}: SidebarProps) {
+	const [isFoldersExpanded, setIsFoldersExpanded] = useState(true)
+
 	const sections = [
 		{ id: 'all', label: 'All Playbooks', icon: BookOpen },
 		{ id: 'shared', label: 'Shared with me', icon: Users },
@@ -16,8 +29,27 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
 		{ id: 'trash', label: 'Trash', icon: Trash2 },
 	]
 
+	const handleFoldersSectionClick = () => {
+		if (activeSection === 'folders') {
+			// Toggle expansion when already in folders section
+			setIsFoldersExpanded(!isFoldersExpanded)
+		} else {
+			// Switch to folders section and ensure it's expanded
+			onSectionChange('folders')
+			setIsFoldersExpanded(true)
+			// Clear folder selection to show all folders view
+			onFolderSelect(null)
+		}
+	}
+
+	const handleFolderClick = (folderId: number) => {
+		onSectionChange('folders')
+		onFolderSelect(folderId)
+		setIsFoldersExpanded(true)
+	}
+
 	return (
-		<div className="w-64 border-r border-sidebar-border bg-sidebar h-screen sticky top-0 flex flex-col">
+		<div className="border-r border-sidebar-border bg-sidebar h-screen sticky top-0 flex flex-col">
 			{/* Logo/Header */}
 			<div className="border-b border-sidebar-border" style={{ height: `${HEADER_HEIGHT}px` }}>
 				<div className="px-6 h-full flex items-center">
@@ -26,16 +58,18 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
 			</div>
 
 			{/* Navigation */}
-			<nav className="flex-1 px-3 py-4">
+			<nav className="flex-1 px-3 py-4 overflow-y-auto">
 				<ul className="space-y-1">
 					{sections.map((section) => {
 						const Icon = section.icon
 						const isActive = activeSection === section.id
+						const isFoldersSection = section.id === 'folders'
 
 						return (
 							<li key={section.id}>
+								{/* Section Button */}
 								<button
-									onClick={() => onSectionChange(section.id)}
+									onClick={() => isFoldersSection ? handleFoldersSectionClick() : onSectionChange(section.id)}
 									className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 cursor-pointer ${
 										isActive
 											? 'bg-primary/10 text-primary font-medium border border-primary/20'
@@ -43,22 +77,44 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
 									}`}
 								>
 									<Icon className="w-5 h-5" strokeWidth={1.5} />
-									<span>{section.label}</span>
+									<span className="flex-1 text-left">{section.label}</span>
+									{isFoldersSection && folders.length > 0 && (
+										isFoldersExpanded ? (
+											<ChevronDown className="w-4 h-4" />
+										) : (
+											<ChevronRight className="w-4 h-4" />
+										)
+									)}
 								</button>
+
+								{/* Folder List (only for folders section) */}
+								{isFoldersSection && isFoldersExpanded && activeSection === 'folders' && folders.length > 0 && (
+									<ul className="mt-1 ml-6 space-y-1">
+										{folders.map((folder) => {
+											const isFolderSelected = selectedFolderId === folder.id
+											return (
+												<li key={folder.id}>
+													<button
+														onClick={() => handleFolderClick(folder.id)}
+														className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 cursor-pointer text-sm ${
+															isFolderSelected
+																? 'bg-primary/5 text-primary font-medium'
+																: 'text-sidebar-foreground hover:bg-sidebar-accent/30'
+														}`}
+													>
+														<Folder className="w-4 h-4" strokeWidth={1.5} />
+														<span className="truncate">{folder.name}</span>
+													</button>
+												</li>
+											)
+										})}
+									</ul>
+								)}
 							</li>
 						)
 					})}
 				</ul>
 			</nav>
-
-			{/* Storage Info */}
-			<div className="px-6 py-4 border-t border-sidebar-border">
-				<div className="text-sidebar-foreground/60 mb-2">Storage</div>
-				<div className="w-full h-1.5 bg-sidebar-border rounded-full overflow-hidden">
-					<div className="h-full w-[45%] bg-sidebar-primary rounded-full" />
-				</div>
-				<div className="text-sidebar-foreground/60 mt-2">4.5 GB of 10 GB used</div>
-			</div>
 		</div>
 	)
 }
