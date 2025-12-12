@@ -183,10 +183,15 @@ function PlayEditorContent() {
 		async function loadPlay() {
 			if (!playId) return
 
+			// CLEAR STATE BEFORE LOADING NEW PLAY
+			dispatch({ type: 'SET_DRAWINGS', drawings: [] })
+			setPlayers([])
+
 			try {
 				const response = await fetch(`/api/plays/${playId}`)
 				if (!response.ok) {
 					console.error('Failed to load play')
+					setIsPlayLoaded(true)
 					return
 				}
 
@@ -204,14 +209,17 @@ function PlayEditorContent() {
 				if (play.hashAlignment) {
 					dispatch({ type: 'SET_HASH_ALIGNMENT', alignment: play.hashAlignment })
 				}
+
+				// Set players (or default linemen for empty plays)
 				if (play.players?.length > 0) {
 					setPlayers(play.players)
 				} else {
-					// Initialize default linemen for new (empty) plays
 					const hashAlignment = play.hashAlignment || 'middle'
 					const defaultLinemen = createDefaultLinemen(hashAlignment)
 					setPlayers(defaultLinemen)
 				}
+
+				// Set drawings (already cleared above, so this handles all cases)
 				if (play.drawings?.length > 0) {
 					dispatch({ type: 'SET_DRAWINGS', drawings: play.drawings })
 				}
@@ -227,7 +235,6 @@ function PlayEditorContent() {
 				setIsPlayLoaded(true)
 			} catch (error) {
 				console.error('Load error:', error)
-				// Still mark as loaded even on error to avoid infinite loading
 				setIsPlayLoaded(true)
 			}
 		}
