@@ -3,6 +3,7 @@ import index from './index.html'
 import { usersAPI, getUserById } from './api/users'
 import { authAPI } from './api/auth'
 import { playbooksAPI } from './api/playbooks'
+import { presentationsAPI } from './api/presentations'
 import { foldersAPI } from './api/folders'
 import { teamsAPI } from './api/teams'
 import { sectionsAPI } from './api/sections'
@@ -61,6 +62,24 @@ const server = serve({
       GET: playbooksAPI.get,
       PUT: playbooksAPI.update,
       DELETE: playbooksAPI.delete
+    },
+
+    // Presentation API endpoints
+    "/api/playbooks/:playbookId/presentations": {
+      GET: presentationsAPI.list,
+      POST: presentationsAPI.create
+    },
+    "/api/presentations/:presentationId": {
+      GET: presentationsAPI.get,
+      PUT: presentationsAPI.update,
+      DELETE: presentationsAPI.delete
+    },
+    "/api/presentations/:presentationId/slides": {
+      POST: presentationsAPI.addSlide,
+      PUT: presentationsAPI.reorderSlides
+    },
+    "/api/presentations/:presentationId/slides/:slideId": {
+      DELETE: presentationsAPI.removeSlide
     },
 
     // Folder API endpoints
