@@ -594,7 +594,7 @@ function PlayEditorContent() {
 					playbookId={playbookId}
 					onBackToPlaybook={handleBackToPlaybook}
 				/>
-				<div ref={canvasRef} className="relative flex-1">
+				<div className="relative flex-1">
 					<Canvas
 						drawingState={playState.drawingState}
 						hashAlignment={playState.hashAlignment}
