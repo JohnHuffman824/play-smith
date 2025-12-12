@@ -84,3 +84,11 @@ export async function deletePlaybook(id: number): Promise<void> {
 		throw new Error('UNAUTHORIZED')
 	}
 }
+
+export async function togglePlaybookStar(id: number): Promise<Playbook> {
+	const response = await fetch(`/api/playbooks/${id}/star`, {
+		method: 'PUT'
+	})
+	const result = await handleResponse<{ playbook: Playbook }>(response)
+	return result.playbook
+}

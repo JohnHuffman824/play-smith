@@ -8,6 +8,7 @@ import {
 	createPlaybook as apiCreatePlaybook,
 	updatePlaybook as apiUpdatePlaybook,
 	deletePlaybook as apiDeletePlaybook,
+	togglePlaybookStar as apiTogglePlaybookStar,
 	type PlaybookWithCount
 } from '../api/queries/playbookQueries'
 
@@ -20,6 +21,7 @@ interface UsePlaybooksDataReturn {
 	createPlaybook: (name: string, teamId: number | null, description?: string) => Promise<Playbook>
 	updatePlaybook: (id: number, updates: { name?: string; description?: string }) => Promise<void>
 	deletePlaybook: (id: number) => Promise<void>
+	toggleStar: (id: number) => Promise<void>
 	refetch: () => Promise<void>
 }
 
@@ -119,6 +121,31 @@ export function usePlaybooksData(currentTeamId: number | null = null): UsePlaybo
 		}
 	})
 
+	// TOGGLE STAR MUTATION with optimistic update
+	const toggleStarMutation = useMutation({
+		mutationFn: apiTogglePlaybookStar,
+		onMutate: async (id: number) => {
+			await queryClient.cancelQueries({ queryKey: playbookKeys.list() })
+			const previous = queryClient.getQueryData<PlaybookWithCount[]>(playbookKeys.list())
+
+			queryClient.setQueryData<PlaybookWithCount[]>(
+				playbookKeys.list(),
+				old => old?.map(pb => pb.id === id ? { ...pb, is_starred: !pb.is_starred } : pb)
+			)
+
+			return { previous }
+		},
+		onError: (err, variables, context) => {
+			if (context?.previous) {
+				queryClient.setQueryData(playbookKeys.list(), context.previous)
+			}
+			handleUnauthorized(err as Error)
+		},
+		onSettled: () => {
+			queryClient.invalidateQueries({ queryKey: playbookKeys.list() })
+		}
+	})
+
 	// WRAPPER FUNCTIONS (maintain API compatibility)
 	const createPlaybook = async (
 		name: string,
@@ -139,6 +166,10 @@ export function usePlaybooksData(currentTeamId: number | null = null): UsePlaybo
 		await deleteMutation.mutateAsync(id)
 	}
 
+	const toggleStar = async (id: number): Promise<void> => {
+		await toggleStarMutation.mutateAsync(id)
+	}
+
 	const refetch = useCallback(async () => {
 		await queryClient.invalidateQueries({ queryKey: playbookKeys.list() })
 	}, [queryClient])
@@ -152,6 +183,7 @@ export function usePlaybooksData(currentTeamId: number | null = null): UsePlaybo
 		createPlaybook,
 		updatePlaybook,
 		deletePlaybook,
+		toggleStar,
 		refetch
 	}
 }
