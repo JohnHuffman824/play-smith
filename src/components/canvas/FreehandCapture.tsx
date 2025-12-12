@@ -59,18 +59,25 @@ export function FreehandCapture({
 		if (!ctx) return
 
 		const rect = canvas.getBoundingClientRect()
-		const pixel = {
+		// Coordinates relative to the transformed canvas element
+		const screenRelative = {
 			x: event.clientX - rect.left,
 			y: event.clientY - rect.top,
 		}
-		const feet = coordSystem.screenToFeet(pixel.x, pixel.y, zoom, panX, panY)
+		// Convert to canvas internal coordinates (divide by zoom since we're inside transform)
+		const canvasPixel = {
+			x: screenRelative.x / zoom,
+			y: screenRelative.y / zoom,
+		}
+		// Use pixelsToFeet directly (NOT screenToFeet) since we're already in canvas space
+		const feet = coordSystem.pixelsToFeet(canvasPixel.x, canvasPixel.y)
 
 		ctx.strokeStyle = style.color
 		ctx.lineWidth = style.strokeWidth * coordSystem.scale
 		ctx.lineCap = 'round'
 		ctx.lineJoin = 'round'
 		ctx.beginPath()
-		ctx.moveTo(pixel.x, pixel.y)
+		ctx.moveTo(canvasPixel.x, canvasPixel.y)
 
 		setPoints([feet])
 		setIsDrawing(true)
@@ -84,13 +91,20 @@ export function FreehandCapture({
 		if (!ctx) return
 
 		const rect = canvas.getBoundingClientRect()
-		const pixel = {
+		// Coordinates relative to the transformed canvas element
+		const screenRelative = {
 			x: event.clientX - rect.left,
 			y: event.clientY - rect.top,
 		}
-		const feet = coordSystem.screenToFeet(pixel.x, pixel.y, zoom, panX, panY)
+		// Convert to canvas internal coordinates (divide by zoom since we're inside transform)
+		const canvasPixel = {
+			x: screenRelative.x / zoom,
+			y: screenRelative.y / zoom,
+		}
+		// Use pixelsToFeet directly (NOT screenToFeet) since we're already in canvas space
+		const feet = coordSystem.pixelsToFeet(canvasPixel.x, canvasPixel.y)
 
-		ctx.lineTo(pixel.x, pixel.y)
+		ctx.lineTo(canvasPixel.x, canvasPixel.y)
 		ctx.stroke()
 
 		setPoints((prev) => [...prev, feet])
