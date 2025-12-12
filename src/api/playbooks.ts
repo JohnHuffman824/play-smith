@@ -133,5 +133,29 @@ export const playbooksAPI = {
 		await playbookRepo.delete(playbookId)
 
 		return new Response(null, { status: 204 })
+	},
+
+	toggleStar: async (req: Request) => {
+		const userId = await getSessionUser(req)
+		if (!userId) {
+			return Response.json({ error: 'Unauthorized' }, { status: 401 })
+		}
+
+		const playbookId = parseInt(req.params.id)
+		if (isNaN(playbookId)) {
+			return Response.json({ error: 'Invalid playbook ID' }, { status: 400 })
+		}
+
+		const { hasAccess, playbook } = await checkPlaybookAccess(playbookId, userId)
+		if (!playbook) {
+			return Response.json({ error: 'Playbook not found' }, { status: 404 })
+		}
+		if (!hasAccess) {
+			return Response.json({ error: 'Access denied' }, { status: 403 })
+		}
+
+		const updated = await playbookRepo.toggleStar(playbookId)
+
+		return Response.json({ playbook: updated })
 	}
 }

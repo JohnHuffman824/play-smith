@@ -44,6 +44,9 @@ const server = serve({
       GET: playbooksAPI.list,
       POST: playbooksAPI.create
     },
+    "/api/playbooks/:id/star": {
+      PUT: playbooksAPI.toggleStar
+    },
     "/api/playbooks/:id": {
       GET: playbooksAPI.get,
       PUT: playbooksAPI.update,

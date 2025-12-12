@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import React from 'react'
 import {
   MoreVertical,
   Edit,
@@ -8,7 +8,6 @@ import {
   Circle,
   Play
 } from 'lucide-react'
-import { usePlayTransition } from '@/contexts/PlayTransitionContext'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,10 +19,6 @@ import {
   PLAY_TYPE_PASS,
   PLAY_TYPE_BADGE_PASS,
   PLAY_TYPE_BADGE_RUN,
-  MAX_VISIBLE_TAGS,
-  TAG_COLORS,
-  DEFAULT_TAG_COLOR,
-  getTagClasses,
 } from './constants/playbook'
 import { formatDateDayMonthYear } from '@/utils/date.utils'
 import { PlayThumbnailSVG } from './PlayThumbnailSVG'
@@ -45,7 +40,6 @@ type PlayCardProps = {
   formation: string
   playType: string
   defensiveFormation: string
-  tags: (string | { name: string; color: string })[]
   lastModified: string
   thumbnail?: string
   drawings?: Drawing[]
@@ -67,94 +61,9 @@ type PlayCardThumbnailProps = {
   name: string
   playType: string
   onOpen: () => void
+  onAnimate?: () => void
 }
 
-type PlayCardTagsProps = {
-  tags: (string | { name: string; color: string })[]
-}
-
-function getTagColor(tag: string | { name: string; color: string }) {
-  if (typeof tag === 'object' && tag.color) {
-    return getTagClasses(tag.color)
-  }
-  return TAG_COLORS[typeof tag === 'string' ? tag : tag.name] || DEFAULT_TAG_COLOR
-}
-
-function PlayCardThumbnail({
-  thumbnail,
-  drawings,
-  players,
-  name,
-  playType,
-  onOpen
-}: PlayCardThumbnailProps) {
-  const badgeClass = playType == PLAY_TYPE_PASS
-    ? PLAY_TYPE_BADGE_PASS
-    : PLAY_TYPE_BADGE_RUN
-
-  // Use default linemen if no players provided
-  const defaultLinemen = createDefaultLinemen('middle')
-  const displayPlayers = (players && players.length > 0) ? players : defaultLinemen
-
-  return (
-    <div className="relative group/thumbnail">
-      <div
-        onClick={onOpen}
-        className="aspect-video bg-muted flex items-center
-          justify-center cursor-pointer hover:bg-accent
-          transition-colors duration-200"
-      >
-        <PlayThumbnailSVG
-          drawings={drawings || []}
-          players={displayPlayers}
-          className="w-full h-full"
-        />
-      </div>
-
-      {playType && (
-        <div className="absolute top-2 right-2">
-          <span
-            className={`px-2.5 py-1 rounded-md text-xs shadow-sm
-              backdrop-blur-sm ${badgeClass}`}
-          >
-            {playType}
-          </span>
-        </div>
-      )}
-    </div>
-  )
-}
-
-
-function PlayCardTags({ tags }: PlayCardTagsProps) {
-  if (tags.length == 0) return null
-
-  const visibleTags = tags.slice(0, MAX_VISIBLE_TAGS)
-  const hiddenCount = tags.length - MAX_VISIBLE_TAGS
-
-  return (
-    <div className="flex flex-wrap gap-1.5 mb-3">
-      {visibleTags.map((tag) => {
-        const colors = getTagColor(tag)
-        const tagName = typeof tag === 'string' ? tag : tag.name
-        return (
-          <span
-            key={tagName}
-            className={`px-2.5 py-1 rounded-full text-xs
-              ${colors.bg} ${colors.text}`}
-          >
-            {tagName}
-          </span>
-        )
-      })}
-      {hiddenCount > 0 && (
-        <span className="px-2.5 py-1 text-muted-foreground text-xs">
-          +{hiddenCount}
-        </span>
-      )}
-    </div>
-  )
-}
 
 export function PlayCard({
   id,
@@ -162,7 +71,6 @@ export function PlayCard({
   formation,
   playType,
   defensiveFormation,
-  tags,
   lastModified,
   thumbnail,
   drawings,
@@ -176,14 +84,6 @@ export function PlayCard({
   onDelete,
   onDuplicate,
 }: PlayCardProps) {
-  const cardRef = useRef<HTMLDivElement>(null)
-  const { registerCard } = usePlayTransition()
-
-  useEffect(() => {
-    registerCard(id, cardRef.current)
-    return () => registerCard(id, null)
-  }, [id, registerCard])
-
   const cardClass = `group relative bg-card border border-border
     rounded-xl overflow-hidden hover:ring-4 hover:ring-blue-500/50
     hover:border-blue-500
@@ -192,7 +92,7 @@ export function PlayCard({
     }`
 
   return (
-    <div ref={cardRef} className={cardClass}>
+    <div className={cardClass}>
       <PlayCardThumbnail
         thumbnail={thumbnail}
         drawings={drawings}
@@ -200,6 +100,7 @@ export function PlayCard({
         name={name}
         playType={playType}
         onOpen={() => onOpen(id)}
+        onAnimate={onAnimate ? () => onAnimate(id) : undefined}
       />
 
       {onSelect && (
@@ -242,6 +143,12 @@ export function PlayCard({
                 <Edit className="w-4 h-4" />
                 Open
               </DropdownMenuItem>
+              {onAnimate && (
+                <DropdownMenuItem onClick={() => onAnimate(id)}>
+                  <Play className="w-4 h-4" />
+                  Animate
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem onClick={() => onRename(id)}>
                 <Edit className="w-4 h-4" />
                 Rename
@@ -283,8 +190,6 @@ export function PlayCard({
             vs {defensiveFormation}
           </p>
         )}
-
-        <PlayCardTags tags={tags} />
 
         <div className="pt-2 border-t border-border">
           <p className="text-muted-foreground">{formatDateDayMonthYear(lastModified)}</p>

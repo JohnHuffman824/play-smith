@@ -1,5 +1,5 @@
-import { describe, test, expect, mock } from 'bun:test'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { describe, test, expect, mock, afterEach } from 'bun:test'
+import { render, screen, fireEvent, cleanup } from '@testing-library/react'
 import { FormationOnboardingDialog } from './FormationOnboardingDialog'
 
 const mockSystemFormations = [
@@ -12,6 +12,7 @@ const mockTeamFormations = [
 ]
 
 describe('FormationOnboardingDialog', () => {
+  afterEach(cleanup)
   test('shows system default formations', () => {
     render(
       <FormationOnboardingDialog

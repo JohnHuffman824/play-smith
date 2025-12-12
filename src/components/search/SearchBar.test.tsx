@@ -1,8 +1,9 @@
-import { describe, test, expect } from 'bun:test'
-import { render, screen } from '@testing-library/react'
+import { describe, test, expect, afterEach } from 'bun:test'
+import { render, screen, cleanup } from '@testing-library/react'
 import { SearchBar } from './SearchBar'
 
 describe('SearchBar', () => {
+  afterEach(cleanup)
   test('shows "Select a formation" placeholder initially', () => {
     render(<SearchBar teamId="1" onSelect={() => {}} />)
 

@@ -8,12 +8,9 @@ import { ConceptDialog } from '../components/concepts/ConceptDialog'
 import { SelectionOverlay } from '../components/canvas/SelectionOverlay'
 import { SelectedTagsOverlay } from '../components/tags/SelectedTagsOverlay'
 import { TagDialog } from '../components/tags/TagDialog'
-import { CanvasTransitionOverlay } from '../components/canvas/CanvasTransitionOverlay'
 import { useTheme } from '../contexts/ThemeContext'
 import { PlayProvider, usePlayContext } from '../contexts/PlayContext'
 import { ConceptProvider, useConcept } from '../contexts/ConceptContext'
-import { PlayTransitionProvider, usePlayTransition } from '../contexts/PlayTransitionContext'
-import { captureCanvasSnapshot, type CanvasSnapshot } from '../hooks/useCanvasSnapshot'
 import { useConceptData } from '../hooks/useConceptData'
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
 import { useTagsData, type Tag } from '../hooks/useTagsData'
@@ -55,24 +52,6 @@ function PlayEditorContent() {
 	}>()
 	const [teamId, setTeamId] = useState<string | null>(null)
 	const navigate = useNavigate()
-	const canvasRef = useRef<HTMLDivElement>(null)
-	const { getCardPosition } = usePlayTransition()
-
-	// Use refs for transition data that doesn't need to trigger re-renders
-	const transitionDataRef = useRef<{
-		snapshot: CanvasSnapshot | null
-		sourceRect: DOMRect | null
-		targetRect: DOMRect | null
-		targetPlayId: string | null
-	}>({
-		snapshot: null,
-		sourceRect: null,
-		targetRect: null,
-		targetPlayId: null,
-	})
-
-	// Only isAnimating needs to be in state to trigger overlay re-render
-	const [isTransitioning, setIsTransitioning] = useState(false)
 
 	const {
 		state: playState,
@@ -523,49 +502,6 @@ function PlayEditorContent() {
 		}
 	}
 
-	function handleOpenPlayWithAnimation(targetPlayId: string) {
-		const snapshot = captureCanvasSnapshot(canvasRef.current)
-		const sourceRect = canvasRef.current?.getBoundingClientRect() ?? null
-		const targetRect = getCardPosition(targetPlayId)
-
-		if (!snapshot || !sourceRect || !targetRect) {
-			// Fallback: navigate immediately
-			navigate(`/playbooks/${playbookId}/play/${targetPlayId}`)
-			return
-		}
-
-		// Store transition data in ref (doesn't trigger re-render)
-		transitionDataRef.current = {
-			snapshot,
-			sourceRect,
-			targetRect,
-			targetPlayId,
-		}
-
-		// Only set isAnimating in state to trigger overlay render
-		setIsTransitioning(true)
-	}
-
-	function handleTransitionComplete() {
-		const { targetPlayId } = transitionDataRef.current
-
-		// Clear transition data
-		transitionDataRef.current = {
-			snapshot: null,
-			sourceRect: null,
-			targetRect: null,
-			targetPlayId: null,
-		}
-
-		// Stop animation
-		setIsTransitioning(false)
-
-		// Navigate to target play
-		if (targetPlayId) {
-			navigate(`/playbooks/${playbookId}/play/${targetPlayId}`)
-		}
-	}
-
 	async function handleDeletePlay() {
 		if (!playId) return
 
@@ -642,13 +578,6 @@ function PlayEditorContent() {
 
 	return (
 		<main className={`flex h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
-			<CanvasTransitionOverlay
-				snapshot={transitionDataRef.current.snapshot}
-				sourceRect={transitionDataRef.current.sourceRect}
-				targetRect={transitionDataRef.current.targetRect}
-				isAnimating={isTransitioning}
-				onAnimationComplete={handleTransitionComplete}
-			/>
 			<Toolbar
 				drawingState={playState.drawingState}
 				setDrawingState={setDrawingState}
@@ -683,7 +612,7 @@ function PlayEditorContent() {
 					plays={playbookPlays}
 					currentPlayId={playId}
 					showPlayBar={playState.showPlayBar}
-					onOpenPlay={handleOpenPlayWithAnimation}
+					onOpenPlay={(targetPlayId) => navigate(`/playbooks/${playbookId}/play/${targetPlayId}`)}
 					onAddPlay={handleAddPlay}
 					isAddingPlay={isAddingPlay}
 				onRenamePlay={handleRenamePlay}
@@ -825,12 +754,10 @@ function PlayEditorContent() {
 
 export function PlayEditorPage() {
 	return (
-		<PlayTransitionProvider>
-			<ConceptProvider>
-				<PlayProvider>
-					<PlayEditorContent />
-				</PlayProvider>
-			</ConceptProvider>
-		</PlayTransitionProvider>
+		<ConceptProvider>
+			<PlayProvider>
+				<PlayEditorContent />
+			</PlayProvider>
+		</ConceptProvider>
 	)
 }

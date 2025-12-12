@@ -6,7 +6,7 @@ import { Modal } from '@/components/shared/Modal'
 import { Input } from '../ui/input'
 import { SettingsDialog } from '@/components/shared/SettingsDialog'
 import { ShareDialog } from '@/components/shared/ShareDialog'
-import { PlayViewerModal } from '@/components/animation/PlayViewerModal'
+import { AnimationDialog } from '@/components/animation/AnimationDialog'
 import { ThemeProvider, useTheme } from '@/contexts/ThemeContext'
 import { usePlaybookData } from '@/hooks/usePlaybookData'
 import {
@@ -473,6 +473,7 @@ function PlaybookEditorContent({
                         selectedPlays={selectedPlays}
                         onSelect={togglePlaySelection}
                         onOpen={handleOpenPlay}
+                        onAnimate={handleAnimatePlay}
                         onRename={handleRenamePlay}
                         onDelete={handleDeletePlay}
                         onDuplicate={handleDuplicatePlay}
@@ -667,20 +668,13 @@ function PlaybookEditorContent({
         </div>
       </Modal>
 
-      {/* Play Animation Viewer Modal */}
-      {showPlayViewer && viewingPlayId && playbookId && (
-        <PlayViewerModal
-          isOpen={showPlayViewer}
-          onClose={handleClosePlayViewer}
-          playbookId={playbookId}
-          initialPlayId={viewingPlayId}
-          plays={allPlays.map(play => ({
-            id: play.id,
-            name: play.name,
-          }))}
-          canEdit={true}
-        />
-      )}
+      {/* Play Animation Dialog */}
+      <AnimationDialog
+        isOpen={showPlayViewer}
+        onClose={handleClosePlayViewer}
+        playId={viewingPlayId}
+        playName={allPlays.find(p => p.id === viewingPlayId)?.name}
+      />
     </div>
   )
 }

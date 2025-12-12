@@ -4,7 +4,8 @@ import {
   Trash2,
   Copy,
   CheckCircle2,
-  Circle
+  Circle,
+  Play
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -25,6 +26,7 @@ type PlayListViewProps = {
   selectedPlays: Set<string>
   onSelect: (id: string) => void
   onOpen: (id: string) => void
+  onAnimate?: (id: string) => void
   onRename: (id: string) => void
   onDelete: (id: string) => void
   onDuplicate: (id: string) => void
@@ -35,6 +37,7 @@ export function PlayListView({
   selectedPlays,
   onSelect,
   onOpen,
+  onAnimate,
   onRename,
   onDelete,
   onDuplicate,
@@ -163,6 +166,12 @@ export function PlayListView({
                       <Edit className="w-4 h-4" />
                       Open
                     </DropdownMenuItem>
+                    {onAnimate && (
+                      <DropdownMenuItem onClick={() => onAnimate(play.id)}>
+                        <Play className="w-4 h-4" />
+                        Animate
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem onClick={() => onRename(play.id)}>
                       <Edit className="w-4 h-4" />
                       Rename

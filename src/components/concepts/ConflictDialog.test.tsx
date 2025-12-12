@@ -1,8 +1,9 @@
-import { describe, test, expect, mock } from 'bun:test'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { describe, test, expect, mock, afterEach } from 'bun:test'
+import { render, screen, fireEvent, cleanup } from '@testing-library/react'
 import { ConflictDialog } from './ConflictDialog'
 
 describe('ConflictDialog', () => {
+  afterEach(cleanup)
   test('shows existing assignment and new assignment', () => {
     render(
       <ConflictDialog

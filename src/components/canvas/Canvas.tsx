@@ -1,5 +1,4 @@
 import { useRef, useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
 import type { DrawingState } from '../../types/play.types'
 import type { HashAlignment } from '../../types/field.types'
 import { useFieldCoordinates } from '../../hooks/useFieldCoordinates'
@@ -18,11 +17,6 @@ import {
 	EVENT_FILL_PLAYER,
 	UNLINK_DISTANCE_FEET,
 } from '../../constants/field.constants'
-import {
-	CANVAS_FADE_DURATION_S,
-	CANVAS_FADE_DELAY_S,
-	CANVAS_FADE_SCALE_START,
-} from '../../constants/animation.constants'
 import { SVGCanvas } from './SVGCanvas'
 import type {
 	ControlPoint,
@@ -596,13 +590,6 @@ export function Canvas({
 	return (
 		<div className={containerClasses}>
 			{/* Whiteboard frame with field background */}
-			<motion.div
-				key={playId}
-				className="w-full"
-				initial={{ opacity: 0, scale: CANVAS_FADE_SCALE_START }}
-				animate={{ opacity: 1, scale: 1 }}
-				transition={{ duration: CANVAS_FADE_DURATION_S, delay: CANVAS_FADE_DELAY_S }}
-			>
 			<div
 				ref={whiteboardRef}
 				className={whiteboardClasses}
@@ -803,7 +790,6 @@ export function Canvas({
           onClose={() => setShowLabelDialog(false)}
         />
       )}
-			</motion.div>
     </div>
   );
 }

@@ -55,14 +55,14 @@ export function PlayCardsSection({
 			className={`border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'} relative`}
 			style={{
 				height: showPlayBar ? '340px' : '0px',
-				overflow: 'hidden',
+				overflow: 'visible',
 				zIndex: 0,
 				transition: 'height 800ms ease-in-out',
 			}}
 		>
 			{/* Render content when visible OR during hide animation (delayed unmount) */}
 			{shouldRenderContent && (
-				<div className="h-[340px] px-4 pt-4 pb-4 flex items-start">
+				<div className="h-[340px] px-4 pt-4 flex items-start">
 					<div
 						ref={scrollContainerRef}
 						className="flex gap-4 overflow-x-auto overflow-y-visible py-2"

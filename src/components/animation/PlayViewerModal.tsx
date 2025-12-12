@@ -4,9 +4,10 @@
  * Fetches full play content (players, drawings) on-demand from API.
  */
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { X, Pencil, Loader2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '../ui/button'
 import { cn } from '../ui/utils'
 import {
@@ -88,12 +89,17 @@ function PlayViewerContent({
 			: null
 	)
 
+	const previousPlayIdRef = useRef<string | null>(null)
+
 	useEffect(() => {
-		if (playTiming) {
+		const currentPlayId = playContent?.id ?? null
+
+		if (playTiming && currentPlayId !== previousPlayIdRef.current) {
+			previousPlayIdRef.current = currentPlayId
 			stop()
 			loadPlay(playTiming)
 		}
-	}, [playTiming, loadPlay, stop])
+	}, [playTiming, playContent?.id, loadPlay, stop])
 
 	useEffect(() => {
 		function handleKeyDown(e: KeyboardEvent) {
@@ -114,7 +120,13 @@ function PlayViewerContent({
 		playContent?.name || currentMetadata.name || 'Untitled Play'
 
 	return (
-		<div className='fixed inset-0 z-50 flex flex-col bg-black'>
+		<motion.div
+			initial={{ opacity: 0 }}
+			animate={{ opacity: 1 }}
+			exit={{ opacity: 0 }}
+			transition={{ duration: 0.2 }}
+			className='fixed inset-0 z-50 flex flex-col bg-black'
+		>
 			{/* Header */}
 			<div
 				className={cn(
@@ -180,7 +192,7 @@ function PlayViewerContent({
 					hasNextPlay={currentIndex < totalPlays - 1}
 				/>
 			</div>
-		</div>
+		</motion.div>
 	)
 }
 
@@ -220,23 +232,25 @@ export function PlayViewerModal({
 		setCurrentIndex((prev) => Math.min(plays.length - 1, prev + 1))
 	}, [plays.length])
 
-	if (!isOpen || !currentMetadata) return null
-
 	return (
-		<AnimationProvider>
-			<PlayViewerContent
-				playbookId={playbookId}
-				playContent={playContent}
-				currentMetadata={currentMetadata}
-				currentIndex={currentIndex}
-				totalPlays={plays.length}
-				isLoading={isLoading}
-				error={error}
-				onClose={onClose}
-				onPrevPlay={handlePrevPlay}
-				onNextPlay={handleNextPlay}
-				canEdit={canEdit}
-			/>
-		</AnimationProvider>
+		<AnimatePresence>
+			{isOpen && currentMetadata && (
+				<AnimationProvider>
+					<PlayViewerContent
+						playbookId={playbookId}
+						playContent={playContent}
+						currentMetadata={currentMetadata}
+						currentIndex={currentIndex}
+						totalPlays={plays.length}
+						isLoading={isLoading}
+						error={error}
+						onClose={onClose}
+						onPrevPlay={handlePrevPlay}
+						onNextPlay={handleNextPlay}
+						canEdit={canEdit}
+					/>
+				</AnimationProvider>
+			)}
+		</AnimatePresence>
 	)
 }

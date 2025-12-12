@@ -3,7 +3,7 @@
  * Renders the football field, animated routes, and player positions.
  */
 
-import { useRef, useEffect, useState, useMemo } from 'react'
+import { useRef, useEffect, useState, useMemo, useCallback } from 'react'
 import { cn } from '../ui/utils'
 import { FootballField } from '../field/FootballField'
 import { AnimatedPlayer } from './AnimatedPlayer'
@@ -81,6 +81,10 @@ export function AnimationCanvas({
 		return map
 	}, [state.playerStates])
 
+	const handleDimensionsChange = useCallback((w: number, h: number) => {
+		setDimensions({ width: w, height: h })
+	}, [])
+
 	if (dimensions.width === 0 || dimensions.height === 0) {
 		return (
 			<div ref={containerRef} className={cn('size-full', className)} />
@@ -92,9 +96,7 @@ export function AnimationCanvas({
 			ref={containerRef}
 			className={cn('relative size-full overflow-hidden', className)}
 		>
-			<FootballField
-				onDimensionsChange={(w, h) => setDimensions({ width: w, height: h })}
-			/>
+			<FootballField onDimensionsChange={handleDimensionsChange} />
 
 			<svg className='pointer-events-none absolute inset-0 size-full'>
 				{drawings.map((drawing) => {

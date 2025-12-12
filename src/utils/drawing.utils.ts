@@ -91,6 +91,52 @@ export function findPlayerSnapTarget(
 	return closest
 }
 
+export interface DrawingSnapTarget {
+	drawingId: string
+	pointId: string
+	point: Coordinate
+	distance: number
+}
+
+export function findDrawingSnapTarget(
+	position: Coordinate,
+	drawings: Drawing[],
+	threshold: number,
+): DrawingSnapTarget | null {
+	let closest: DrawingSnapTarget | null = null
+
+	for (const drawing of drawings) {
+		// Skip drawings that already have a player linked
+		if (drawing.playerId) continue
+
+		// Check start and end points only (not intermediate points)
+		const startPoint = getDrawingStartPoint(drawing)
+		const endPoint = getDrawingEndPoint(drawing)
+		const candidates = [startPoint, endPoint].filter(
+			(point): point is ControlPoint => Boolean(point),
+		)
+
+		for (const point of candidates) {
+			const dx = position.x - point.x
+			const dy = position.y - point.y
+			const distance = Math.sqrt(dx * dx + dy * dy)
+
+			if (distance > threshold) continue
+
+			if (!closest || distance < closest.distance) {
+				closest = {
+					drawingId: drawing.id,
+					pointId: point.id,
+					point: { x: point.x, y: point.y },
+					distance,
+				}
+			}
+		}
+	}
+
+	return closest
+}
+
 export function calculateUnlinkPosition(
 	playerPos: Coordinate,
 	secondToLastPoint: Coordinate,

@@ -10,6 +10,7 @@ import { Canvas } from '../canvas/Canvas'
 import { ConceptToolbar } from './ConceptToolbar'
 import { FlipController } from './FlipController'
 import { TargetingTooltip } from './TargetingTooltip'
+import { ConceptTypeTooltip } from './ConceptTypeTooltip'
 import { PlayProvider } from '../../contexts/PlayContext'
 import type { Tool } from '../../types/play.types'
 import { generateThumbnail } from '../../utils/thumbnail'
@@ -23,6 +24,7 @@ import {
 	SelectValue
 } from '../ui/select'
 import { Input } from '../ui/input'
+import { Checkbox } from '../ui/checkbox'
 
 interface ConceptDialogProps {
 	isOpen: boolean
@@ -366,30 +368,30 @@ export function ConceptDialog({
 						</button>
 
 						{/* Concept Type Flags */}
-						<div className="flex items-center gap-3 ml-4 pl-4 border-l border-gray-300 dark:border-gray-600">
+						<div className="flex items-center gap-4 ml-4">
+							<div className="flex items-center gap-2">
+								<label className="text-sm font-medium">Type:</label>
+								<ConceptTypeTooltip />
+							</div>
 							<label className="flex items-center gap-2 cursor-pointer">
-								<input
-									type="checkbox"
+								<Checkbox
 									checked={isMotion}
-									onChange={(e) => {
-										setIsMotion(e.target.checked)
-										if (e.target.checked) setIsModifier(false)
+									onCheckedChange={(checked) => {
+										setIsMotion(checked === true)
+										if (checked) setIsModifier(false)
 									}}
-									className="cursor-pointer"
 								/>
-								<span className="text-sm font-medium">Motion</span>
+								<span className="text-sm">Motion</span>
 							</label>
 							<label className="flex items-center gap-2 cursor-pointer">
-								<input
-									type="checkbox"
+								<Checkbox
 									checked={isModifier}
-									onChange={(e) => {
-										setIsModifier(e.target.checked)
-										if (e.target.checked) setIsMotion(false)
+									onCheckedChange={(checked) => {
+										setIsModifier(checked === true)
+										if (checked) setIsMotion(false)
 									}}
-									className="cursor-pointer"
 								/>
-								<span className="text-sm font-medium">Modifier</span>
+								<span className="text-sm">Modifier</span>
 							</label>
 						</div>
 					</div>
