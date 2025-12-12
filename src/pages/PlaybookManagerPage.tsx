@@ -230,7 +230,10 @@ export function PlaybookManagerPage() {
 				/>
 			</ResizablePanel>
 
-			<ResizableHandle withHandle />
+			<ResizableHandle
+			withHandle
+			className="hover:bg-sidebar-accent active:bg-sidebar-border transition-colors duration-200"
+		/>
 
 			<ResizablePanel defaultSize={100 - initialSidebarPercent} minSize={50}>
 				<div className="flex flex-col h-full overflow-hidden">
