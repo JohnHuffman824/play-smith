@@ -330,6 +330,11 @@ export function Canvas({
     }
   }
 
+  // Helper to determine if custom cursor should be visible
+  function shouldShowCustomCursor(): boolean {
+    return !isPanning && panMode !== 'spacebar'
+  }
+
   function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
     if (!whiteboardRef.current) return;
     const rect = whiteboardRef.current.getBoundingClientRect();
@@ -856,7 +861,8 @@ export function Canvas({
           {/* Custom Pencil Cursor - only visible when draw tool is active */}
           {drawingState.tool == TOOL_DRAW &&
             isOverCanvas &&
-            cursorPosition && (
+            cursorPosition &&
+            shouldShowCustomCursor() && (
               <div
                 className="absolute pointer-events-none"
                 style={{
@@ -873,7 +879,8 @@ export function Canvas({
           {/* Custom Fill Cursor - paint bucket icon */}
           {drawingState.tool == TOOL_FILL &&
             isOverCanvas &&
-            cursorPosition && (
+            cursorPosition &&
+            shouldShowCustomCursor() && (
               <div
                 className="absolute pointer-events-none"
                 style={{
@@ -891,7 +898,8 @@ export function Canvas({
           {drawingState.tool == TOOL_ERASE &&
             isOverCanvas &&
             cursorPosition &&
-            !isHoveringDeletable && (
+            !isHoveringDeletable &&
+            shouldShowCustomCursor() && (
               <div
                 className="absolute pointer-events-none"
                 style={{
@@ -916,7 +924,8 @@ export function Canvas({
           {/* Custom Add Player Cursor - Player circle preview */}
           {drawingState.tool == TOOL_ADD_PLAYER &&
             isOverCanvas &&
-            cursorPosition && (
+            cursorPosition &&
+            shouldShowCustomCursor() && (
               <div
                 className="absolute pointer-events-none"
                 style={{
