@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import {
   MoreVertical,
   Edit,
@@ -7,6 +8,7 @@ import {
   Circle,
   Play
 } from 'lucide-react'
+import { usePlayTransition } from '@/contexts/PlayTransitionContext'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -174,14 +176,23 @@ export function PlayCard({
   onDelete,
   onDuplicate,
 }: PlayCardProps) {
+  const cardRef = useRef<HTMLDivElement>(null)
+  const { registerCard } = usePlayTransition()
+
+  useEffect(() => {
+    registerCard(id, cardRef.current)
+    return () => registerCard(id, null)
+  }, [id, registerCard])
+
   const cardClass = `group relative bg-card border border-border
-    rounded-xl overflow-hidden hover:shadow-lg
+    rounded-xl overflow-hidden hover:ring-4 hover:ring-blue-500/50
+    hover:border-blue-500
     transition-all duration-200 ${
       selected ? 'ring-2 ring-primary' : ''
     }`
 
   return (
-    <div className={cardClass}>
+    <div ref={cardRef} className={cardClass}>
       <PlayCardThumbnail
         thumbnail={thumbnail}
         drawings={drawings}
