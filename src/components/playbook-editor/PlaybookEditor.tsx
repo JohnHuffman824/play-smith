@@ -137,57 +137,7 @@ function PlaybookEditorContent({
     }
   }, [theme])
 
-  // Show loading state
-  if (isLoadingData) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading playbook...</p>
-        </div>
-      </div>
-    )
-  }
-
-  // Show error state
-  if (dataError) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">Error</h1>
-          <p className="text-gray-600 mb-6">{dataError}</p>
-          <button
-            onClick={onBack}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer"
-          >
-            Back to Playbooks
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  const allPlays = sections.flatMap((section) =>
-    section.plays.map((play) => ({ ...play, sectionId: section.id }))
-  )
-
-  const filteredSections = sections.map((section) => ({
-    ...section,
-    plays: section.plays.filter(
-      (play) =>
-        play.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        play.formation.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        play.tags.some((tag) => 
-          tag.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-    ),
-  })).filter((section) => section.plays.length > 0)
-
-  const displayedSections = activeSectionFilter
-    ? filteredSections.filter((section) => section.id == activeSectionFilter)
-    : filteredSections
-
-  // Concept filtering
+  // Concept filtering (must be before early returns to follow Rules of Hooks)
   const filteredConcepts = useMemo(() => {
     let items: Array<{
       id: number; name: string; type: 'concept' | 'formation' | 'group';
@@ -237,6 +187,56 @@ function PlaybookEditorContent({
 
     return items
   }, [concepts, formations, conceptGroups, conceptFilter, searchQuery])
+
+  // Show loading state
+  if (isLoadingData) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading playbook...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show error state
+  if (dataError) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">Error</h1>
+          <p className="text-gray-600 mb-6">{dataError}</p>
+          <button
+            onClick={onBack}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer"
+          >
+            Back to Playbooks
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  const allPlays = sections.flatMap((section) =>
+    section.plays.map((play) => ({ ...play, sectionId: section.id }))
+  )
+
+  const filteredSections = sections.map((section) => ({
+    ...section,
+    plays: section.plays.filter(
+      (play) =>
+        play.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        play.formation.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        play.tags.some((tag) => 
+          tag.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+    ),
+  })).filter((section) => section.plays.length > 0)
+
+  const displayedSections = activeSectionFilter
+    ? filteredSections.filter((section) => section.id == activeSectionFilter)
+    : filteredSections
 
   // Concept handlers
   const handleEditConcept = (id: number, type: 'concept' | 'formation' | 'group') => {
