@@ -3,6 +3,7 @@ import index from './index.html'
 import { usersAPI, getUserById } from './api/users'
 import { authAPI } from './api/auth'
 import { playbooksAPI } from './api/playbooks'
+import { playbookSharesAPI } from './api/playbook-shares'
 import { foldersAPI } from './api/folders'
 import { teamsAPI } from './api/teams'
 import { sectionsAPI } from './api/sections'
@@ -56,6 +57,13 @@ const server = serve({
     },
     "/api/trash": {
       DELETE: playbooksAPI.emptyTrash
+    },
+    "/api/playbooks/:id/shares": {
+      GET: playbookSharesAPI.listShares,
+      POST: playbookSharesAPI.createShare
+    },
+    "/api/playbooks/:id/shares/:teamId": {
+      DELETE: playbookSharesAPI.deleteShare
     },
     "/api/playbooks/:id": {
       GET: playbooksAPI.get,

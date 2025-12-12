@@ -79,7 +79,7 @@ export function ConceptToolbar({
 	})
 
 	return (
-		<div className="w-20 h-full flex flex-col items-center justify-center bg-white dark:bg-gray-800" style={{ gap: '12px' }}>
+		<div className="w-20 h-full flex flex-col items-center justify-center bg-card border-r border-border" style={{ gap: '12px' }}>
 			{/* Tools */}
 			{TOOLS.map(tool => {
 				const Icon = tool.icon
@@ -143,9 +143,7 @@ export function ConceptToolbar({
 					className={`w-14 h-14 rounded-xl flex items-center justify-center transition-all cursor-pointer relative ${
 						showColorPicker
 							? 'bg-blue-500 text-white shadow-lg scale-105'
-							: theme === 'dark'
-								? 'bg-gray-700 hover:bg-gray-600 text-gray-300'
-								: 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+							: 'bg-secondary text-secondary-foreground hover:bg-accent'
 					}`}
 					aria-label="Color picker"
 				>

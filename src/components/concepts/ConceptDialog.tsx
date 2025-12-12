@@ -181,7 +181,7 @@ export function ConceptDialog({
 
 	return (
 		<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-			<div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-[85vw] h-[85vh] max-w-6xl flex flex-col">
+			<div className="bg-card rounded-lg shadow-xl w-[85vw] h-[85vh] max-w-6xl flex flex-col">
 				{/* Name and Scope */}
 				<div className="px-6 py-4 flex items-start gap-4">
 					<div className="flex-1">
@@ -215,7 +215,7 @@ export function ConceptDialog({
 									px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer
 									${scope === 'team'
 										? 'bg-blue-500 text-white'
-										: 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+										: 'bg-secondary text-secondary-foreground hover:bg-accent'
 									}
 								`}
 							>
@@ -228,7 +228,7 @@ export function ConceptDialog({
 									px-4 py-2 rounded-md text-sm font-medium transition-colors
 									${scope === 'playbook'
 										? 'bg-blue-500 text-white'
-										: 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+										: 'bg-secondary text-secondary-foreground hover:bg-accent'
 									}
 									${!playbookId ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
 								`}
@@ -240,7 +240,7 @@ export function ConceptDialog({
 
 					<button
 						onClick={onClose}
-						className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors cursor-pointer ml-auto"
+						className="p-2 hover:bg-accent rounded transition-colors cursor-pointer ml-auto"
 						aria-label="Close dialog"
 					>
 						<X className="w-5 h-5" />
@@ -280,7 +280,7 @@ export function ConceptDialog({
 						/>
 
 						{/* Canvas */}
-						<div ref={canvasContainerRef} className="flex-1 flex flex-col rounded-2xl border-2 border-gray-300 dark:border-gray-600">
+						<div ref={canvasContainerRef} className="flex-1 flex flex-col rounded-2xl border-2 border-border">
 							<Canvas
 								drawingState={{
 									tool: selectedTool,
@@ -360,7 +360,7 @@ export function ConceptDialog({
 						{/* Flip Button */}
 						<button
 							onClick={handleFlip}
-							className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-2 cursor-pointer"
+							className="px-3 py-1.5 border border-border rounded-md hover:bg-accent transition-colors flex items-center gap-2 cursor-pointer"
 							title="Flip concept horizontally"
 						>
 							<FlipHorizontal className="w-4 h-4" />
@@ -400,7 +400,7 @@ export function ConceptDialog({
 					<div className="flex items-center gap-2">
 						<button
 							onClick={onClose}
-							className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+							className="px-4 py-2 border border-border rounded-md hover:bg-accent transition-colors cursor-pointer"
 						>
 							Cancel
 						</button>

@@ -113,12 +113,8 @@ export function CallSheetExportDialog({
 								onClick={() => toggleSection(section.id)}
 								className={`p-3 rounded-lg cursor-pointer transition-all ${
 									isSelected
-										? theme === 'dark'
-											? 'bg-blue-900/30 border-2 border-blue-500'
-											: 'bg-blue-50 border-2 border-blue-500'
-										: theme === 'dark'
-											? 'bg-gray-700 border-2 border-transparent hover:border-gray-600'
-											: 'bg-gray-50 border-2 border-transparent hover:border-gray-300'
+										? 'bg-blue-500/10 border-2 border-blue-500'
+										: 'bg-secondary border-2 border-transparent hover:border-border'
 								}`}
 							>
 								<div className="flex items-center justify-between">
@@ -130,18 +126,10 @@ export function CallSheetExportDialog({
 											className="w-5 h-5 cursor-pointer"
 										/>
 										<div>
-											<div
-												className={`font-medium ${
-													theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
-												}`}
-											>
+											<div className="font-medium text-foreground">
 												{section.name}
 											</div>
-											<div
-												className={`text-sm ${
-													theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-												}`}
-											>
+											<div className="text-sm text-muted-foreground">
 												{section.plays.length} play{section.plays.length !== 1 ? 's' : ''}
 											</div>
 										</div>
@@ -153,12 +141,8 @@ export function CallSheetExportDialog({
 				</div>
 
 				{/* Summary */}
-				<div
-					className={`p-3 rounded-lg mb-4 ${
-						theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'
-					}`}
-				>
-					<div className={theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}>
+				<div className="p-3 rounded-lg mb-4 bg-secondary">
+					<div className="text-secondary-foreground">
 						<span className="font-medium">{selectedCount}</span> section
 						{selectedCount !== 1 ? 's' : ''} selected • <span className="font-medium">{totalPlays}</span> total play
 						{totalPlays !== 1 ? 's' : ''}
@@ -170,12 +154,8 @@ export function CallSheetExportDialog({
 					<button
 						onClick={onClose}
 						disabled={exporting}
-						className={`px-4 py-2 rounded-xl transition-all ${
+						className={`px-4 py-2 rounded-xl transition-all bg-secondary text-secondary-foreground hover:bg-accent ${
 							exporting ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-						} ${
-							theme === 'dark'
-								? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-								: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
 						}`}
 					>
 						Cancel

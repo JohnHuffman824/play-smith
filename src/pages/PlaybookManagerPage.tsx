@@ -10,6 +10,7 @@ import { Modal } from '../components/playbook-manager/Modal'
 import { SettingsDialog } from '../components/playbook-manager/SettingsDialog'
 import { ManageTeamsDialog } from '../components/playbook-manager/ManageTeamsDialog'
 import { NewFolderDialog } from '../components/playbook-manager/NewFolderDialog'
+import { SharePlaybookDialog } from '../components/playbook-manager/SharePlaybookDialog'
 import { Input } from '../components/ui/input'
 
 export function PlaybookManagerPage() {
@@ -42,6 +43,10 @@ export function PlaybookManagerPage() {
 	const [showSettingsDialog, setShowSettingsDialog] = useState(false)
 	const [showManageTeamsDialog, setShowManageTeamsDialog] = useState(false)
 	const [showNewFolderDialog, setShowNewFolderDialog] = useState(false)
+	const [showShareDialog, setShowShareDialog] = useState(false)
+	const [sharePlaybookId, setSharePlaybookId] = useState<number | null>(null)
+	const [sharePlaybookName, setSharePlaybookName] = useState('')
+	const [sharePlaybookTeamId, setSharePlaybookTeamId] = useState<number | null>(null)
 	const [newPlaybookName, setNewPlaybookName] = useState('')
 
 	const personalPlaybooks = useMemo(
@@ -56,6 +61,11 @@ export function PlaybookManagerPage() {
 			pb.name.toLowerCase().includes(searchQuery.toLowerCase())
 		),
 		[allTeamPlaybooks, searchQuery]
+	)
+
+	const playbooks = useMemo(
+		() => [...personalPlaybooks, ...teamPlaybooks],
+		[personalPlaybooks, teamPlaybooks]
 	)
 
 	const handleCreatePlaybook = async () => {
@@ -105,7 +115,13 @@ export function PlaybookManagerPage() {
 	}
 
 	const handleShare = (id: number) => {
-		// TODO: Implement share functionality
+		const playbook = playbooks.find(pb => pb.id === id)
+		if (playbook) {
+			setSharePlaybookId(id)
+			setSharePlaybookName(playbook.name)
+			setSharePlaybookTeamId(playbook.team_id)
+			setShowShareDialog(true)
+		}
 	}
 
 	const handleExportPlaybook = (id: number) => {
@@ -311,6 +327,22 @@ export function PlaybookManagerPage() {
 				isOpen={showNewFolderDialog}
 				onClose={() => setShowNewFolderDialog(false)}
 			/>
+
+			{/* Share Playbook Dialog */}
+			{sharePlaybookId && (
+				<SharePlaybookDialog
+					isOpen={showShareDialog}
+					onClose={() => {
+						setShowShareDialog(false)
+						setSharePlaybookId(null)
+						setSharePlaybookName('')
+						setSharePlaybookTeamId(null)
+					}}
+					playbookId={sharePlaybookId}
+					playbookName={sharePlaybookName}
+					currentTeamId={sharePlaybookTeamId}
+				/>
+			)}
 		</div>
 	)
 }

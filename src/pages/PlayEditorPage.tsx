@@ -167,6 +167,9 @@ function PlayEditorContent() {
 						body: JSON.stringify({ tag_ids: selectedTags.map(t => t.id) })
 					})
 
+					// Mark as clean after successful save
+					markClean()
+
 					eventBus.emit('canvas:save-complete', { success: true })
 				}
 			} catch (error) {
@@ -180,7 +183,7 @@ function PlayEditorContent() {
 
 		eventBus.on('canvas:save', handleSave)
 		return () => eventBus.off('canvas:save', handleSave)
-	}, [playId, playState.players, playState.drawings, playState.play, playState.hashAlignment, selectedTags])
+	}, [playId, playState.players, playState.drawings, playState.play, playState.hashAlignment, selectedTags, markClean])
 
 	// Load play data on mount - also sets teamId for concept data
 	useEffect(() => {
@@ -241,13 +244,8 @@ function PlayEditorContent() {
 				// Mark play as loaded after all data is fetched
 				setIsPlayLoaded(true)
 
-				// Store initial state for unsaved changes detection
-				setInitialPlayState({
-					players: play.players?.length > 0
-						? play.players
-						: createDefaultLinemen(play.hashAlignment || 'middle'),
-					drawings: play.drawings || []
-				})
+				// Mark as clean after loading play data
+				markClean()
 			} catch (error) {
 				console.error('Load error:', error)
 				setIsPlayLoaded(true)
@@ -255,7 +253,7 @@ function PlayEditorContent() {
 		}
 
 		loadPlay()
-	}, [playId]) // eslint-disable-line react-hooks/exhaustive-deps
+	}, [playId, markClean]) // eslint-disable-line react-hooks/exhaustive-deps
 
 	// Fetch all plays in the playbook for the play bar
 	useEffect(() => {
@@ -335,20 +333,8 @@ function PlayEditorContent() {
 		return () => eventBus.off('tags:openDialog', handleOpenTagDialog)
 	}, [])
 
-	function hasUnsavedChanges(): boolean {
-		if (!initialPlayState) return false
-
-		// Compare players
-		const playersChanged = JSON.stringify(playState.players) !== JSON.stringify(initialPlayState.players)
-
-		// Compare drawings
-		const drawingsChanged = JSON.stringify(playState.drawings) !== JSON.stringify(initialPlayState.drawings)
-
-		return playersChanged || drawingsChanged
-	}
-
 	function handleBackToPlaybook() {
-		if (hasUnsavedChanges()) {
+		if (playState.isDirty) {
 			setShowUnsavedChangesDialog(true)
 			return
 		}
@@ -698,20 +684,14 @@ function PlayEditorContent() {
 							setTargetPlayId(null)
 							setTargetPlayName('')
 						}}
-						className="px-4 py-2 border border-gray-300
-							dark:border-gray-600 rounded-md
-							hover:bg-gray-100 dark:hover:bg-gray-700
-							transition-colors cursor-pointer"
+						className="px-4 py-2 border border-border rounded-lg hover:bg-accent transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
 					>
 						Cancel
 					</button>
 					<button
 						onClick={confirmRename}
 						disabled={!targetPlayName.trim()}
-						className="px-4 py-2 bg-blue-500 hover:bg-blue-600
-							text-white rounded-md transition-colors
-							disabled:opacity-50 disabled:cursor-not-allowed
-							cursor-pointer"
+						className="px-4 py-2 bg-action-button text-action-button-foreground hover:bg-action-button/90 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
 					>
 						Rename
 					</button>
@@ -739,18 +719,13 @@ function PlayEditorContent() {
 							setShowDeleteModal(false)
 							setTargetPlayId(null)
 						}}
-						className="px-4 py-2 border border-gray-300
-							dark:border-gray-600 rounded-md
-							hover:bg-gray-100 dark:hover:bg-gray-700
-							transition-colors cursor-pointer"
+						className="px-4 py-2 border border-border rounded-lg hover:bg-accent transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
 					>
 						Cancel
 					</button>
 					<button
 						onClick={confirmDeleteFromBar}
-						className="px-4 py-2 bg-red-500 hover:bg-red-600
-							text-white rounded-md transition-colors
-							cursor-pointer"
+						className="px-4 py-2 bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-lg transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
 					>
 						Delete
 					</button>

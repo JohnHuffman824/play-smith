@@ -12,7 +12,8 @@
 
 | Pattern | Classes |
 |---------|---------|
-| Button | `px-4 py-2 rounded-lg transition-all duration-200 cursor-pointer` |
+| Action Button | `px-4 py-2 rounded-lg bg-action-button text-action-button-foreground hover:bg-action-button/90 transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50` |
+| Button (Base) | `px-4 py-2 rounded-lg transition-all duration-200 cursor-pointer` |
 | Card | `bg-card border border-border rounded-xl p-4` |
 | Input | `px-4 py-2.5 bg-input-background rounded-lg border-0 outline-none focus:ring-2 focus:ring-ring/20` |
 | Dialog | `rounded-2xl shadow-2xl border border-border p-6 z-50` |
@@ -33,6 +34,7 @@ bg-popover text-popover-foreground
 // Semantic Colors
 bg-primary text-primary-foreground
 bg-secondary text-secondary-foreground
+bg-action-button text-action-button-foreground  // High-level action buttons (blue)
 bg-destructive text-destructive-foreground
 bg-muted text-muted-foreground
 bg-accent text-accent-foreground
@@ -1589,22 +1591,23 @@ export function ShareDialog({ isOpen, onClose }: ShareDialogProps) {
 
 ### Preferred Button Styling
 
-**Default Recommendation:** Use **light blue** (`bg-blue-500` / `bg-primary`) for most interactive buttons
+**Default Recommendation:** Use `bg-action-button text-action-button-foreground` for high-level action buttons
 
-The blue color provides:
-- Strong visual affordance for clickable elements
+The action-button token provides:
+- **Blue color** (#3b82f6) for strong visual affordance
 - Consistent with sports/team aesthetic
 - High contrast in both light and dark modes
 - Clear distinction from background elements
+- Full theme support across light and dark modes
 
 ### Button Color Hierarchy
 
-| Priority | Style | Use Case |
-|----------|-------|----------|
-| **Primary** | `bg-blue-500 text-white` or `bg-primary text-primary-foreground` | Main actions, CTAs, important interactive elements |
-| **Secondary** | `bg-secondary text-secondary-foreground` | Supporting actions |
-| **Ghost/Subtle** | `hover:bg-accent` | Tertiary actions, less emphasis |
-| **Destructive** | `bg-destructive text-destructive-foreground` | Delete, remove actions |
+| Priority | Style | Use Case | Example |
+|----------|-------|----------|---------|
+| **Action Button** | `bg-action-button text-action-button-foreground` | Primary actions, navigation, CTAs, confirmations | "Back to Playbook", "Save", "Rename", "Create" |
+| **Destructive** | `bg-destructive text-destructive-foreground` | Delete, remove, dangerous actions | "Delete", "Remove", "Cancel Subscription" |
+| **Secondary** | `bg-secondary text-secondary-foreground` | Supporting actions, badges, chips | Tags, labels, info badges |
+| **Ghost/Subtle** | `hover:bg-accent` with `border-border` | Tertiary actions, cancel buttons | "Cancel" in dialogs, dismiss actions |
 
 ### Examples
 

@@ -86,6 +86,24 @@ function initializeSchema() {
 	sqlite.run(`CREATE INDEX IF NOT EXISTS idx_playbooks_starred ON playbooks(is_starred) WHERE is_starred = 1`)
 	sqlite.run(`CREATE INDEX IF NOT EXISTS idx_playbooks_deleted ON playbooks(deleted_at) WHERE deleted_at IS NOT NULL`)
 
+	// Playbook shares table
+	sqlite.run(`
+		CREATE TABLE IF NOT EXISTS playbook_shares (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			playbook_id INTEGER NOT NULL,
+			shared_with_team_id INTEGER NOT NULL,
+			permission TEXT NOT NULL DEFAULT 'view',
+			shared_by INTEGER NOT NULL,
+			shared_at TEXT DEFAULT CURRENT_TIMESTAMP,
+			UNIQUE (playbook_id, shared_with_team_id),
+			FOREIGN KEY (playbook_id) REFERENCES playbooks(id) ON DELETE CASCADE,
+			FOREIGN KEY (shared_with_team_id) REFERENCES teams(id) ON DELETE CASCADE,
+			FOREIGN KEY (shared_by) REFERENCES users(id)
+		)
+	`)
+
+	sqlite.run(`CREATE INDEX IF NOT EXISTS idx_playbook_shares_shared_team ON playbook_shares(shared_with_team_id)`)
+
 	// Sections table
 	sqlite.run(`
 		CREATE TABLE IF NOT EXISTS sections (
