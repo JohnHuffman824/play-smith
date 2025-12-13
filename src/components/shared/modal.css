@@ -39,3 +39,15 @@
 .modal-body {
   padding: 1rem 1.5rem;
 }
+
+/* || Close Button */
+.modal-close-button {
+  height: auto;
+  width: auto;
+  padding: 0.25rem;
+}
+
+.modal-close-button svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}

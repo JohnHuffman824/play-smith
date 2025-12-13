@@ -40,9 +40,9 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
             onClick={onClose}
             variant="ghost"
             size="icon"
-            className="h-auto w-auto p-1"
+            className="modal-close-button"
           >
-            <X className="w-5 h-5" />
+            <X />
           </Button>
         </div>
 
