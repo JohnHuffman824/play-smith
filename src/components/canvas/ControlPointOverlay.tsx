@@ -210,9 +210,10 @@ export function ControlPointOverlay({
 				}
 
 				const pixel = coordSystem.feetToPixels(point.x, point.y)
-				// Control node colors: light mode = white fill + black outline, dark mode = dark fill + white outline
-				const nodeFill = theme === 'dark' ? '#1f1f1f' : 'white'
-				const nodeStroke = theme === 'dark' ? 'white' : 'black'
+				// Control node colors from CSS variables
+				const computedStyle = getComputedStyle(document.documentElement)
+				const nodeFill = computedStyle.getPropertyValue('--control-point-fill').trim() || 'white'
+				const nodeStroke = computedStyle.getPropertyValue('--control-point-stroke').trim() || 'black'
 
 				return (
 					<circle
