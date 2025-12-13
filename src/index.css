@@ -241,6 +241,9 @@ button {
   font-size: 1rem;
   font-weight: 500;
   line-height: 1.5;
+  border: none;
+  background: none;
+  color: inherit;
 }
 
 input {
@@ -470,3 +473,24 @@ html {
 /* Yellow utilities for star */
 .fill-yellow-400 { fill: #facc15; }
 .text-yellow-400 { color: #facc15; }
+
+/* Border utilities */
+.border { border-width: 1px; border-style: solid; }
+.border-b { border-bottom-width: 1px; border-bottom-style: solid; }
+.border-border { border-color: var(--border); }
+
+/* Background utilities */
+.bg-card { background-color: var(--card); }
+.bg-border { background-color: var(--border); }
+.bg-action-button { background-color: var(--action-button); }
+.hover\:bg-action-button\/90:hover { background-color: color-mix(in oklch, var(--action-button) 90%, transparent); }
+
+/* Text utilities */
+.text-action-button-foreground { color: var(--action-button-foreground); }
+
+/* Width/Height utilities (additional) */
+.w-px { width: 1px; }
+.h-6 { height: 1.5rem; }
+
+/* Rounded corners */
+.rounded-lg { border-radius: 0.5rem; }

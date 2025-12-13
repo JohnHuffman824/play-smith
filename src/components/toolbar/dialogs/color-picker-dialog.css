@@ -1,18 +1,18 @@
 /* || Base styles */
 .color-picker-dialog {
-  width: 280px;
-  border-radius: 16px;
-  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  width: 17.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 1.5rem 3rem -0.75rem rgb(0 0 0 / 0.25);
   border: 1px solid var(--border);
   background: var(--popover);
-  padding: 16px;
+  padding: 1rem;
   z-index: 50;
 }
 
 .color-picker-dialog[data-positioned="true"] {
   position: absolute;
-  left: 96px;
-  top: 288px;
+  left: 6rem;
+  top: 18rem;
 }
 
 /* || Header */
@@ -20,7 +20,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 1rem;
 }
 
 .color-picker-dialog-title {
@@ -29,7 +29,7 @@
 
 /* || Sections */
 .color-picker-dialog-section {
-  margin-bottom: 16px;
+  margin-bottom: 1rem;
 }
 
 .color-picker-dialog-section:last-child {
@@ -39,29 +39,29 @@
 .color-picker-dialog-label {
   display: block;
   font-size: 0.75rem;
-  margin-bottom: 8px;
+  margin-bottom: 0.5rem;
   color: var(--muted-foreground);
 }
 
 /* || Custom color inputs */
 .color-picker-dialog-custom {
   display: flex;
-  gap: 8px;
+  gap: 0.5rem;
   align-items: center;
 }
 
 .color-picker-dialog-color-input {
-  width: 48px;
-  height: 48px;
-  border-radius: 8px;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.5rem;
   border: 1px solid var(--border);
   cursor: pointer;
 }
 
 .color-picker-dialog-text-input {
   flex: 1;
-  padding: 8px 12px;
-  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
   border: 1px solid var(--input);
   font-size: 0.875rem;
   background: var(--input-background);
@@ -76,13 +76,13 @@
 .color-picker-dialog-preset-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
+  gap: 0.5rem;
 }
 
 .color-picker-dialog-preset-button {
   width: 100%;
   aspect-ratio: 1;
-  border-radius: 8px;
+  border-radius: 0.5rem;
   transition: all 200ms;
   cursor: pointer;
   border: 1px solid var(--border);
@@ -93,6 +93,6 @@
 }
 
 .color-picker-dialog-preset-button[data-selected="true"] {
-  box-shadow: 0 0 0 2px var(--action-button), 0 0 0 4px var(--background);
+  box-shadow: 0 0 0 0.125rem var(--action-button), 0 0 0 0.25rem var(--background);
   transform: scale(1.1);
 }

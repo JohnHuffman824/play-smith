@@ -1,7 +1,7 @@
 /* || Base styles */
 .play-card {
   position: relative;
-  width: 300px;
+  width: 100%;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 12px;
@@ -187,17 +187,23 @@
 
 .play-card-defensive-formation {
   color: var(--muted-foreground);
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
-/* || Footer */
-.play-card-footer {
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
+/* || Tags */
+.play-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+  min-height: 22px;
 }
 
-.play-card-date {
-  color: var(--muted-foreground);
-  line-height: 1.2;
-  margin: 0;
+.play-card-tag {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid;
+  white-space: nowrap;
 }

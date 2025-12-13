@@ -16,6 +16,7 @@ import { ConceptCard } from './ConceptCard'
 import type { ConceptFilter } from './ConceptsToolbar'
 import { ConceptDialog } from '@/components/concepts/ConceptDialog'
 import type { BaseConcept } from '@/types/concept.types'
+import { IconButton } from '../ui/icon-button'
 import {
   Tooltip,
   TooltipContent,
@@ -488,13 +489,14 @@ function PlaybookEditorContent({
         <div className="playbook-editor-header">
           <div className="playbook-editor-header-content">
             <div className="playbook-editor-header-left">
-              <button
-                onClick={onBack}
-                className="playbook-editor-icon-button"
-                title="Back to Playbooks"
-              >
-                <ArrowLeft className="icon-md" />
-              </button>
+              <TooltipProvider>
+                <IconButton
+                  icon={ArrowLeft}
+                  tooltip="Back to Playbooks"
+                  onClick={onBack}
+                  variant="ghost"
+                />
+              </TooltipProvider>
               <div>
                 <div className="playbook-editor-title-row">
                   <h1>{playbookName}</h1>
@@ -512,72 +514,70 @@ function PlaybookEditorContent({
                 value={searchQuery}
                 onChange={setSearchQuery}
                 placeholder="Search plays, formations, tags..."
-                className="min-w-[400px]"
+                className="playbook-editor-search-input"
               />
             </div>
 
             <div className="playbook-editor-header-right">
-              <button
-                onClick={handleImport}
-                className="playbook-editor-icon-button"
-                title="Import Plays"
-              >
-                <Upload className="icon-md" />
-              </button>
-              <button
-                onClick={handleExport}
-                className="playbook-editor-icon-button"
-                title={exportTitle}
-              >
-                <Download className="icon-md" />
-              </button>
+              <TooltipProvider>
+                <IconButton
+                  icon={Upload}
+                  tooltip="Import Plays"
+                  onClick={handleImport}
+                  variant="ghost"
+                />
+                <IconButton
+                  icon={Download}
+                  tooltip={exportTitle}
+                  onClick={handleExport}
+                  variant="ghost"
+                />
 
-              <div className="playbook-editor-header-divider-small" />
+                <div className="playbook-editor-header-divider-small" />
 
-              <button
-                onClick={() => setShowShareDialog(true)}
-                className="playbook-editor-icon-button"
-                title="Share"
-              >
-                <Share2 className="icon-md" />
-              </button>
+                <IconButton
+                  icon={Share2}
+                  tooltip="Share"
+                  onClick={() => setShowShareDialog(true)}
+                  variant="ghost"
+                />
 
-              <div className="playbook-editor-header-divider-small" />
+                <div className="playbook-editor-header-divider-small" />
 
-              <div className="playbook-editor-view-toggle">
-                <button
-                  onClick={() => setViewMode(VIEW_MODE_GRID)}
-                  className={`playbook-editor-view-button ${
-                    viewMode == VIEW_MODE_GRID
-                      ? 'playbook-editor-view-button-active'
-                      : 'playbook-editor-view-button-inactive'
-                  }`}
-                  title="Grid View"
-                >
-                  <LayoutGrid className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => setViewMode(VIEW_MODE_LIST)}
-                  className={`playbook-editor-view-button ${
-                    viewMode == VIEW_MODE_LIST
-                      ? 'playbook-editor-view-button-active'
-                      : 'playbook-editor-view-button-inactive'
-                  }`}
-                  title="List View"
-                >
-                  <List className="w-4 h-4" />
-                </button>
-              </div>
+                <div className="playbook-editor-view-toggle">
+                  <button
+                    onClick={() => setViewMode(VIEW_MODE_GRID)}
+                    className={`playbook-editor-view-button ${
+                      viewMode == VIEW_MODE_GRID
+                        ? 'playbook-editor-view-button-active'
+                        : 'playbook-editor-view-button-inactive'
+                    }`}
+                    title="Grid View"
+                  >
+                    <LayoutGrid className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setViewMode(VIEW_MODE_LIST)}
+                    className={`playbook-editor-view-button ${
+                      viewMode == VIEW_MODE_LIST
+                        ? 'playbook-editor-view-button-active'
+                        : 'playbook-editor-view-button-inactive'
+                    }`}
+                    title="List View"
+                  >
+                    <List className="w-4 h-4" />
+                  </button>
+                </div>
 
-              <div className="playbook-editor-header-divider-small" />
+                <div className="playbook-editor-header-divider-small" />
 
-              <button
-                onClick={() => setShowSettingsDialog(true)}
-                className="playbook-editor-icon-button"
-                title="Settings"
-              >
-                <Settings className="icon-md" />
-              </button>
+                <IconButton
+                  icon={Settings}
+                  tooltip="Settings"
+                  onClick={() => setShowSettingsDialog(true)}
+                  variant="ghost"
+                />
+              </TooltipProvider>
             </div>
           </div>
         </div>

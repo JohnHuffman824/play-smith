@@ -1,14 +1,14 @@
 /* || Base styles */
 .erase-dialog {
   position: absolute;
-  left: 96px;
-  top: 128px;
-  width: 256px;
-  border-radius: 16px;
-  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  left: 6rem;
+  top: 8rem;
+  width: 16rem;
+  border-radius: 1rem;
+  box-shadow: 0 1.5rem 3rem -0.75rem rgb(0 0 0 / 0.25);
   background: var(--popover);
   border: 1px solid var(--border);
-  padding: 16px;
+  padding: 1rem;
   z-index: 50;
 }
 
@@ -17,7 +17,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 1rem;
 }
 
 .erase-dialog-title {
@@ -32,7 +32,7 @@
 .erase-dialog-label {
   display: block;
   font-size: 0.75rem;
-  margin-bottom: 8px;
+  margin-bottom: 0.5rem;
   color: var(--muted-foreground);
 }
 
@@ -40,12 +40,12 @@
 .erase-dialog-size-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  gap: 0.5rem;
 }
 
 .erase-dialog-size-button {
-  padding: 16px 12px;
-  border-radius: 8px;
+  padding: 1rem 0.75rem;
+  border-radius: 0.5rem;
   transition: all 200ms;
   cursor: pointer;
   outline: none;
@@ -58,7 +58,7 @@
 }
 
 .erase-dialog-size-button:focus-visible {
-  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+  box-shadow: 0 0 0 0.1875rem color-mix(in oklch, var(--ring) 50%, transparent);
 }
 
 .erase-dialog-size-button[data-active="true"] {
@@ -70,7 +70,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 0.5rem;
 }
 
 .erase-dialog-size-dot {

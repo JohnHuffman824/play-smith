@@ -12,7 +12,7 @@ describe('Auth API', () => {
 
 	let testUserId: number
 	const testEmail = 'api-test@example.com'
-	const testPassword = 'testpassword123'
+	const testPassword = 'TestPassword123'
 	let baseUrl: string
 
 	beforeAll(async () => {
@@ -125,7 +125,7 @@ describe('Auth API', () => {
 				body: JSON.stringify({
 					email: 'newuser@example.com',
 					name: 'New User',
-					password: 'newpassword123',
+					password: 'NewPassword123',
 				}),
 			})
 
@@ -154,7 +154,7 @@ describe('Auth API', () => {
 				body: JSON.stringify({
 					email: testEmail, // Already exists from beforeAll
 					name: 'Duplicate User',
-					password: 'password123',
+					password: 'Password123',
 				}),
 			})
 

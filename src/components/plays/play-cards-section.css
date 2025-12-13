@@ -26,13 +26,14 @@
 
 .play-cards-section__card-wrapper {
 	flex-shrink: 0;
+	width: 20rem;
 }
 
 /* || Add Play Button */
 .play-cards-section__add-button {
 	flex-shrink: 0;
 	width: 20rem;
-	height: 18rem;
+	height: 18.3rem;
 	border-radius: 0.75rem;
 	border: 2px dashed var(--border);
 	background: var(--muted);

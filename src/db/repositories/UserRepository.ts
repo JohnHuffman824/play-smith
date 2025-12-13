@@ -44,12 +44,23 @@ export class UserRepository {
 		return user ?? null
 	}
 
-	// Lists users newest first
-	async list(): Promise<User[]> {
-		return await db<User[]>`
-			SELECT id, email, name, password_hash, created_at, updated_at
+	// Lists users newest first (without password_hash for security)
+	async list(): Promise<Omit<User, 'password_hash'>[]> {
+		return await db<Omit<User, 'password_hash'>[]>`
+			SELECT id, email, name, created_at, updated_at
 			FROM users
 			ORDER BY created_at DESC
 		`
+	}
+
+	// Retrieves a user by ID without password_hash (for public use)
+	async findByIdPublic(id: number): Promise<Omit<User, 'password_hash'> | null> {
+		const [user] = await db<Omit<User, 'password_hash'>[]>`
+			SELECT id, email, name, created_at, updated_at
+			FROM users
+			WHERE id = ${id}
+		`
+
+		return user ?? null
 	}
 }

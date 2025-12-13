@@ -44,6 +44,8 @@ type PlayCardProps = {
   drawings?: Drawing[]
   players?: Player[]
   personnel?: string
+  tags?: string[]
+  tagObjects?: { id: number; name: string; color: string }[]
   selected?: boolean
   onSelect?: (id: string) => void
   onOpen: (id: string) => void
@@ -127,6 +129,8 @@ export function PlayCard({
   drawings,
   players,
   personnel,
+  tags,
+  tagObjects,
   selected = false,
   onSelect,
   onOpen,
@@ -219,8 +223,20 @@ export function PlayCard({
           </p>
         )}
 
-        <div className="play-card-footer">
-          <p className="play-card-date">{formatDateDayMonthYear(lastModified)}</p>
+        <div className="play-card-tags">
+          {tagObjects?.map((tag) => (
+            <span
+              key={tag.id}
+              className="play-card-tag"
+              style={{
+                backgroundColor: `${tag.color}20`,
+                color: tag.color,
+                borderColor: `${tag.color}40`
+              }}
+            >
+              {tag.name}
+            </span>
+          ))}
         </div>
       </div>
     </div>

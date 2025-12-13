@@ -17,7 +17,7 @@
 .playbook-editor-header {
   border-bottom: 1px solid var(--border);
   background: var(--card);
-  padding: 16px 24px;
+  /*padding: 16px 24px;*/
 }
 
 .playbook-editor-header-content {
@@ -52,6 +52,13 @@
   gap: 8px;
 }
 
+/* || Search Input */
+.playbook-editor-search-input {
+  flex: 1;
+  min-width: 30rem;
+  max-width: 50rem;
+}
+
 /* || Tabs */
 .playbook-editor-tabs {
   border-bottom: 1px solid var(--border);
@@ -78,20 +85,22 @@
   border-radius: 8px;
   transition: all 200ms;
   cursor: pointer;
+  border: none;
 }
 
 .playbook-editor-tab-active {
-  background: var(--accent);
+  background-color: var(--accent);
   color: var(--foreground);
 }
 
 .playbook-editor-tab-inactive {
+  background-color: transparent;
   color: var(--muted-foreground);
 }
 
 .playbook-editor-tab-inactive:hover {
   color: var(--foreground);
-  background: color-mix(in oklch, var(--accent) 50%, transparent);
+  background-color: color-mix(in oklch, var(--accent) 50%, transparent);
 }
 
 .playbook-editor-tabs-divider {
@@ -104,24 +113,32 @@
 .playbook-editor-content {
   flex: 1;
   overflow: auto;
-  padding: 24px;
 }
 
 .playbook-editor-sections {
   display: flex;
   flex-direction: column;
   gap: 32px;
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
 
 .playbook-editor-section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 0.5rem;
+}
+
+.playbook-editor-section-header h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
 }
 
 .playbook-editor-section-count {
   color: var(--muted-foreground);
+  font-size: 1rem;
 }
 
 /* || Empty states */
@@ -157,7 +174,7 @@
 .playbook-editor-grid {
   display: grid;
   grid-template-columns: repeat(1, 1fr);
-  gap: 16px;
+  gap: 1rem;
 }
 
 @media (width >= 640px) {
@@ -264,7 +281,7 @@
 
 .playbook-editor-error-button {
   padding: 8px 16px;
-  background: var(--action-button);
+  background-color: var(--action-button);
   color: var(--action-button-foreground);
   border-radius: 8px;
   border: 1px solid transparent;
@@ -274,7 +291,7 @@
 }
 
 .playbook-editor-error-button:hover {
-  background: color-mix(in oklch, var(--action-button) 90%, transparent);
+  background-color: color-mix(in oklch, var(--action-button) 90%, transparent);
 }
 
 .playbook-editor-error-button:focus-visible {
@@ -285,41 +302,38 @@
 .playbook-editor-view-toggle {
   display: flex;
   align-items: center;
-  background: var(--muted);
+  background-color: var(--muted);
   border-radius: 8px;
-  padding: 4px;
+  padding: 2px;
 }
 
 .playbook-editor-view-button {
-  padding: 8px;
+  padding: 6px;
   border-radius: 4px;
   transition: all 200ms;
   cursor: pointer;
+  border: 1px solid transparent;
+  background-color: transparent;
+  color: var(--muted-foreground);
 }
 
-.playbook-editor-view-button-active {
-  background: var(--card);
-  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 5%);
-}
-
-.playbook-editor-view-button-inactive:hover {
-  background: color-mix(in oklch, var(--accent) 50%, transparent);
-}
-
-/* || Icon Button (header icons) */
-.playbook-editor-icon-button {
-  padding: 8px;
-  border-radius: 8px;
-  transition: all 200ms;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.playbook-editor-view-button:hover {
   color: var(--foreground);
 }
 
-.playbook-editor-icon-button:hover {
-  background: var(--accent);
+.playbook-editor-view-button-active {
+  background-color: var(--background);
+  border-color: var(--border);
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 10%), 0 1px 2px -1px rgb(0 0 0 / 10%);
+  color: var(--foreground);
+}
+
+.playbook-editor-view-button-inactive {
+  background-color: transparent;
+}
+
+.playbook-editor-view-button-inactive:hover {
+  background-color: color-mix(in oklch, var(--accent) 50%, transparent);
 }
 
 /* || Toolbar Button Groups */
@@ -350,8 +364,9 @@
 }
 
 .playbook-editor-action-button--primary {
-  background: var(--primary);
-  color: var(--primary-foreground);
+  background-color: var(--action-button);
+  color: var(--action-button-foreground);
+  border: none;
 }
 
 .playbook-editor-action-button--primary:hover {
@@ -360,12 +375,12 @@
 
 .playbook-editor-action-button--secondary {
   border: 1px solid var(--border);
-  background: transparent;
+  background-color: transparent;
   color: var(--foreground);
 }
 
 .playbook-editor-action-button--secondary:hover {
-  background: var(--accent);
+  background-color: var(--accent);
 }
 
 /* || Filter Button (All Plays, Plays, Redzone, Ideas) */
@@ -379,8 +394,9 @@
 }
 
 .playbook-editor-filter-button--active {
-  background: var(--action-button);
+  background-color: var(--action-button);
   color: var(--action-button-foreground);
+  border: none;
 }
 
 .playbook-editor-filter-button--active:hover {
@@ -389,12 +405,12 @@
 
 .playbook-editor-filter-button--inactive {
   border: 1px solid var(--border);
-  background: transparent;
+  background-color: transparent;
   color: var(--foreground);
 }
 
 .playbook-editor-filter-button--inactive:hover {
-  background: var(--accent);
+  background-color: var(--accent);
 }
 
 /* || Title Row */
@@ -413,9 +429,10 @@
 /* || Empty State Button */
 .playbook-editor-empty-button {
   padding: 10px 24px;
-  background: var(--primary);
+  background-color: var(--primary);
   color: var(--primary-foreground);
   border-radius: 8px;
+  border: none;
   cursor: pointer;
   transition: all 200ms;
   font-weight: 500;
@@ -459,18 +476,19 @@
 }
 
 .playbook-editor-modal-button--secondary {
-  background: transparent;
+  background-color: transparent;
   border: 1px solid var(--border);
   color: var(--foreground);
 }
 
 .playbook-editor-modal-button--secondary:hover {
-  background: var(--accent);
+  background-color: var(--accent);
 }
 
 .playbook-editor-modal-button--primary {
-  background: var(--primary);
+  background-color: var(--primary);
   color: var(--primary-foreground);
+  border: none;
 }
 
 .playbook-editor-modal-button--primary:hover {
@@ -483,8 +501,9 @@
 }
 
 .playbook-editor-modal-button--destructive {
-  background: var(--destructive);
+  background-color: var(--destructive);
   color: var(--destructive-foreground);
+  border: none;
 }
 
 .playbook-editor-modal-button--destructive:hover {

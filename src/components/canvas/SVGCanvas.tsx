@@ -455,6 +455,7 @@ export function SVGCanvas({
 				width={width}
 				height={height}
 				className='svg-canvas'
+				style={{ pointerEvents: activeTool === 'draw' ? 'none' : undefined }}
 				onPointerMove={handleDrawingDragMove}
 				onPointerUp={(e) => handleDrawingDragEnd(e)}
 				onPointerDown={(e) => {
