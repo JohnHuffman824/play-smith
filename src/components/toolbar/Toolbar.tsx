@@ -292,7 +292,7 @@ export function Toolbar({
 
 	function handleToggleTags() {
 		closeAllDialogs()
-		eventBus.emit('tags:openDialog')
+		eventBus.emit('labels:openDialog')
 	}
 
 	function handleSavePlay() {

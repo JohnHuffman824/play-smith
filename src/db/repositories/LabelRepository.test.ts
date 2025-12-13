@@ -4,8 +4,8 @@ import { LabelRepository } from './LabelRepository'
 describe('LabelRepository', () => {
 	const labelRepo = new LabelRepository()
 
-	test('findPresets returns preset labels', async () => {
-		const labels = await labelRepo.findPresets()
+	test('getPresetTags returns preset labels', async () => {
+		const labels = await labelRepo.getPresetTags()
 		expect(labels.length).toBe(10)
 		expect(labels.every(l => l.is_preset)).toBe(true)
 	})

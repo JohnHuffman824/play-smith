@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Toolbar } from '../components/toolbar/Toolbar'
 import { Canvas } from '../components/canvas/Canvas'
@@ -6,14 +6,15 @@ import { PlayHeader } from '../components/plays/PlayHeader'
 import { PlayCardsSection } from '../components/plays/PlayCardsSection'
 import { ConceptDialog } from '../components/concepts/ConceptDialog'
 import { SelectionOverlay } from '../components/canvas/SelectionOverlay'
-import { SelectedTagsOverlay } from '../components/tags/SelectedTagsOverlay'
-import { TagDialog } from '../components/tags/TagDialog'
+import { SelectedLabelsOverlay } from '../components/labels/SelectedLabelsOverlay'
+import { LabelDialog } from '../components/labels/LabelDialog'
+import { useTheme } from '@/contexts/SettingsContext'
 import { PlayProvider, usePlayContext } from '../contexts/PlayContext'
 import { ConceptProvider, useConcept } from '../contexts/ConceptContext'
 import { CanvasViewportProvider } from '../contexts/CanvasViewportContext'
 import { useConceptData } from '../hooks/useConceptData'
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
-import { useTagsData, type Tag } from '../hooks/useTagsData'
+import { useLabelsData, type Label } from '../hooks/useLabelsData'
 import type { Play } from '../hooks/usePlaybookData'
 import { eventBus } from '../services/EventBus'
 import { createDefaultLinemen } from '../utils/lineman.utils'
@@ -52,6 +53,7 @@ interface ApiPlay {
 }
 
 function PlayEditorContent() {
+	const { theme } = useTheme()
 	const { playbookId, playId } = useParams<{
 		playbookId?: string
 		playId?: string
@@ -80,19 +82,19 @@ function PlayEditorContent() {
 	} = useConcept()
 
 	const {
-		formations: _formations,
+		formations,
 		concepts,
-		conceptGroups: _conceptGroups,
+		conceptGroups,
 		createConcept,
 		updateConcept,
-		isLoading: _conceptsLoading
+		isLoading: conceptsLoading
 	} = useConceptData(teamId, playbookId)
 
 	const [selectedObjectIds, setSelectedObjectIds] = useState<string[]>([])
 
-	const { tags: availableTags, createTag } = useTagsData(teamId)
-	const [selectedTags, setSelectedTags] = useState<Tag[]>([])
-	const [showTagDialog, setShowTagDialog] = useState(false)
+	const { labels: availableLabels, createLabel } = useLabelsData(teamId)
+	const [selectedLabels, setSelectedLabels] = useState<Label[]>([])
+	const [showLabelDialog, setShowLabelDialog] = useState(false)
 	const [isPlayLoaded, setIsPlayLoaded] = useState(false)
 	const [playbookPlays, setPlaybookPlays] = useState<Play[]>([])
 	const [isAddingPlay, setIsAddingPlay] = useState(false)
@@ -101,7 +103,7 @@ function PlayEditorContent() {
 	const [modalTargetPlayId, setModalTargetPlayId] = useState<string | null>(null)
 	const [targetPlayName, setTargetPlayName] = useState('')
 	const [showUnsavedChangesDialog, setShowUnsavedChangesDialog] = useState(false)
-	const [_initialPlayState, _setInitialPlayState] = useState<{
+	const [initialPlayState, setInitialPlayState] = useState<{
 		players: any[]
 		drawings: any[]
 	} | null>(null)
@@ -166,11 +168,11 @@ function PlayEditorContent() {
 						error: errorData.error || 'Failed to save play'
 					})
 				} else {
-					// Save tags
-					await fetch(`/api/plays/${playId}/tags`, {
+					// Save labels
+					await fetch(`/api/plays/${playId}/labels`, {
 						method: 'PUT',
 						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify({ tag_ids: selectedTags.map(t => t.id) })
+						body: JSON.stringify({ label_ids: selectedLabels.map(l => l.id) })
 					})
 
 					// Mark as clean after successful save
@@ -189,7 +191,7 @@ function PlayEditorContent() {
 
 		eventBus.on('canvas:save', handleSave)
 		return () => eventBus.off('canvas:save', handleSave)
-	}, [playId, playState.players, playState.drawings, playState.play, playState.hashAlignment, selectedTags, markClean])
+	}, [playId, playState.players, playState.drawings, playState.play, playState.hashAlignment, selectedLabels, markClean])
 
 	// Load play data on mount - also sets teamId for concept data
 	useEffect(() => {
@@ -241,11 +243,11 @@ function PlayEditorContent() {
 					dispatch({ type: 'SET_DRAWINGS', drawings: play.drawings })
 				}
 
-				// Load tags
-				const tagsRes = await fetch(`/api/plays/${playId}/tags`)
-				if (tagsRes.ok) {
-					const tagsData = await tagsRes.json()
-					setSelectedTags(tagsData.tags || [])
+				// Load labels
+				const labelsRes = await fetch(`/api/plays/${playId}/labels`)
+				if (labelsRes.ok) {
+					const labelsData = await labelsRes.json()
+					setSelectedLabels(labelsData.labels || [])
 				}
 
 				// Mark play as loaded after all data is fetched
@@ -318,7 +320,6 @@ function PlayEditorContent() {
 				applyConceptGroup(chip.entity as any)
 			}
 		})
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [conceptState.appliedConcepts])
 
 	// Listen for delete selection event (Delete/Backspace keyboard shortcut)
@@ -331,14 +332,14 @@ function PlayEditorContent() {
 		return () => eventBus.off('selection:delete', handleDeleteSelection)
 	}, [selectedObjectIds, deleteSelectedObjects])
 
-	// Listen for tags:openDialog event from toolbar
+	// Listen for labels:openDialog event from toolbar
 	useEffect(() => {
-		function handleOpenTagDialog() {
-			setShowTagDialog(true)
+		function handleOpenLabelDialog() {
+			setShowLabelDialog(true)
 		}
 
-		eventBus.on('tags:openDialog', handleOpenTagDialog)
-		return () => eventBus.off('tags:openDialog', handleOpenTagDialog)
+		eventBus.on('labels:openDialog', handleOpenLabelDialog)
+		return () => eventBus.off('labels:openDialog', handleOpenLabelDialog)
 	}, [])
 
 	function handleBackToPlaybook() {
@@ -358,8 +359,8 @@ function PlayEditorContent() {
 		}
 	}
 
-	function handleRemoveTag(tagId: number) {
-		setSelectedTags(prev => prev.filter(t => t.id !== tagId))
+	function handleRemoveLabel(labelId: number) {
+		setSelectedLabels(prev => prev.filter(l => l.id !== labelId))
 	}
 
 	async function handleAddPlay() {
@@ -631,10 +632,10 @@ function PlayEditorContent() {
 							onSelectionChange={setSelectedObjectIds}
 						/>
 					</CanvasViewportProvider>
-					{/* Selected Tags Overlay */}
-					<SelectedTagsOverlay
-						tags={selectedTags}
-						onRemoveTag={handleRemoveTag}
+					{/* Selected Labels Overlay */}
+					<SelectedLabelsOverlay
+						labels={selectedLabels}
+						onRemoveLabel={handleRemoveLabel}
 					/>
 				</div>
 				<PlayCardsSection
@@ -777,14 +778,14 @@ function PlayEditorContent() {
 			/>
 		)}
 
-		{/* Tag Dialog */}
-			<TagDialog
-				isOpen={showTagDialog}
-				onClose={() => setShowTagDialog(false)}
-				availableTags={availableTags}
-				selectedTagIds={selectedTags.map(t => t.id)}
-				onTagsChange={ids => setSelectedTags(availableTags.filter(t => ids.includes(t.id)))}
-				onCreateTag={createTag}
+		{/* Label Dialog */}
+			<LabelDialog
+				isOpen={showLabelDialog}
+				onClose={() => setShowLabelDialog(false)}
+				availableLabels={availableLabels}
+				selectedLabelIds={selectedLabels.map(l => l.id)}
+				onLabelsChange={ids => setSelectedLabels(availableLabels.filter(l => ids.includes(l.id)))}
+				onCreateLabel={createLabel}
 			/>
 
 

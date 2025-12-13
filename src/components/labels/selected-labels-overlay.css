@@ -1,5 +1,5 @@
-/* || Selected Tags Overlay */
-.selected-tags-overlay {
+/* || Selected Labels Overlay */
+.selected-labels-overlay {
 	position: absolute;
 	top: 20px;
 	left: 38px;
@@ -11,8 +11,8 @@
 	max-width: 50%;
 }
 
-/* || Tag chip */
-.selected-tags-overlay__tag {
+/* || Label chip */
+.selected-labels-overlay__label {
 	position: relative;
 	display: inline-block;
 	padding: 2px 8px;
@@ -22,7 +22,7 @@
 }
 
 /* || Remove button */
-.selected-tags-overlay__remove {
+.selected-labels-overlay__remove {
 	position: absolute;
 	top: -4px;
 	right: -4px;
@@ -37,16 +37,16 @@
 	outline: none;
 }
 
-.selected-tags-overlay__tag:hover .selected-tags-overlay__remove {
+.selected-labels-overlay__label:hover .selected-labels-overlay__remove {
 	opacity: 1;
 }
 
-.selected-tags-overlay__remove:focus-visible {
+.selected-labels-overlay__remove:focus-visible {
 	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
 }
 
 /* || Remove button icon */
-.selected-tags-overlay__remove-icon {
+.selected-labels-overlay__remove-icon {
 	width: 0.625rem;
 	height: 0.625rem;
 }

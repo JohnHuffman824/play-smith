@@ -1,15 +1,15 @@
-/* || Tag Dialog */
-.tag-dialog {
+/* || Label Dialog */
+.label-dialog {
 	max-width: calc(100% - 2rem);
 }
 
 @media (width >= 640px) {
-	.tag-dialog {
+	.label-dialog {
 		max-width: 28rem;
 	}
 }
 
-.tag-dialog__content {
+.label-dialog__content {
 	display: flex;
 	flex-direction: column;
 	gap: 16px;
@@ -17,20 +17,20 @@
 }
 
 /* || Section */
-.tag-dialog__section-title {
+.label-dialog__section-title {
 	font-size: 0.875rem;
 	font-weight: 500;
 	margin-bottom: 8px;
 }
 
-.tag-dialog__tags {
+.label-dialog__labels {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 8px;
 }
 
-/* || Tag button */
-.tag-dialog__tag-button {
+/* || Label button */
+.label-dialog__label-button {
 	display: flex;
 	align-items: center;
 	gap: 4px;
@@ -42,33 +42,33 @@
 	transition: all 200ms;
 }
 
-.tag-dialog__tag-button:focus-visible {
+.label-dialog__label-button:focus-visible {
 	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
 }
 
-.tag-dialog__tag-button--selected {
+.label-dialog__label-button--selected {
 	box-shadow: 0 0 0 2px var(--action-button);
 }
 
 /* || Create section */
-.tag-dialog__create {
+.label-dialog__create {
 	padding-top: 8px;
 	border-top: 1px solid var(--border);
 }
 
-.tag-dialog__create-form {
+.label-dialog__create-form {
 	display: flex;
 	flex-direction: column;
 	gap: 12px;
 }
 
-.tag-dialog__color-palette {
+.label-dialog__color-palette {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 8px;
 }
 
-.tag-dialog__color-button {
+.label-dialog__color-button {
 	width: 32px;
 	height: 32px;
 	border-radius: 9999px;
@@ -78,21 +78,21 @@
 	transition: all 200ms;
 }
 
-.tag-dialog__color-button:focus-visible {
+.label-dialog__color-button:focus-visible {
 	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
 }
 
-.tag-dialog__color-button--selected {
+.label-dialog__color-button--selected {
 	box-shadow: 0 0 0 2px var(--action-button), 0 0 0 4px var(--background);
 }
 
-.tag-dialog__form-actions {
+.label-dialog__form-actions {
 	display: flex;
 	justify-content: flex-end;
 	gap: 8px;
 }
 
-.tag-dialog__create-toggle {
+.label-dialog__create-toggle {
 	display: flex;
 	align-items: center;
 	gap: 8px;
@@ -106,21 +106,21 @@
 	transition: color 200ms;
 }
 
-.tag-dialog__create-toggle:hover {
+.label-dialog__create-toggle:hover {
 	color: var(--foreground);
 }
 
-.tag-dialog__create-toggle:focus-visible {
+.label-dialog__create-toggle:focus-visible {
 	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
 }
 
 /* || Icon sizes */
-.tag-dialog__icon-sm {
+.label-dialog__icon-sm {
 	width: 0.75rem;
 	height: 0.75rem;
 }
 
-.tag-dialog__icon-md {
+.label-dialog__icon-md {
 	width: 1rem;
 	height: 1rem;
 }

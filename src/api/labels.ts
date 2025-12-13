@@ -1,21 +1,21 @@
 import { getSessionUser } from './middleware/auth'
 import { db } from '../db/connection'
-import { TagRepository } from '../db/repositories/TagRepository'
+import { LabelRepository } from '../db/repositories/LabelRepository'
 import { TeamRepository } from '../db/repositories/TeamRepository'
 import { checkPlaybookAccess } from './utils/checkPlaybookAccess'
 
-const tagRepo = new TagRepository()
+const labelRepo = new LabelRepository()
 const teamRepo = new TeamRepository()
 
-export const tagsAPI = {
+export const labelsAPI = {
 	listPresets: async (req: Request) => {
 		const userId = await getSessionUser(req)
 		if (!userId) return Response.json({ error: 'Unauthorized' }, { status: 401 })
-		const tags = await tagRepo.getPresetTags()
-		return Response.json({ tags })
+		const labels = await labelRepo.getPresetLabels()
+		return Response.json({ labels })
 	},
 
-	listTeamTags: async (req: Request) => {
+	listTeamLabels: async (req: Request) => {
 		const userId = await getSessionUser(req)
 		if (!userId) return Response.json({ error: 'Unauthorized' }, { status: 401 })
 		const teamId = parseInt(req.params.teamId)
@@ -27,8 +27,8 @@ export const tagsAPI = {
 			return Response.json({ error: 'Access denied' }, { status: 403 })
 		}
 
-		const tags = await tagRepo.getTeamTags(teamId)
-		return Response.json({ tags })
+		const labels = await labelRepo.getTeamLabels(teamId)
+		return Response.json({ labels })
 	},
 
 	create: async (req: Request) => {
@@ -47,10 +47,10 @@ export const tagsAPI = {
 		if (!body.name?.trim()) return Response.json({ error: 'Name required' }, { status: 400 })
 		if (!body.color) return Response.json({ error: 'Color required' }, { status: 400 })
 		try {
-			const tag = await tagRepo.create({ team_id: teamId, name: body.name.trim(), color: body.color, created_by: userId })
-			return Response.json({ tag }, { status: 201 })
+			const label = await labelRepo.create({ team_id: teamId, name: body.name.trim(), color: body.color, created_by: userId })
+			return Response.json({ label }, { status: 201 })
 		} catch (e: any) {
-			if (e.code === '23505') return Response.json({ error: 'Tag exists' }, { status: 409 })
+			if (e.code === '23505') return Response.json({ error: 'Label exists' }, { status: 409 })
 			throw e
 		}
 	},
@@ -58,52 +58,52 @@ export const tagsAPI = {
 	update: async (req: Request) => {
 		const userId = await getSessionUser(req)
 		if (!userId) return Response.json({ error: 'Unauthorized' }, { status: 401 })
-		const tagId = parseInt(req.params.tagId)
-		if (isNaN(tagId)) return Response.json({ error: 'Invalid tag ID' }, { status: 400 })
+		const labelId = parseInt(req.params.labelId)
+		if (isNaN(labelId)) return Response.json({ error: 'Invalid label ID' }, { status: 400 })
 
-		// Get the tag to verify team membership
-		const existingTag = await tagRepo.findById(tagId)
-		if (!existingTag) {
+		// Get the label to verify team membership
+		const existingLabel = await labelRepo.findById(labelId)
+		if (!existingLabel) {
 			return Response.json({ error: 'Not found' }, { status: 404 })
 		}
-		if (existingTag.team_id) {
-			const userRole = await teamRepo.getUserRole(existingTag.team_id, userId)
+		if (existingLabel.team_id) {
+			const userRole = await teamRepo.getUserRole(existingLabel.team_id, userId)
 			if (!userRole) {
 				return Response.json({ error: 'Access denied' }, { status: 403 })
 			}
 		}
 
 		const body = await req.json()
-		const tag = await tagRepo.update(tagId, body)
-		if (!tag) return Response.json({ error: 'Not found or preset' }, { status: 404 })
-		return Response.json({ tag })
+		const label = await labelRepo.update(labelId, body)
+		if (!label) return Response.json({ error: 'Not found or preset' }, { status: 404 })
+		return Response.json({ label })
 	},
 
 	delete: async (req: Request) => {
 		const userId = await getSessionUser(req)
 		if (!userId) return Response.json({ error: 'Unauthorized' }, { status: 401 })
-		const tagId = parseInt(req.params.tagId)
-		if (isNaN(tagId)) return Response.json({ error: 'Invalid tag ID' }, { status: 400 })
+		const labelId = parseInt(req.params.labelId)
+		if (isNaN(labelId)) return Response.json({ error: 'Invalid label ID' }, { status: 400 })
 
-		// Get the tag to verify team membership
-		const existingTag = await tagRepo.findById(tagId)
-		if (!existingTag) {
+		// Get the label to verify team membership
+		const existingLabel = await labelRepo.findById(labelId)
+		if (!existingLabel) {
 			return Response.json({ error: 'Not found' }, { status: 404 })
 		}
-		if (existingTag.team_id) {
-			const userRole = await teamRepo.getUserRole(existingTag.team_id, userId)
+		if (existingLabel.team_id) {
+			const userRole = await teamRepo.getUserRole(existingLabel.team_id, userId)
 			if (!userRole) {
 				return Response.json({ error: 'Access denied' }, { status: 403 })
 			}
 		}
 
-		const deleted = await tagRepo.delete(tagId)
+		const deleted = await labelRepo.delete(labelId)
 		if (!deleted) return Response.json({ error: 'Not found or preset' }, { status: 404 })
 		return new Response(null, { status: 204 })
 	}
 }
 
-export const playTagsAPI = {
+export const playLabelsAPI = {
 	list: async (req: Request) => {
 		const userId = await getSessionUser(req)
 		if (!userId) return Response.json({ error: 'Unauthorized' }, { status: 401 })
@@ -117,8 +117,8 @@ export const playTagsAPI = {
 		const { hasAccess } = await checkPlaybookAccess(play.playbook_id, userId)
 		if (!hasAccess) return Response.json({ error: 'Access denied' }, { status: 403 })
 
-		const tags = await tagRepo.getPlayTags(playId)
-		return Response.json({ tags })
+		const labels = await labelRepo.getPlayLabels(playId)
+		return Response.json({ labels })
 	},
 
 	set: async (req: Request) => {
@@ -135,14 +135,14 @@ export const playTagsAPI = {
 		if (!hasAccess) return Response.json({ error: 'Access denied' }, { status: 403 })
 
 		const body = await req.json()
-		if (!Array.isArray(body.tag_ids)) return Response.json({ error: 'tag_ids array required' }, { status: 400 })
-		await tagRepo.setPlayTags(playId, body.tag_ids)
-		const tags = await tagRepo.getPlayTags(playId)
-		return Response.json({ tags })
+		if (!Array.isArray(body.label_ids)) return Response.json({ error: 'label_ids array required' }, { status: 400 })
+		await labelRepo.setPlayLabels(playId, body.label_ids)
+		const labels = await labelRepo.getPlayLabels(playId)
+		return Response.json({ labels })
 	}
 }
 
-export const playbookTagsAPI = {
+export const playbookLabelsAPI = {
 	list: async (req: Request) => {
 		const userId = await getSessionUser(req)
 		if (!userId) return Response.json({ error: 'Unauthorized' }, { status: 401 })
@@ -153,8 +153,8 @@ export const playbookTagsAPI = {
 		const { hasAccess } = await checkPlaybookAccess(playbookId, userId)
 		if (!hasAccess) return Response.json({ error: 'Access denied' }, { status: 403 })
 
-		const tags = await tagRepo.getPlaybookTags(playbookId)
-		return Response.json({ tags })
+		const labels = await labelRepo.getPlaybookLabels(playbookId)
+		return Response.json({ labels })
 	},
 
 	set: async (req: Request) => {
@@ -168,9 +168,9 @@ export const playbookTagsAPI = {
 		if (!hasAccess) return Response.json({ error: 'Access denied' }, { status: 403 })
 
 		const body = await req.json()
-		if (!Array.isArray(body.tag_ids)) return Response.json({ error: 'tag_ids array required' }, { status: 400 })
-		await tagRepo.setPlaybookTags(playbookId, body.tag_ids)
-		const tags = await tagRepo.getPlaybookTags(playbookId)
-		return Response.json({ tags })
+		if (!Array.isArray(body.label_ids)) return Response.json({ error: 'label_ids array required' }, { status: 400 })
+		await labelRepo.setPlaybookLabels(playbookId, body.label_ids)
+		const labels = await labelRepo.getPlaybookLabels(playbookId)
+		return Response.json({ labels })
 	}
 }
