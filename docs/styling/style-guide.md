@@ -42,6 +42,9 @@ Input.tsx  → input.css      (.input)
 article.main div.content p.box { }
 ```
 
+### Indentation
+Use tab characters instead of 2 spaces
+
 ### Shorthands
 ```css
 /* ✅ Use shorthand when all values are set */
