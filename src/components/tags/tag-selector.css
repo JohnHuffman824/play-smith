@@ -63,3 +63,9 @@
 .tag-selector__add:focus-visible {
 	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
 }
+
+/* || Icons */
+.tag-selector__icon {
+	width: 0.75rem;
+	height: 0.75rem;
+}

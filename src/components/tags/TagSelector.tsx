@@ -30,13 +30,13 @@ export function TagSelector({ availableTags, selectedTags, onTagsChange, onCreat
 						<span key={tag.id} className="tag-selector__tag" style={tagStyle}>
 							{tag.name}
 							<button onClick={e => removeTag(tag.id, e)} className="tag-selector__tag-remove" aria-label={`Remove ${tag.name}`}>
-								<X className="w-3 h-3" />
+								<X className="tag-selector__icon" />
 							</button>
 						</span>
 					)
 				})}
 				<button onClick={() => setDialogOpen(true)} className="tag-selector__add" aria-label="Add tags">
-					{selectedTags.length === 0 ? <><TagIcon className="w-3 h-3" />Add tags</> : <Plus className="w-3 h-3" />}
+					{selectedTags.length === 0 ? <><TagIcon className="tag-selector__icon" />Add tags</> : <Plus className="tag-selector__icon" />}
 				</button>
 			</div>
 			<TagDialog isOpen={dialogOpen} onClose={() => setDialogOpen(false)} availableTags={availableTags}
