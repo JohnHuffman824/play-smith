@@ -4,7 +4,7 @@
 	align-items: center;
 	gap: 8px;
 	padding: 8px 12px;
-	background: var(--accent);
+	background-color: var(--accent);
 	border-radius: 8px;
 	transition: all 200ms;
 	cursor: pointer;
@@ -13,7 +13,7 @@
 }
 
 .team-selector-button:hover {
-	background: color-mix(in oklch, var(--accent) 80%, transparent);
+	background-color: color-mix(in oklch, var(--accent) 80%, transparent);
 }
 
 .team-selector-button:focus-visible {
@@ -27,7 +27,38 @@
 	white-space: nowrap;
 }
 
+/* || Icon sizing */
+.team-selector-icon {
+	width: 1rem;
+	height: 1rem;
+}
+
+/* || Dropdown menu item */
+.team-selector-item {
+	cursor: pointer;
+}
+
+.team-selector-item-content {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex: 1 1 0%;
+}
+
+.team-selector-item-name {
+	flex: 1 1 0%;
+}
+
+.team-selector-item-check {
+	color: var(--primary);
+}
+
 /* || Dropdown menu item active state */
 .team-selector-item-active {
-	background: color-mix(in oklch, var(--accent) 50%, transparent);
+	background-color: color-mix(in oklch, var(--accent) 50%, transparent);
+}
+
+/* || Manage teams button */
+.team-selector-manage {
+	cursor: pointer;
 }

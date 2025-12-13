@@ -29,9 +29,9 @@ export function TeamSelector({ teams, currentTeamId, onSwitchTeam, onManageTeams
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
 				<button className="team-selector-button">
-					<Users className="w-4 h-4" />
+					<Users className="team-selector-icon" />
 					<span className="team-selector-name">{currentTeam?.name || 'Select Team'}</span>
-					<ChevronDown className="w-4 h-4" />
+					<ChevronDown className="team-selector-icon" />
 				</button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="start" style={{ minWidth: '250px' }}>
@@ -40,18 +40,20 @@ export function TeamSelector({ teams, currentTeamId, onSwitchTeam, onManageTeams
 					<DropdownMenuItem
 						key={team.id}
 						onClick={() => onSwitchTeam(team.id)}
-						className={`cursor-pointer ${team.id === currentTeamId ? 'team-selector-item-active' : ''}`}
+						className={`team-selector-item ${team.id === currentTeamId ? 'team-selector-item-active' : ''}`.trim()}
 					>
-						<Users className="w-4 h-4" />
-						<span className="flex-1">{team.name}</span>
-						{team.id === currentTeamId && (
-							<Check className="w-4 h-4 text-primary" />
-						)}
+						<div className="team-selector-item-content">
+							<Users className="team-selector-icon" />
+							<span className="team-selector-item-name">{team.name}</span>
+							{team.id === currentTeamId && (
+								<Check className="team-selector-icon team-selector-item-check" />
+							)}
+						</div>
 					</DropdownMenuItem>
 				))}
 				<DropdownMenuSeparator />
-				<DropdownMenuItem onClick={() => onManageTeams()} className="cursor-pointer">
-					<Settings className="w-4 h-4" />
+				<DropdownMenuItem onClick={() => onManageTeams()} className="team-selector-manage">
+					<Settings className="team-selector-icon" />
 					Manage Teams
 				</DropdownMenuItem>
 			</DropdownMenuContent>
