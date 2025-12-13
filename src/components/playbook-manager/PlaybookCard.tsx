@@ -7,7 +7,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { cn } from '@/components/ui/utils'
 import './playbook-card.css'
 
 type PlaybookCardProps = {
@@ -51,7 +50,7 @@ export function PlaybookCard({
 
 	return (
 		<div
-			className="playbook-card group"
+			className="playbook-card"
 			onClick={handleOpen}
 		>
 			{/* Thumbnail/Preview */}
@@ -80,7 +79,7 @@ export function PlaybookCard({
 								title={isStarred ? "Unstar Playbook" : "Star Playbook"}
 							>
 								<Star
-									className={`w-4 h-4 ${isStarred ? 'fill-yellow-400 text-yellow-400' : 'text-foreground'}`}
+									className={`w-4 h-4 ${isStarred ? 'fill-yellow-400 text-yellow-400' : 'text-foreground'}`.trim()}
 								/>
 							</button>
 						)}
