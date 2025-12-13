@@ -52,10 +52,8 @@ export function Sidebar({
 	return (
 		<div className="playbook-sidebar">
 			{/* Logo/Header */}
-			<div className="border-b border-sidebar-border" style={{ height: `${HEADER_HEIGHT}px` }}>
-				<div className="playbook-sidebar-header">
-					<h1 className="playbook-sidebar-title">Play Smith</h1>
-				</div>
+			<div className="playbook-sidebar-header" style={{ height: `${HEADER_HEIGHT}px` }}>
+				<h1 className="playbook-sidebar-title">Play Smith</h1>
 			</div>
 
 			{/* Navigation */}
@@ -71,15 +69,15 @@ export function Sidebar({
 								{/* Section Button */}
 								<button
 									onClick={() => isFoldersSection ? handleFoldersSectionClick() : onSectionChange(section.id)}
-									className={`playbook-sidebar-section ${isActive ? 'playbook-sidebar-section-active' : ''}`}
+									className={`playbook-sidebar-section ${isActive ? 'playbook-sidebar-section-active' : ''}`.trim()}
 								>
-									<Icon className="w-5 h-5" strokeWidth={1.5} />
+									<Icon strokeWidth={1.5} />
 									<span className="playbook-sidebar-section-label">{section.label}</span>
 									{isFoldersSection && folders.length > 0 && (
 										isFoldersExpanded ? (
-											<ChevronDown className="w-4 h-4" />
+											<ChevronDown />
 										) : (
-											<ChevronRight className="w-4 h-4" />
+											<ChevronRight />
 										)
 									)}
 								</button>
@@ -93,9 +91,9 @@ export function Sidebar({
 												<li key={folder.id}>
 													<button
 														onClick={() => handleFolderClick(folder.id)}
-														className={`playbook-sidebar-folder ${isFolderSelected ? 'playbook-sidebar-folder-active' : ''}`}
+														className={`playbook-sidebar-folder ${isFolderSelected ? 'playbook-sidebar-folder-active' : ''}`.trim()}
 													>
-														<Folder className="w-4 h-4" strokeWidth={1.5} />
+														<Folder strokeWidth={1.5} />
 														<span className="playbook-sidebar-folder-name">{folder.name}</span>
 													</button>
 												</li>
