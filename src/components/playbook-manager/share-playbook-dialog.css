@@ -124,3 +124,13 @@
 .share-playbook-modal {
 	max-width: 672px;
 }
+
+/* || Utility classes */
+.share-playbook-full-width {
+	width: 100%;
+}
+
+.share-playbook-icon {
+	width: 1rem;
+	height: 1rem;
+}

@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react'
-import { Modal } from './Modal'
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from '../ui/dialog'
 import { Button } from '../ui/button'
 import { useTeamsData } from '../../hooks/useTeamsData'
 import { Trash2 } from 'lucide-react'
@@ -125,13 +130,12 @@ export function SharePlaybookDialog({
 	}
 
 	return (
-		<Modal
-			isOpen={isOpen}
-			onClose={onClose}
-			title={`Share "${playbookName}"`}
-			className="share-playbook-modal"
-		>
-			<div className="share-playbook-form">
+		<Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+			<DialogContent className="share-playbook-modal">
+				<DialogHeader>
+					<DialogTitle>Share "{playbookName}"</DialogTitle>
+				</DialogHeader>
+				<div className="share-playbook-form">
 				{/* Share form */}
 				<div className="share-playbook-field">
 					<div>
@@ -203,7 +207,7 @@ export function SharePlaybookDialog({
 						<Button
 							onClick={handleShare}
 							disabled={isSharing || !selectedTeamId}
-							className="w-full"
+							className="share-playbook-full-width"
 						>
 							{isSharing ? 'Sharing...' : 'Share Playbook'}
 						</Button>
@@ -241,7 +245,7 @@ export function SharePlaybookDialog({
 										onClick={() => handleRemoveShare(share.shared_with_team_id)}
 										style={{ color: 'var(--destructive)' }}
 									>
-										<Trash2 className="w-4 h-4" />
+										<Trash2 className="share-playbook-icon" />
 									</Button>
 								</div>
 							))}
@@ -256,6 +260,7 @@ export function SharePlaybookDialog({
 					</Button>
 				</div>
 			</div>
-		</Modal>
+			</DialogContent>
+		</Dialog>
 	)
 }
