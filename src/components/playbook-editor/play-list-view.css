@@ -17,6 +17,8 @@
 }
 
 .play-list-view-header-cell {
+  display: flex;
+  align-items: center;
   color: var(--muted-foreground);
 }
 
