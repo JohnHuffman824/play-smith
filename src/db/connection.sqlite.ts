@@ -322,34 +322,34 @@ function initializeSchema() {
 	`)
 
 	sqlite.run(`
-		CREATE TABLE IF NOT EXISTS play_tags (
+		CREATE TABLE IF NOT EXISTS play_labels (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			play_id INTEGER NOT NULL,
-			tag_id INTEGER NOT NULL,
+			label_id INTEGER NOT NULL,
 			created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-			UNIQUE (play_id, tag_id),
+			UNIQUE (play_id, label_id),
 			FOREIGN KEY (play_id) REFERENCES plays(id) ON DELETE CASCADE,
-			FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+			FOREIGN KEY (label_id) REFERENCES labels(id) ON DELETE CASCADE
 		)
 	`)
 
-	sqlite.run(`CREATE INDEX IF NOT EXISTS idx_play_tags_play ON play_tags(play_id)`)
-	sqlite.run(`CREATE INDEX IF NOT EXISTS idx_play_tags_tag ON play_tags(tag_id)`)
+	sqlite.run(`CREATE INDEX IF NOT EXISTS idx_play_labels_play ON play_labels(play_id)`)
+	sqlite.run(`CREATE INDEX IF NOT EXISTS idx_play_labels_label ON play_labels(label_id)`)
 
 	sqlite.run(`
-		CREATE TABLE IF NOT EXISTS playbook_tags (
+		CREATE TABLE IF NOT EXISTS playbook_labels (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			playbook_id INTEGER NOT NULL,
-			tag_id INTEGER NOT NULL,
+			label_id INTEGER NOT NULL,
 			created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-			UNIQUE (playbook_id, tag_id),
+			UNIQUE (playbook_id, label_id),
 			FOREIGN KEY (playbook_id) REFERENCES playbooks(id) ON DELETE CASCADE,
-			FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+			FOREIGN KEY (label_id) REFERENCES labels(id) ON DELETE CASCADE
 		)
 	`)
 
-	sqlite.run(`CREATE INDEX IF NOT EXISTS idx_playbook_tags_playbook ON playbook_tags(playbook_id)`)
-	sqlite.run(`CREATE INDEX IF NOT EXISTS idx_playbook_tags_tag ON playbook_tags(tag_id)`)
+	sqlite.run(`CREATE INDEX IF NOT EXISTS idx_playbook_labels_playbook ON playbook_labels(playbook_id)`)
+	sqlite.run(`CREATE INDEX IF NOT EXISTS idx_playbook_labels_label ON playbook_labels(label_id)`)
 }
 
 // Initialize schema on import

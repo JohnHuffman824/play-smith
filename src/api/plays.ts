@@ -187,7 +187,7 @@ export const playsAPI = {
 				p.custom_drawings,
 				(
 					SELECT COALESCE(json_agg(json_build_object('id', t.id, 'name', t.name, 'color', t.color)), '[]'::json)
-					FROM tags t JOIN play_tags pt ON pt.tag_id = t.id
+					FROM labels t JOIN play_labels pt ON pt.label_id = t.id
 					WHERE pt.play_id = p.id
 				) as tags,
 				(

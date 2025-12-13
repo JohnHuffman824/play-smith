@@ -221,14 +221,14 @@ export interface Label {
 export interface PlayLabel {
 	id: number
 	play_id: number
-	tag_id: number
+	label_id: number
 	created_at: Date
 }
 
 export interface PlaybookLabel {
 	id: number
 	playbook_id: number
-	tag_id: number
+	label_id: number
 	created_at: Date
 }
 
