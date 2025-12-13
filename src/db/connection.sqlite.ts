@@ -289,9 +289,9 @@ function initializeSchema() {
 		)
 	`)
 
-	// Tags tables
+	// Labels tables
 	sqlite.run(`
-		CREATE TABLE IF NOT EXISTS tags (
+		CREATE TABLE IF NOT EXISTS labels (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			team_id INTEGER,
 			name TEXT NOT NULL,
@@ -306,12 +306,12 @@ function initializeSchema() {
 		)
 	`)
 
-	sqlite.run(`CREATE INDEX IF NOT EXISTS idx_tags_team ON tags(team_id)`)
-	sqlite.run(`CREATE INDEX IF NOT EXISTS idx_tags_preset ON tags(is_preset)`)
+	sqlite.run(`CREATE INDEX IF NOT EXISTS idx_labels_team ON labels(team_id)`)
+	sqlite.run(`CREATE INDEX IF NOT EXISTS idx_labels_preset ON labels(is_preset)`)
 
-	// Seed preset tags for SQLite tests
+	// Seed preset labels for SQLite tests
 	sqlite.run(`
-		INSERT OR IGNORE INTO tags (name, color, is_preset, team_id, created_by) VALUES
+		INSERT OR IGNORE INTO labels (name, color, is_preset, team_id, created_by) VALUES
 			('Short Yardage', '#10B981', 1, NULL, NULL),
 			('Mid Yardage', '#FBBF24', 1, NULL, NULL),
 			('Long Yardage', '#F97316', 1, NULL, NULL),
