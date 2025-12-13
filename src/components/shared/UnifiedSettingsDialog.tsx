@@ -26,7 +26,7 @@ export function UnifiedSettingsDialog({ isOpen, onClose, context }: UnifiedSetti
 				<div className="unified-settings-header">
 					<h2 className="unified-settings-title">Settings</h2>
 					<Button onClick={onClose} variant="ghost" size="icon">
-						<X className="h-5 w-5" />
+						<X className="unified-settings-close-icon" />
 					</Button>
 				</div>
 

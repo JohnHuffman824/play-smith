@@ -60,3 +60,9 @@
   display: flex;
   justify-content: flex-end;
 }
+
+/* || Icon */
+.unified-settings-close-icon {
+  height: 1.25rem;
+  width: 1.25rem;
+}
