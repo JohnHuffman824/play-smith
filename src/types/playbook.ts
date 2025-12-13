@@ -18,7 +18,7 @@ export interface Play {
 	personnel_name?: string
 	defensive_formation_id: number | null
 	defensive_formation_name?: string
-	tags: { id: number; name: string; color: string }[]
+	labels: { id: number; name: string; color: string }[]
 	updated_at: string
 	thumbnail?: string
 }

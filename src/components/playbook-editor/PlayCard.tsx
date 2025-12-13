@@ -43,8 +43,8 @@ type PlayCardProps = {
   drawings?: Drawing[]
   players?: Player[]
   personnel?: string
-  tags?: string[]
-  tagObjects?: { id: number; name: string; color: string }[]
+  labels?: string[]
+  labelObjects?: { id: number; name: string; color: string }[]
   selected?: boolean
   onSelect?: (id: string) => void
   onOpen: (id: string) => void
@@ -128,8 +128,8 @@ export function PlayCard({
   drawings,
   players,
   personnel,
-  _tags,
-  tagObjects,
+  _labels,
+  labelObjects,
   selected = false,
   onSelect,
   onOpen,

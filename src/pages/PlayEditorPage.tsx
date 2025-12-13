@@ -46,7 +46,7 @@ interface ApiPlay {
 	personnel_id: number | null
 	play_type: string
 	defensive_formation_id: number | null
-	tags: Array<string | { name: string; color: string }>
+	labels: Array<string | { name: string; color: string }>
 	updated_at: string
 	drawings: unknown[]
 	players: unknown[]
@@ -290,10 +290,10 @@ function PlayEditorContent() {
 					defensiveFormation: apiPlay.defensive_formation_id
 						? String(apiPlay.defensive_formation_id)
 						: '',
-					tags: (apiPlay.tags || []).map((t) =>
-						typeof t === 'string' ? t : t.name
+					labels: (apiPlay.labels || []).map((l) =>
+						typeof l === 'string' ? l : l.name
 					),
-					tagObjects: apiPlay.tags || [],
+					labelObjects: apiPlay.labels || [],
 					lastModified: apiPlay.updated_at
 						? new Date(apiPlay.updated_at).toLocaleDateString()
 						: new Date().toLocaleDateString(),
@@ -517,8 +517,8 @@ function PlayEditorContent() {
 					defensiveFormation: newPlay.defensive_formation_id
 						? String(newPlay.defensive_formation_id)
 						: '',
-					tags: [],
-					tagObjects: [],
+					labels: [],
+					labelObjects: [],
 					lastModified: new Date().toLocaleDateString(),
 					drawings: newPlay.custom_drawings || [],
 					players: newPlay.custom_players || []

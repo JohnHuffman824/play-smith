@@ -503,7 +503,7 @@ function PlaybookEditorContent({
               <SearchInput
                 value={searchQuery}
                 onChange={setSearchQuery}
-                placeholder="Search plays, formations, tags..."
+                placeholder="Search plays, formations, labels..."
                 className="playbook-editor-search-input"
               />
             </div>

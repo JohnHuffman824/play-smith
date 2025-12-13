@@ -186,10 +186,10 @@ export const playsAPI = {
 				p.custom_players,
 				p.custom_drawings,
 				(
-					SELECT COALESCE(json_agg(json_build_object('id', t.id, 'name', t.name, 'color', t.color)), '[]'::json)
-					FROM labels t JOIN play_labels pt ON pt.label_id = t.id
-					WHERE pt.play_id = p.id
-				) as tags,
+					SELECT COALESCE(json_agg(json_build_object('id', l.id, 'name', l.name, 'color', l.color)), '[]'::json)
+					FROM labels l JOIN play_labels pl ON pl.label_id = l.id
+					WHERE pl.play_id = p.id
+				) as labels,
 				(
 					SELECT json_agg(cpa.drawing_data)
 					FROM concept_applications ca
@@ -220,7 +220,7 @@ export const playsAPI = {
 				personnel_id: p.personnel_id,
 				defensive_formation_id: p.defensive_formation_id,
 				updated_at: p.updated_at,
-				tags: p.tags,
+				labels: p.labels,
 				drawings: [...conceptDrawings, ...customDrawings],
 				players: customPlayers
 			}
