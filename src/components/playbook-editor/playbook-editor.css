@@ -89,11 +89,16 @@
   transition: all 200ms;
   cursor: pointer;
   border: none;
+  outline: none;
 }
 
 .playbook-editor-tab-active {
   background-color: var(--accent);
   color: var(--foreground);
+}
+
+.playbook-editor-tab-active:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
 }
 
 .playbook-editor-tab-inactive {
@@ -104,6 +109,10 @@
 .playbook-editor-tab-inactive:hover {
   color: var(--foreground);
   background-color: color-mix(in oklch, var(--accent) 50%, transparent);
+}
+
+.playbook-editor-tab-inactive:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
 }
 
 .playbook-editor-tabs-divider {
@@ -326,6 +335,7 @@
   gap: 8px;
   font-size: 0.875rem;
   font-weight: 500;
+  outline: none;
 }
 
 .playbook-editor-action-button--primary {
@@ -338,6 +348,10 @@
   opacity: 0.9;
 }
 
+.playbook-editor-action-button--primary:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
 .playbook-editor-action-button--secondary {
   border: 1px solid var(--border);
   background-color: transparent;
@@ -348,6 +362,10 @@
   background-color: var(--accent);
 }
 
+.playbook-editor-action-button--secondary:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
 /* || Filter Button (All Plays, Plays, Redzone, Ideas) */
 .playbook-editor-filter-button {
   padding: 8px 16px;
@@ -356,6 +374,7 @@
   cursor: pointer;
   font-size: 0.875rem;
   font-weight: 500;
+  outline: none;
 }
 
 .playbook-editor-filter-button--active {
@@ -368,6 +387,10 @@
   opacity: 0.9;
 }
 
+.playbook-editor-filter-button--active:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
 .playbook-editor-filter-button--inactive {
   border: 1px solid var(--border);
   background-color: transparent;
@@ -376,6 +399,10 @@
 
 .playbook-editor-filter-button--inactive:hover {
   background-color: var(--accent);
+}
+
+.playbook-editor-filter-button--inactive:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
 }
 
 /* || Title Row */
@@ -401,10 +428,15 @@
   cursor: pointer;
   transition: all 200ms;
   font-weight: 500;
+  outline: none;
 }
 
 .playbook-editor-empty-button:hover {
   opacity: 0.9;
+}
+
+.playbook-editor-empty-button:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
 }
 
 /* || Modal Styles */
@@ -438,6 +470,7 @@
   transition: all 200ms;
   cursor: pointer;
   font-weight: 500;
+  outline: none;
 }
 
 .playbook-editor-modal-button--secondary {
@@ -450,6 +483,10 @@
   background-color: var(--accent);
 }
 
+.playbook-editor-modal-button--secondary:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
 .playbook-editor-modal-button--primary {
   background-color: var(--primary);
   color: var(--primary-foreground);
@@ -458,6 +495,10 @@
 
 .playbook-editor-modal-button--primary:hover {
   opacity: 0.9;
+}
+
+.playbook-editor-modal-button--primary:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
 }
 
 .playbook-editor-modal-button--primary:disabled {
@@ -473,6 +514,20 @@
 
 .playbook-editor-modal-button--destructive:hover {
   opacity: 0.9;
+}
+
+.playbook-editor-modal-button--destructive:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+/* || Section Title Help */
+.playbook-editor-section-title-help {
+  cursor: help;
+}
+
+/* || Tooltip */
+.playbook-editor-tooltip-text {
+  max-width: 300px;
 }
 
 /* || Icon Sizes */

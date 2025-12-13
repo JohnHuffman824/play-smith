@@ -2,7 +2,12 @@ import { useState, useEffect, useMemo } from 'react'
 import { PlaybookEditorToolbar } from './PlaybookEditorToolbar'
 import { PlayCard } from './PlayCard'
 import { PlayListView } from './PlayListView'
-import { Modal } from '@/components/shared/Modal'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Input } from '../ui/input'
 import { SearchInput } from '../ui/search-input'
 import { UnifiedSettingsDialog } from '@/components/shared/UnifiedSettingsDialog'
@@ -254,10 +259,10 @@ function PlaybookEditorContent({
   // Show loading state
   if (isLoadingData) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading playbook...</p>
+      <div className="playbook-editor-loading">
+        <div className="playbook-editor-loading-content">
+          <div className="playbook-editor-spinner"></div>
+          <p className="playbook-editor-loading-text">Loading playbook...</p>
         </div>
       </div>
     )
@@ -266,13 +271,13 @@ function PlaybookEditorContent({
   // Show error state
   if (dataError) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">Error</h1>
-          <p className="text-gray-600 mb-6">{dataError}</p>
+      <div className="playbook-editor-error">
+        <div className="playbook-editor-error-content">
+          <h1 className="playbook-editor-error-title">Error</h1>
+          <p className="playbook-editor-error-message">{dataError}</p>
           <button
             onClick={onBack}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer"
+            className="playbook-editor-error-button"
           >
             Back to Playbooks
           </button>
@@ -687,10 +692,10 @@ function PlaybookEditorContent({
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <h2 className="cursor-help">{section.name}</h2>
+                              <h2 className="playbook-editor-section-title-help">{section.name}</h2>
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p className="max-w-xs">
+                              <p className="playbook-editor-tooltip-text">
                                 Ideas & Experiments - plays here are in development. All team members can contribute ideas. These aren't required learning.
                               </p>
                             </TooltipContent>
@@ -820,98 +825,101 @@ function PlaybookEditorContent({
       />
 
       {/* Delete Concept Confirmation */}
-      <Modal
-        isOpen={showDeleteConceptModal}
-        onClose={() => setShowDeleteConceptModal(false)}
-        title="Delete Concept"
-      >
-        <p className="playbook-editor-modal-message">
-          Are you sure you want to delete this {conceptToDelete?.type}? This action cannot be undone.
-        </p>
-        <div className="playbook-editor-modal-actions">
-          <button onClick={() => setShowDeleteConceptModal(false)} className="playbook-editor-modal-button playbook-editor-modal-button--secondary">
-            Cancel
-          </button>
-          <button onClick={confirmDeleteConcept} className="playbook-editor-modal-button playbook-editor-modal-button--destructive">
-            Delete
-          </button>
-        </div>
-      </Modal>
-
-      <Modal
-        isOpen={showNewPlayModal}
-        onClose={closeNewPlayModal}
-        title="Create New Play"
-      >
-        <div className="playbook-editor-modal-content">
-          <div>
-            <label className="playbook-editor-modal-label">Play Name</label>
-            <Input
-              type="text"
-              value={newItemName}
-              onChange={(e) => setNewItemName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key == 'Enter') {
-                  handleNewPlay()
-                }
-              }}
-              placeholder="Enter play name..."
-              autoFocus
-            />
-          </div>
+      <Dialog open={showDeleteConceptModal} onOpenChange={setShowDeleteConceptModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Concept</DialogTitle>
+          </DialogHeader>
+          <p className="playbook-editor-modal-message">
+            Are you sure you want to delete this {conceptToDelete?.type}? This action cannot be undone.
+          </p>
           <div className="playbook-editor-modal-actions">
-            <button onClick={closeNewPlayModal} className="playbook-editor-modal-button playbook-editor-modal-button--secondary">
+            <button onClick={() => setShowDeleteConceptModal(false)} className="playbook-editor-modal-button playbook-editor-modal-button--secondary">
               Cancel
             </button>
-            <button
-              onClick={handleNewPlay}
-              disabled={!newItemName.trim()}
-              className="playbook-editor-modal-button playbook-editor-modal-button--primary"
-            >
-              Create
+            <button onClick={confirmDeleteConcept} className="playbook-editor-modal-button playbook-editor-modal-button--destructive">
+              Delete
             </button>
           </div>
-        </div>
-      </Modal>
+        </DialogContent>
+      </Dialog>
 
-      <Modal
-        isOpen={showNewSectionModal}
-        onClose={closeNewSectionModal}
-        title="Create New Section"
-      >
-        <div className="playbook-editor-modal-content">
-          <div>
-            <label className="playbook-editor-modal-label">Section Name</label>
-            <Input
-              type="text"
-              value={newItemName}
-              onChange={(e) => setNewItemName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key == 'Enter') {
-                  handleNewSection()
-                }
-              }}
-              placeholder="Enter section name..."
-              autoFocus
-            />
+      <Dialog open={showNewPlayModal} onOpenChange={setShowNewPlayModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Play</DialogTitle>
+          </DialogHeader>
+          <div className="playbook-editor-modal-content">
+            <div>
+              <label className="playbook-editor-modal-label">Play Name</label>
+              <Input
+                type="text"
+                value={newItemName}
+                onChange={(e) => setNewItemName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key == 'Enter') {
+                    handleNewPlay()
+                  }
+                }}
+                placeholder="Enter play name..."
+                autoFocus
+              />
+            </div>
+            <div className="playbook-editor-modal-actions">
+              <button onClick={closeNewPlayModal} className="playbook-editor-modal-button playbook-editor-modal-button--secondary">
+                Cancel
+              </button>
+              <button
+                onClick={handleNewPlay}
+                disabled={!newItemName.trim()}
+                className="playbook-editor-modal-button playbook-editor-modal-button--primary"
+              >
+                Create
+              </button>
+            </div>
           </div>
-          <div className="playbook-editor-modal-actions">
-            <button
-              onClick={closeNewSectionModal}
-              className="playbook-editor-modal-button playbook-editor-modal-button--secondary"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleNewSection}
-              disabled={!newItemName.trim()}
-              className="playbook-editor-modal-button playbook-editor-modal-button--primary"
-            >
-              Create
-            </button>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showNewSectionModal} onOpenChange={setShowNewSectionModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Section</DialogTitle>
+          </DialogHeader>
+          <div className="playbook-editor-modal-content">
+            <div>
+              <label className="playbook-editor-modal-label">Section Name</label>
+              <Input
+                type="text"
+                value={newItemName}
+                onChange={(e) => setNewItemName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key == 'Enter') {
+                    handleNewSection()
+                  }
+                }}
+                placeholder="Enter section name..."
+                autoFocus
+              />
+            </div>
+            <div className="playbook-editor-modal-actions">
+              <button
+                onClick={closeNewSectionModal}
+                className="playbook-editor-modal-button playbook-editor-modal-button--secondary"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleNewSection}
+                disabled={!newItemName.trim()}
+                className="playbook-editor-modal-button playbook-editor-modal-button--primary"
+              >
+                Create
+              </button>
+            </div>
           </div>
-        </div>
-      </Modal>
+        </DialogContent>
+      </Dialog>
 
       <UnifiedSettingsDialog
         isOpen={showSettingsDialog}
@@ -934,67 +942,69 @@ function PlaybookEditorContent({
         playbookId={playbookId || ''}
       />
 
-      <Modal
-        isOpen={showRenameModal}
-        onClose={closeRenameModal}
-        title="Rename Play"
-      >
-        <div className="playbook-editor-modal-content">
-          <div>
-            <label className="playbook-editor-modal-label">Play Name</label>
-            <Input
-              type="text"
-              value={renamePlayName}
-              onChange={(e) => setRenamePlayName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key == 'Enter') {
-                  confirmRename()
-                }
-              }}
-              placeholder="Enter play name..."
-              autoFocus
-            />
+      <Dialog open={showRenameModal} onOpenChange={setShowRenameModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Rename Play</DialogTitle>
+          </DialogHeader>
+          <div className="playbook-editor-modal-content">
+            <div>
+              <label className="playbook-editor-modal-label">Play Name</label>
+              <Input
+                type="text"
+                value={renamePlayName}
+                onChange={(e) => setRenamePlayName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key == 'Enter') {
+                    confirmRename()
+                  }
+                }}
+                placeholder="Enter play name..."
+                autoFocus
+              />
+            </div>
+            <div className="playbook-editor-modal-actions">
+              <button onClick={closeRenameModal} className="playbook-editor-modal-button playbook-editor-modal-button--secondary">
+                Cancel
+              </button>
+              <button
+                onClick={confirmRename}
+                disabled={!renamePlayName.trim()}
+                className="playbook-editor-modal-button playbook-editor-modal-button--primary"
+              >
+                Rename
+              </button>
+            </div>
           </div>
-          <div className="playbook-editor-modal-actions">
-            <button onClick={closeRenameModal} className="playbook-editor-modal-button playbook-editor-modal-button--secondary">
-              Cancel
-            </button>
-            <button
-              onClick={confirmRename}
-              disabled={!renamePlayName.trim()}
-              className="playbook-editor-modal-button playbook-editor-modal-button--primary"
-            >
-              Rename
-            </button>
-          </div>
-        </div>
-      </Modal>
+        </DialogContent>
+      </Dialog>
 
-      <Modal
-        isOpen={showDeleteConfirmModal}
-        onClose={closeDeleteConfirmModal}
-        title="Delete Play"
-      >
-        <div className="playbook-editor-modal-content">
-          <p className="playbook-editor-modal-message">
-            Are you sure you want to delete this play? This action cannot be undone.
-          </p>
-          <div className="playbook-editor-modal-actions">
-            <button
-              onClick={closeDeleteConfirmModal}
-              className="playbook-editor-modal-button playbook-editor-modal-button--secondary"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={confirmDelete}
-              className="playbook-editor-modal-button playbook-editor-modal-button--destructive"
-            >
-              Delete
-            </button>
+      <Dialog open={showDeleteConfirmModal} onOpenChange={setShowDeleteConfirmModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Play</DialogTitle>
+          </DialogHeader>
+          <div className="playbook-editor-modal-content">
+            <p className="playbook-editor-modal-message">
+              Are you sure you want to delete this play? This action cannot be undone.
+            </p>
+            <div className="playbook-editor-modal-actions">
+              <button
+                onClick={closeDeleteConfirmModal}
+                className="playbook-editor-modal-button playbook-editor-modal-button--secondary"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="playbook-editor-modal-button playbook-editor-modal-button--destructive"
+              >
+                Delete
+              </button>
+            </div>
           </div>
-        </div>
-      </Modal>
+        </DialogContent>
+      </Dialog>
 
       {/* Play Animation Dialog */}
       <AnimationDialog
