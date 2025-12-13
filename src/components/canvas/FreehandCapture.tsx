@@ -192,7 +192,7 @@ export function FreehandCapture({
 	return (
 		<canvas
 			ref={canvasRef}
-			className='absolute inset-0 w-full h-full pointer-events-auto'
+			className="absolute inset-0 w-full h-full pointer-events-auto"
 			style={{ display: isActive ? 'block' : 'none' }}
 			onPointerDown={startDrawing}
 			onPointerMove={draw}
