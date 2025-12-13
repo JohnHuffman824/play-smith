@@ -10,7 +10,6 @@ interface PlaybookSection {
 interface PlaybookWithSections {
   id: string
   name: string
-  teamName: string | null
   sections: PlaybookSection[]
 }
 
@@ -36,7 +35,6 @@ export function useDestinationPlaybooks(currentPlaybookId: string) {
         setPlaybooks((data.playbooks || []).map((pb: any) => ({
           id: String(pb.id),
           name: pb.name,
-          teamName: pb.team_name || null,
           sections: [],
         })))
       } catch (err) {
@@ -53,6 +51,10 @@ export function useDestinationPlaybooks(currentPlaybookId: string) {
 
     try {
       const response = await fetch(`/api/playbooks/${playbookId}/sections`)
+      if (response.status === 401) {
+        navigate('/login')
+        return []
+      }
       if (!response.ok) throw new Error('Failed to fetch sections')
 
       const data = await response.json()
@@ -69,7 +71,7 @@ export function useDestinationPlaybooks(currentPlaybookId: string) {
       console.error('Failed to fetch sections:', err)
       return []
     }
-  }, [sectionsCache])
+  }, [navigate])
 
   return { playbooks, isLoading, error, fetchSections }
 }
