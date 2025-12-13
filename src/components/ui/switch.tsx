@@ -4,7 +4,6 @@ import * as React from "react"
 import * as SwitchPrimitive from "@radix-ui/react-switch"
 
 import './switch.css'
-import { cn } from "./utils"
 
 function Switch({
   className,
@@ -13,7 +12,7 @@ function Switch({
   return (
     <SwitchPrimitive.Root
       data-slot="switch"
-      className={cn('switch', className)}
+      className={`switch ${className ?? ''}`.trim()}
       {...props}
     >
       <SwitchPrimitive.Thumb

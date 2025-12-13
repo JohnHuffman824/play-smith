@@ -1,6 +1,5 @@
 import * as React from 'react'
 import { Slot } from '@radix-ui/react-slot'
-import { cn } from './utils'
 import './badge.css'
 
 type BadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline'
@@ -17,7 +16,7 @@ function Badge({ className, variant = 'default', asChild = false, ...props }: Ba
 		<Comp
 			data-slot='badge'
 			data-variant={variant}
-			className={cn('badge', className)}
+			className={`badge ${className ?? ''}`.trim()}
 			{...props}
 		/>
 	)

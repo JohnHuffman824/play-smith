@@ -1,6 +1,5 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
-import { cn } from "./utils"
 import "./button.css"
 
 type ButtonVariant = "default" | "destructive" | "outline" | "secondary" | "ghost" | "link" | "action"
@@ -26,7 +25,7 @@ function Button({
       data-slot="button"
       data-variant={variant}
       data-size={size}
-      className={cn("button", className)}
+      className={`button ${className ?? ''}`.trim()}
       {...props}
     />
   )
