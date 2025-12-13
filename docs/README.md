@@ -49,7 +49,7 @@ docs/
 │   ├── core/                    # Users, teams, sessions
 │   ├── playbooks/               # Playbooks, sections, plays
 │   ├── canvas/                  # Players, drawings
-│   ├── organization/            # Tags, formations, concepts
+│   ├── organization/            # Labels, formations, concepts
 │   └── audit.md                 # Audit logging
 │
 ├── deployment/                  # Infrastructure & Deployment

@@ -57,7 +57,7 @@ export function PlayListView({
           Formation
         </div>
         <div className="play-list-view-header-cell" style={{ gridColumn: 'span 2' }}>
-          Tags
+          Labels
         </div>
         <div className="play-list-view-header-cell" style={{ gridColumn: 'span 1' }}>
           Modified

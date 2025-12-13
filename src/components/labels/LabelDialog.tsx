@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { X, Plus, Check } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { TAG_COLOR_PALETTE, getTagStyles } from '../playbook-editor/constants/playbook'
+import { LABEL_COLOR_PALETTE, getLabelStyles } from '../playbook-editor/constants/playbook'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import type { Label } from '@/hooks/useLabelsData'
@@ -20,7 +20,7 @@ interface LabelDialogProps {
 export function LabelDialog({ isOpen, onClose, availableLabels, selectedLabelIds, onLabelsChange, onCreateLabel, title = 'Manage Labels' }: LabelDialogProps) {
 	const [showCreate, setShowCreate] = useState(false)
 	const [newName, setNewName] = useState('')
-	const [newColor, setNewColor] = useState(TAG_COLOR_PALETTE[0].value)
+	const [newColor, setNewColor] = useState(LABEL_COLOR_PALETTE[0].value)
 	const [creating, setCreating] = useState(false)
 
 	const toggleLabel = (id: number) => {
@@ -50,7 +50,7 @@ export function LabelDialog({ isOpen, onClose, availableLabels, selectedLabelIds
 						<h4 className="label-dialog__section-title">Preset Labels</h4>
 						<div className="label-dialog__labels">
 							{presets.map(label => {
-								const labelStyle = getTagStyles(label.color)
+								const labelStyle = getLabelStyles(label.color)
 								const selected = selectedLabelIds.includes(label.id)
 								return (
 									<button key={label.id} onClick={() => toggleLabel(label.id)}
@@ -67,7 +67,7 @@ export function LabelDialog({ isOpen, onClose, availableLabels, selectedLabelIds
 							<h4 className="label-dialog__section-title">Custom Labels</h4>
 							<div className="label-dialog__labels">
 								{custom.map(label => {
-									const labelStyle = getTagStyles(label.color)
+									const labelStyle = getLabelStyles(label.color)
 									const selected = selectedLabelIds.includes(label.id)
 									return (
 										<button key={label.id} onClick={() => toggleLabel(label.id)}
@@ -86,7 +86,7 @@ export function LabelDialog({ isOpen, onClose, availableLabels, selectedLabelIds
 								<div className="label-dialog__create-form">
 									<Input type="text" value={newName} onChange={e => setNewName(e.target.value)} placeholder="Label name..." autoFocus />
 									<div className="label-dialog__color-palette">
-										{TAG_COLOR_PALETTE.map(c => (
+										{LABEL_COLOR_PALETTE.map(c => (
 											<button key={c.value} onClick={() => setNewColor(c.value)}
 												className={`label-dialog__color-button ${newColor === c.value ? 'label-dialog__color-button--selected' : ''}`}
 												style={{ backgroundColor: c.value }} title={c.name} aria-label={c.name} />

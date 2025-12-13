@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Tag as TagIcon, Plus, X } from 'lucide-react'
 import { LabelDialog } from './LabelDialog'
-import { getTagStyles } from '../playbook-editor/constants/playbook'
+import { getLabelStyles } from '../playbook-editor/constants/playbook'
 import type { Label } from '@/hooks/useLabelsData'
 import './label-selector.css'
 
@@ -25,7 +25,7 @@ export function LabelSelector({ availableLabels, selectedLabels, onLabelsChange,
 		<div>
 			<div className="label-selector">
 				{selectedLabels.map(label => {
-					const labelStyle = getTagStyles(label.color)
+					const labelStyle = getLabelStyles(label.color)
 					return (
 						<span key={label.id} className="label-selector__label" style={labelStyle}>
 							{label.name}

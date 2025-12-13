@@ -1,5 +1,5 @@
 import { X } from 'lucide-react'
-import { getTagStyles } from '../playbook-editor/constants/playbook'
+import { getLabelStyles } from '../playbook-editor/constants/playbook'
 import type { Label } from '@/hooks/useLabelsData'
 import './selected-labels-overlay.css'
 
@@ -14,7 +14,7 @@ export function SelectedLabelsOverlay({ labels, onRemoveLabel }: SelectedLabelsO
 	return (
 		<div className="selected-labels-overlay">
 			{labels.map(label => {
-				const labelStyle = getTagStyles(label.color)
+				const labelStyle = getLabelStyles(label.color)
 				return (
 					<span
 						key={label.id}

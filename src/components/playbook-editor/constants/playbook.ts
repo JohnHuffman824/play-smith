@@ -28,8 +28,8 @@ export const PRIMARY_BUTTON_BASE = 'px-4 py-2 bg-primary text-primary-foreground
 // Personnel Options
 export const PERSONNEL_OPTIONS = ['11', '10', '12', '13', '21', '22'] as const
 
-// Tag Color Palette
-export const TAG_COLOR_PALETTE = [
+// Label Color Palette
+export const LABEL_COLOR_PALETTE = [
 	{ name: 'Green', value: '#10B981' },
 	{ name: 'Yellow', value: '#FBBF24' },
 	{ name: 'Orange', value: '#F97316' },
@@ -60,7 +60,7 @@ const HEX_TO_STYLES: Record<string, { bg: string; text: string }> = {
 	'#F59E0B': { bg: 'rgba(245, 158, 11, 0.3)', text: '#D97706' },
 }
 
-export function getTagStyles(hexColor: string): React.CSSProperties {
+export function getLabelStyles(hexColor: string): React.CSSProperties {
 	const hex = hexColor.toUpperCase()
 	const colors = HEX_TO_STYLES[hex]
 	if (!colors) {
