@@ -24,7 +24,7 @@ export function ConflictDialog({
     <div className="conflict-dialog-backdrop">
       <div className="conflict-dialog">
         <div className="conflict-dialog-header">
-          <AlertTriangle className="w-6 h-6 conflict-dialog-icon" />
+          <AlertTriangle className="conflict-dialog-icon" />
           <h3 className="conflict-dialog-title">Route Conflict</h3>
         </div>
 
