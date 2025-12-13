@@ -503,10 +503,10 @@ export function Toolbar({
 					}}
 				/>
 
-				{/* Tags Button */}
+				{/* Labels Button */}
 				<ToolbarButton
 					icon={Tag}
-					tooltip='Tags (T)'
+					tooltip='Labels (T)'
 					onClick={handleToggleTags}
 				/>
 
