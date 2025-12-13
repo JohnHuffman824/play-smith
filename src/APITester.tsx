@@ -1,4 +1,5 @@
 import { useRef, type FormEvent } from "react"
+import './api-tester.css'
 
 export function APITester() {
   const responseInputRef = useRef<HTMLTextAreaElement>(null)
@@ -22,19 +23,19 @@ export function APITester() {
   }
 
   return (
-    <div className="mt-8 mx-auto w-full max-w-2xl text-left flex flex-col gap-4">
+    <div className="api-tester-container">
       <form
         onSubmit={testEndpoint}
-        className="flex items-center gap-2 bg-[#1a1a1a] p-3 rounded-xl font-mono border-2 border-[#fbf0df] transition-colors duration-300 focus-within:border-[#f3d5a3] w-full"
+        className="api-tester-form"
       >
         <select
           name="method"
-          className="bg-[#fbf0df] text-[#1a1a1a] py-1.5 px-3 rounded-lg font-bold text-sm min-w-[0px] appearance-none cursor-pointer hover:bg-[#f3d5a3] transition-colors duration-100"
+          className="api-tester-method-select"
         >
-          <option value="GET" className="py-1">
+          <option value="GET" className="api-tester-method-option">
             GET
           </option>
-          <option value="PUT" className="py-1">
+          <option value="PUT" className="api-tester-method-option">
             PUT
           </option>
         </select>
@@ -42,12 +43,12 @@ export function APITester() {
           type="text"
           name="endpoint"
           defaultValue="/api/hello"
-          className="w-full flex-1 bg-transparent border-0 text-[#fbf0df] font-mono text-base py-1.5 px-2 outline-none focus:text-white placeholder-[#fbf0df]/40"
+          className="api-tester-endpoint-input"
           placeholder="/api/hello"
         />
         <button
           type="submit"
-          className="bg-[#fbf0df] text-[#1a1a1a] border-0 px-5 py-1.5 rounded-lg font-bold transition-all duration-100 hover:bg-[#f3d5a3] hover:-translate-y-px cursor-pointer whitespace-nowrap"
+          className="api-tester-submit-button"
         >
           Send
         </button>
@@ -56,7 +57,7 @@ export function APITester() {
         ref={responseInputRef}
         readOnly
         placeholder="Response will appear here..."
-        className="w-full min-h-[140px] bg-[#1a1a1a] border-2 border-[#fbf0df] rounded-xl p-3 text-[#fbf0df] font-mono resize-y focus:border-[#f3d5a3] placeholder-[#fbf0df]/40"
+        className="api-tester-response-textarea"
       />
     </div>
   )

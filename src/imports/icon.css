@@ -1,0 +1,43 @@
+.icon-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.icon-outer-flex {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.icon-inner-flex {
+  align-content: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 11px 21px;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.icon-frame {
+  height: 213.33px;
+  position: relative;
+  flex-shrink: 0;
+  width: 213.324px;
+}
+
+.icon-frame-inner {
+  position: absolute;
+  inset: -5%;
+}
+
+.icon-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}

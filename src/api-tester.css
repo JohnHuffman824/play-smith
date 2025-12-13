@@ -1,0 +1,106 @@
+.api-tester-container {
+  margin-top: 2rem;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: 42rem;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.api-tester-form {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #1a1a1a;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  font-family: monospace;
+  border: 2px solid #fbf0df;
+  transition: border-color 300ms;
+  width: 100%;
+}
+
+.api-tester-form:focus-within {
+  border-color: #f3d5a3;
+}
+
+.api-tester-method-select {
+  background-color: #fbf0df;
+  color: #1a1a1a;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.5rem;
+  font-weight: bold;
+  font-size: 0.875rem;
+  min-width: 0;
+  appearance: none;
+  cursor: pointer;
+  transition: background-color 100ms;
+}
+
+.api-tester-method-select:hover {
+  background-color: #f3d5a3;
+}
+
+.api-tester-method-option {
+  padding: 0.25rem 0;
+}
+
+.api-tester-endpoint-input {
+  width: 100%;
+  flex: 1;
+  background-color: transparent;
+  border: 0;
+  color: #fbf0df;
+  font-family: monospace;
+  font-size: 1rem;
+  padding: 0.375rem 0.5rem;
+  outline: none;
+}
+
+.api-tester-endpoint-input:focus {
+  color: white;
+}
+
+.api-tester-endpoint-input::placeholder {
+  color: rgba(251, 240, 223, 0.4);
+}
+
+.api-tester-submit-button {
+  background-color: #fbf0df;
+  color: #1a1a1a;
+  border: 0;
+  padding: 0.375rem 1.25rem;
+  border-radius: 0.5rem;
+  font-weight: bold;
+  transition: all 100ms;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.api-tester-submit-button:hover {
+  background-color: #f3d5a3;
+  transform: translateY(-1px);
+}
+
+.api-tester-response-textarea {
+  width: 100%;
+  min-height: 140px;
+  background-color: #1a1a1a;
+  border: 2px solid #fbf0df;
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  color: #fbf0df;
+  font-family: monospace;
+  resize: vertical;
+}
+
+.api-tester-response-textarea:focus {
+  border-color: #f3d5a3;
+}
+
+.api-tester-response-textarea::placeholder {
+  color: rgba(251, 240, 223, 0.4);
+}
