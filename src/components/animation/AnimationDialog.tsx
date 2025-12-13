@@ -8,10 +8,8 @@ import { Play, Pause } from 'lucide-react'
 import {
 	Dialog,
 	DialogContent,
-	DialogDescription,
-	DialogHeader,
-	DialogTitle,
 } from '../ui/dialog'
+import { DialogCloseButton } from '../ui/dialog-close-button'
 import {
 	Select,
 	SelectContent,
@@ -37,9 +35,11 @@ type AnimationDialogProps = {
 function AnimationDialogContent({
 	playId,
 	playName,
+	onClose,
 }: {
 	playId: string | null
 	playName?: string
+	onClose: () => void
 }) {
 	const { playContent, isLoading } = usePlayContent({
 		playId,
@@ -86,12 +86,10 @@ function AnimationDialogContent({
 
 	return (
 		<div className='animation-dialog-content'>
-			<DialogHeader className='animation-dialog-header'>
-				<DialogTitle>{displayName}</DialogTitle>
-				<DialogDescription className='sr-only'>
-					Play animation viewer
-				</DialogDescription>
-			</DialogHeader>
+			<div className='animation-dialog-header'>
+				<span className='animation-dialog-title'>{displayName}</span>
+				<DialogCloseButton onClose={onClose} />
+			</div>
 
 			{isLoading ? (
 				<div className='animation-dialog-loading'>
@@ -155,7 +153,7 @@ export function AnimationDialog({
 		<Dialog open={isOpen} onOpenChange={onClose}>
 			<DialogContent className='animation-dialog-wrapper'>
 				<AnimationProvider>
-					<AnimationDialogContent playId={playId} playName={playName} />
+					<AnimationDialogContent playId={playId} playName={playName} onClose={onClose} />
 				</AnimationProvider>
 			</DialogContent>
 		</Dialog>

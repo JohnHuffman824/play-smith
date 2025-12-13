@@ -71,9 +71,9 @@ describe('PlaybookManagerPage - Resizable Sidebar', () => {
       </SettingsProvider>
     )
 
-    // Wait for loading to complete
+    // Wait for page to render by checking for sidebar content
     await waitFor(() => {
-      expect(screen.queryByText('Loading playbooks...')).toBeFalsy()
+      expect(screen.getByText('All Playbooks')).toBeTruthy()
     })
 
     const panelGroup = container.querySelector('[data-slot="resizable-panel-group"]')
@@ -96,9 +96,9 @@ describe('PlaybookManagerPage - Resizable Sidebar', () => {
       </SettingsProvider>
     )
 
-    // Wait for loading to complete
+    // Wait for page to render by checking for sidebar content
     await waitFor(() => {
-      expect(screen.queryByText('Loading playbooks...')).toBeFalsy()
+      expect(screen.getByText('All Playbooks')).toBeTruthy()
     })
 
     const handle = container.querySelector('[data-slot="resizable-handle"]')
@@ -122,9 +122,9 @@ describe('PlaybookManagerPage - Resizable Sidebar', () => {
       </SettingsProvider>
     )
 
-    // Wait for loading to complete
+    // Wait for page to render by checking for sidebar content
     await waitFor(() => {
-      expect(screen.queryByText('Loading playbooks...')).toBeFalsy()
+      expect(screen.getByText('All Playbooks')).toBeTruthy()
     })
 
     // Panel exists (id is set on the panel)
@@ -147,9 +147,9 @@ describe('PlaybookManagerPage - Resizable Sidebar', () => {
       </SettingsProvider>
     )
 
-    // Wait for loading to complete
+    // Wait for page to render by checking for sidebar content
     await waitFor(() => {
-      expect(screen.queryByText('Loading playbooks...')).toBeFalsy()
+      expect(screen.getByText('All Playbooks')).toBeTruthy()
     })
 
     // Verify sidebar navigation items are still rendered

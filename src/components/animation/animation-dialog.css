@@ -7,7 +7,16 @@
 }
 
 .animation-dialog-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
 	flex-shrink: 0;
+}
+
+.animation-dialog-title {
+	font-size: 1.125rem;
+	font-weight: 600;
+	line-height: 1;
 }
 
 .animation-dialog-loading,
@@ -56,6 +65,13 @@
 	height: 95vh;
 	max-width: none;
 	padding: 1.5rem;
+	display: flex;
+	flex-direction: column;
+}
+
+/* Hide the automatic close button from DialogContent */
+.animation-dialog-wrapper > [data-slot="dialog-close"] {
+	display: none;
 }
 
 @media (width >= 640px) {

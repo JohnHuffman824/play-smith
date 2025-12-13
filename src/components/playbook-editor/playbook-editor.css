@@ -32,6 +32,7 @@
   align-items: center;
   gap: 16px;
   padding-left: 1rem;
+  flex: 1;
 }
 
 .playbook-editor-header-divider {
@@ -58,7 +59,7 @@
 .playbook-editor-search-input {
   flex: 1;
   min-width: 30rem;
-  max-width: 50rem;
+  max-width: 70rem;
 }
 
 /* || Tabs */
@@ -298,49 +299,6 @@
 
 .playbook-editor-error-button:focus-visible {
   box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
-}
-
-/* || View mode toggle */
-.playbook-editor-view-toggle {
-  display: flex;
-  align-items: center;
-  background-color: var(--muted);
-  border-radius: 8px;
-  padding: 2px;
-}
-
-.playbook-editor-view-button {
-  padding: 6px;
-  border-radius: 4px;
-  transition: all 200ms;
-  cursor: pointer;
-  border: 1px solid transparent;
-  background-color: transparent;
-  color: var(--muted-foreground);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.875rem;
-  height: 1.875rem;
-}
-
-.playbook-editor-view-button:hover {
-  color: var(--foreground);
-}
-
-.playbook-editor-view-button-active {
-  background-color: var(--background);
-  border-color: var(--border);
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 10%), 0 1px 2px -1px rgb(0 0 0 / 10%);
-  color: var(--foreground);
-}
-
-.playbook-editor-view-button-inactive {
-  background-color: transparent;
-}
-
-.playbook-editor-view-button-inactive:hover {
-  background-color: color-mix(in oklch, var(--accent) 50%, transparent);
 }
 
 /* || Toolbar Button Groups */

@@ -17,6 +17,7 @@ import type { ConceptFilter } from './ConceptsToolbar'
 import { ConceptDialog } from '@/components/concepts/ConceptDialog'
 import type { BaseConcept } from '@/types/concept.types'
 import { IconButton } from '../ui/icon-button'
+import { ViewToggle } from '../ui/view-toggle'
 import {
   Tooltip,
   TooltipContent,
@@ -544,30 +545,7 @@ function PlaybookEditorContent({
 
                 <div className="playbook-editor-header-divider-small" />
 
-                <div className="playbook-editor-view-toggle">
-                  <button
-                    onClick={() => setViewMode(VIEW_MODE_GRID)}
-                    className={`playbook-editor-view-button ${
-                      viewMode == VIEW_MODE_GRID
-                        ? 'playbook-editor-view-button-active'
-                        : 'playbook-editor-view-button-inactive'
-                    }`}
-                    title="Grid View"
-                  >
-                    <LayoutGrid className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => setViewMode(VIEW_MODE_LIST)}
-                    className={`playbook-editor-view-button ${
-                      viewMode == VIEW_MODE_LIST
-                        ? 'playbook-editor-view-button-active'
-                        : 'playbook-editor-view-button-inactive'
-                    }`}
-                    title="List View"
-                  >
-                    <List className="w-4 h-4" />
-                  </button>
-                </div>
+                <ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
 
                 <div className="playbook-editor-header-divider-small" />
 

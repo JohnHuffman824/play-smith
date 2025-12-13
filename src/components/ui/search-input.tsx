@@ -7,6 +7,7 @@ interface SearchInputProps {
 	onChange: (value: string) => void
 	placeholder?: string
 	className?: string
+	style?: React.CSSProperties
 }
 
 /**
@@ -17,9 +18,10 @@ export function SearchInput({
 	onChange,
 	placeholder = 'Search...',
 	className,
+	style,
 }: SearchInputProps) {
 	return (
-		<div className={cn('search-input-wrapper', className)}>
+		<div className={cn('search-input-wrapper', className)} style={style}>
 			<Search className="search-input-icon" />
 			<input
 				type="text"

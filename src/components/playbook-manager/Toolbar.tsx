@@ -1,7 +1,8 @@
-import { Grid, List, Plus, FolderPlus, Upload, Download, Settings } from 'lucide-react'
+import { Plus, FolderPlus, Upload, Download, Settings } from 'lucide-react'
 import { TeamSelector } from './TeamSelector'
 import { HEADER_HEIGHT } from '../../constants/layout'
 import { IconButton } from '../ui/icon-button'
+import { ViewToggle } from '../ui/view-toggle'
 import { SearchInput } from '../ui/search-input'
 import { TooltipProvider } from '../ui/tooltip'
 import './toolbar.css'
@@ -53,7 +54,7 @@ export function Toolbar({
 						value={searchQuery}
 						onChange={onSearchChange}
 						placeholder="Search playbooks..."
-						style={{ flex: 1, maxWidth: '672px' }}
+						style={{ flex: 1, maxWidth: '70rem' }}
 					/>
 
 						{/* Right Section - Actions */}
@@ -69,20 +70,7 @@ export function Toolbar({
 							<div className="playbook-toolbar-divider" />
 
 							{/* View Mode Toggle */}
-							<div className="playbook-toolbar-view-mode">
-								<button
-									onClick={() => onViewModeChange('grid')}
-									className={`playbook-toolbar-view-button ${viewMode === 'grid' ? 'playbook-toolbar-view-button-active' : ''}`}
-								>
-									<Grid className="w-4 h-4" />
-								</button>
-								<button
-									onClick={() => onViewModeChange('list')}
-									className={`playbook-toolbar-view-button ${viewMode === 'list' ? 'playbook-toolbar-view-button-active' : ''}`}
-								>
-									<List className="w-4 h-4" />
-								</button>
-							</div>
+							<ViewToggle viewMode={viewMode} onViewModeChange={onViewModeChange} />
 
 							<div className="playbook-toolbar-divider" />
 

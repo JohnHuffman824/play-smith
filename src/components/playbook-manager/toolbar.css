@@ -37,38 +37,6 @@
 	background: var(--border);
 }
 
-/* || View mode toggle */
-.playbook-toolbar-view-mode {
-	display: flex;
-	align-items: center;
-	background: var(--muted);
-	border-radius: 8px;
-	padding: 4px;
-}
-
-.playbook-toolbar-view-button {
-	padding: 8px;
-	border-radius: 4px;
-	transition: all 200ms;
-	cursor: pointer;
-	outline: none;
-	background: transparent;
-	border: none;
-}
-
-.playbook-toolbar-view-button:hover {
-	background: color-mix(in oklch, var(--accent) 50%, transparent);
-}
-
-.playbook-toolbar-view-button:focus-visible {
-	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
-}
-
-.playbook-toolbar-view-button-active {
-	background: var(--card);
-	box-shadow: 0 1px 2px 0 rgb(0 0 0 / 5%);
-}
-
 /* || New Playbook button */
 .playbook-toolbar-new-playbook {
 	display: flex;
