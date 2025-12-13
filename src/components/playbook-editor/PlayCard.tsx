@@ -91,7 +91,7 @@ function PlayCardThumbnail({
         <PlayThumbnailSVG
           drawings={drawings || []}
           players={displayPlayers}
-          className="w-full h-full"
+          className="play-card-icon-full"
         />
       </div>
 
@@ -110,7 +110,7 @@ function PlayCardThumbnail({
           className="play-card-animate-button"
           aria-label="Animate play"
         >
-          <Play className="size-5 fill-white text-white" />
+          <Play className="play-card-icon-large play-card-icon-white" />
         </button>
       )}
     </div>
@@ -140,7 +140,7 @@ export function PlayCard({
   onDuplicate,
 }: PlayCardProps) {
   return (
-    <div className={`play-card group ${selected ? 'play-card-selected' : ''}`}>
+    <div className={`play-card ${selected ? 'play-card-selected' : ''}`.trim()}>
       <PlayCardThumbnail
         thumbnail={thumbnail}
         drawings={drawings}
@@ -160,9 +160,9 @@ export function PlayCard({
           className="play-card-select-button"
         >
           {selected ? (
-            <CheckCircle2 className="w-5 h-5 text-primary" />
+            <CheckCircle2 className="play-card-icon-large play-card-icon-primary" />
           ) : (
-            <Circle className="w-5 h-5 text-muted-foreground play-card-select-icon-hidden" />
+            <Circle className="play-card-icon-large play-card-icon-muted play-card-select-icon-hidden" />
           )}
         </button>
       )}
@@ -174,27 +174,27 @@ export function PlayCard({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="play-card-menu-button">
-                <MoreVertical className="w-4 h-4" />
+                <MoreVertical className="play-card-icon" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               {onAnimate && (
                 <DropdownMenuItem onClick={() => onAnimate(id)}>
-                  <Play className="w-4 h-4" />
+                  <Play className="play-card-icon" />
                   Animate
                 </DropdownMenuItem>
               )}
               <DropdownMenuItem onClick={() => onRename(id)}>
-                <Edit className="w-4 h-4" />
+                <Edit className="play-card-icon" />
                 Rename
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => onDuplicate(id)}>
-                <Copy className="w-4 h-4" />
+                <Copy className="play-card-icon" />
                 Duplicate
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => onDelete(id)} variant="destructive">
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="play-card-icon" />
                 Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
