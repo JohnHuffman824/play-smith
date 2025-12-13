@@ -44,20 +44,20 @@ export const TAG_COLOR_PALETTE = [
 	{ name: 'Amber', value: '#F59E0B' },
 ]
 
-// Tag color styles mapping
+// Label color styles mapping
 const HEX_TO_STYLES: Record<string, { bg: string; text: string }> = {
-	'#10B981': { bg: 'rgba(16, 185, 129, 0.15)', text: '#10B981' },
-	'#FBBF24': { bg: 'rgba(251, 191, 36, 0.15)', text: '#B8860B' },
-	'#F97316': { bg: 'rgba(249, 115, 22, 0.15)', text: '#F97316' },
-	'#EF4444': { bg: 'rgba(239, 68, 68, 0.15)', text: '#EF4444' },
-	'#F43F5E': { bg: 'rgba(244, 63, 94, 0.15)', text: '#F43F5E' },
-	'#3B82F6': { bg: 'rgba(59, 130, 246, 0.15)', text: '#3B82F6' },
-	'#8B5CF6': { bg: 'rgba(139, 92, 246, 0.15)', text: '#8B5CF6' },
-	'#6366F1': { bg: 'rgba(99, 102, 241, 0.15)', text: '#6366F1' },
-	'#14B8A6': { bg: 'rgba(20, 184, 166, 0.15)', text: '#14B8A6' },
-	'#06B6D4': { bg: 'rgba(6, 182, 212, 0.15)', text: '#0891B2' },
-	'#EC4899': { bg: 'rgba(236, 72, 153, 0.15)', text: '#EC4899' },
-	'#F59E0B': { bg: 'rgba(245, 158, 11, 0.15)', text: '#D97706' },
+	'#10B981': { bg: 'rgba(16, 185, 129, 0.3)', text: '#10B981' },
+	'#FBBF24': { bg: 'rgba(251, 191, 36, 0.3)', text: '#B8860B' },
+	'#F97316': { bg: 'rgba(249, 115, 22, 0.3)', text: '#F97316' },
+	'#EF4444': { bg: 'rgba(239, 68, 68, 0.3)', text: '#EF4444' },
+	'#F43F5E': { bg: 'rgba(244, 63, 94, 0.3)', text: '#F43F5E' },
+	'#3B82F6': { bg: 'rgba(59, 130, 246, 0.3)', text: '#3B82F6' },
+	'#8B5CF6': { bg: 'rgba(139, 92, 246, 0.3)', text: '#8B5CF6' },
+	'#6366F1': { bg: 'rgba(99, 102, 241, 0.3)', text: '#6366F1' },
+	'#14B8A6': { bg: 'rgba(20, 184, 166, 0.3)', text: '#14B8A6' },
+	'#06B6D4': { bg: 'rgba(6, 182, 212, 0.3)', text: '#0891B2' },
+	'#EC4899': { bg: 'rgba(236, 72, 153, 0.3)', text: '#EC4899' },
+	'#F59E0B': { bg: 'rgba(245, 158, 11, 0.3)', text: '#D97706' },
 }
 
 export function getTagStyles(hexColor: string): React.CSSProperties {
