@@ -73,8 +73,14 @@ export function SendToDialog({
 			})
 
 			if (!response.ok) {
-				const data = await response.json()
-				throw new Error(data.error || 'Failed to send plays')
+				let errorMessage = 'Failed to send plays'
+				try {
+					const data = await response.json()
+					errorMessage = data.error || errorMessage
+				} catch {
+					// Response wasn't JSON, use default message
+				}
+				throw new Error(errorMessage)
 			}
 
 			onComplete()

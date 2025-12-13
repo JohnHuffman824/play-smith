@@ -26,11 +26,6 @@
 	margin: 0;
 }
 
-.send-to-playbook-team {
-	color: var(--muted-foreground);
-	font-size: 0.75rem;
-}
-
 .send-to-error {
 	color: var(--destructive);
 	font-size: 0.875rem;
