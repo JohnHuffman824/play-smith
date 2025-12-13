@@ -1,0 +1,38 @@
+.send-to-dialog-content {
+	max-width: 28rem;
+}
+
+.send-to-dialog-body {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+}
+
+.send-to-field {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.send-to-label {
+	font-size: 0.875rem;
+	font-weight: 500;
+	color: var(--foreground);
+}
+
+.send-to-hint {
+	font-size: 0.75rem;
+	color: var(--muted-foreground);
+	margin: 0;
+}
+
+.send-to-playbook-team {
+	color: var(--muted-foreground);
+	font-size: 0.75rem;
+}
+
+.send-to-error {
+	color: var(--destructive);
+	font-size: 0.875rem;
+	margin: 0;
+}
