@@ -22,6 +22,11 @@
   color: var(--muted-foreground);
 }
 
+.play-list-view-header-cell svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
 /* || Rows */
 .play-list-view-rows {
   border-top: 1px solid var(--border);
@@ -57,20 +62,52 @@
   padding: 0;
   border-radius: 0.25rem;
   transition: all 200ms;
+  cursor: pointer;
+  outline: none;
+  background-color: transparent;
+  border: none;
 }
 
 .play-list-view-select-button:hover {
-  background: var(--accent);
+  background-color: var(--accent);
+}
+
+.play-list-view-select-button:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.play-list-view-select-button svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.play-list-view-select-button svg.icon-selected {
+  color: var(--primary);
+}
+
+.play-list-view-select-button svg.icon-unselected {
+  color: var(--muted-foreground);
 }
 
 /* || Name button */
 .play-list-view-name-button {
   padding: 0;
   text-align: left;
+  cursor: pointer;
+  outline: none;
+  background-color: transparent;
+  border: none;
+  color: var(--foreground);
+  transition: all 200ms;
 }
 
 .play-list-view-name-button:hover {
   text-decoration: underline;
+}
+
+.play-list-view-name-button:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+  border-radius: 0.25rem;
 }
 
 /* || Formation text */
@@ -113,8 +150,21 @@
   border-radius: 0.25rem;
   transition: all 200ms;
   cursor: pointer;
+  outline: none;
+  background-color: transparent;
+  border: none;
+  color: var(--foreground);
 }
 
 .play-list-view-menu-button:hover {
-  background: var(--accent);
+  background-color: var(--accent);
+}
+
+.play-list-view-menu-button:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.play-list-view-menu-button svg {
+  width: 1rem;
+  height: 1rem;
 }

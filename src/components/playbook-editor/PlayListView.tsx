@@ -42,7 +42,7 @@ export function PlayListView({
     <div className="play-list-view">
       <div className="play-list-view-header">
         <div className="play-list-view-header-cell" style={{ gridColumn: 'span 1' }}>
-          <Circle className="w-5 h-5" />
+          <Circle />
         </div>
         <div className="play-list-view-header-cell" style={{ gridColumn: 'span 5' }}>
           Play
@@ -66,9 +66,7 @@ export function PlayListView({
           return (
             <div
               key={play.id}
-              className={`play-list-view-row ${
-                isSelected ? 'play-list-view-row-selected' : ''
-              }`}
+              className={`play-list-view-row ${isSelected ? 'play-list-view-row-selected' : ''}`.trim()}
             >
               <div className="play-list-view-cell" style={{ gridColumn: 'span 1' }}>
                 <button
@@ -76,9 +74,9 @@ export function PlayListView({
                   className="play-list-view-select-button"
                 >
                   {isSelected ? (
-                    <CheckCircle2 className="w-5 h-5 text-primary" />
+                    <CheckCircle2 className="icon-selected" />
                   ) : (
-                    <Circle className="w-5 h-5 text-muted-foreground" />
+                    <Circle className="icon-unselected" />
                   )}
                 </button>
               </div>
@@ -127,27 +125,27 @@ export function PlayListView({
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button className="play-list-view-menu-button">
-                      <MoreVertical className="w-4 h-4" />
+                      <MoreVertical />
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     {onAnimate && (
                       <DropdownMenuItem onClick={() => onAnimate(play.id)}>
-                        <Play className="w-4 h-4" />
+                        <Play />
                         Animate
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuItem onClick={() => onRename(play.id)}>
-                      <Edit className="w-4 h-4" />
+                      <Edit />
                       Rename
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => onDuplicate(play.id)}>
-                      <Copy className="w-4 h-4" />
+                      <Copy />
                       Duplicate
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => onDelete(play.id)} variant="destructive">
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 />
                       Delete
                     </DropdownMenuItem>
                   </DropdownMenuContent>
