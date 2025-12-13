@@ -97,7 +97,7 @@ export function ShareDialog({
             onClick={onClose}
             variant="ghost"
             size="icon"
-            className="h-auto w-auto p-1.5"
+            className="share-dialog-close-button"
           >
             <X className="w-5 h-5" />
           </Button>
@@ -125,7 +125,7 @@ export function ShareDialog({
                 <Button
                   onClick={handleCopyLink}
                   variant="default"
-                  className="whitespace-nowrap"
+                  className="share-dialog-copy-button"
                 >
                   {linkCopied ? (
                     <>
@@ -163,7 +163,7 @@ export function ShareDialog({
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="secondary"
-                      className="min-w-[140px] justify-between h-auto py-2.5 cursor-pointer"
+                      className="share-dialog-role-selector"
                     >
                       <span>
                         {defaultRole == ROLE_VIEWER ? 'Viewer' : 'Collaborator'}
@@ -171,23 +171,23 @@ export function ShareDialog({
                       <ChevronDown className="w-4 h-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="min-w-[200px]">
+                  <DropdownMenuContent align="end" className="share-dialog-dropdown-content">
                     <DropdownMenuItem
                       onClick={() => setDefaultRole(ROLE_VIEWER)}
-                      className="flex-col items-start h-auto py-2"
+                      className="share-dialog-dropdown-item"
                     >
-                      <div className="font-medium">Viewer</div>
-                      <div className="text-muted-foreground text-sm">
+                      <div className="share-dialog-role-label">Viewer</div>
+                      <div className="share-dialog-role-description">
                         Can view only
                       </div>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={() => setDefaultRole(ROLE_COLLABORATOR)}
-                      className="flex-col items-start h-auto py-2"
+                      className="share-dialog-dropdown-item"
                     >
-                      <div className="font-medium">Collaborator</div>
-                      <div className="text-muted-foreground text-sm">
+                      <div className="share-dialog-role-label">Collaborator</div>
+                      <div className="share-dialog-role-description">
                         Can edit and share
                       </div>
                     </DropdownMenuItem>
@@ -197,7 +197,7 @@ export function ShareDialog({
                   onClick={handleAddEmail}
                   disabled={!canAddEmail}
                   variant="secondary"
-                  className="h-auto py-2.5"
+                  className="share-dialog-add-button"
                 >
                   Add
                 </Button>
@@ -221,7 +221,7 @@ export function ShareDialog({
                             <Button
                               variant="secondary"
                               size="sm"
-                              className="h-auto py-1.5 bg-accent/50 hover:bg-accent cursor-pointer"
+                              className="share-dialog-recipient-role-button"
                             >
                               <span>
                                 {recipient.role == ROLE_VIEWER
@@ -232,25 +232,25 @@ export function ShareDialog({
                               <ChevronDown className="w-3 h-3" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="min-w-[200px]">
+                          <DropdownMenuContent align="end" className="share-dialog-dropdown-content">
                             <DropdownMenuItem
                               onClick={() => handleRoleChange(recipient.email, ROLE_VIEWER)}
-                              className="flex-col items-start h-auto py-2"
+                              className="share-dialog-dropdown-item"
                             >
-                              <div className="font-medium">Viewer</div>
-                              <div className="text-muted-foreground text-sm">
+                              <div className="share-dialog-role-label">Viewer</div>
+                              <div className="share-dialog-role-description">
                                 Can view only
                               </div>
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
                               onClick={() => handleRoleChange(recipient.email, ROLE_COLLABORATOR)}
-                              className="flex-col items-start h-auto py-2"
+                              className="share-dialog-dropdown-item"
                             >
-                              <div className="font-medium">
+                              <div className="share-dialog-role-label">
                                 Collaborator
                               </div>
-                              <div className="text-muted-foreground text-sm">
+                              <div className="share-dialog-role-description">
                                 Can edit and share
                               </div>
                             </DropdownMenuItem>
@@ -260,7 +260,7 @@ export function ShareDialog({
                           onClick={() => handleRemoveEmail(recipient.email)}
                           variant="ghost"
                           size="icon"
-                          className="h-auto w-auto p-1"
+                          className="share-dialog-remove-button"
                         >
                           <X className="w-4 h-4" />
                         </Button>
