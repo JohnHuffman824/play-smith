@@ -17,6 +17,7 @@ import {
 	Loader2,
 	RotateCcw,
 	Tag,
+	Play,
 } from 'lucide-react'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import type { DrawingState, Tool } from '../../types/play.types'
@@ -57,6 +58,7 @@ interface ToolbarProps {
 	setShowPlayBar: (_show: boolean) => void
 	playId?: string
 	onDeletePlay?: () => Promise<void>
+	onAnimate?: () => void
 }
 
 /**
@@ -71,6 +73,7 @@ export function Toolbar({
 	setShowPlayBar,
 	playId,
 	onDeletePlay,
+	onAnimate,
 }: ToolbarProps) {
 	const { state: _state } = usePlayContext()
 	const players = _state.players || []
@@ -243,7 +246,7 @@ export function Toolbar({
 			const BUTTON_SIZE = 56 // 14 * 4 (w-14 h-14 in pixels)
 			const GAP = 12
 			const PADDING = 12
-			const TOTAL_BUTTONS = 16 // Count of all toolbar buttons
+			const TOTAL_BUTTONS = 17 // Count of all toolbar buttons
 
 			// Use window height as the stable constraint
 			const availableHeight = window.innerHeight - (2 * PADDING)
@@ -509,6 +512,15 @@ export function Toolbar({
 					tooltip='Labels (T)'
 					onClick={handleToggleTags}
 				/>
+
+				{/* Animate Button */}
+				{onAnimate && (
+					<ToolbarButton
+						icon={Play}
+						tooltip="Animate"
+						onClick={onAnimate}
+					/>
+				)}
 
 				{/* Toggle Play Bar Button */}
 				<ToolbarButton

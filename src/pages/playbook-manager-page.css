@@ -201,8 +201,7 @@
 
 /* || Modal Container */
 .playbook-manager-modals {
-	position: relative;
-	z-index: 1000;
+	/* Removed position and z-index to avoid stacking context conflicts with portaled elements */
 }
 
 /* || Dialog Styles */

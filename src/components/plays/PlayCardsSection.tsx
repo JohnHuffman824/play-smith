@@ -16,6 +16,7 @@ interface PlayCardsSectionProps {
 	onRenamePlay?: (id: string) => void
 	onDeletePlay?: (id: string) => void
 	onDuplicatePlay?: (id: string) => void
+	onAnimatePlay?: (id: string) => void
 }
 
 const NOOP = () => {}
@@ -29,7 +30,8 @@ export function PlayCardsSection({
 	isAddingPlay,
 	onRenamePlay,
 	onDeletePlay,
-	onDuplicatePlay
+	onDuplicatePlay,
+	onAnimatePlay
 }: PlayCardsSectionProps) {
 	const scrollContainerRef = useRef<HTMLDivElement>(null)
 	// Track whether content should be rendered (delayed unmount on hide)
@@ -73,6 +75,7 @@ export function PlayCardsSection({
 										onRename={onRenamePlay ?? NOOP}
 										onDelete={onDeletePlay ?? NOOP}
 										onDuplicate={onDuplicatePlay ?? NOOP}
+										onAnimate={onAnimatePlay}
 									/>
 								</div>
 							))}

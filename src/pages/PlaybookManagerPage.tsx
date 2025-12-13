@@ -248,7 +248,6 @@ export function PlaybookManagerPage() {
 			  - Enter to toggle expand/collapse
 			*/}
 			<ResizableHandle
-				withHandle
 				className="playbook-manager-resize-handle"
 			/>
 

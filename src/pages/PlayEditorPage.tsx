@@ -8,6 +8,7 @@ import { ConceptDialog } from '../components/concepts/ConceptDialog'
 import { SelectionOverlay } from '../components/canvas/SelectionOverlay'
 import { SelectedLabelsOverlay } from '../components/labels/SelectedLabelsOverlay'
 import { LabelDialog } from '../components/labels/LabelDialog'
+import { AnimationDialog } from '@/components/animation/AnimationDialog'
 import { useTheme } from '@/contexts/SettingsContext'
 import { PlayProvider, usePlayContext } from '../contexts/PlayContext'
 import { ConceptProvider, useConcept } from '../contexts/ConceptContext'
@@ -103,6 +104,8 @@ function PlayEditorContent() {
 	const [modalTargetPlayId, setModalTargetPlayId] = useState<string | null>(null)
 	const [targetPlayName, setTargetPlayName] = useState('')
 	const [showUnsavedChangesDialog, setShowUnsavedChangesDialog] = useState(false)
+	const [showAnimationDialog, setShowAnimationDialog] = useState(false)
+	const [animatingPlayId, setAnimatingPlayId] = useState<string | null>(null)
 	const [initialPlayState, setInitialPlayState] = useState<{
 		players: any[]
 		drawings: any[]
@@ -363,6 +366,16 @@ function PlayEditorContent() {
 		setSelectedLabels(prev => prev.filter(l => l.id !== labelId))
 	}
 
+	function handleAnimatePlay(targetPlayId: string) {
+		setAnimatingPlayId(targetPlayId)
+		setShowAnimationDialog(true)
+	}
+
+	function handleCloseAnimationDialog() {
+		setShowAnimationDialog(false)
+		setAnimatingPlayId(null)
+	}
+
 	async function handleAddPlay() {
 		if (!playbookId || isAddingPlay) return
 
@@ -615,6 +628,7 @@ function PlayEditorContent() {
 				setShowPlayBar={setShowPlayBar}
 				playId={playId}
 				onDeletePlay={handleDeletePlay}
+				onAnimate={() => handleAnimatePlay(playId!)}
 			/>
 			<div className="play-editor-content">
 				<PlayHeader
@@ -648,6 +662,7 @@ function PlayEditorContent() {
 				onRenamePlay={handleRenamePlay}
 				onDeletePlay={handleDeletePlayFromBar}
 				onDuplicatePlay={handleDuplicatePlay}
+				onAnimatePlay={handleAnimatePlay}
 				/>
 
 				{/* Selection Overlay */}
@@ -802,6 +817,13 @@ function PlayEditorContent() {
 				teamId={teamId}
 				playbookId={playbookId}
 				onSave={handleSaveConcept}
+			/>
+
+			<AnimationDialog
+				isOpen={showAnimationDialog}
+				onClose={handleCloseAnimationDialog}
+				playId={animatingPlayId}
+				playName={playbookPlays.find(p => p.id === animatingPlayId)?.name}
 			/>
 		</main>
 	)

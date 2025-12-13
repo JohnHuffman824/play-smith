@@ -61,7 +61,10 @@ export function AnimatedPlayer({
 			}}
 		>
 			{showLabel && !isGhost && (
-				<span className='animated-player-label'>
+				<span
+					className='animated-player-label'
+					style={{ fontSize: pixelRadius }}
+				>
 					{label}
 				</span>
 			)}

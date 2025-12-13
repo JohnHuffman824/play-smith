@@ -11,7 +11,6 @@
 
 .animated-player-label {
 	user-select: none;
-	font-size: 10px;
 	font-weight: 700;
 	color: white;
 	filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
