@@ -86,6 +86,35 @@
 	padding: 16px 24px;
 }
 
+.presentation-editor__add-button {
+	width: 100%;
+}
+
+/* || Icons */
+.presentation-editor__close-icon {
+	width: 20px;
+	height: 20px;
+}
+
+.presentation-editor__add-icon {
+	width: 16px;
+	height: 16px;
+	margin-right: 8px;
+}
+
+.presentation-editor__icon {
+	width: 16px;
+	height: 16px;
+}
+
+.presentation-editor__delete-button {
+	color: var(--destructive);
+}
+
+.presentation-editor__delete-button:hover {
+	color: var(--destructive);
+}
+
 /* || Add Modal */
 .presentation-editor__modal-overlay {
 	position: fixed;

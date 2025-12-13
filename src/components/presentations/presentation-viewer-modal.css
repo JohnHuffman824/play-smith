@@ -76,3 +76,33 @@
 	border-top: 1px solid rgb(255 255 255 / 10%);
 	padding: 16px 24px;
 }
+
+/* || Buttons */
+.presentation-viewer__close-button {
+	color: rgb(255 255 255);
+}
+
+.presentation-viewer__close-button:hover {
+	background: rgb(255 255 255 / 10%);
+}
+
+.presentation-viewer__close-icon {
+	width: 24px;
+	height: 24px;
+}
+
+.presentation-viewer__edit-button {
+	gap: 8px;
+	border-color: rgb(255 255 255 / 20%);
+	background: rgb(255 255 255 / 10%);
+	color: rgb(255 255 255);
+}
+
+.presentation-viewer__edit-button:hover {
+	background: rgb(255 255 255 / 20%);
+}
+
+.presentation-viewer__edit-icon {
+	width: 16px;
+	height: 16px;
+}

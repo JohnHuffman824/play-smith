@@ -8,7 +8,6 @@ import { X, Pencil, Loader2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '../ui/button'
-import { cn } from '../ui/utils'
 import {
 	AnimationProvider,
 	useAnimation,
@@ -29,9 +28,9 @@ type PresentationViewerModalProps = {
 
 function LoadingState() {
 	return (
-		<div className='presentation-viewer__loading'>
-			<Loader2 className='presentation-viewer__loading-spinner' />
-			<p className='presentation-viewer__loading-text'>
+		<div className="presentation-viewer__loading">
+			<Loader2 className="presentation-viewer__loading-spinner" />
+			<p className="presentation-viewer__loading-text">
 				Loading presentation...
 			</p>
 		</div>
@@ -148,25 +147,25 @@ function PresentationViewerContent({
 			animate={{ opacity: 1 }}
 			exit={{ opacity: 0 }}
 			transition={{ duration: 0.2 }}
-			className='presentation-viewer'
+			className="presentation-viewer"
 		>
 			{/* Header */}
-			<div className='presentation-viewer__header'>
-				<div className='presentation-viewer__header-content'>
+			<div className="presentation-viewer__header">
+				<div className="presentation-viewer__header-content">
 					<Button
-						variant='ghost'
-						size='icon'
+						variant="ghost"
+						size="icon"
 						onClick={onClose}
-						aria-label='Close (Esc)'
-						className='text-white hover:bg-white/10'
+						aria-label="Close (Esc)"
+						className="presentation-viewer__close-button"
 					>
-						<X className='size-6' />
+						<X className="presentation-viewer__close-icon" />
 					</Button>
-					<div className='presentation-viewer__header-text'>
-						<h2 className='presentation-viewer__title'>
+					<div className="presentation-viewer__header-text">
+						<h2 className="presentation-viewer__title">
 							{presentation?.name}
 						</h2>
-						<span className='presentation-viewer__subtitle'>
+						<span className="presentation-viewer__subtitle">
 							Slide {currentIndex + 1} of{' '}
 							{slides.length}: {displayName}
 						</span>
@@ -174,14 +173,11 @@ function PresentationViewerContent({
 				</div>
 
 				<Button
-					variant='outline'
+					variant="outline"
 					onClick={handleEdit}
-					className={cn(
-						'gap-2 border-white/20 bg-white/10',
-						'text-white hover:bg-white/20'
-					)}
+					className="presentation-viewer__edit-button"
 				>
-					<Pencil className='size-4' />
+					<Pencil className="presentation-viewer__edit-icon" />
 					Edit Play
 				</Button>
 			</div>
@@ -190,11 +186,11 @@ function PresentationViewerContent({
 			{isLoading ? (
 				<LoadingState />
 			) : error ? (
-				<div className='presentation-viewer__error'>
-					<p className='presentation-viewer__error-text'>{error}</p>
+				<div className="presentation-viewer__error">
+					<p className="presentation-viewer__error-text">{error}</p>
 				</div>
 			) : (
-				<div className='presentation-viewer__canvas'>
+				<div className="presentation-viewer__canvas">
 					<AnimationCanvas
 						drawings={playContent?.drawings ?? []}
 						players={playContent?.players ?? []}
@@ -203,7 +199,7 @@ function PresentationViewerContent({
 			)}
 
 			{/* Controls */}
-			<div className='presentation-viewer__controls'>
+			<div className="presentation-viewer__controls">
 				<AnimationControls
 					onPrevPlay={handlePrevSlide}
 					onNextPlay={handleNextSlide}

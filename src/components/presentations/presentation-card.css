@@ -60,6 +60,11 @@
 	outline: none;
 }
 
+.presentation-card__button-icon {
+	width: 16px;
+	height: 16px;
+}
+
 .presentation-card:hover .presentation-card__button {
 	opacity: 1;
 }

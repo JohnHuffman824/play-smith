@@ -92,7 +92,7 @@ export function PresentationEditor({
 					onClick={onClose}
 					aria-label="Close"
 				>
-					<X className="size-5" />
+					<X className="presentation-editor__close-icon" />
 				</Button>
 			</div>
 
@@ -106,7 +106,7 @@ export function PresentationEditor({
 						<Button
 							onClick={() => setShowAddMenu(true)}
 						>
-							<Plus className="size-4 mr-2" />
+							<Plus className="presentation-editor__add-icon" />
 							Add First Slide
 						</Button>
 					</div>
@@ -141,10 +141,10 @@ export function PresentationEditor({
 									onClick={() =>
 										handleRemoveSlide(slide.id)
 									}
-									className="text-destructive hover:text-destructive"
+									className="presentation-editor__delete-button"
 									aria-label="Remove slide"
 								>
-									<Trash2 className="size-4" />
+									<Trash2 className="presentation-editor__icon" />
 								</Button>
 							</Reorder.Item>
 						))}
@@ -157,9 +157,9 @@ export function PresentationEditor({
 				<Button
 					onClick={() => setShowAddMenu(true)}
 					disabled={playsToAdd.length === 0}
-					className="w-full"
+					className="presentation-editor__add-button"
 				>
-					<Plus className="size-4 mr-2" />
+					<Plus className="presentation-editor__add-icon" />
 					Add Slide
 				</Button>
 			</div>

@@ -61,7 +61,7 @@ export function PresentationCard({
 					title="Edit Presentation"
 					aria-label="Edit Presentation"
 				>
-					<Edit className="w-4 h-4" />
+					<Edit className="presentation-card__button-icon" />
 				</button>
 
 				{/* Present Button - hover */}
@@ -74,7 +74,7 @@ export function PresentationCard({
 					title="Start Presentation"
 					aria-label="Start Presentation"
 				>
-					<Play className="w-4 h-4" />
+					<Play className="presentation-card__button-icon" />
 				</button>
 
 				{/* More Options Button */}
@@ -85,7 +85,7 @@ export function PresentationCard({
 							onClick={(e) => e.stopPropagation()}
 							aria-label="More options"
 						>
-							<MoreVertical className="w-4 h-4" />
+							<MoreVertical className="presentation-card__button-icon" />
 						</button>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent
@@ -93,21 +93,21 @@ export function PresentationCard({
 						onClick={(e) => e.stopPropagation()}
 					>
 						<DropdownMenuItem onClick={() => onOpen(id)}>
-							<Play className="w-4 h-4" />
+							<Play className="presentation-card__button-icon" />
 							Present
 						</DropdownMenuItem>
 						<DropdownMenuItem onClick={() => onEdit(id)}>
-							<Edit className="w-4 h-4" />
+							<Edit className="presentation-card__button-icon" />
 							Edit Slides
 						</DropdownMenuItem>
 						<DropdownMenuItem onClick={() => onRename(id)}>
-							<Edit className="w-4 h-4" />
+							<Edit className="presentation-card__button-icon" />
 							Rename
 						</DropdownMenuItem>
 						<DropdownMenuItem
 							onClick={() => onDuplicate(id)}
 						>
-							<Copy className="w-4 h-4" />
+							<Copy className="presentation-card__button-icon" />
 							Duplicate
 						</DropdownMenuItem>
 						<DropdownMenuSeparator />
@@ -115,7 +115,7 @@ export function PresentationCard({
 							onClick={() => onDelete(id)}
 							variant="destructive"
 						>
-							<Trash2 className="w-4 h-4" />
+							<Trash2 className="presentation-card__button-icon" />
 							Delete
 						</DropdownMenuItem>
 					</DropdownMenuContent>
