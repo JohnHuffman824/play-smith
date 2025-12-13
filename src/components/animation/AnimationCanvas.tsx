@@ -4,7 +4,6 @@
  */
 
 import { useRef, useEffect, useState, useMemo, useCallback } from 'react'
-import { cn } from '../ui/utils'
 import { FootballField } from '../field/FootballField'
 import { AnimatedPlayer } from './AnimatedPlayer'
 import { AnimatedRoute } from './AnimatedRoute'
@@ -87,14 +86,14 @@ export function AnimationCanvas({
 
 	if (dimensions.width === 0 || dimensions.height === 0) {
 		return (
-			<div ref={containerRef} className={cn('size-full', className)} />
+			<div ref={containerRef} className={`size-full ${className ?? ''}`.trim()} />
 		)
 	}
 
 	return (
 		<div
 			ref={containerRef}
-			className={cn('relative size-full overflow-hidden', className)}
+			className={`relative size-full overflow-hidden ${className ?? ''}`.trim()}
 		>
 			<FootballField onDimensionsChange={handleDimensionsChange} />
 
