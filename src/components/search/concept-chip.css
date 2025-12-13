@@ -21,6 +21,16 @@
 	cursor: grabbing;
 }
 
+/* Chip type styles */
+.concept-chip--formation,
+.concept-chip--concept,
+.concept-chip--concept-group,
+.concept-chip--text {
+	background-color: var(--secondary);
+	color: var(--secondary-foreground);
+	border-color: var(--border);
+}
+
 .concept-chip__remove {
 	background: none;
 	border: none;
@@ -38,4 +48,9 @@
 
 .concept-chip__remove:focus-visible {
 	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.concept-chip__remove-icon {
+	width: 0.75rem;
+	height: 0.75rem;
 }

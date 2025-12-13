@@ -28,7 +28,7 @@ export function ConceptChip({ chip, onRemove, isDragging }: ConceptChipProps) {
 				className="concept-chip__remove"
 				aria-label={`Remove ${chip.label}`}
 			>
-				<X className="w-3 h-3" />
+				<X className="concept-chip__remove-icon" />
 			</button>
 		</div>
 	)
