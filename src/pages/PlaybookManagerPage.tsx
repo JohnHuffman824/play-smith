@@ -6,7 +6,12 @@ import { useFoldersData } from '../hooks/useFoldersData'
 import { Sidebar } from '../components/playbook-manager/Sidebar'
 import { Toolbar } from '../components/playbook-manager/Toolbar'
 import { PlaybookCard } from '../components/playbook-manager/PlaybookCard'
-import { Modal } from '../components/playbook-manager/Modal'
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from '../components/ui/dialog'
 import { UnifiedSettingsDialog } from '../components/shared/UnifiedSettingsDialog'
 import { ManageTeamsDialog } from '../components/playbook-manager/ManageTeamsDialog'
 import { NewFolderDialog } from '../components/playbook-manager/NewFolderDialog'
@@ -18,6 +23,7 @@ import {
 	ResizableHandle,
 } from '../components/ui/resizable'
 import { useSettings, MIN_SIDEBAR_WIDTH, MAX_SIDEBAR_WIDTH } from '../contexts/SettingsContext'
+import './playbook-manager-page.css'
 
 export function PlaybookManagerPage() {
 	const navigate = useNavigate()
@@ -212,7 +218,7 @@ export function PlaybookManagerPage() {
 		<>
 		<ResizablePanelGroup
 			direction="horizontal"
-			className="h-screen overflow-hidden bg-background"
+			className="playbook-manager-page"
 		>
 			<ResizablePanel
 				id="sidebar"
@@ -243,11 +249,11 @@ export function PlaybookManagerPage() {
 			*/}
 			<ResizableHandle
 				withHandle
-				className="hover:bg-sidebar-accent active:bg-sidebar-border transition-colors duration-200"
+				className="playbook-manager-resize-handle"
 			/>
 
 			<ResizablePanel defaultSize={100 - initialSidebarPercent} minSize={50}>
-				<div className="flex flex-col h-full overflow-hidden">
+				<div className="playbook-manager-content">
 					{/* Toolbar */}
 					<Toolbar
 						viewMode={viewMode}
@@ -266,28 +272,25 @@ export function PlaybookManagerPage() {
 					/>
 
 					{/* Content */}
-					<div className="flex-1 overflow-auto p-6">
+					<div className="playbook-manager-content-inner">
 					{/* Trash Section - Special UI */}
 					{activeSection === 'trash' && (
 						<>
 							{playbooks.length > 0 && (
-								<div className="mb-4 flex justify-between items-center">
-									<p className="text-sm text-muted-foreground">
+								<div className="trash-header">
+									<p className="trash-notice">
 										Items in trash will be permanently deleted after 30 days
 									</p>
 									<button
 										onClick={handleEmptyTrash}
-										className="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+										className="trash-empty-button"
 									>
 										Empty Trash
 									</button>
 								</div>
 							)}
 							{playbooks.length > 0 ? (
-								<div className={viewMode === 'grid'
-									? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
-									: "flex flex-col gap-3"
-								}>
+								<div className={viewMode === 'grid' ? "playbook-grid" : "playbook-list"}>
 									{playbooks.map(playbook => (
 										<PlaybookCard
 											key={playbook.id}
@@ -307,8 +310,8 @@ export function PlaybookManagerPage() {
 									))}
 								</div>
 							) : (
-								<div className="text-center py-16">
-									<p className="text-muted-foreground">Trash is empty.</p>
+								<div className="empty-state">
+									<p className="empty-state-text">Trash is empty.</p>
 								</div>
 							)}
 						</>
@@ -319,12 +322,9 @@ export function PlaybookManagerPage() {
 						<>
 							{/* Personal Playbooks Section */}
 							{personalPlaybooks.length > 0 && (
-								<div className="mb-8">
-									<h2 className="text-xl font-semibold mb-4">Personal Playbooks</h2>
-									<div className={viewMode === 'grid'
-										? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
-										: "flex flex-col gap-3"
-									}>
+								<div className="playbook-section">
+									<h2 className="playbook-section-title">Personal Playbooks</h2>
+									<div className={viewMode === 'grid' ? "playbook-grid" : "playbook-list"}>
 										{personalPlaybooks.map(playbook => (
 											<PlaybookCard
 												key={playbook.id}
@@ -348,12 +348,9 @@ export function PlaybookManagerPage() {
 
 							{/* Team Playbooks Section */}
 							{teamPlaybooks.length > 0 && (
-								<div className="mb-8">
-									<h2 className="text-xl font-semibold mb-4">Team Playbooks</h2>
-									<div className={viewMode === 'grid'
-										? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
-										: "flex flex-col gap-3"
-									}>
+								<div className="playbook-section">
+									<h2 className="playbook-section-title">Team Playbooks</h2>
+									<div className={viewMode === 'grid' ? "playbook-grid" : "playbook-list"}>
 										{teamPlaybooks.map(playbook => (
 											<PlaybookCard
 												key={playbook.id}
@@ -377,25 +374,25 @@ export function PlaybookManagerPage() {
 
 							{/* Section-Specific Empty States */}
 							{personalPlaybooks.length === 0 && teamPlaybooks.length === 0 && (
-								<div className="text-center py-16">
+								<div className="empty-state">
 									{activeSection === 'starred' && (
-										<p className="text-muted-foreground">No starred playbooks yet. Star a playbook to see it here.</p>
+										<p className="empty-state-text">No starred playbooks yet. Star a playbook to see it here.</p>
 									)}
 									{activeSection === 'recent' && (
-										<p className="text-muted-foreground">No recently opened playbooks.</p>
+										<p className="empty-state-text">No recently opened playbooks.</p>
 									)}
 									{activeSection === 'shared' && (
-										<p className="text-muted-foreground">No playbooks have been shared with you.</p>
+										<p className="empty-state-text">No playbooks have been shared with you.</p>
 									)}
 									{activeSection === 'folders' && selectedFolderId !== null && (
-										<p className="text-muted-foreground">This folder is empty.</p>
+										<p className="empty-state-text">This folder is empty.</p>
 									)}
 									{activeSection === 'all' && (
 										<>
-											<p className="text-muted-foreground mb-4">No playbooks found</p>
+											<p className="empty-state-text">No playbooks found</p>
 											<button
 												onClick={() => setShowNewPlaybookModal(true)}
-												className="px-6 py-2.5 bg-action-button text-action-button-foreground rounded-lg cursor-pointer hover:bg-action-button/90 transition-all duration-200 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+												className="empty-state-button"
 											>
 												Create Your First Playbook
 											</button>
@@ -411,52 +408,56 @@ export function PlaybookManagerPage() {
 		</ResizablePanelGroup>
 
 		{/* Modals outside the resizable panels */}
-		<div>
-			{/* New Playbook Modal */}
-			<Modal
-				isOpen={showNewPlaybookModal}
-				onClose={() => {
-					setShowNewPlaybookModal(false)
-					setNewPlaybookName('')
+		<div className="playbook-manager-modals">
+			{/* New Playbook Dialog */}
+			<Dialog
+				open={showNewPlaybookModal}
+				onOpenChange={(open) => {
+					setShowNewPlaybookModal(open)
+					if (!open) setNewPlaybookName('')
 				}}
-				title="Create New Playbook"
 			>
-				<div className="space-y-4">
-					<div>
-						<label className="block mb-2">Playbook Name</label>
-						<Input
-							type="text"
-							value={newPlaybookName}
-							onChange={e => setNewPlaybookName(e.target.value)}
-							onKeyDown={e => {
-								if (e.key === 'Enter') {
-									handleCreatePlaybook()
-								}
-							}}
-							placeholder="Enter playbook name..."
-							autoFocus
-						/>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Create New Playbook</DialogTitle>
+					</DialogHeader>
+					<div className="new-playbook-dialog-content">
+						<div className="new-playbook-form-field">
+							<label className="new-playbook-label">Playbook Name</label>
+							<Input
+								type="text"
+								value={newPlaybookName}
+								onChange={e => setNewPlaybookName(e.target.value)}
+								onKeyDown={e => {
+									if (e.key === 'Enter') {
+										handleCreatePlaybook()
+									}
+								}}
+								placeholder="Enter playbook name..."
+								autoFocus
+							/>
+						</div>
+						<div className="new-playbook-actions">
+							<button
+								onClick={() => {
+									setShowNewPlaybookModal(false)
+									setNewPlaybookName('')
+								}}
+								className="new-playbook-cancel-button"
+							>
+								Cancel
+							</button>
+							<button
+								onClick={handleCreatePlaybook}
+								disabled={!newPlaybookName.trim()}
+								className="new-playbook-create-button"
+							>
+								Create
+							</button>
+						</div>
 					</div>
-					<div className="flex justify-end gap-2">
-						<button
-							onClick={() => {
-								setShowNewPlaybookModal(false)
-								setNewPlaybookName('')
-							}}
-							className="px-4 py-2 hover:bg-accent rounded-lg cursor-pointer transition-colors"
-						>
-							Cancel
-						</button>
-						<button
-							onClick={handleCreatePlaybook}
-							disabled={!newPlaybookName.trim()}
-							className="px-4 py-2 bg-action-button text-action-button-foreground rounded-lg disabled:opacity-50 cursor-pointer hover:bg-action-button/90 transition-all duration-200 disabled:cursor-not-allowed outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-						>
-							Create
-						</button>
-					</div>
-				</div>
-			</Modal>
+				</DialogContent>
+			</Dialog>
 
 			{/* Settings Dialog */}
 			<UnifiedSettingsDialog
