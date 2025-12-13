@@ -26,6 +26,7 @@ import {
 } from '../ui/select'
 import { Input } from '../ui/input'
 import { Checkbox } from '../ui/checkbox'
+import './concept-dialog.css'
 
 interface ConceptDialogProps {
 	isOpen: boolean
@@ -181,12 +182,12 @@ export function ConceptDialog({
 	}
 
 	return (
-		<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-			<div className="bg-popover border border-border rounded-2xl shadow-2xl w-[85vw] h-[85vh] max-w-6xl flex flex-col">
+		<div className="concept-dialog-overlay">
+			<div className="concept-dialog">
 				{/* Name and Scope */}
-				<div className="px-6 py-4 flex items-start gap-4">
-					<div className="flex-1">
-						<label className="block text-sm font-medium mb-1">
+				<div className="concept-dialog-header">
+					<div className="concept-dialog-header-content">
+						<label className="concept-dialog-label">
 							Concept Name
 						</label>
 						<Input
@@ -199,40 +200,27 @@ export function ConceptDialog({
 							aria-invalid={nameError && touched}
 						/>
 						{nameError && touched && (
-							<p className="mt-1 text-sm text-destructive">
+							<p className="concept-dialog-error">
 								{nameError}
 							</p>
 						)}
 					</div>
 
 					<div>
-						<label className="block text-sm font-medium mb-1">
+						<label className="concept-dialog-label">
 							Scope
 						</label>
-						<div className="flex gap-2">
+						<div className="concept-dialog-scope">
 							<button
 								onClick={() => setScope('team')}
-								className={`
-									px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer
-									${scope === 'team'
-										? 'bg-blue-500 text-white'
-										: 'bg-secondary text-secondary-foreground hover:bg-accent'
-									}
-								`}
+								className={`concept-dialog-scope-button ${scope === 'team' ? 'concept-dialog-scope-button-active' : 'concept-dialog-scope-button-inactive'}`}
 							>
 								Team
 							</button>
 							<button
 								onClick={() => setScope('playbook')}
 								disabled={!playbookId}
-								className={`
-									px-4 py-2 rounded-md text-sm font-medium transition-colors
-									${scope === 'playbook'
-										? 'bg-blue-500 text-white'
-										: 'bg-secondary text-secondary-foreground hover:bg-accent'
-									}
-									${!playbookId ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-								`}
+								className={`concept-dialog-scope-button ${scope === 'playbook' ? 'concept-dialog-scope-button-active' : 'concept-dialog-scope-button-inactive'} ${!playbookId ? 'concept-dialog-scope-button-disabled' : ''}`}
 							>
 								Playbook
 							</button>
@@ -241,7 +229,7 @@ export function ConceptDialog({
 
 					<button
 						onClick={onClose}
-						className="p-2 border border-border hover:bg-accent rounded transition-colors cursor-pointer ml-auto"
+						className="concept-dialog-close-button"
 						aria-label="Close dialog"
 					>
 						<X className="w-5 h-5" />
@@ -249,7 +237,7 @@ export function ConceptDialog({
 				</div>
 
 				{/* Canvas Area */}
-				<div className="flex-1 flex min-h-0 relative pr-6">
+				<div className="concept-dialog-canvas-area">
 					<PlayProvider>
 						{/* Left Toolbar */}
 						<ConceptToolbar
@@ -281,7 +269,7 @@ export function ConceptDialog({
 						/>
 
 						{/* Canvas */}
-						<div ref={canvasContainerRef} className="flex-1 flex flex-col rounded-2xl border-2 border-border">
+						<div ref={canvasContainerRef} className="concept-dialog-canvas-container">
 							<CanvasViewportProvider>
 								<Canvas
 									drawingState={{
@@ -306,7 +294,7 @@ export function ConceptDialog({
 
 					{/* Color Picker Dialog */}
 					{showColorPicker && (
-					<div className="absolute left-28 top-24 z-50">
+					<div className="concept-dialog-color-picker">
 						<ColorPickerDialog
 							currentColor={color}
 							onColorChange={setColor}
@@ -318,11 +306,11 @@ export function ConceptDialog({
 				</div>
 
 				{/* Bottom Controls */}
-				<div className="px-6 py-4 flex items-center justify-between">
-					<div className="flex items-center gap-4">
+				<div className="concept-dialog-footer">
+					<div className="concept-dialog-footer-controls">
 						{/* Targeting Mode */}
-						<div className="flex items-center gap-2">
-							<label className="text-sm font-medium">
+						<div className="concept-dialog-control-group">
+							<label className="concept-dialog-control-label">
 								Target Type:
 							</label>
 							<Select
@@ -341,8 +329,8 @@ export function ConceptDialog({
 						</div>
 
 						{/* Play Direction */}
-						<div className="flex items-center gap-2">
-							<label className="text-sm font-medium">
+						<div className="concept-dialog-control-group">
+							<label className="concept-dialog-control-label">
 								Direction:
 							</label>
 							<Select
@@ -363,7 +351,7 @@ export function ConceptDialog({
 						{/* Flip Button */}
 						<button
 							onClick={handleFlip}
-							className="px-3 py-1.5 border border-border rounded-md hover:bg-accent transition-colors flex items-center gap-2 cursor-pointer"
+							className="concept-dialog-flip-button"
 							title="Flip concept horizontally"
 						>
 							<FlipHorizontal className="w-4 h-4" />
@@ -371,12 +359,12 @@ export function ConceptDialog({
 						</button>
 
 						{/* Concept Type Flags */}
-						<div className="flex items-center gap-4 ml-4">
-							<div className="flex items-center gap-2">
-								<label className="text-sm font-medium">Type:</label>
+						<div className="concept-dialog-type-controls">
+							<div className="concept-dialog-control-group">
+								<label className="concept-dialog-control-label">Type:</label>
 								<ConceptTypeTooltip />
 							</div>
-							<label className="flex items-center gap-2 cursor-pointer">
+							<label className="concept-dialog-checkbox-label">
 								<Checkbox
 									checked={isMotion}
 									onCheckedChange={(checked) => {
@@ -384,9 +372,9 @@ export function ConceptDialog({
 										if (checked) setIsModifier(false)
 									}}
 								/>
-								<span className="text-sm">Motion</span>
+								<span className="concept-dialog-checkbox-text">Motion</span>
 							</label>
-							<label className="flex items-center gap-2 cursor-pointer">
+							<label className="concept-dialog-checkbox-label">
 								<Checkbox
 									checked={isModifier}
 									onCheckedChange={(checked) => {
@@ -394,23 +382,23 @@ export function ConceptDialog({
 										if (checked) setIsMotion(false)
 									}}
 								/>
-								<span className="text-sm">Modifier</span>
+								<span className="concept-dialog-checkbox-text">Modifier</span>
 							</label>
 						</div>
 					</div>
 
 					{/* Action Buttons */}
-					<div className="flex items-center gap-2">
+					<div className="concept-dialog-action-buttons">
 						<button
 							onClick={onClose}
-							className="px-4 py-2 border border-border rounded-md hover:bg-accent transition-colors cursor-pointer"
+							className="concept-dialog-cancel-button"
 						>
 							Cancel
 						</button>
 						<button
 							onClick={handleSave}
 							disabled={!isFormValid || isSaving}
-							className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+							className="concept-dialog-save-button"
 						>
 							{isSaving ? 'Saving...' : mode === 'edit' ? 'Update' : 'Create'}
 						</button>
