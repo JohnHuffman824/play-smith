@@ -56,6 +56,21 @@
   outline: none;
   transition: all 200ms;
   border: 1px solid transparent;
+  background-color: color-mix(in oklch, var(--action-button) 60%, rgb(34 197 94));
+  color: color-mix(in oklch, var(--action-button-foreground) 60%, rgb(134 239 172));
+}
+
+.dark .toolbar-save-button {
+  background-color: rgb(21 128 61);
+  color: rgb(134 239 172);
+}
+
+.toolbar-save-button:hover:not(:disabled) {
+  background-color: color-mix(in oklch, var(--action-button) 50%, rgb(22 163 74));
+}
+
+.dark .toolbar-save-button:hover:not(:disabled) {
+  background-color: rgb(22 163 74);
 }
 
 .toolbar-save-button:focus-visible {
@@ -67,39 +82,19 @@
   cursor: not-allowed;
 }
 
-/* Dark theme */
-.toolbar-save-button[data-theme="dark"] {
-  background: rgb(21 128 61);
-  color: rgb(134 239 172);
-}
-
-.toolbar-save-button[data-theme="dark"]:hover:not(:disabled) {
-  background: rgb(22 163 74);
-}
-
-/* Light theme */
-.toolbar-save-button[data-theme="light"] {
-  background: rgb(220 252 231);
-  color: rgb(22 101 52);
-}
-
-.toolbar-save-button[data-theme="light"]:hover:not(:disabled) {
-  background: rgb(187 247 208);
-}
-
 /* Success/Error states */
 .toolbar-save-button[data-success="true"],
 .toolbar-save-button[data-error="true"] {
   transform: scale(1.1);
 }
 
-.toolbar-save-button[data-error="true"][data-theme="light"] {
-  background: rgb(254 226 226);
-  color: rgb(220 38 38);
+.toolbar-save-button[data-error="true"] {
+  background-color: color-mix(in oklch, var(--destructive) 20%, transparent);
+  color: var(--destructive);
 }
 
-.toolbar-save-button[data-error="true"][data-theme="dark"] {
-  background: rgb(153 27 27);
+.dark .toolbar-save-button[data-error="true"] {
+  background-color: rgb(153 27 27);
   color: rgb(252 165 165);
 }
 
@@ -115,6 +110,21 @@
   outline: none;
   transition: all 200ms;
   border: 1px solid transparent;
+  background-color: color-mix(in oklch, var(--destructive) 20%, transparent);
+  color: var(--destructive);
+}
+
+.dark .toolbar-delete-button {
+  background-color: rgb(153 27 27);
+  color: rgb(252 165 165);
+}
+
+.toolbar-delete-button:hover:not(:disabled) {
+  background-color: color-mix(in oklch, var(--destructive) 30%, transparent);
+}
+
+.dark .toolbar-delete-button:hover:not(:disabled) {
+  background-color: rgb(185 28 28);
 }
 
 .toolbar-delete-button:focus-visible {
@@ -126,26 +136,6 @@
   cursor: not-allowed;
 }
 
-/* Dark theme */
-.toolbar-delete-button[data-theme="dark"] {
-  background: rgb(153 27 27);
-  color: rgb(252 165 165);
-}
-
-.toolbar-delete-button[data-theme="dark"]:hover:not(:disabled) {
-  background: rgb(185 28 28);
-}
-
-/* Light theme */
-.toolbar-delete-button[data-theme="light"] {
-  background: rgb(254 226 226);
-  color: rgb(153 27 27);
-}
-
-.toolbar-delete-button[data-theme="light"]:hover:not(:disabled) {
-  background: rgb(254 202 202);
-}
-
 /* || Status dot */
 .toolbar-status-dot {
   position: absolute;
@@ -153,7 +143,13 @@
   top: -4px;
   width: 12px;
   height: 12px;
-  background: rgb(34 197 94);
+  background-color: rgb(34 197 94);
   border-radius: 9999px;
-  border: 2px solid white;
+  border: 2px solid var(--card);
+}
+
+/* || Icon sizing */
+.toolbar-icon {
+  width: 1.5rem;
+  height: 1.5rem;
 }

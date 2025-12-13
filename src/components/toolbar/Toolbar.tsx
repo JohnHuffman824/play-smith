@@ -29,18 +29,25 @@ import { ColorPickerDialog } from './dialogs/ColorPickerDialog'
 import { DrawOptionsDialog } from './dialogs/DrawOptionsDialog'
 import { EraseDialog } from './dialogs/EraseDialog'
 import { DrawingDialog } from './dialogs/DrawingDialog'
-import { ConfirmDialog } from './dialogs/ConfirmDialog'
 import { HashDialog } from './dialogs/HashDialog'
 import { UnifiedSettingsDialog } from '../shared/UnifiedSettingsDialog'
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip'
+import {
+	AlertDialog,
+	AlertDialogContent,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogAction,
+	AlertDialogCancel,
+} from '../ui/alert-dialog'
 import { ToolbarButton } from '../ui/toolbar-button'
-import { useTheme } from '@/contexts/SettingsContext'
 import { EraserIcon } from './icons/EraserIcon'
 import { HashIcon } from './icons/HashIcon'
 import { ColorSwatchIndicator } from './ColorSwatchIndicator'
 import { usePlayContext } from '../../contexts/PlayContext'
 import { areLinemenAtDefaultPositions } from '../../utils/lineman.utils'
-import { cn } from '../ui/utils'
 import './toolbar.css'
 
 interface ToolbarProps {
@@ -67,7 +74,6 @@ export function Toolbar({
 	playId,
 	onDeletePlay,
 }: ToolbarProps) {
-	const { theme } = useTheme()
 	const { state } = usePlayContext()
 	const players = state.players || []
 	const [showColorPicker, setShowColorPicker] = useState(false)
@@ -439,7 +445,7 @@ export function Toolbar({
 							data-active={drawingState.tool == 'fill'}
 							style={drawingState.tool !== 'fill' ? { color: 'var(--icon-muted)' } : undefined}
 						>
-							<PaintBucket className="w-6 h-6" style={{ transform: 'scaleX(-1)' }} />
+							<PaintBucket className="toolbar-icon" style={{ transform: 'scaleX(-1)' }} />
 						</button>
 					</TooltipTrigger>
 					<TooltipContent side="right">Fill Color (F)</TooltipContent>
@@ -462,7 +468,7 @@ export function Toolbar({
 							style={!showDrawingDialog ? { color: 'var(--icon-muted)' } : undefined}
 						>
 							<ArrowDown
-								className="w-6 h-6"
+								className="toolbar-icon"
 								style={{ transform: 'rotate(-45deg)' }}
 							/>
 						</button>
@@ -537,18 +543,17 @@ export function Toolbar({
 							onClick={handleSavePlay}
 							disabled={isSaving}
 							className="toolbar-save-button"
-							data-theme={theme}
-							data-success={showSuccess}
+									data-success={showSuccess}
 							data-error={showError}
 						>
 							{isSaving ? (
-								<Loader2 className="w-6 h-6 animate-spin" />
+								<Loader2 className="toolbar-icon animate-spin" />
 							) : showSuccess ? (
-								<Check className="w-6 h-6" />
+								<Check className="toolbar-icon" />
 							) : showError ? (
-								<X className="w-6 h-6" />
+								<X className="toolbar-icon" />
 							) : (
-								<Save className="w-6 h-6" />
+								<Save className="toolbar-icon" />
 							)}
 						</button>
 					</TooltipTrigger>
@@ -562,12 +567,11 @@ export function Toolbar({
 							onClick={handleDeletePlay}
 							disabled={!playId || isDeleting}
 							className="toolbar-delete-button"
-							data-theme={theme}
-						>
+								>
 							{isDeleting ? (
-								<Loader2 className="w-6 h-6 animate-spin" />
+								<Loader2 className="toolbar-icon animate-spin" />
 							) : (
-								<Trash2 className="w-6 h-6" />
+								<Trash2 className="toolbar-icon" />
 							)}
 						</button>
 					</TooltipTrigger>
@@ -624,35 +628,45 @@ export function Toolbar({
 				/>
 			)}
 
-			{showClearConfirm && (
-				<ConfirmDialog
-					title='Clear Play?'
-					message={
-						'Are you sure you want to clear the current play? ' +
-						'This action cannot be undone.'
-					}
-					confirmLabel='Clear'
-					cancelLabel='Cancel'
-					onConfirm={confirmClearPlay}
-					onCancel={() => setShowClearConfirm(false)}
-					variant='danger'
-				/>
-			)}
+			<AlertDialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>Clear Play?</AlertDialogTitle>
+						<AlertDialogDescription>
+							Are you sure you want to clear the current play? This action cannot be undone.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel>Cancel</AlertDialogCancel>
+						<AlertDialogAction
+							onClick={confirmClearPlay}
+							data-variant="destructive"
+						>
+							Clear
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 
-			{showDeletePlayConfirm && (
-				<ConfirmDialog
-					title='Delete Play?'
-					message={
-						'Are you sure you want to permanently delete ' +
-						'this play? This action cannot be undone.'
-					}
-					confirmLabel='Delete'
-					cancelLabel='Cancel'
-					onConfirm={confirmDeletePlay}
-					onCancel={() => setShowDeletePlayConfirm(false)}
-					variant='danger'
-				/>
-			)}
+			<AlertDialog open={showDeletePlayConfirm} onOpenChange={setShowDeletePlayConfirm}>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>Delete Play?</AlertDialogTitle>
+						<AlertDialogDescription>
+							Are you sure you want to permanently delete this play? This action cannot be undone.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel>Cancel</AlertDialogCancel>
+						<AlertDialogAction
+							onClick={confirmDeletePlay}
+							data-variant="destructive"
+						>
+							Delete
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 
 			{showHashDialog && (
 				<HashDialog
