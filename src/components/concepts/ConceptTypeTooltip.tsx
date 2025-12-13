@@ -27,7 +27,7 @@ export function ConceptTypeTooltip() {
 				className="concept-type-tooltip-button"
 				aria-label="Concept type help"
 			>
-				<HelpCircle className="w-4 h-4 concept-type-tooltip-icon" />
+				<HelpCircle className="concept-type-tooltip-icon" />
 			</button>
 
 			{isOpen && (
