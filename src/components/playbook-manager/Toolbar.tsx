@@ -99,17 +99,20 @@ export function Toolbar({
 								icon={FolderPlus}
 								tooltip="New Folder"
 								onClick={onNewFolder}
+								variant="ghost"
 							/>
 
 							<IconButton
 								icon={Upload}
 								tooltip="Import"
+								variant="ghost"
 								onClick={onImport}
 							/>
 
 							<IconButton
 								icon={Download}
 								tooltip="Export"
+								variant="ghost"
 								onClick={onExport}
 							/>
 
@@ -119,6 +122,7 @@ export function Toolbar({
 							<IconButton
 								icon={Settings}
 								tooltip="Settings"
+								variant="ghost"
 								onClick={onSettingsClick}
 							/>
 						</div>
