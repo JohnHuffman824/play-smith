@@ -115,6 +115,9 @@ const _server = serve({
       GET: playsAPI.list,
       POST: playsAPI.create
     },
+    "/api/plays/send": {
+      POST: playsAPI.send
+    },
     "/api/plays/:playId": {
       GET: playsAPI.get,
       PUT: playsAPI.update,

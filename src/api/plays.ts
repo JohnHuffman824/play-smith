@@ -543,5 +543,133 @@ export const playsAPI = {
 		await db`DELETE FROM plays WHERE id = ${playId}`
 
 		return new Response(null, { status: 204 })
+	},
+
+	send: async (req: Request) => {
+		const userId = await getSessionUser(req)
+		if (!userId) {
+			return Response.json({ error: 'Unauthorized' }, { status: 401 })
+		}
+
+		const body = await req.json()
+		const { playIds, destinationPlaybookId, destinationSectionId, mode } = body
+
+		// Validate inputs
+		if (!Array.isArray(playIds) || playIds.length === 0) {
+			return Response.json({ error: 'playIds array required' }, { status: 400 })
+		}
+		if (!destinationPlaybookId) {
+			return Response.json({ error: 'destinationPlaybookId required' }, { status: 400 })
+		}
+		if (mode !== 'move' && mode !== 'copy') {
+			return Response.json({ error: 'mode must be "move" or "copy"' }, { status: 400 })
+		}
+
+		// Check destination playbook access
+		const { hasAccess: destAccess, role: destRole } = await checkPlaybookAccess(destinationPlaybookId, userId)
+		if (!destAccess) {
+			return Response.json({ error: 'Access denied to destination playbook' }, { status: 403 })
+		}
+
+		const sentPlayIds: number[] = []
+		const errors: Array<{ playId: number; error: string }> = []
+
+		// Get next display_order for destination
+		const [maxOrder] = await db`
+			SELECT COALESCE(MAX(display_order), -1) as max_order
+			FROM plays WHERE playbook_id = ${destinationPlaybookId}
+		`
+		let nextOrder = (maxOrder?.max_order ?? -1) + 1
+
+		for (const playId of playIds) {
+			try {
+				// Get source play and verify access
+				const [play] = await db`
+					SELECT p.*, pb.team_id
+					FROM plays p
+					JOIN playbooks pb ON p.playbook_id = pb.id
+					WHERE p.id = ${playId}
+				`
+				if (!play) {
+					errors.push({ playId, error: 'Play not found' })
+					continue
+				}
+
+				const { hasAccess: sourceAccess, role: sourceRole } = await checkPlaybookAccess(play.playbook_id, userId)
+				if (!sourceAccess) {
+					errors.push({ playId, error: 'Access denied to source playbook' })
+					continue
+				}
+
+				if (mode === 'move') {
+					// Check move permission on source
+					const movePermission = await checkPlayPermission(userId, playId, play.section_id, 'move', sourceRole)
+					if (!movePermission.allowed) {
+						errors.push({ playId, error: movePermission.reason || 'Move not allowed' })
+						continue
+					}
+
+					// Update play's playbook_id and section_id
+					await db`
+						UPDATE plays
+						SET playbook_id = ${destinationPlaybookId},
+							section_id = ${destinationSectionId},
+							display_order = ${nextOrder++}
+						WHERE id = ${playId}
+					`
+					sentPlayIds.push(playId)
+				} else {
+					// Copy mode: duplicate with all related data
+					const [newPlay] = await db`
+						INSERT INTO plays (
+							playbook_id, name, section_id, play_type,
+							formation_id, personnel_id, defensive_formation_id,
+							hash_position, notes, created_by, display_order,
+							custom_players, custom_drawings
+						)
+						VALUES (
+							${destinationPlaybookId},
+							${play.name + ' (Copy)'},
+							${destinationSectionId},
+							${play.play_type},
+							${play.formation_id},
+							${play.personnel_id},
+							${play.defensive_formation_id},
+							${play.hash_position},
+							${play.notes},
+							${userId},
+							${nextOrder++},
+							${play.custom_players},
+							${play.custom_drawings}
+						)
+						RETURNING id
+					`
+
+					// Copy concept applications
+					await db`
+						INSERT INTO concept_applications (play_id, concept_id, concept_group_id, order_index)
+						SELECT ${newPlay.id}, concept_id, concept_group_id, order_index
+						FROM concept_applications WHERE play_id = ${playId}
+					`
+
+					// Copy labels
+					await db`
+						INSERT INTO play_labels (play_id, label_id)
+						SELECT ${newPlay.id}, label_id
+						FROM play_labels WHERE play_id = ${playId}
+					`
+
+					sentPlayIds.push(newPlay.id)
+				}
+			} catch (err) {
+				errors.push({ playId, error: err instanceof Error ? err.message : 'Unknown error' })
+			}
+		}
+
+		return Response.json({
+			success: errors.length === 0,
+			sentPlayIds,
+			errors: errors.length > 0 ? errors : undefined
+		})
 	}
 }
