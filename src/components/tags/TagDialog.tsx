@@ -43,7 +43,7 @@ export function TagDialog({ isOpen, onClose, availableTags, selectedTagIds, onTa
 
 	return (
 		<Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
-			<DialogContent className="sm:max-w-md">
+			<DialogContent className="tag-dialog">
 				<DialogHeader><DialogTitle>{title}</DialogTitle></DialogHeader>
 				<div className="tag-dialog__content">
 					<div>
@@ -56,7 +56,7 @@ export function TagDialog({ isOpen, onClose, availableTags, selectedTagIds, onTa
 									<button key={tag.id} onClick={() => toggleTag(tag.id)}
 										className={`tag-dialog__tag-button ${selected ? 'tag-dialog__tag-button--selected' : ''}`}
 										style={tagStyle}>
-										{selected && <Check className="w-3 h-3" />}{tag.name}
+										{selected && <Check className="tag-dialog__icon-sm" />}{tag.name}
 									</button>
 								)
 							})}
@@ -73,7 +73,7 @@ export function TagDialog({ isOpen, onClose, availableTags, selectedTagIds, onTa
 										<button key={tag.id} onClick={() => toggleTag(tag.id)}
 											className={`tag-dialog__tag-button ${selected ? 'tag-dialog__tag-button--selected' : ''}`}
 											style={tagStyle}>
-											{selected && <Check className="w-3 h-3" />}{tag.name}
+											{selected && <Check className="tag-dialog__icon-sm" />}{tag.name}
 										</button>
 									)
 								})}
@@ -101,7 +101,7 @@ export function TagDialog({ isOpen, onClose, availableTags, selectedTagIds, onTa
 								</div>
 							) : (
 								<button onClick={() => setShowCreate(true)} className="tag-dialog__create-toggle">
-									<Plus className="w-4 h-4" />Create custom tag
+									<Plus className="tag-dialog__icon-md" />Create custom tag
 								</button>
 							)}
 						</div>

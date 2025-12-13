@@ -1,4 +1,14 @@
 /* || Tag Dialog */
+.tag-dialog {
+	max-width: calc(100% - 2rem);
+}
+
+@media (width >= 640px) {
+	.tag-dialog {
+		max-width: 28rem;
+	}
+}
+
 .tag-dialog__content {
 	display: flex;
 	flex-direction: column;
@@ -102,4 +112,15 @@
 
 .tag-dialog__create-toggle:focus-visible {
 	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+/* || Icon sizes */
+.tag-dialog__icon-sm {
+	width: 0.75rem;
+	height: 0.75rem;
+}
+
+.tag-dialog__icon-md {
+	width: 1rem;
+	height: 1rem;
 }
