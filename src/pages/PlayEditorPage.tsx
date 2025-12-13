@@ -6,8 +6,8 @@ import { PlayHeader } from '../components/plays/PlayHeader'
 import { PlayCardsSection } from '../components/plays/PlayCardsSection'
 import { ConceptDialog } from '../components/concepts/ConceptDialog'
 import { SelectionOverlay } from '../components/canvas/SelectionOverlay'
-import { SelectedTagsOverlay } from '../components/tags/SelectedTagsOverlay'
-import { TagDialog } from '../components/tags/TagDialog'
+import { SelectedLabelsOverlay } from '../components/labels/SelectedLabelsOverlay'
+import { LabelDialog } from '../components/labels/LabelDialog'
 import { useTheme } from '@/contexts/SettingsContext'
 import { PlayProvider, usePlayContext } from '../contexts/PlayContext'
 import { ConceptProvider, useConcept } from '../contexts/ConceptContext'
@@ -94,7 +94,7 @@ function PlayEditorContent() {
 
 	const { labels: availableLabels, createLabel } = useLabelsData(teamId)
 	const [selectedLabels, setSelectedLabels] = useState<Label[]>([])
-	const [showTagDialog, setShowTagDialog] = useState(false)
+	const [showLabelDialog, setShowLabelDialog] = useState(false)
 	const [isPlayLoaded, setIsPlayLoaded] = useState(false)
 	const [playbookPlays, setPlaybookPlays] = useState<Play[]>([])
 	const [isAddingPlay, setIsAddingPlay] = useState(false)
@@ -335,7 +335,7 @@ function PlayEditorContent() {
 	// Listen for labels:openDialog event from toolbar
 	useEffect(() => {
 		function handleOpenLabelDialog() {
-			setShowTagDialog(true)
+			setShowLabelDialog(true)
 		}
 
 		eventBus.on('labels:openDialog', handleOpenLabelDialog)
@@ -633,9 +633,9 @@ function PlayEditorContent() {
 						/>
 					</CanvasViewportProvider>
 					{/* Selected Labels Overlay */}
-					<SelectedTagsOverlay
-						tags={selectedLabels}
-						onRemoveTag={handleRemoveLabel}
+					<SelectedLabelsOverlay
+						labels={selectedLabels}
+						onRemoveLabel={handleRemoveLabel}
 					/>
 				</div>
 				<PlayCardsSection
@@ -779,13 +779,13 @@ function PlayEditorContent() {
 		)}
 
 		{/* Label Dialog */}
-			<TagDialog
-				isOpen={showTagDialog}
-				onClose={() => setShowTagDialog(false)}
-				availableTags={availableLabels}
-				selectedTagIds={selectedLabels.map(l => l.id)}
-				onTagsChange={ids => setSelectedLabels(availableLabels.filter(l => ids.includes(l.id)))}
-				onCreateTag={createLabel}
+			<LabelDialog
+				isOpen={showLabelDialog}
+				onClose={() => setShowLabelDialog(false)}
+				availableLabels={availableLabels}
+				selectedLabelIds={selectedLabels.map(l => l.id)}
+				onLabelsChange={ids => setSelectedLabels(availableLabels.filter(l => ids.includes(l.id)))}
+				onCreateLabel={createLabel}
 			/>
 
 

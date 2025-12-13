@@ -1,13 +1,13 @@
-/* || Tag Selector */
-.tag-selector {
+/* || Label Selector */
+.label-selector {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
 	gap: 8px;
 }
 
-/* || Tag chip */
-.tag-selector__tag {
+/* || Label chip */
+.label-selector__label {
 	display: flex;
 	align-items: center;
 	gap: 4px;
@@ -16,7 +16,7 @@
 	font-size: 0.75rem;
 }
 
-.tag-selector__tag-remove {
+.label-selector__label-remove {
 	opacity: 0;
 	background: none;
 	border: none;
@@ -27,20 +27,20 @@
 	color: inherit;
 }
 
-.tag-selector__tag:hover .tag-selector__tag-remove {
+.label-selector__label:hover .label-selector__label-remove {
 	opacity: 1;
 }
 
-.tag-selector__tag-remove:hover {
+.label-selector__label-remove:hover {
 	color: var(--foreground);
 }
 
-.tag-selector__tag-remove:focus-visible {
+.label-selector__label-remove:focus-visible {
 	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
 }
 
 /* || Add button */
-.tag-selector__add {
+.label-selector__add {
 	display: flex;
 	align-items: center;
 	gap: 4px;
@@ -55,17 +55,17 @@
 	transition: all 200ms;
 }
 
-.tag-selector__add:hover {
+.label-selector__add:hover {
 	color: var(--foreground);
 	background: var(--accent);
 }
 
-.tag-selector__add:focus-visible {
+.label-selector__add:focus-visible {
 	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
 }
 
 /* || Icons */
-.tag-selector__icon {
+.label-selector__icon {
 	width: 0.75rem;
 	height: 0.75rem;
 }
