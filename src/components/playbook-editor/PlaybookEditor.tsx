@@ -28,6 +28,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { SendToDialog } from './SendToDialog'
+import { Send } from 'lucide-react'
 import './playbook-editor.css'
 
 type ConceptType = 'concept' | 'formation' | 'group'
@@ -120,6 +122,7 @@ function PlaybookEditorContent({
   const [showPlayViewer, setShowPlayViewer] = useState(false)
   const [viewingPlayId, setViewingPlayId] = useState<string | null>(null)
   const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showSendToDialog, setShowSendToDialog] = useState(false)
 
   // Concepts tab state
   const [activeTab, setActiveTab] = useState<'plays' | 'concepts'>('plays')
@@ -138,7 +141,8 @@ function PlaybookEditorContent({
     updatePlay,
     deletePlay,
     duplicatePlay,
-    createSection
+    createSection,
+    refetch: fetchData
   } = usePlaybookData(playbookId)
 
   // Fetch concept data
@@ -621,6 +625,21 @@ function PlaybookEditorContent({
                     </button>
                   ))}
                 </div>
+
+                {selectedPlays.size > 0 && (
+                  <>
+                    <div className="playbook-editor-tabs-divider" />
+                    <div className="playbook-editor-selection-actions">
+                      <button
+                        onClick={() => setShowSendToDialog(true)}
+                        className="playbook-editor-action-button playbook-editor-action-button--secondary"
+                      >
+                        <Send className="icon-sm" />
+                        <span>Send To ({selectedPlays.size})</span>
+                      </button>
+                    </div>
+                  </>
+                )}
               </>
             ) : (
               <>
@@ -989,6 +1008,20 @@ function PlaybookEditorContent({
         onClose={handleClosePlayViewer}
         playId={viewingPlayId}
         playName={allPlays.find(p => p.id === viewingPlayId)?.name}
+      />
+
+      {/* Send To Dialog */}
+      <SendToDialog
+        isOpen={showSendToDialog}
+        onClose={() => setShowSendToDialog(false)}
+        selectedPlayIds={Array.from(selectedPlays)}
+        currentPlaybookId={playbookId || ''}
+        currentPlaybookSections={sections}
+        onComplete={() => {
+          setSelectedPlays(new Set())
+          setShowSendToDialog(false)
+          fetchData()
+        }}
       />
     </div>
   )

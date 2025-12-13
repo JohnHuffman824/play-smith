@@ -530,6 +530,14 @@
   max-width: 300px;
 }
 
+/* || Selection Actions */
+.playbook-editor-selection-actions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-left: auto;
+}
+
 /* || Icon Sizes */
 .icon-sm {
   width: 16px;
