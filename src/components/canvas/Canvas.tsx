@@ -38,8 +38,8 @@ import {convertToSharp, extractMainCoordinates} from '../../utils/curve.utils'
 import {processSmoothPath} from '../../utils/smooth-path.utils'
 import './canvas.css'
 
-const HEADER_TOOLBAR_HEIGHT = 110
-const PLAY_BAR_HEIGHT = 300
+const HEADER_TOOLBAR_HEIGHT = 88
+const PLAY_BAR_HEIGHT = 325
 const CANVAS_HEIGHT_WITH_PLAY_BAR = HEADER_TOOLBAR_HEIGHT + PLAY_BAR_HEIGHT
 const ANIMATION_DURATION_MS = 800
 
