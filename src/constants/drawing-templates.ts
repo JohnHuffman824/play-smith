@@ -1,4 +1,4 @@
-import { PathSegment, Drawing, ControlPoint } from '../types/drawing.types'
+import type { PathSegment, Drawing, ControlPoint } from '../types/drawing.types'
 
 export interface DrawingTemplateParam {
 	name: string

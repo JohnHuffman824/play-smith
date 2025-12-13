@@ -4,9 +4,11 @@
 
 import type { Coordinate } from './field.types'
 
+export type { Coordinate }
+
 export interface ControlPoint extends Coordinate {
 	id: string
-	type: 'start' | 'end' | 'corner'
+	type: 'start' | 'end' | 'corner' | 'intermediate' | 'control'
 	handleIn?: Coordinate
 	handleOut?: Coordinate
 }

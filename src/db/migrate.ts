@@ -62,11 +62,11 @@ export async function migrate(): Promise<void> {
 		const migrationLabel = `${migration.id}_${migration.name}`
 
 		if (applied.has(migration.id)) {
-			console.log(`✓ Migration ${migrationLabel} already applied`)
+			console.warn(`✓ Migration ${migrationLabel} already applied`)
 			continue
 		}
 
-		console.log(`→ Applying migration ${migrationLabel}...`)
+		console.warn(`→ Applying migration ${migrationLabel}...`)
 		const sql = await readFile(migration.path, 'utf-8')
 
 		try {
@@ -76,14 +76,14 @@ export async function migrate(): Promise<void> {
 				VALUES (${migration.id}, ${migration.name})
 			`
 
-			console.log(`✓ Applied migration ${migrationLabel}`)
+			console.warn(`✓ Applied migration ${migrationLabel}`)
 		} catch (error) {
 			console.error(`✗ Failed to apply migration ${migrationLabel}:`, error)
 			throw error
 		}
 	}
 
-	console.log('✓ All migrations applied successfully')
+	console.warn('✓ All migrations applied successfully')
 }
 
 if (import.meta.main) {

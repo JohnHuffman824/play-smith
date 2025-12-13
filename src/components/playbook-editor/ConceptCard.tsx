@@ -19,8 +19,11 @@ type ConceptCardProps = {
 	isMotion?: boolean
 	isModifier?: boolean
 	lastModified: string
+	 
 	onEdit: (id: number, type: ConceptType) => void
+	 
 	onDelete: (id: number, type: ConceptType) => void
+	 
 	onDuplicate: (id: number, type: ConceptType) => void
 }
 

@@ -1,6 +1,6 @@
 // src/pages/PlaybookManagerPage.resizable.test.tsx
-import { describe, it, expect, beforeEach, vi } from 'bun:test'
-import { render, screen, waitFor } from '@testing-library/react'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'bun:test'
+import { render, screen, waitFor, cleanup } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { PlaybookManagerPage } from './PlaybookManagerPage'
@@ -38,6 +38,10 @@ import * as folderQueries from '../api/queries/folderQueries'
 
 describe('PlaybookManagerPage - Resizable Sidebar', () => {
   let queryClient: QueryClient
+
+  afterEach(() => {
+    cleanup()
+  })
 
   beforeEach(() => {
     localStorage.clear()

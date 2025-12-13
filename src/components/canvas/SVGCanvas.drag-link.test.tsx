@@ -1,5 +1,5 @@
-import { describe, test, expect, beforeEach, afterEach } from 'bun:test'
-import { cleanup, render, fireEvent, waitFor } from '@testing-library/react'
+import { describe, test, expect, afterEach } from 'bun:test'
+import { cleanup, render } from '@testing-library/react'
 import { SVGCanvas } from './SVGCanvas'
 import { FieldCoordinateSystem } from '../../utils/coordinates'
 import { SettingsProvider } from '@/contexts/SettingsContext'
@@ -46,7 +46,6 @@ describe('SVGCanvas - Drawing Drag Link to Player', () => {
 
 	test('snap indicator appears when dragging drawing near player', async () => {
 		const drawing = createTestDrawing('drawing-1')
-		let linkCalled = false
 
 		const { container } = render(
 			<SettingsProvider>
@@ -61,7 +60,7 @@ describe('SVGCanvas - Drawing Drag Link to Player', () => {
 					autoCorrect={false}
 					defaultStyle={defaultStyle}
 					snapThreshold={20}
-					onLinkDrawingToPlayer={() => { linkCalled = true }}
+					onLinkDrawingToPlayer={() => {}}
 				/>
 			</SettingsProvider>
 		)
@@ -78,11 +77,11 @@ describe('SVGCanvas - Drawing Drag Link to Player', () => {
 
 	test('onLinkDrawingToPlayer called with correct params on snap release', async () => {
 		const drawing = createTestDrawing('drawing-1')
-		let linkedDrawingId: string | null = null
-		let linkedPointId: string | null = null
-		let linkedPlayerId: string | null = null
+		let _linkedDrawingId: string | null = null
+		let _linkedPointId: string | null = null
+		let _linkedPlayerId: string | null = null
 
-		const { container } = render(
+		render(
 			<SettingsProvider>
 				<SVGCanvas
 					width={1600}
@@ -96,9 +95,9 @@ describe('SVGCanvas - Drawing Drag Link to Player', () => {
 					defaultStyle={defaultStyle}
 					snapThreshold={20}
 					onLinkDrawingToPlayer={(drawingId, pointId, playerId) => {
-						linkedDrawingId = drawingId
-						linkedPointId = pointId
-						linkedPlayerId = playerId
+						_linkedDrawingId = drawingId
+						_linkedPointId = pointId
+						_linkedPlayerId = playerId
 					}}
 				/>
 			</SettingsProvider>
@@ -106,9 +105,9 @@ describe('SVGCanvas - Drawing Drag Link to Player', () => {
 
 		// TODO: Simulate drag near player and release
 		// Verify onLinkDrawingToPlayer was called with correct IDs
-		// expect(linkedDrawingId).toBe('drawing-1')
-		// expect(linkedPointId).toBe('end') // The point closer to player
-		// expect(linkedPlayerId).toBe('player-1')
+		// expect(_linkedDrawingId).toBe('drawing-1')
+		// expect(_linkedPointId).toBe('end') // The point closer to player
+		// expect(_linkedPlayerId).toBe('player-1')
 
 		expect(true).toBe(true) // Placeholder
 	})
@@ -120,7 +119,7 @@ describe('SVGCanvas - Drawing Drag Link to Player', () => {
 			linkedPointId: 'start',
 		}
 
-		const { container } = render(
+		render(
 			<SettingsProvider>
 				<SVGCanvas
 					width={1600}

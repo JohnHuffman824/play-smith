@@ -1,5 +1,5 @@
 import { afterEach, describe, test, expect } from 'bun:test'
-import { cleanup, render, fireEvent } from '@testing-library/react'
+import { cleanup, render } from '@testing-library/react'
 import { SVGCanvas } from './SVGCanvas'
 import { FieldCoordinateSystem } from '../../utils/coordinates'
 import type { Drawing, PathStyle } from '../../types/drawing.types'
@@ -40,12 +40,7 @@ describe('SVGCanvas - Line Thickness Integration Test (GREEN)', () => {
 				lineEnd: 'none',
 				pathMode: 'sharp',
 			},
-		}
-
-		let updatedDrawings: Drawing[] = [initialDrawing]
-
-		const handleChange = (drawings: Drawing[]) => {
-			updatedDrawings = drawings
+			annotations: [],
 		}
 
 		const { container } = render(
@@ -55,7 +50,7 @@ describe('SVGCanvas - Line Thickness Integration Test (GREEN)', () => {
 					height={800}
 					coordSystem={coordSystem}
 					drawings={[initialDrawing]}
-					onChange={handleChange}
+					onChange={() => {}}
 					activeTool="select"
 					autoCorrect={false}
 					defaultStyle={initialDrawing.style}

@@ -5,10 +5,6 @@
 import type { Coordinate } from '../types/field.types'
 import type { ControlPoint, PathSegment, Drawing } from '../types/drawing.types'
 
-// Constants for curve smoothing
-const CATMULL_ROM_HANDLE_SCALE = 1 / 6
-const BEZIER_SAMPLE_POINTS = 10
-
 /**
  * Extract main path coordinates from a drawing in segment order.
  * FIXED: Maintains proper segment traversal order instead of using Object.values().
@@ -91,22 +87,30 @@ export function convertToSharp(
 
 	for (let i = 0; i < drawing.segments.length; i++) {
 		const segment = drawing.segments[i]
+		if (!segment) continue
+
 		const pointIds = segment.pointIds
 
 		if (i === 0) {
 			// FIXED: Get the actual first on-path point
 			if (segment.type === 'line') {
 				// Line: pointIds = [startId, endId]
-				const startPoint = drawing.points[pointIds[0]]
-				if (startPoint) {
-					mainCoords.push({ x: startPoint.x, y: startPoint.y })
+				const firstPointId = pointIds[0]
+				if (firstPointId) {
+					const startPoint = drawing.points[firstPointId]
+					if (startPoint) {
+						mainCoords.push({ x: startPoint.x, y: startPoint.y })
+					}
 				}
 			} else if (segment.type === 'cubic') {
 				if (pointIds.length === 2) {
 					// NEW FORMAT: pointIds = [fromId, toId], handles in nodes
-					const fromPoint = drawing.points[pointIds[0]]
-					if (fromPoint) {
-						mainCoords.push({ x: fromPoint.x, y: fromPoint.y })
+					const firstPointId = pointIds[0]
+					if (firstPointId) {
+						const fromPoint = drawing.points[firstPointId]
+						if (fromPoint) {
+							mainCoords.push({ x: fromPoint.x, y: fromPoint.y })
+						}
 					}
 				} else if (pointIds.length === 3) {
 					// OLD FORMAT: pointIds = [cp1Id, cp2Id, endId]
@@ -129,10 +133,11 @@ export function convertToSharp(
 
 		// Get the endpoint of each segment
 		const lastPointId = pointIds[pointIds.length - 1]
-		const lastPoint = drawing.points[lastPointId]
-
-		if (lastPoint) {
-			mainCoords.push({ x: lastPoint.x, y: lastPoint.y })
+		if (lastPointId) {
+			const lastPoint = drawing.points[lastPointId]
+			if (lastPoint) {
+				mainCoords.push({ x: lastPoint.x, y: lastPoint.y })
+			}
 		}
 	}
 
@@ -141,13 +146,16 @@ export function convertToSharp(
 	const segments: PathSegment[] = []
 
 	for (let i = 0; i < mainCoords.length; i++) {
+		const coord = mainCoords[i]
+		if (!coord) continue
+
 		const id = `p-${i}`
 		const isFirst = i === 0
 		const isLast = i === mainCoords.length - 1
 		points[id] = {
 			id,
-			x: mainCoords[i].x,
-			y: mainCoords[i].y,
+			x: coord.x,
+			y: coord.y,
 			type: isFirst ? 'start' : isLast ? 'end' : 'corner',
 		}
 	}

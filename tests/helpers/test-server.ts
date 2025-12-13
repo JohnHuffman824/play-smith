@@ -1,4 +1,5 @@
-import { serve, Server } from 'bun'
+import { serve } from 'bun'
+import type { Server } from 'bun'
 import index from '../../src/index.html'
 import { usersAPI, getUserById } from '../../src/api/users'
 import { authAPI } from '../../src/api/auth'
@@ -9,14 +10,14 @@ import { foldersAPI } from '../../src/api/folders'
 import { sectionsAPI } from '../../src/api/sections'
 import { playsAPI } from '../../src/api/plays'
 
-let testServer: Server | null = null
+let testServer: Server<unknown> | null = null
 
 /**
  * Start a test server on a random available port
  * Returns the server instance and base URL
  */
 export async function startTestServer(): Promise<{
-	server: Server
+	server: Server<unknown>
 	url: string
 }> {
 	// If server is already running, return existing instance

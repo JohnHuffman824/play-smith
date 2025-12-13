@@ -40,11 +40,11 @@ interface PathRendererProps {
 	drawing: Drawing
 	coordSystem: FieldCoordinateSystem
 	className?: string
-	onSelect?: (id: string) => void
-	onSelectWithPosition?: (id: string, position: { x: number; y: number }) => void
+	onSelect?: (_id: string) => void
+	onSelectWithPosition?: (_id: string, _position: { x: number; y: number }) => void
 	isSelected?: boolean
 	activeTool?: 'draw' | 'select' | 'erase'
-	onDelete?: (id: string) => void
+	onDelete?: (_id: string) => void
 	onDragStart?: (drawingId: string, feetX: number, feetY: number) => void
 	onHover?: (isHovered: boolean) => void
 	onPathContextMenu?: (
@@ -305,19 +305,23 @@ function buildPath(
 		// Apply Chaikin smoothing to pixel coordinates
 		const smoothed = applyChaikin(allPixelPoints, CHAIKIN_ITERATIONS)
 
+		if (smoothed.length < 2) {
+			return { d: '', endPoints: [] }
+		}
+
 		// Build path from smoothed points
-		commands.push(`M ${smoothed[0].x} ${smoothed[0].y}`)
+		commands.push(`M ${smoothed[0]!.x} ${smoothed[0]!.y}`)
 		for (let i = 1; i < smoothed.length; i++) {
-			commands.push(`L ${smoothed[i].x} ${smoothed[i].y}`)
+			commands.push(`L ${smoothed[i]!.x} ${smoothed[i]!.y}`)
 		}
 
 		// Return original endpoints for arrow rendering
-		endPoints.push(allPixelPoints[0])
-		endPoints.push(allPixelPoints[allPixelPoints.length - 1])
+		endPoints.push(allPixelPoints[0]!)
+		endPoints.push(allPixelPoints[allPixelPoints.length - 1]!)
 
 		// Calculate end direction from smoothed path
-		const lastSmoothed = smoothed[smoothed.length - 1]
-		const prevSmoothed = smoothed[smoothed.length - 2]
+		const lastSmoothed = smoothed[smoothed.length - 1]!
+		const prevSmoothed = smoothed[smoothed.length - 2]!
 		const endAngle = Math.atan2(
 			lastSmoothed.y - prevSmoothed.y,
 			lastSmoothed.x - prevSmoothed.x

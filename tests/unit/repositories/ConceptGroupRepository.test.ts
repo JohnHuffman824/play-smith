@@ -25,14 +25,21 @@ describe('ConceptGroupRepository', () => {
 
 	const sampleDrawing: Drawing = {
 		id: 'test-drawing-1',
-		type: 'path',
-		points: [{ x: 0, y: 0 }, { x: 10, y: 10 }],
+		points: {
+			'start-1': { id: 'start-1', type: 'start', x: 0, y: 0 },
+			'end-1': { id: 'end-1', type: 'end', x: 10, y: 10 }
+		},
+		segments: [
+			{ type: 'line', pointIds: ['start-1', 'end-1'] }
+		],
 		style: {
 			color: '#000000',
-			lineWidth: 2,
+			strokeWidth: 2,
 			lineStyle: 'solid',
-			lineEnd: 'arrow'
-		}
+			lineEnd: 'arrow',
+			pathMode: 'sharp'
+		},
+		annotations: []
 	}
 
 	beforeEach(async () => {
@@ -122,12 +129,12 @@ describe('ConceptGroupRepository', () => {
 			expect(result.description).toBe('Mesh concepts from trips formation')
 			expect(result.formation_id).toBe(testFormationId)
 			expect(result.formation).not.toBeNull()
-			expect(result.formation!.name).toBe('Test Formation')
+			expect(result.formation?.name).toBe('Test Formation')
 			expect(result.concepts).toHaveLength(2)
-			expect(result.concepts[0].id).toBe(testConcept1Id)
-			expect(result.concepts[0].order_index).toBe(0)
-			expect(result.concepts[1].id).toBe(testConcept2Id)
-			expect(result.concepts[1].order_index).toBe(1)
+			expect(result.concepts[0]?.id).toBe(testConcept1Id)
+			expect(result.concepts[0]?.order_index).toBe(0)
+			expect(result.concepts[1]?.id).toBe(testConcept2Id)
+			expect(result.concepts[1]?.order_index).toBe(1)
 		})
 
 		test('creates group without formation', async () => {
@@ -206,8 +213,8 @@ describe('ConceptGroupRepository', () => {
 			const result = await repo.create(groupData)
 
 			// Should be ordered by order_index
-			expect(result.concepts[0].id).toBe(testConcept2Id)
-			expect(result.concepts[1].id).toBe(testConcept1Id)
+			expect(result.concepts[0]?.id).toBe(testConcept2Id)
+			expect(result.concepts[1]?.id).toBe(testConcept1Id)
 		})
 
 		test('initializes usage tracking fields', async () => {
@@ -480,8 +487,8 @@ describe('ConceptGroupRepository', () => {
 			)
 
 			const updated = await repo.findById(group.id)
-			expect(updated!.concepts).toHaveLength(1)
-			expect(updated!.concepts[0].id).toBe(testConcept2Id)
+			expect(updated?.concepts).toHaveLength(1)
+			expect(updated?.concepts[0]?.id).toBe(testConcept2Id)
 		})
 
 		test('returns null for non-existent group', async () => {

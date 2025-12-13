@@ -6,15 +6,13 @@ import './drawing-properties-dialog.css'
 interface DrawingPropertiesDialogProps {
 	drawing: Drawing
 	position: { x: number; y: number }
-	onUpdate: (updates: Partial<PathStyle>) => void
+	onUpdate: (_updates: Partial<PathStyle>) => void
 	onClose: () => void
 	coordSystem: FieldCoordinateSystem
 }
 
 const DIALOG_WIDTH = 280
 const DIALOG_MAX_HEIGHT = 550
-const BACKDROP_Z_INDEX = 40
-const DIALOG_Z_INDEX = 50
 
 const brushSizes = [
 	{ size: 2, label: 'Thin' },

@@ -19,7 +19,7 @@ import { modifierOverridesAPI } from './api/modifierOverrides'
 import { tagsAPI, playTagsAPI, playbookTagsAPI } from './api/tags'
 import { handleCallSheetExport } from './api/exports'
 
-const server = serve({
+const _server = serve({
   routes: {
     // API routes (must be defined BEFORE catch-all)
     // These routes handle server-side requests and return JSON
@@ -244,13 +244,13 @@ const server = serve({
 
     // Example API endpoints
     "/api/hello": {
-      async GET(req) {
+      async GET(_req) {
         return Response.json({
           message: "Hello, world!",
           method: "GET",
         })
       },
-      async PUT(req) {
+      async PUT(_req) {
         return Response.json({
           message: "Hello, world!",
           method: "PUT",

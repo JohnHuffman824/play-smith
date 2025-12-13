@@ -25,9 +25,15 @@ export default [
       'react-hooks': reactHooksPlugin
     },
     rules: {
+      'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': ['warn', {
+        args: 'all',
         argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_'
+        varsIgnorePattern: '^_',
+        caughtErrors: 'all',
+        caughtErrorsIgnorePattern: '^_',
+        destructuredArrayIgnorePattern: '^_',
+        ignoreRestSiblings: true
       }],
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',

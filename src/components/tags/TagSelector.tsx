@@ -8,8 +8,8 @@ import './tag-selector.css'
 interface TagSelectorProps {
 	availableTags: Tag[]
 	selectedTags: Tag[]
-	onTagsChange: (tagIds: number[]) => void
-	onCreateTag?: (name: string, color: string) => Promise<Tag>
+	onTagsChange: (_tagIds: number[]) => void
+	onCreateTag?: (_name: string, _color: string) => Promise<Tag>
 }
 
 export function TagSelector({ availableTags, selectedTags, onTagsChange, onCreateTag }: TagSelectorProps) {

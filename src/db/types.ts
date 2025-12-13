@@ -137,6 +137,8 @@ export interface BaseConcept {
 	targeting_mode: 'absolute_role' | 'relative_selector'
 	ball_position: 'left' | 'center' | 'right'
 	play_direction: 'left' | 'right' | 'na'
+	is_motion: boolean
+	is_modifier: boolean
 	created_by: number
 	created_at: Date
 	updated_at: Date

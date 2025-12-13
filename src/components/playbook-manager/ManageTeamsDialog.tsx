@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { X, Plus, Users, Settings2, Trash2, UserPlus, Crown, Edit2, Shield, Eye, Mail, ChevronLeft } from 'lucide-react'
+import { X, Plus, Users, Trash2, UserPlus, Crown, Edit2, Shield, Eye, Mail, ChevronLeft } from 'lucide-react'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'

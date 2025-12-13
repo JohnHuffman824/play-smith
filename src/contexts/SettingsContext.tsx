@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react'
+import { createContext, useContext, useState, useEffect } from 'react'
+import type { ReactNode } from 'react'
 
 // Global settings types
 type Theme = 'light' | 'dark' | 'system'
@@ -18,29 +19,29 @@ export const DEFAULT_SIDEBAR_WIDTH = 256
 interface SettingsContextType {
 	// Global settings (all contexts)
 	theme: Theme
-	setTheme: (theme: Theme) => void
+	setTheme: (_theme: Theme) => void
 	positionNaming: PositionNaming
-	setPositionNaming: (naming: PositionNaming) => void
+	setPositionNaming: (_naming: PositionNaming) => void
 	fieldLevel: FieldLevel
-	setFieldLevel: (level: FieldLevel) => void
+	setFieldLevel: (_level: FieldLevel) => void
 	defaultPersonnel: Personnel
-	setDefaultPersonnel: (personnel: Personnel) => void
+	setDefaultPersonnel: (_personnel: Personnel) => void
 	autoMirrorRoutes: boolean
-	setAutoMirrorRoutes: (enabled: boolean) => void
+	setAutoMirrorRoutes: (_enabled: boolean) => void
 
 	// Playbook Manager context
 	viewMode: ViewMode
-	setViewMode: (mode: ViewMode) => void
+	setViewMode: (_mode: ViewMode) => void
 	cardsPerRow: number
-	setCardsPerRow: (count: number) => void
+	setCardsPerRow: (_count: number) => void
 	showPlayCount: boolean
-	setShowPlayCount: (show: boolean) => void
+	setShowPlayCount: (_show: boolean) => void
 	confirmBeforeDelete: boolean
-	setConfirmBeforeDelete: (confirm: boolean) => void
+	setConfirmBeforeDelete: (_confirm: boolean) => void
 	autoSaveInterval: AutoSaveInterval
-	setAutoSaveInterval: (interval: AutoSaveInterval) => void
+	setAutoSaveInterval: (_interval: AutoSaveInterval) => void
 	sidebarWidth: number
-	setSidebarWidth: (width: number) => void
+	setSidebarWidth: (_width: number) => void
 
 	// Play Editor context
 	moveSkillsOnHashChange: boolean

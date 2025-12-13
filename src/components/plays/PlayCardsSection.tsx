@@ -2,7 +2,6 @@ import { useRef, useEffect, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { PlayCard } from '../playbook-editor/PlayCard'
 import type { Play } from '../../hooks/usePlaybookData'
-import { Button } from '@/components/ui/button'
 import './play-cards-section.css'
 
 const ANIMATION_DURATION = 800 // ms - must match CSS transition duration

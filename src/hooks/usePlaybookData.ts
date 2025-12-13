@@ -50,7 +50,7 @@ interface UsePlaybookDataReturn {
 export function usePlaybookData(playbookId: string | undefined): UsePlaybookDataReturn {
 	const navigate = useNavigate()
 	const [sections, setSections] = useState<Section[]>([])
-	const [plays, setPlays] = useState<Play[]>([])
+	const [_plays, setPlays] = useState<Play[]>([])
 	const [isLoading, setIsLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
 
@@ -135,13 +135,13 @@ export function usePlaybookData(playbookId: string | undefined): UsePlaybookData
 	}, [fetchData])
 
 	// Create play
-	const createPlay = useCallback(async (name: string, sectionId: string | null): Promise<Play> => {
+	const createPlay = useCallback(async (_name: string, _sectionId: string | null): Promise<Play> => {
 		if (!playbookId) throw new Error('No playbook ID')
 
 		const response = await fetch(`/api/playbooks/${playbookId}/plays`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ name, section_id: sectionId })
+			body: JSON.stringify({ name: _name, section_id: _sectionId })
 		})
 
 		if (response.status === 403) {

@@ -4,7 +4,7 @@ import './hash-dialog.css'
 interface HashDialogProps {
   currentAlignment: HashAlignment
   linemenAtDefault: boolean
-  onAlignmentChange: (alignment: HashAlignment) => void
+  onAlignmentChange: (_alignment: HashAlignment) => void
   onClose: () => void
   useRelativePosition?: boolean
 }

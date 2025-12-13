@@ -1,11 +1,10 @@
 import { useEffect } from 'react'
 import { DialogCloseButton } from '../../ui/dialog-close-button'
-import { useTheme } from '@/contexts/SettingsContext'
 import './color-picker-dialog.css'
 
 interface ColorPickerDialogProps {
   currentColor: string
-  onColorChange: (color: string) => void
+  onColorChange: (_color: string) => void
   onClose: () => void
   position?: {
     left?: string
@@ -27,16 +26,14 @@ const presetColors = [
   { name: 'Gray', value: '#6B7280' },
 ]
 
-export function ColorPickerDialog({ currentColor, onColorChange, onClose, position, useRelativePosition = false }: ColorPickerDialogProps) {
-  const { theme } = useTheme()
-
+export function ColorPickerDialog({ currentColor, onColorChange, onClose, useRelativePosition = false }: ColorPickerDialogProps) {
   // Set default color based on theme if no color is set
   useEffect(() => {
     if (!currentColor || currentColor === '') {
       const foregroundColor = getComputedStyle(document.documentElement).getPropertyValue('--foreground').trim()
       onColorChange(foregroundColor || '#000000')
     }
-  }, []) // Only run once on mount
+  }, [currentColor, onColorChange]) // Only run when dependencies change
 
   return (
     <div

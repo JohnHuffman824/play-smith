@@ -20,11 +20,11 @@ type PresentationCardProps = {
 	name: string
 	slideCount: number
 	lastModified: string
-	onOpen: (id: number) => void
-	onEdit: (id: number) => void
-	onRename: (id: number) => void
-	onDelete: (id: number) => void
-	onDuplicate: (id: number) => void
+	onOpen: (_id: number) => void
+	onEdit: (_id: number) => void
+	onRename: (_id: number) => void
+	onDelete: (_id: number) => void
+	onDuplicate: (_id: number) => void
 }
 
 export function PresentationCard({

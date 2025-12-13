@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Modal } from './Modal'
+import { Modal } from '../shared/Modal'
 import { Input } from '../ui/input'
 import { Button } from '../ui/button'
 import { useFoldersData } from '../../hooks/useFoldersData'

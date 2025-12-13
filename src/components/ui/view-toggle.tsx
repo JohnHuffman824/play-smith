@@ -3,7 +3,7 @@ import './view-toggle.css'
 
 interface ViewToggleProps {
 	viewMode: 'grid' | 'list'
-	onViewModeChange: (mode: 'grid' | 'list') => void
+	onViewModeChange: (_mode: 'grid' | 'list') => void
 }
 
 export function ViewToggle({ viewMode, onViewModeChange }: ViewToggleProps) {

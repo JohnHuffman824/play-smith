@@ -6,7 +6,7 @@ import './new-presentation-dialog.css'
 type NewPresentationDialogProps = {
 	isOpen: boolean
 	onClose: () => void
-	onCreate: (name: string, description?: string) => Promise<void>
+	onCreate: (_name: string, _description?: string) => Promise<void>
 }
 
 export function NewPresentationDialog({

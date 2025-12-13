@@ -98,11 +98,11 @@ function computeUnlinkTarget(
 
 export function Canvas({
   drawingState,
-  hashAlignment,
+  hashAlignment: _hashAlignment,
   showPlayBar,
-  playId,
+  playId: _playId,
   containerMode = 'viewport',
-  showFieldMarkings = false,
+  showFieldMarkings: _showFieldMarkings = false,
 }: CanvasProps) {
   const whiteboardRef = useRef<HTMLDivElement>(null);
 	const panStartRef = useRef<{ x: number; y: number } | null>(null);
@@ -182,21 +182,16 @@ export function Canvas({
 	useEffect(() => {
 		if (drawings.length == 0 && players.length == 0) return
 		saveToHistory()
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [drawings, players])
 
 	// Handle undo event
 	useEffect(() => {
 		function handleUndo() {
-			if (history.length == 0) return
+			// Need at least 2 history entries to undo (current + previous)
+			if (history.length < 2) return
 
 			const previousSnapshot = history[history.length - 2]
-
-			if (!previousSnapshot) {
-				setDrawings([])
-				setPlayers([])
-				setHistory([])
-				return
-			}
 
 			setDrawings(previousSnapshot.drawings)
 			setPlayers(previousSnapshot.players)
@@ -289,6 +284,7 @@ export function Canvas({
 
 		element.addEventListener('wheel', handleWheel, { passive: false })
 		return () => element.removeEventListener('wheel', handleWheel)
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [zoom, panX, panY, canvasDimensions])
 
 	// Keyboard event listeners for spacebar pan
@@ -321,6 +317,7 @@ export function Canvas({
 			document.removeEventListener('keydown', handleKeyDown)
 			document.removeEventListener('keyup', handleKeyUp)
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [zoom, panMode, isPanning])
 
   function getCursorStyle() {

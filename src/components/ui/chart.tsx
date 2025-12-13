@@ -10,7 +10,7 @@ import "./chart.css"
 const THEMES = { light: "", dark: ".dark" } as const
 
 export type ChartConfig = {
-  [k in string]: {
+  [_k in string]: {
     label?: React.ReactNode
     icon?: React.ComponentType
   } & (
@@ -141,7 +141,7 @@ function ChartTooltipContent({
 
     if (labelFormatter) {
       return (
-        <div className={cn("chart-tooltip-label", labelClassName)}>
+        <div className={`chart-tooltip-label ${labelClassName ?? ''}`.trim()}>
           {labelFormatter(value, payload)}
         </div>
       )
@@ -151,7 +151,7 @@ function ChartTooltipContent({
       return null
     }
 
-    return <div className={cn("chart-tooltip-label", labelClassName)}>{value}</div>
+    return <div className={`chart-tooltip-label ${labelClassName ?? ''}`.trim()}>{value}</div>
   }, [
     label,
     labelFormatter,

@@ -3,6 +3,7 @@ import { cleanup, render, fireEvent, screen } from '@testing-library/react'
 import { Canvas } from '../../../src/components/canvas/Canvas'
 import { PlayProvider } from '../../../src/contexts/PlayContext'
 import { SettingsProvider } from '../../../src/contexts/SettingsContext'
+import { CanvasViewportProvider } from '../../../src/contexts/CanvasViewportContext'
 import { eventBus } from '../../../src/services/EventBus'
 import type { DrawingState } from '../../../src/types/play.types'
 
@@ -18,15 +19,17 @@ function renderCanvas(
 	return render(
 		<SettingsProvider>
 			<PlayProvider initialState={mockInitialState}>
-				<Canvas
-					drawingState={drawingState}
-					hashAlignment="center"
-					showPlayBar={false}
-					readonly={false}
-					showFieldMarkings={true}
-					containerMode="page"
-					initialPlayers={initialPlayers}
-				/>
+				<CanvasViewportProvider>
+					<Canvas
+						drawingState={drawingState}
+						hashAlignment="center"
+						showPlayBar={false}
+						readonly={false}
+						showFieldMarkings={true}
+						containerMode="page"
+						initialPlayers={initialPlayers}
+					/>
+				</CanvasViewportProvider>
 			</PlayProvider>
 		</SettingsProvider>
 	)
@@ -63,7 +66,7 @@ describe('Canvas Undo Functionality', () => {
 		const { container } = renderCanvas(defaultDrawingState, initialPlayers)
 
 		// Mock getBoundingClientRect for the whiteboard
-		const whiteboard = container.querySelector('div[class*="rounded-2xl"]') as HTMLElement
+		const whiteboard = container.querySelector('.canvas-whiteboard') as HTMLElement
 		expect(whiteboard).toBeTruthy()
 		whiteboard.getBoundingClientRect = () => ({
 			left: 0,
@@ -99,7 +102,7 @@ describe('Canvas Undo Functionality', () => {
 
 		const { container } = renderCanvas(defaultDrawingState, initialPlayers)
 
-		const whiteboard = container.querySelector('div[class*="rounded-2xl"]') as HTMLElement
+		const whiteboard = container.querySelector('.canvas-whiteboard') as HTMLElement
 		expect(whiteboard).toBeTruthy()
 		whiteboard.getBoundingClientRect = () => ({
 			left: 0,
@@ -128,7 +131,7 @@ describe('Canvas Undo Functionality', () => {
 		// Start with an empty canvas
 		const { container } = renderCanvas(defaultDrawingState, [])
 
-		const whiteboard = container.querySelector('div[class*="rounded-2xl"]') as HTMLElement
+		const whiteboard = container.querySelector('.canvas-whiteboard') as HTMLElement
 		expect(whiteboard).toBeTruthy()
 		whiteboard.getBoundingClientRect = () => ({
 			left: 0,
@@ -159,7 +162,7 @@ describe('Canvas Undo Functionality', () => {
 
 		const { container } = renderCanvas(defaultDrawingState, initialPlayers)
 
-		const whiteboard = container.querySelector('div[class*="rounded-2xl"]') as HTMLElement
+		const whiteboard = container.querySelector('.canvas-whiteboard') as HTMLElement
 		expect(whiteboard).toBeTruthy()
 		whiteboard.getBoundingClientRect = () => ({
 			left: 0,

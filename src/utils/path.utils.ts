@@ -1,4 +1,4 @@
-import { Coordinate } from '../types/field.types'
+import type { Coordinate } from '../types/field.types'
 
 interface StraightenResult {
 	points: Coordinate[]
@@ -24,11 +24,12 @@ export function simplifyPath(
 		let index = -1
 
 		for (let i = start + 1; i < end; i++) {
-			const dist = perpendicularDistance(
-				points[i],
-				points[start],
-				points[end],
-			)
+			const point = points[i]
+			const startPoint = points[start]
+			const endPoint = points[end]
+			if (!point || !startPoint || !endPoint) continue
+
+			const dist = perpendicularDistance(point, startPoint, endPoint)
 			if (dist > maxDist) {
 				maxDist = dist
 				index = i

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X, Plus, Check } from 'lucide-react'
+import { Plus, Check } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { TAG_COLOR_PALETTE, getTagStyles } from '../playbook-editor/constants/playbook'
 import { Input } from '@/components/ui/input'
@@ -12,8 +12,8 @@ interface TagDialogProps {
 	onClose: () => void
 	availableTags: Tag[]
 	selectedTagIds: number[]
-	onTagsChange: (tagIds: number[]) => void
-	onCreateTag?: (name: string, color: string) => Promise<Tag>
+	onTagsChange: (_tagIds: number[]) => void
+	onCreateTag?: (_name: string, _color: string) => Promise<Tag>
 	title?: string
 }
 

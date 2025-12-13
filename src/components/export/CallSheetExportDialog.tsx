@@ -19,7 +19,7 @@ export function CallSheetExportDialog({
 	playbookName,
 	playbookId,
 }: CallSheetExportDialogProps) {
-	const { theme } = useTheme()
+	const { theme: _theme } = useTheme()
 	const [exporting, setExporting] = useState(false)
 	const [selectedSections, setSelectedSections] = useState<Set<string>>(
 		new Set(sections.map((s) => s.id))

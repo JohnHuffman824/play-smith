@@ -32,7 +32,10 @@ export function parseConceptQuery(
   // Step 2: Try to parse as "Role Template" composition
   const words = query.trim().split(/\s+/)
   if (words.length >= 2) {
-    const potentialRole = words[0].toUpperCase()
+    const firstWord = words[0]
+    if (!firstWord) return { type: 'suggestion', suggestion: 'create_new' }
+
+    const potentialRole = firstWord.toUpperCase()
     const potentialTemplate = words.slice(1).join(' ')
 
     const roleMatch = roles.find(r => r.toUpperCase() === potentialRole)

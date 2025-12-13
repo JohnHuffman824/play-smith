@@ -1,7 +1,5 @@
 import {
 	MousePointer,
-	Minus,
-	Paintbrush,
 	Palette,
 	Plus,
 	Trash2,
@@ -20,7 +18,7 @@ import {
 	RotateCcw,
 	Tag,
 } from 'lucide-react'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import type { DrawingState, Tool } from '../../types/play.types'
 import type { HashAlignment } from '../../types/field.types'
 import { eventBus } from '../../services/EventBus'
@@ -52,11 +50,11 @@ import './toolbar.css'
 
 interface ToolbarProps {
 	drawingState: DrawingState
-	setDrawingState: (state: DrawingState) => void
+	setDrawingState: (_state: DrawingState) => void
 	hashAlignment: HashAlignment
-	setHashAlignment: (alignment: HashAlignment) => void
+	setHashAlignment: (_alignment: HashAlignment) => void
 	showPlayBar: boolean
-	setShowPlayBar: (show: boolean) => void
+	setShowPlayBar: (_show: boolean) => void
 	playId?: string
 	onDeletePlay?: () => Promise<void>
 }
@@ -74,8 +72,8 @@ export function Toolbar({
 	playId,
 	onDeletePlay,
 }: ToolbarProps) {
-	const { state } = usePlayContext()
-	const players = state.players || []
+	const { state: _state } = usePlayContext()
+	const players = _state.players || []
 	const [showColorPicker, setShowColorPicker] = useState(false)
 	const [showDrawOptions, setShowDrawOptions] = useState(false)
 	const [showEraseDialog, setShowEraseDialog] = useState(false)
@@ -93,9 +91,9 @@ export function Toolbar({
 	const [showError, setShowError] = useState(false)
 	const [columnCount, setColumnCount] = useState(1)
 	const [rowsPerColumn, setRowsPerColumn] = useState(14)
-	const drawDialogRef = useRef<HTMLDivElement>(null)
+	const _drawDialogRef = useRef<HTMLDivElement>(null)
 
-	function handleSnapThresholdChange(value: number) {
+	function _handleSnapThresholdChange(value: number) {
 		setDrawingState({ ...drawingState, snapThreshold: value })
 	}
 
@@ -111,6 +109,34 @@ export function Toolbar({
 		setShowHashDialog(false)
 		setShowSettingsDialog(false)
 	}
+
+	const handleToolChange = useCallback((tool: Tool) => {
+		// Close all dialogs when switching tools
+		closeAllDialogs()
+
+		if (tool == 'color') {
+			setShowColorPicker(true)
+			return
+		}
+
+		if (tool == 'draw') {
+			// If already on draw tool, toggle the dialog (for keyboard shortcut support)
+			if (drawingState.tool == 'draw') {
+				setShowDrawOptions(prev => !prev)
+			} else {
+				setDrawingState({ ...drawingState, tool })
+				setShowDrawOptions(true)
+			}
+			return
+		}
+
+		if (tool == 'drawing') {
+			setShowDrawingDialog(true)
+			return
+		}
+
+		setDrawingState({ ...drawingState, tool })
+	}, [drawingState, setShowColorPicker, setShowDrawOptions, setShowDrawingDialog, setDrawingState])
 
 	// Auto-close dialogs when cursor moves away
 	useDialogAutoClose({
@@ -157,7 +183,7 @@ export function Toolbar({
 
 		eventBus.on('dialog:openDraw', handleDrawToolTrigger)
 		return () => eventBus.off('dialog:openDraw', handleDrawToolTrigger)
-	}, [drawingState.tool])
+	}, [drawingState.tool, handleToolChange])
 
 	// Listen for color picker keyboard shortcut
 	useEffect(() => {
@@ -255,34 +281,6 @@ export function Toolbar({
 		window.addEventListener('resize', calculateLayout)
 		return () => window.removeEventListener('resize', calculateLayout)
 	}, [])
-
-	function handleToolChange(tool: Tool) {
-		// Close all dialogs when switching tools
-		closeAllDialogs()
-
-		if (tool == 'color') {
-			setShowColorPicker(true)
-			return
-		}
-
-		if (tool == 'draw') {
-			// If already on draw tool, toggle the dialog (for keyboard shortcut support)
-			if (drawingState.tool == 'draw') {
-				setShowDrawOptions(prev => !prev)
-			} else {
-				setDrawingState({ ...drawingState, tool })
-				setShowDrawOptions(true)
-			}
-			return
-		}
-
-		if (tool == 'drawing') {
-			setShowDrawingDialog(true)
-			return
-		}
-
-		setDrawingState({ ...drawingState, tool })
-	}
 
 	function handleAddPlayer() {
 		eventBus.emit('player:add', {})

@@ -14,9 +14,9 @@ import { ConceptTypeTooltip } from './ConceptTypeTooltip'
 import { PlayProvider } from '../../contexts/PlayContext'
 import { CanvasViewportProvider } from '../../contexts/CanvasViewportContext'
 import type { Tool } from '../../types/play.types'
+import type { HashAlignment } from '../../types/field.types'
 import { generateThumbnail } from '../../utils/thumbnail'
 import { ColorPickerDialog } from '../toolbar/dialogs/ColorPickerDialog'
-import { DrawOptionsDialog } from '../toolbar/dialogs/DrawOptionsDialog'
 import {
 	Select,
 	SelectContent,
@@ -35,7 +35,7 @@ interface ConceptDialogProps {
 	concept?: BaseConcept
 	teamId: string
 	playbookId?: string
-	onSave: (concept: Partial<BaseConcept>) => Promise<void>
+	onSave: (_concept: Partial<BaseConcept>) => Promise<void>
 }
 
 export function ConceptDialog({
@@ -99,6 +99,7 @@ export function ConceptDialog({
 			setNameError('')
 			setTouched(false)
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [isOpen, concept, mode])
 
 	// Validate name whenever it changes

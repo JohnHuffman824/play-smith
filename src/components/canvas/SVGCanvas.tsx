@@ -36,11 +36,11 @@ interface SVGCanvasProps {
 	coordSystem: FieldCoordinateSystem
 	drawings: Drawing[]
 	players?: Player[]
-	onChange: (drawings: Drawing[]) => void
+	onChange: (_drawings: Drawing[]) => void
 	activeTool: 'draw' | 'select' | 'erase' | 'addPlayer'
 	autoCorrect: boolean
 	defaultStyle: PathStyle
-	onDeleteDrawing?: (id: string) => void
+	onDeleteDrawing?: (_id: string) => void
 	eraseSize?: number
 	snapThreshold: number
 	selectedDrawingIds?: string[]
@@ -48,9 +48,9 @@ interface SVGCanvasProps {
 	panX?: number
 	panY?: number
 	onLinkDrawingToPlayer?: (
-		drawingId: string,
-		pointId: string,
-		playerId: string,
+		_drawingId: string,
+		_pointId: string,
+		_playerId: string,
 	) => void
 	onAddPlayerAtNode?: (
 		drawingId: string,
@@ -101,7 +101,7 @@ export function SVGCanvas({
 	onDrawingHoverChange,
 	onSelectWithPosition,
 }: SVGCanvasProps) {
-	const [selectedDrawingId, setSelectedDrawingId] = useState<string | null>(
+	const [_selectedDrawingId, setSelectedDrawingId] = useState<string | null>(
 		null,
 	)
 	const [lastDrawnDrawingId, setLastDrawnDrawingId] =
@@ -442,7 +442,7 @@ export function SVGCanvas({
 		setWholeDrawingSnapTarget(null)
 	}
 
-	function handleDrawingDoubleClick(
+	function _handleDrawingDoubleClick(
 		drawingId: string,
 		position: { x: number; y: number },
 	) {

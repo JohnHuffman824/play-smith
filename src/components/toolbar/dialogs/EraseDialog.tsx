@@ -3,7 +3,7 @@ import './erase-dialog.css'
 
 interface EraseDialogProps {
   eraseSize: number
-  onEraseSizeChange: (size: number) => void
+  onEraseSizeChange: (_size: number) => void
   onClose: () => void
 }
 

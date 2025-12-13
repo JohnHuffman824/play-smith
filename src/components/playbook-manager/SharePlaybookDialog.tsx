@@ -46,16 +46,6 @@ export function SharePlaybookDialog({
 	// Filter out the playbook's own team from the available teams
 	const availableTeams = teams.filter(team => team.id !== currentTeamId)
 
-	// Load shares when dialog opens
-	useEffect(() => {
-		if (isOpen) {
-			loadShares()
-			setSelectedTeamId(availableTeams[0]?.id ?? null)
-			setPermission('view')
-			setError('')
-		}
-	}, [isOpen, playbookId])
-
 	async function loadShares() {
 		setIsLoading(true)
 		try {
@@ -72,6 +62,17 @@ export function SharePlaybookDialog({
 			setIsLoading(false)
 		}
 	}
+
+	// Load shares when dialog opens
+	useEffect(() => {
+		if (isOpen) {
+			loadShares()
+			setSelectedTeamId(availableTeams[0]?.id ?? null)
+			setPermission('view')
+			setError('')
+		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [isOpen, playbookId])
 
 	async function handleShare() {
 		if (!selectedTeamId) {

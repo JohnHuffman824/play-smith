@@ -57,8 +57,8 @@ describe('TeamRepository', () => {
 		const members = await teamRepo.getMembers(testTeamId)
 
 		expect(members.length).toBe(1)
-		expect(members[0].user_id).toBe(testUserId)
-		expect(members[0].role).toBe('owner')
+		expect(members[0]?.user_id).toBe(testUserId)
+		expect(members[0]?.role).toBe('owner')
 	})
 
 	test('get user teams', async () => {

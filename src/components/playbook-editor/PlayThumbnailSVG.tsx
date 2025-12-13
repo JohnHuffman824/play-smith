@@ -1,7 +1,6 @@
 import type {
 	Drawing,
 	ControlPoint,
-	PathSegment,
 	Coordinate
 } from '@/types/drawing.types'
 import {
@@ -72,7 +71,7 @@ function hasValidDrawings(drawings: Drawing[]): boolean {
 function transformPoint(
 	point: Coordinate,
 	viewBoxWidth: number,
-	viewBoxHeight: number,
+	_viewBoxHeight: number,
 	padding: number
 ): Coordinate {
 	const availableWidth = viewBoxWidth - 2 * padding
@@ -125,9 +124,14 @@ function buildPathString(
 		const transformed = allPoints.map(transform)
 		const smoothed = applyChaikin(transformed, CHAIKIN_ITERATIONS)
 
-		const commands: string[] = [`M ${smoothed[0].x.toFixed(2)} ${smoothed[0].y.toFixed(2)}`]
+		if (smoothed.length === 0) return ''
+
+		const commands: string[] = [`M ${smoothed[0]!.x.toFixed(2)} ${smoothed[0]!.y.toFixed(2)}`]
 		for (let i = 1; i < smoothed.length; i++) {
-			commands.push(`L ${smoothed[i].x.toFixed(2)} ${smoothed[i].y.toFixed(2)}`)
+			const point = smoothed[i]
+			if (point) {
+				commands.push(`L ${point.x.toFixed(2)} ${point.y.toFixed(2)}`)
+			}
 		}
 		return commands.join(' ')
 	}
@@ -153,18 +157,23 @@ function buildPathString(
 
 		if (i === 0) {
 			// Move to first point
-			const firstPoint = drawing.points[pointIds[0]]
-			if (firstPoint) {
-				const transformed = transform(firstPoint)
-				const x = transformed.x.toFixed(2)
-				const y = transformed.y.toFixed(2)
-				commands.push(`M ${x} ${y}`)
+			const firstPointId = pointIds[0]
+			if (firstPointId !== undefined) {
+				const firstPoint = drawing.points[firstPointId]
+				if (firstPoint) {
+					const transformed = transform(firstPoint)
+					const x = transformed.x.toFixed(2)
+					const y = transformed.y.toFixed(2)
+					commands.push(`M ${x} ${y}`)
+				}
 			}
 		}
 
 		if (segment.type === 'line') {
 			// Line to last point in segment
-			const lastPoint = drawing.points[pointIds[pointIds.length - 1]]
+			const lastPointId = pointIds[pointIds.length - 1]
+			if (lastPointId === undefined) continue
+			const lastPoint = drawing.points[lastPointId]
 			if (lastPoint) {
 				const transformed = transform(lastPoint)
 				const x = transformed.x.toFixed(2)
@@ -174,8 +183,11 @@ function buildPathString(
 		} else if (segment.type === 'quadratic') {
 			// Quadratic curve: Q controlX controlY endX endY
 			if (pointIds.length >= 2) {
-				const controlPoint = drawing.points[pointIds[0]]
-				const endPoint = drawing.points[pointIds[1]]
+				const controlPointId = pointIds[0]
+				const endPointId = pointIds[1]
+				if (controlPointId === undefined || endPointId === undefined) continue
+				const controlPoint = drawing.points[controlPointId]
+				const endPoint = drawing.points[endPointId]
 				if (controlPoint && endPoint) {
 					const c = transform(controlPoint)
 					const e = transform(endPoint)
@@ -190,8 +202,11 @@ function buildPathString(
 			// Cubic curve: C cp1X cp1Y cp2X cp2Y endX endY
 			if (pointIds.length === 2) {
 				// NEW FORMAT: pointIds = [fromId, toId], handles in nodes
-				const fromPoint = drawing.points[pointIds[0]]
-				const toPoint = drawing.points[pointIds[1]]
+				const fromPointId = pointIds[0]
+				const toPointId = pointIds[1]
+				if (fromPointId === undefined || toPointId === undefined) continue
+				const fromPoint = drawing.points[fromPointId]
+				const toPoint = drawing.points[toPointId]
 				if (fromPoint && toPoint) {
 					// Calculate absolute control points from handles
 					const cp1: Coordinate = {
@@ -215,9 +230,13 @@ function buildPathString(
 				}
 			} else if (pointIds.length >= 3) {
 				// OLD FORMAT: pointIds = [cp1Id, cp2Id, endId]
-				const cp1Point = drawing.points[pointIds[0]]
-				const cp2Point = drawing.points[pointIds[1]]
-				const endPoint = drawing.points[pointIds[2]]
+				const cp1PointId = pointIds[0]
+				const cp2PointId = pointIds[1]
+				const endPointId = pointIds[2]
+				if (cp1PointId === undefined || cp2PointId === undefined || endPointId === undefined) continue
+				const cp1Point = drawing.points[cp1PointId]
+				const cp2Point = drawing.points[cp2PointId]
+				const endPoint = drawing.points[endPointId]
 				if (cp1Point && cp2Point && endPoint) {
 					const c1 = transform(cp1Point)
 					const c2 = transform(cp2Point)
@@ -304,6 +323,7 @@ function getEndDirection(
 
 	// Get the last point
 	const lastPointId = lastSegment.pointIds[lastSegment.pointIds.length - 1]
+	if (lastPointId === undefined) return undefined
 	const lastPoint = drawing.points[lastPointId]
 	if (!lastPoint) return undefined
 
@@ -313,7 +333,9 @@ function getEndDirection(
 	// Try to get second-to-last from current segment
 	if (lastSegment.pointIds.length >= 2) {
 		const secondToLastId = lastSegment.pointIds[lastSegment.pointIds.length - 2]
-		secondToLastPoint = drawing.points[secondToLastId]
+		if (secondToLastId !== undefined) {
+			secondToLastPoint = drawing.points[secondToLastId]
+		}
 	}
 
 	// If not found, try previous segment
@@ -321,7 +343,9 @@ function getEndDirection(
 		const prevSegment = drawing.segments[drawing.segments.length - 2]
 		if (prevSegment && prevSegment.pointIds.length > 0) {
 			const prevLastId = prevSegment.pointIds[prevSegment.pointIds.length - 1]
-			secondToLastPoint = drawing.points[prevLastId]
+			if (prevLastId !== undefined) {
+				secondToLastPoint = drawing.points[prevLastId]
+			}
 		}
 	}
 

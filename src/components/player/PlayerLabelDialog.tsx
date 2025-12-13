@@ -7,7 +7,7 @@ interface PlayerLabelDialogProps {
   position: { x: number; y: number }
   currentLabel: string
   hasLinkedDrawing: boolean
-  onLabelChange: (label: string) => void
+  onLabelChange: (_label: string) => void
   onUnlink: () => void
   onDelete: () => void
   onClose: () => void

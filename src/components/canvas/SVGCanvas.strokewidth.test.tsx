@@ -34,6 +34,7 @@ describe('SVGCanvas - StrokeWidth Scaling Bug', () => {
 				lineEnd: 'none',
 				pathMode: 'sharp',
 			},
+			annotations: [],
 		}
 
 		const drawings = [initialDrawing]
@@ -99,7 +100,7 @@ describe('SVGCanvas - StrokeWidth Scaling Bug', () => {
 
 	test('strokeWidth values should be in feet, not pixels', () => {
 		// This test verifies the contract: strokeWidth in Drawing.style is ALWAYS in feet
-		const coordSystem = new FieldCoordinateSystem(1600, 800)
+		new FieldCoordinateSystem(1600, 800)
 		const scale = 10 // px/ft
 
 		// Test all the brush sizes from the dialog

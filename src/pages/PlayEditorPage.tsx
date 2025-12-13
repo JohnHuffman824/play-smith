@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Toolbar } from '../components/toolbar/Toolbar'
 import { Canvas } from '../components/canvas/Canvas'
@@ -8,7 +8,6 @@ import { ConceptDialog } from '../components/concepts/ConceptDialog'
 import { SelectionOverlay } from '../components/canvas/SelectionOverlay'
 import { SelectedTagsOverlay } from '../components/tags/SelectedTagsOverlay'
 import { TagDialog } from '../components/tags/TagDialog'
-import { useTheme } from '@/contexts/SettingsContext'
 import { PlayProvider, usePlayContext } from '../contexts/PlayContext'
 import { ConceptProvider, useConcept } from '../contexts/ConceptContext'
 import { CanvasViewportProvider } from '../contexts/CanvasViewportContext'
@@ -53,7 +52,6 @@ interface ApiPlay {
 }
 
 function PlayEditorContent() {
-	const { theme } = useTheme()
 	const { playbookId, playId } = useParams<{
 		playbookId?: string
 		playId?: string
@@ -82,12 +80,12 @@ function PlayEditorContent() {
 	} = useConcept()
 
 	const {
-		formations,
+		formations: _formations,
 		concepts,
-		conceptGroups,
+		conceptGroups: _conceptGroups,
 		createConcept,
 		updateConcept,
-		isLoading: conceptsLoading
+		isLoading: _conceptsLoading
 	} = useConceptData(teamId, playbookId)
 
 	const [selectedObjectIds, setSelectedObjectIds] = useState<string[]>([])
@@ -103,7 +101,7 @@ function PlayEditorContent() {
 	const [modalTargetPlayId, setModalTargetPlayId] = useState<string | null>(null)
 	const [targetPlayName, setTargetPlayName] = useState('')
 	const [showUnsavedChangesDialog, setShowUnsavedChangesDialog] = useState(false)
-	const [initialPlayState, setInitialPlayState] = useState<{
+	const [_initialPlayState, _setInitialPlayState] = useState<{
 		players: any[]
 		drawings: any[]
 	} | null>(null)
@@ -320,6 +318,7 @@ function PlayEditorContent() {
 				applyConceptGroup(chip.entity as any)
 			}
 		})
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [conceptState.appliedConcepts])
 
 	// Listen for delete selection event (Delete/Backspace keyboard shortcut)

@@ -7,10 +7,10 @@ interface DrawOptionsDialogProps {
   lineEnd: 'none' | 'arrow' | 'tShape'
   brushSize: number
   pathMode: 'sharp' | 'curve'
-  onLineStyleChange: (style: 'solid' | 'dashed') => void
-  onLineEndChange: (end: 'none' | 'arrow' | 'tShape') => void
-  onBrushSizeChange: (size: number) => void
-  onPathModeChange: (mode: 'sharp' | 'curve') => void
+  onLineStyleChange: (_style: 'solid' | 'dashed') => void
+  onLineEndChange: (_end: 'none' | 'arrow' | 'tShape') => void
+  onBrushSizeChange: (_size: number) => void
+  onPathModeChange: (_mode: 'sharp' | 'curve') => void
   onClose: () => void
   useRelativePosition?: boolean
 }

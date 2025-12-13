@@ -1,4 +1,4 @@
-import type { RoleDefinition, SelectorDefinition, RelativeSelector } from '../types/concept.types'
+import type { RoleDefinition, SelectorDefinition } from '../types/concept.types'
 
 // Chip type constants - eliminates magic strings
 export const CHIP_TYPE_FORMATION = 'formation' as const

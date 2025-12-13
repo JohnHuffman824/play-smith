@@ -98,11 +98,11 @@ export function PlaybookManagerPage() {
 		navigate(`/playbooks/${newPlaybook.id}`)
 	}
 
-	const handleRename = async (id: number, newName: string) => {
+	const _handleRename = async (id: number, newName: string) => {
 		await updatePlaybook(id, { name: newName })
 	}
 
-	const handleDelete = async (id: number) => {
+	const _handleDelete = async (id: number) => {
 		await deletePlaybook(id)
 	}
 
@@ -143,7 +143,7 @@ export function PlaybookManagerPage() {
 		}
 	}
 
-	const handleExportPlaybook = (id: number) => {
+	const handleExportPlaybook = (_id: number) => {
 		// TODO: Implement single playbook export
 	}
 
@@ -151,11 +151,11 @@ export function PlaybookManagerPage() {
 		await toggleStar(id)
 	}
 
-	const handleRestore = async (id: number) => {
+	const _handleRestore = async (id: number) => {
 		await restore(id)
 	}
 
-	const handlePermanentDelete = async (id: number) => {
+	const _handlePermanentDelete = async (id: number) => {
 		await permanentDelete(id)
 	}
 
@@ -168,27 +168,27 @@ export function PlaybookManagerPage() {
 	const handleRenamePrompt = useCallback((id: number, currentName: string) => {
 		const newName = prompt('Rename playbook:', currentName)
 		if (newName?.trim()) {
-			handleRename(id, newName.trim())
+			updatePlaybook(id, { name: newName.trim() })
 		}
-	}, [])
+	}, [updatePlaybook])
 
 	const handleDeletePrompt = useCallback((id: number, name: string) => {
 		if (confirm(`Delete "${name}"?`)) {
-			handleDelete(id)
+			deletePlaybook(id)
 		}
-	}, [])
+	}, [deletePlaybook])
 
 	const handleRestorePrompt = useCallback((id: number, name: string) => {
 		if (confirm(`Restore "${name}"?`)) {
-			handleRestore(id)
+			restore(id)
 		}
-	}, [])
+	}, [restore])
 
 	const handlePermanentDeletePrompt = useCallback((id: number, name: string) => {
 		if (confirm(`Permanently delete "${name}"? This cannot be undone.`)) {
-			handlePermanentDelete(id)
+			permanentDelete(id)
 		}
-	}, [])
+	}, [permanentDelete])
 
 	if (isLoading) {
 		return (

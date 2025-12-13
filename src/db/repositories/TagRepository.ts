@@ -1,5 +1,5 @@
 import { db } from '../connection'
-import type { Tag, PlayTag, PlaybookTag } from '../types'
+import type { Tag } from '../types'
 
 export class TagRepository {
 	async getPresetTags(): Promise<Tag[]> {

@@ -23,7 +23,7 @@ type PresentationEditorProps = {
 
 export function PresentationEditor({
 	presentationId,
-	playbookId,
+	playbookId: _playbookId,
 	availablePlays,
 	onClose
 }: PresentationEditorProps) {

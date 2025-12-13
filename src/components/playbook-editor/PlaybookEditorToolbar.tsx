@@ -11,6 +11,7 @@ interface PlaybookEditorToolbarProps {
   onNewSection: () => void
   sections: Section[]
   activeSectionFilter: string | null
+   
   onSectionFilterChange: (sectionId: string | null) => void
 }
 

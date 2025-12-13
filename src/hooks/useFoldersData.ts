@@ -72,7 +72,7 @@ export function useFoldersData(): UseFoldersDataReturn {
 
 			return { previous }
 		},
-		onError: (err, variables, context) => {
+		onError: (err, _variables, context) => {
 			if (context?.previous) {
 				queryClient.setQueryData(folderKeys.list(), context.previous)
 			}
@@ -97,7 +97,7 @@ export function useFoldersData(): UseFoldersDataReturn {
 
 			return { previous }
 		},
-		onError: (err, variables, context) => {
+		onError: (err, _variables, context) => {
 			if (context?.previous) {
 				queryClient.setQueryData(folderKeys.list(), context.previous)
 			}

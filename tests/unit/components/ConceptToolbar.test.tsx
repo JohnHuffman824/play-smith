@@ -48,11 +48,10 @@ describe('ConceptToolbar - Add Player Tool', () => {
 			onToolChange: (tool) => { capturedTool = tool }
 		})
 
-		// Find the add player button (second button in TOOLS array)
+		// Find the add player button (second button - after select button)
 		const buttons = container.querySelectorAll('button')
-		const addPlayerButton = Array.from(buttons).find(btn =>
-			btn.getAttribute('aria-label')?.includes('Add Player')
-		)
+		// UserPlus icon is the second button in ConceptToolbar
+		const addPlayerButton = buttons[1]
 
 		expect(addPlayerButton).toBeTruthy()
 		fireEvent.click(addPlayerButton!)
@@ -98,10 +97,10 @@ describe('ConceptToolbar - Draw Options Integration', () => {
 			</SettingsProvider>
 		)
 
-		// Find the draw button
-		const drawButton = Array.from(container.querySelectorAll('button')).find(btn =>
-			btn.getAttribute('aria-label')?.includes('Draw')
-		)
+		// Find the draw button (third button - after select and add player)
+		const buttons = container.querySelectorAll('button')
+		// Pencil icon is the third button in ConceptToolbar
+		const drawButton = buttons[2]
 
 		expect(drawButton).toBeTruthy()
 

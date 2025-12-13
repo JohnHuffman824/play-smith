@@ -7,7 +7,7 @@ import {
 	PaintBucket
 } from 'lucide-react'
 import type { Tool } from '../../types/play.types'
-import type { HashAlignment } from '../../types/play.types'
+import type { HashAlignment } from '../../types/field.types'
 import { HashDialog } from '../toolbar/dialogs/HashDialog'
 import { DrawOptionsDialog } from '../toolbar/dialogs/DrawOptionsDialog'
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip'
@@ -15,7 +15,6 @@ import { ToolbarButton } from '../ui/toolbar-button'
 import { EraserIcon } from '../toolbar/icons/EraserIcon'
 import { HashIcon } from '../toolbar/icons/HashIcon'
 import { ColorSwatchIndicator } from '../toolbar/ColorSwatchIndicator'
-import { useTheme } from '@/contexts/SettingsContext'
 import { usePlayContext } from '../../contexts/PlayContext'
 import { areLinemenAtDefaultPositions } from '../../utils/lineman.utils'
 import { useDialogAutoClose } from '../../hooks/useDialogAutoClose'
@@ -23,30 +22,30 @@ import './concept-toolbar.css'
 
 interface ConceptToolbarProps {
 	selectedTool: Tool
-	onToolChange: (tool: Tool) => void
+	onToolChange: (_tool: Tool) => void
 	color: string
-	onColorChange: (color: string) => void
+	onColorChange: (_color: string) => void
 	hashAlignment: HashAlignment
-	onHashAlignmentChange: (alignment: HashAlignment) => void
+	onHashAlignmentChange: (_alignment: HashAlignment) => void
 	showColorPicker: boolean
-	onShowColorPickerChange: (show: boolean) => void
+	onShowColorPickerChange: (_show: boolean) => void
 	showDrawOptions: boolean
-	onShowDrawOptionsChange: (show: boolean) => void
+	onShowDrawOptionsChange: (_show: boolean) => void
 	lineStyle: 'solid' | 'dashed'
 	lineEnd: 'none' | 'arrow' | 'tShape'
 	brushSize: number
 	pathMode: 'sharp' | 'curve'
-	onLineStyleChange: (style: 'solid' | 'dashed') => void
-	onLineEndChange: (end: 'none' | 'arrow' | 'tShape') => void
-	onBrushSizeChange: (size: number) => void
-	onPathModeChange: (mode: 'sharp' | 'curve') => void
+	onLineStyleChange: (_style: 'solid' | 'dashed') => void
+	onLineEndChange: (_end: 'none' | 'arrow' | 'tShape') => void
+	onBrushSizeChange: (_size: number) => void
+	onPathModeChange: (_mode: 'sharp' | 'curve') => void
 }
 
 export function ConceptToolbar({
 	selectedTool,
 	onToolChange,
 	color,
-	onColorChange,
+	_onColorChange,
 	hashAlignment,
 	onHashAlignmentChange,
 	showColorPicker,
@@ -62,7 +61,6 @@ export function ConceptToolbar({
 	onBrushSizeChange,
 	onPathModeChange
 }: ConceptToolbarProps) {
-	const { theme } = useTheme()
 	const { state } = usePlayContext()
 	const players = state.players || []
 	const [showHashDialog, setShowHashDialog] = useState(false)

@@ -3,7 +3,7 @@ import './search-input.css'
 
 interface SearchInputProps {
 	value: string
-	onChange: (value: string) => void
+	onChange: (_value: string) => void
 	placeholder?: string
 	className?: string
 	style?: React.CSSProperties

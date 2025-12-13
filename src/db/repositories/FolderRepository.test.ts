@@ -71,10 +71,10 @@ describe('FolderRepository', () => {
 			[folderA.id, folderB.id, folderC.id, testFolderId].includes(f.id)
 		)
 
-		expect(ourFolders[0].name).toBe('A Folder')
-		expect(ourFolders[1].name).toBe('B Folder')
-		expect(ourFolders[2].name).toBe('C Folder')
-		expect(ourFolders[3].name).toBe('Test Folder')
+		expect(ourFolders[0]?.name).toBe('A Folder')
+		expect(ourFolders[1]?.name).toBe('B Folder')
+		expect(ourFolders[2]?.name).toBe('C Folder')
+		expect(ourFolders[3]?.name).toBe('Test Folder')
 	})
 
 	test('getUserFolders returns empty array for user with no folders', async () => {

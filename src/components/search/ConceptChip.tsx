@@ -5,7 +5,7 @@ import './concept-chip.css'
 
 interface ConceptChipProps {
 	chip: ConceptChipType
-	onRemove: (chipId: string) => void
+	onRemove: (_chipId: string) => void
 	isDragging?: boolean
 }
 

@@ -4,3 +4,6 @@ env = "BUN_PUBLIC_*"
 
 [test]
 preload = ["./tests/setup.ts"]
+
+[test.env]
+NODE_ENV = "test"

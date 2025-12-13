@@ -5,7 +5,7 @@ interface SearchDropdownProps {
 	results: SearchResults | null
 	isSearching: boolean
 	query: string
-	onSelect: (type: 'formation' | 'concept' | 'concept_group', id: number, name: string) => void
+	onSelect: (_type: 'formation' | 'concept' | 'concept_group', _id: number, _name: string) => void
 	onClose: () => void
 }
 

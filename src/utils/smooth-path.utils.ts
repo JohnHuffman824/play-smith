@@ -20,8 +20,15 @@ function simplifyRDP(points: Coordinate[], epsilon: number): Coordinate[] {
 	const first = points[0]
 	const last = points[points.length - 1]
 
+	if (!first || !last) {
+		return points
+	}
+
 	for (let i = 1; i < points.length - 1; i++) {
-		const dist = perpendicularDistance(points[i], first, last)
+		const point = points[i]
+		if (!point) continue
+
+		const dist = perpendicularDistance(point, first, last)
 		if (dist > maxDist) {
 			maxDist = dist
 			maxIndex = i
@@ -73,22 +80,31 @@ export function processSmoothPath(
 	}
 
 	if (coords.length === 1) {
-		return {
-			points: {
-				'p-0': { id: 'p-0', x: coords[0].x, y: coords[0].y, type: 'start' }
-			},
-			segments: []
+		const first = coords[0]
+		if (first) {
+			return {
+				points: {
+					'p-0': { id: 'p-0', x: first.x, y: first.y, type: 'start' }
+				},
+				segments: []
+			}
 		}
+		return { points: {}, segments: [] }
 	}
 
 	if (coords.length === 2) {
-		return {
-			points: {
-				'p-0': { id: 'p-0', x: coords[0].x, y: coords[0].y, type: 'start' },
-				'p-1': { id: 'p-1', x: coords[1].x, y: coords[1].y, type: 'end' }
-			},
-			segments: [{ type: 'line', pointIds: ['p-0', 'p-1'] }]
+		const first = coords[0]
+		const second = coords[1]
+		if (first && second) {
+			return {
+				points: {
+					'p-0': { id: 'p-0', x: first.x, y: first.y, type: 'start' },
+					'p-1': { id: 'p-1', x: second.x, y: second.y, type: 'end' }
+				},
+				segments: [{ type: 'line', pointIds: ['p-0', 'p-1'] }]
+			}
 		}
+		return { points: {}, segments: [] }
 	}
 
 	// Simplify to few control points
@@ -97,11 +113,14 @@ export function processSmoothPath(
 	// Create control points
 	const points: Record<string, ControlPoint> = {}
 	for (let i = 0; i < simplified.length; i++) {
+		const coord = simplified[i]
+		if (!coord) continue
+
 		const id = `p-${i}`
 		points[id] = {
 			id,
-			x: simplified[i].x,
-			y: simplified[i].y,
+			x: coord.x,
+			y: coord.y,
 			type: i === 0 ? 'start' : i === simplified.length - 1 ? 'end' : 'corner'
 		}
 	}

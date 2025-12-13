@@ -12,7 +12,7 @@ interface FreehandCaptureProps {
 	style: PathStyle
 	isActive: boolean
 	autoCorrect: boolean
-	onCommit: (drawing: Drawing) => void
+	onCommit: (_drawing: Drawing) => void
 	players?: PlayerForSnap[]
 	zoom?: number
 	panX?: number
@@ -26,12 +26,12 @@ export function FreehandCapture({
 	coordSystem,
 	style,
 	isActive,
-	autoCorrect,
+	autoCorrect: _autoCorrect,
 	onCommit,
 	players,
-	zoom = 1,
-	panX = 0,
-	panY = 0,
+	zoom: _zoom = 1,
+	panX: _panX = 0,
+	panY: _panY = 0,
 }: FreehandCaptureProps) {
 	const canvasRef = useRef<HTMLCanvasElement | null>(null)
 	const [isDrawing, setIsDrawing] = useState(false)
@@ -187,6 +187,7 @@ export function FreehandCapture({
 		const observer = new ResizeObserver(() => resizeCanvas())
 		observer.observe(canvas)
 		return () => observer.disconnect()
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [coordSystem])
 
 	return (

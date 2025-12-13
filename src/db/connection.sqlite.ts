@@ -111,6 +111,7 @@ function initializeSchema() {
 			playbook_id INTEGER NOT NULL,
 			name TEXT NOT NULL,
 			display_order INTEGER NOT NULL DEFAULT 0,
+			section_type TEXT NOT NULL DEFAULT 'standard',
 			created_at TEXT DEFAULT CURRENT_TIMESTAMP,
 			updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
 			FOREIGN KEY (playbook_id) REFERENCES playbooks(id) ON DELETE CASCADE
@@ -211,6 +212,8 @@ function initializeSchema() {
 			targeting_mode TEXT NOT NULL,
 			ball_position TEXT NOT NULL DEFAULT 'center',
 			play_direction TEXT NOT NULL DEFAULT 'na',
+			is_motion INTEGER NOT NULL DEFAULT 0,
+			is_modifier INTEGER NOT NULL DEFAULT 0,
 			created_by INTEGER NOT NULL,
 			created_at TEXT DEFAULT CURRENT_TIMESTAMP,
 			updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
@@ -424,7 +427,8 @@ export const db = Object.assign(
 			if (!obj || typeof obj !== 'object') return obj
 
 			const dateFields = ['created_at', 'updated_at', 'expires_at', 'joined_at', 'applied_at', 'last_used_at']
-			const booleanFields = ['hash_relative']
+			const booleanFields = ['hash_relative', 'is_motion', 'is_modifier', 'is_starred', 'is_preset']
+			const jsonFields = ['drawing_data', 'selector_params', 'custom_players', 'custom_drawings', 'drawing_template', 'override_rules']
 			const result = { ...obj }
 
 			// Parse date fields
@@ -442,6 +446,17 @@ export const db = Object.assign(
 			for (const field of booleanFields) {
 				if (field in result && typeof result[field] === 'number') {
 					result[field] = result[field] === 1
+				}
+			}
+
+			// Parse JSON fields (SQLite TEXT to JavaScript object)
+			for (const field of jsonFields) {
+				if (field in result && typeof result[field] === 'string') {
+					try {
+						result[field] = JSON.parse(result[field])
+					} catch (_e) {
+						// If JSON parsing fails, keep the string value
+					}
 				}
 			}
 
@@ -491,7 +506,7 @@ export const db = Object.assign(
 					if (stmt.trim()) {
 						try {
 							sqlite.exec(stmt)
-						} catch (error) {
+						} catch (_error) {
 							// Ignore errors for PostgreSQL-specific syntax during migration
 							// The schema is already initialized above
 						}
@@ -526,9 +541,9 @@ export const db = Object.assign(
 
 			// Now replace placeholders with correct number for flattened arrays
 			// Count how many placeholders we need
-			let placeholderIndex = 0
+			let _placeholderIndex = 0
 			sqliteQuery = sqliteQuery.replace(/\?/g, () => {
-				placeholderIndex++
+				_placeholderIndex++
 				return '?'
 			})
 
@@ -559,7 +574,8 @@ export const db = Object.assign(
 				if (!obj || typeof obj !== 'object') return obj
 
 				const dateFields = ['created_at', 'updated_at', 'expires_at', 'joined_at', 'applied_at', 'last_used_at']
-				const booleanFields = ['hash_relative']
+				const booleanFields = ['hash_relative', 'is_motion', 'is_modifier', 'is_starred', 'is_preset']
+				const jsonFields = ['drawing_data', 'selector_params', 'custom_players', 'custom_drawings', 'drawing_template', 'override_rules']
 				const result = { ...obj }
 
 				// Parse date fields
@@ -577,6 +593,17 @@ export const db = Object.assign(
 				for (const field of booleanFields) {
 					if (field in result && typeof result[field] === 'number') {
 						result[field] = result[field] === 1
+					}
+				}
+
+				// Parse JSON fields (SQLite TEXT to JavaScript object)
+				for (const field of jsonFields) {
+					if (field in result && typeof result[field] === 'string') {
+						try {
+							result[field] = JSON.parse(result[field])
+						} catch (_e) {
+							// If JSON parsing fails, keep the string value
+						}
 					}
 				}
 

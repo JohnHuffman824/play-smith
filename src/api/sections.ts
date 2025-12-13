@@ -1,9 +1,7 @@
-import { PlaybookRepository } from '../db/repositories/PlaybookRepository'
 import { SectionRepository } from '../db/repositories/SectionRepository'
 import { getSessionUser } from './middleware/auth'
 import { checkPlaybookAccess } from './utils/checkPlaybookAccess'
 
-const playbookRepo = new PlaybookRepository()
 const sectionRepo = new SectionRepository()
 
 export const sectionsAPI = {

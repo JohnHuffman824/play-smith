@@ -33,35 +33,35 @@ type MultiDrawingControlPointOverlayProps = {
 	panX?: number
 	panY?: number
 	onDragPoint?: (
-		drawingId: string,
-		pointId: string,
-		x: number,
-		y: number,
+		_drawingId: string,
+		_pointId: string,
+		_x: number,
+		_y: number,
 	) => void
 	onMerge?: (
-		sourceDrawingId: string,
-		sourcePointId: string,
-		targetDrawingId: string,
-		targetPointId: string,
+		_sourceDrawingId: string,
+		_sourcePointId: string,
+		_targetDrawingId: string,
+		_targetPointId: string,
 	) => void
 	onLinkToPlayer?: (
-		drawingId: string,
-		pointId: string,
-		playerId: string,
+		_drawingId: string,
+		_pointId: string,
+		_playerId: string,
 	) => void
-	onDeletePoint?: (drawingId: string, pointId: string) => void
-	onAddPoint?: (drawingId: string, segmentIndex: number, position: Coordinate) => void
+	onDeletePoint?: (_drawingId: string, _pointId: string) => void
+	onAddPoint?: (_drawingId: string, _segmentIndex: number, _position: Coordinate) => void
 	onPathContextMenuHandlerRef?: React.MutableRefObject<((
-		drawingId: string,
-		segmentIndex: number,
-		insertPosition: Coordinate,
-		pixelPosition: { x: number; y: number }
+		_drawingId: string,
+		_segmentIndex: number,
+		_insertPosition: Coordinate,
+		_pixelPosition: { x: number; y: number }
 	) => void) | null>
 	onAddPlayerAtNode?: (
-		drawingId: string,
-		pointId: string,
-		x: number,
-		y: number,
+		_drawingId: string,
+		_pointId: string,
+		_x: number,
+		_y: number,
 	) => void
 	activeTool?: 'select' | 'addPlayer'
 }
@@ -234,7 +234,7 @@ export function MultiDrawingControlPointOverlay({
 	onAddPlayerAtNode,
 	activeTool,
 }: MultiDrawingControlPointOverlayProps) {
-	const { theme } = useTheme()
+	const { theme: _theme } = useTheme()
 	const [dragState, setDragState] = useState<MultiDragState | null>(null)
 	const [snapTarget, setSnapTarget] = useState<SnapTarget | null>(null)
 	const [playerSnapTarget, setPlayerSnapTarget] = useState<
@@ -365,7 +365,7 @@ export function MultiDrawingControlPointOverlay({
 	useEffect(() => {
 		if (!contextMenuState && !addPopupState) return
 
-		function handleClickOutside(e: MouseEvent) {
+		function handleClickOutside(_e: MouseEvent) {
 			setContextMenuState(null)
 			setAddPopupState(null)
 		}

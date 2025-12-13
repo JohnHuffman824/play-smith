@@ -14,17 +14,23 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import type { Play } from './types'
+import type { Play as PlayType } from './types'
 import './play-list-view.css'
 
 type PlayListViewProps = {
-  plays: Play[]
+  plays: PlayType[]
   selectedPlays: Set<string>
+   
   onSelect: (id: string) => void
+   
   onOpen: (id: string) => void
+   
   onAnimate?: (id: string) => void
+   
   onRename: (id: string) => void
+   
   onDelete: (id: string) => void
+   
   onDuplicate: (id: string) => void
 }
 

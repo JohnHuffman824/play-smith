@@ -5,7 +5,7 @@ import type { User } from '../../db/types'
  * in API responses
  */
 export function sanitizeUser(user: User): Omit<User, 'password_hash'> {
-	const { password_hash, ...publicUser } = user
+	const { password_hash: _password_hash, ...publicUser } = user
 	return publicUser
 }
 

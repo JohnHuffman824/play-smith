@@ -12,6 +12,7 @@ export type ConceptFilter =
 type ConceptsToolbarProps = {
 	onNewConcept: () => void
 	activeFilter: ConceptFilter
+	 
 	onFilterChange: (filter: ConceptFilter) => void
 }
 

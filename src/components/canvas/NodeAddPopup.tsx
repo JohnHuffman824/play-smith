@@ -7,7 +7,7 @@ type NodeAddPopupProps = {
 	onClose: () => void
 }
 
-export function NodeAddPopup({ position, onAdd, onClose }: NodeAddPopupProps) {
+export function NodeAddPopup({ position, onAdd }: NodeAddPopupProps) {
 	return (
 		<div
 			className="node-add-popup"

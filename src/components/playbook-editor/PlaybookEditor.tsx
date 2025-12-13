@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from 'react'
-import { PlaybookEditorToolbar } from './PlaybookEditorToolbar'
 import { PlayCard } from './PlayCard'
 import { PlayListView } from './PlayListView'
 import {
@@ -61,9 +60,6 @@ const CONCEPT_FILTERS = [
 
 import {
   ArrowLeft,
-  Search,
-  LayoutGrid,
-  List,
   Settings,
   Upload,
   Download,
@@ -72,12 +68,10 @@ import {
   FolderPlus,
 } from 'lucide-react'
 import {
-  PLAY_TYPE_PASS,
   VIEW_MODE_GRID,
-  VIEW_MODE_LIST,
   DEFAULT_PLAYBOOK_NAME,
 } from './constants/playbook'
-import type { Play, Section } from './types'
+import type { Section as _Section } from './types'
 
 interface PlaybookEditorProps {
   playbookId?: string
@@ -91,15 +85,6 @@ interface PlaybookEditorProps {
 }
 
 const DARK_MODE_CLASS = 'dark'
-const LOCALE_OPTIONS = {
-  month: 'short' as const,
-  day: 'numeric' as const,
-  year: 'numeric' as const,
-}
-
-function formatDate(date: Date): string {
-  return date.toLocaleDateString('en-US', LOCALE_OPTIONS)
-}
 
 function PlaybookEditorContent({
   playbookId,
@@ -109,15 +94,10 @@ function PlaybookEditorContent({
   onBack,
   onOpenPlay,
   onImport,
-  onExport
+  _onExport
 }: PlaybookEditorProps) {
   const {
-    theme,
-    setTheme,
-    positionNaming,
-    setPositionNaming,
-    fieldLevel,
-    setFieldLevel
+    theme
   } = useTheme()
 
   const [viewMode, setViewMode] = useState<'grid' | 'list'>(() => {
@@ -158,9 +138,7 @@ function PlaybookEditorContent({
     updatePlay,
     deletePlay,
     duplicatePlay,
-    createSection,
-    updateSection,
-    deleteSection
+    createSection
   } = usePlaybookData(playbookId)
 
   // Fetch concept data
@@ -333,7 +311,7 @@ function PlaybookEditorContent({
     setConceptToDelete(null)
   }
 
-  const handleDuplicateConcept = async (id: number, type: ConceptType) => {
+  const handleDuplicateConcept = async (_id: number, _type: ConceptType) => {
     // TODO: Implement duplication
   }
 
@@ -351,7 +329,7 @@ function PlaybookEditorContent({
     if (!newItemName.trim()) return
 
     try {
-      const sectionId = sections.length > 0 ? sections[0].id : null
+      const sectionId = sections[0]?.id ?? null
       const newPlay = await createPlay(newItemName, sectionId)
 
       setNewItemName('')
@@ -456,7 +434,7 @@ function PlaybookEditorContent({
   }
 
   function handleShare(
-    recipients: Array<{ email: string; role: 'viewer' | 'collaborator' }>
+    _recipients: Array<{ email: string; role: 'viewer' | 'collaborator' }>
   ) {
   }
 
@@ -491,7 +469,6 @@ function PlaybookEditorContent({
     setDeletePlayId(null)
   }
 
-  const totalPlays = allPlays.length
   const exportTitle = selectedPlays.size > 0 
     ? `Export ${selectedPlays.size} selected` 
     : 'Export All'

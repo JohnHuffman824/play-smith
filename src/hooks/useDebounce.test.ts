@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'bun:test'
-import { renderHook, act } from '@testing-library/react'
+import { renderHook } from '@testing-library/react'
 import { useDebounce } from './useDebounce'
 
 describe('useDebounce', () => {

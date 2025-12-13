@@ -7,7 +7,7 @@ import { afterEach, describe, it, expect } from 'bun:test'
 import { cleanup, renderHook, act } from '@testing-library/react'
 import { PlayProvider, usePlayContext } from '../../../src/contexts/PlayContext'
 import { SettingsProvider } from '../../../src/contexts/SettingsContext'
-import { ReactNode } from 'react'
+import type { ReactNode } from 'react'
 
 const wrapper = ({ children }: { children: ReactNode }) => (
 	<SettingsProvider>

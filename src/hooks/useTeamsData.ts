@@ -10,7 +10,7 @@ interface UseTeamsDataReturn {
 	currentTeamRole: 'owner' | 'editor' | 'viewer' | null
 	isLoading: boolean
 	error: string | null
-	switchTeam: (teamId: number) => void
+	switchTeam: (_teamId: number) => void
 	refetch: () => Promise<void>
 }
 

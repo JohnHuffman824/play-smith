@@ -127,7 +127,7 @@ export class SectionRepository {
 
 		// Use a single UPDATE with CASE to avoid N+1 queries
 		const ids = sectionOrders.map(s => s.id)
-		const whenClauses = sectionOrders.map((s, i) => `WHEN $${i * 2 + 1} THEN $${i * 2 + 2}`).join(' ')
+		const whenClauses = sectionOrders.map((_s, i) => `WHEN $${i * 2 + 1} THEN $${i * 2 + 2}`).join(' ')
 		const params = sectionOrders.flatMap(s => [s.id, s.display_order])
 
 		const query = `

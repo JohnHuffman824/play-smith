@@ -123,7 +123,7 @@ function AnimationDialogContent({
 						</Button>
 
 						<Select
-							value={(state.speed ?? 1).toString()}
+							value={(state.playbackSpeed ?? 1).toString()}
 							onValueChange={handleSpeedChange}
 						>
 							<SelectTrigger className='animation-dialog-speed-select'>

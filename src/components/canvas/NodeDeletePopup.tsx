@@ -7,7 +7,7 @@ interface NodeDeletePopupProps {
 	onClose: () => void
 }
 
-export function NodeDeletePopup({ position, onDelete, onClose }: NodeDeletePopupProps) {
+export function NodeDeletePopup({ position, onDelete }: NodeDeletePopupProps) {
 	return (
 		<div
 			className="node-delete-popup"

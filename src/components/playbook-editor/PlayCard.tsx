@@ -18,7 +18,6 @@ import {
 import {
   PLAY_TYPE_PASS,
 } from './constants/playbook'
-import { formatDateDayMonthYear } from '@/utils/date.utils'
 import { PlayThumbnailSVG } from './PlayThumbnailSVG'
 import type { Drawing } from '@/types/drawing.types'
 import { createDefaultLinemen } from '@/utils/lineman.utils'
@@ -66,10 +65,10 @@ type PlayCardThumbnailProps = {
 }
 
 function PlayCardThumbnail({
-  thumbnail,
+  _thumbnail,
   drawings,
   players,
-  name,
+  _name,
   playType,
   onOpen,
   onAnimate
@@ -124,12 +123,12 @@ export function PlayCard({
   formation,
   playType,
   defensiveFormation,
-  lastModified,
+  _lastModified,
   thumbnail,
   drawings,
   players,
   personnel,
-  tags,
+  _tags,
   tagObjects,
   selected = false,
   onSelect,

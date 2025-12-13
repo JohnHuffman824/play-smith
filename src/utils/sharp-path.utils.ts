@@ -79,8 +79,9 @@ function detectLineSegments(
 	for (let i = 0; i < simplified.length - 1; i++) {
 		const start = simplified[i]
 		const end = simplified[i + 1]
-		const angle = calculateAngle(start, end)
+		if (!start || !end) continue
 
+		const angle = calculateAngle(start, end)
 		segments.push({ start, end, angle })
 	}
 
@@ -96,9 +97,12 @@ function analyzeCorners(segments: LineSegment[]): LineSegment[] {
 
 	const merged: LineSegment[] = []
 	let currentSegment = segments[0]
+	if (!currentSegment) return segments
 
 	for (let i = 1; i < segments.length; i++) {
 		const nextSegment = segments[i]
+		if (!nextSegment) continue
+
 		const angleDiff = angleDifference(
 			currentSegment.angle,
 			nextSegment.angle
@@ -129,11 +133,16 @@ function analyzeCorners(segments: LineSegment[]): LineSegment[] {
 function snapAngles(segments: LineSegment[]): LineSegment[] {
 	if (segments.length === 0) return []
 
+	const firstSegment = segments[0]
+	if (!firstSegment) return []
+
 	const snapped: LineSegment[] = []
-	let currentStart = segments[0].start
+	let currentStart = firstSegment.start
 
 	for (let i = 0; i < segments.length; i++) {
 		const segment = segments[i]
+		if (!segment) continue
+
 		const snappedAngle = snapAngle(
 			segment.angle,
 			SHARP_ANGLE_SNAP_INCREMENT
@@ -181,6 +190,8 @@ function convertToControlPoints(
 	// Each point is created once and shared between consecutive segments
 	for (let i = 0; i < segments.length; i++) {
 		const segment = segments[i]
+		if (!segment) continue
+
 		const isFirst = i === 0
 		const isLast = i === segments.length - 1
 
@@ -227,15 +238,18 @@ export function processSharpPath(
 	if (coords.length < 2) {
 		// Handle edge case: single point
 		if (coords.length === 1) {
-			const points: Record<string, ControlPoint> = {
-				'p-0': {
-					id: 'p-0',
-					x: coords[0].x,
-					y: coords[0].y,
-					type: 'start',
-				},
+			const firstCoord = coords[0]
+			if (firstCoord) {
+				const points: Record<string, ControlPoint> = {
+					'p-0': {
+						id: 'p-0',
+						x: firstCoord.x,
+						y: firstCoord.y,
+						type: 'start',
+					},
+				}
+				return { points, segments: [] }
 			}
-			return { points, segments: [] }
 		}
 		return { points: {}, segments: [] }
 	}

@@ -5,7 +5,7 @@ import './selected-tags-overlay.css'
 
 interface SelectedTagsOverlayProps {
 	tags: Tag[]
-	onRemoveTag: (tagId: number) => void
+	onRemoveTag: (_tagId: number) => void
 }
 
 export function SelectedTagsOverlay({ tags, onRemoveTag }: SelectedTagsOverlayProps) {

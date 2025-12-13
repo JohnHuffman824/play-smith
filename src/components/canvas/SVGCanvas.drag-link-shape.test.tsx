@@ -109,7 +109,7 @@ describe('SVGCanvas - Maintain Shape During Drag Link', () => {
 			id: 'd1',
 			points: {
 				'p1': { id: 'p1', x: 10, y: 10, type: 'start' },
-				'p2': { id: 'p2', x: 20, y: 10, type: 'mid' },
+				'p2': { id: 'p2', x: 20, y: 10, type: 'corner' },
 				'p3': { id: 'p3', x: 15, y: 20, type: 'end' },
 			},
 			segments: [

@@ -27,7 +27,7 @@ export function UnifiedSearchBar({
 
 	const { state, applyConcept, removeConcept, reorderConcepts } = useConcept()
 	const { formations, concepts, conceptGroups } = useConceptData(teamId, playbookId)
-	const { query, setQuery, results, isSearching } = useUnifiedSearch(teamId, playbookId)
+	const { query: _query, setQuery, results, isSearching } = useUnifiedSearch(teamId, playbookId)
 
 	useEffect(() => {
 		setQuery(inputValue)
