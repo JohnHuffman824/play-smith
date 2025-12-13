@@ -3,7 +3,6 @@
 import * as React from "react"
 import * as SeparatorPrimitive from "@radix-ui/react-separator"
 
-import { cn } from "./utils"
 import "./separator.css"
 
 function Separator({
@@ -17,7 +16,7 @@ function Separator({
       data-slot="separator-root"
       decorative={decorative}
       orientation={orientation}
-      className={cn("separator", className)}
+      className={`separator ${className ?? ''}`.trim()}
       {...props}
     />
   )

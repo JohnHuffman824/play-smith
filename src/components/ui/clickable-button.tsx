@@ -1,5 +1,4 @@
 import * as React from "react"
-import { cn } from "@/lib/utils"
 import "./clickable-button.css"
 
 export interface ClickableButtonProps
@@ -11,10 +10,7 @@ const ClickableButton = React.forwardRef<HTMLButtonElement, ClickableButtonProps
 	({ className, children, disabled, ...props }, ref) => {
 		return (
 			<button
-				className={cn(
-					"clickable-button",
-					className
-				)}
+				className={`clickable-button ${className ?? ''}`.trim()}
 				ref={ref}
 				disabled={disabled}
 				{...props}

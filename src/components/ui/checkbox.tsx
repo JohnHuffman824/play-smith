@@ -5,7 +5,6 @@ import * as CheckboxPrimitive from "@radix-ui/react-checkbox"
 import { CheckIcon } from "lucide-react"
 
 import './checkbox.css'
-import { cn } from "./utils"
 
 function Checkbox({
   className,
@@ -14,7 +13,7 @@ function Checkbox({
   return (
     <CheckboxPrimitive.Root
       data-slot="checkbox"
-      className={cn('checkbox', className)}
+      className={`checkbox ${className ?? ''}`.trim()}
       {...props}
     >
       <CheckboxPrimitive.Indicator

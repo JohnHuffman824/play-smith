@@ -3,7 +3,6 @@
 import * as React from "react"
 import * as AvatarPrimitive from "@radix-ui/react-avatar"
 
-import { cn } from "./utils"
 import "./avatar.css"
 
 function Avatar({
@@ -13,7 +12,7 @@ function Avatar({
   return (
     <AvatarPrimitive.Root
       data-slot="avatar"
-      className={cn("avatar", className)}
+      className={`avatar ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -26,7 +25,7 @@ function AvatarImage({
   return (
     <AvatarPrimitive.Image
       data-slot="avatar-image"
-      className={cn("avatar-image", className)}
+      className={`avatar-image ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -39,7 +38,7 @@ function AvatarFallback({
   return (
     <AvatarPrimitive.Fallback
       data-slot="avatar-fallback"
-      className={cn("avatar-fallback", className)}
+      className={`avatar-fallback ${className ?? ''}`.trim()}
       {...props}
     />
   )

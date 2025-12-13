@@ -1,5 +1,4 @@
 import { Search } from 'lucide-react'
-import { cn } from './utils'
 import './search-input.css'
 
 interface SearchInputProps {
@@ -21,7 +20,7 @@ export function SearchInput({
 	style,
 }: SearchInputProps) {
 	return (
-		<div className={cn('search-input-wrapper', className)} style={style}>
+		<div className={`search-input-wrapper ${className ?? ''}`.trim()} style={style}>
 			<Search className="search-input-icon" />
 			<input
 				type="text"
