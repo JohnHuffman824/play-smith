@@ -2,14 +2,14 @@ import { useState } from 'react'
 import { Tag as TagIcon, Plus, X } from 'lucide-react'
 import { TagDialog } from './TagDialog'
 import { getTagStyles } from '../playbook-editor/constants/playbook'
-import type { Tag } from '@/hooks/useTagsData'
+import type { Label } from '@/hooks/useLabelsData'
 import './tag-selector.css'
 
 interface TagSelectorProps {
-	availableTags: Tag[]
-	selectedTags: Tag[]
+	availableTags: Label[]
+	selectedTags: Label[]
 	onTagsChange: (tagIds: number[]) => void
-	onCreateTag?: (name: string, color: string) => Promise<Tag>
+	onCreateTag?: (name: string, color: string) => Promise<Label>
 }
 
 export function TagSelector({ availableTags, selectedTags, onTagsChange, onCreateTag }: TagSelectorProps) {

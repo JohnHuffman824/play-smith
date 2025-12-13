@@ -4,16 +4,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { TAG_COLOR_PALETTE, getTagStyles } from '../playbook-editor/constants/playbook'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import type { Tag } from '@/hooks/useTagsData'
+import type { Label } from '@/hooks/useLabelsData'
 import './tag-dialog.css'
 
 interface TagDialogProps {
 	isOpen: boolean
 	onClose: () => void
-	availableTags: Tag[]
+	availableTags: Label[]
 	selectedTagIds: number[]
 	onTagsChange: (tagIds: number[]) => void
-	onCreateTag?: (name: string, color: string) => Promise<Tag>
+	onCreateTag?: (name: string, color: string) => Promise<Label>
 	title?: string
 }
 

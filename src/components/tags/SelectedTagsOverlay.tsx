@@ -1,10 +1,10 @@
 import { X } from 'lucide-react'
 import { getTagStyles } from '../playbook-editor/constants/playbook'
-import type { Tag } from '@/hooks/useTagsData'
+import type { Label } from '@/hooks/useLabelsData'
 import './selected-tags-overlay.css'
 
 interface SelectedTagsOverlayProps {
-	tags: Tag[]
+	tags: Label[]
 	onRemoveTag: (tagId: number) => void
 }
 
