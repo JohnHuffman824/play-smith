@@ -27,7 +27,7 @@ export function TargetingTooltip() {
 				className="targeting-tooltip-button"
 				aria-label="Targeting mode help"
 			>
-				<HelpCircle className="w-4 h-4 targeting-tooltip-icon" />
+				<HelpCircle className="targeting-tooltip-icon" />
 			</button>
 
 			{isOpen && (
