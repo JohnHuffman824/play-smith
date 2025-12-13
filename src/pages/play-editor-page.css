@@ -19,3 +19,81 @@
   flex: 1;
   overflow: hidden;
 }
+
+/* || Dialog Content */
+.play-editor-dialog-label {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.play-editor-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+}
+
+.play-editor-dialog-cancel {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: transparent;
+  cursor: pointer;
+  outline: none;
+  transition: all 200ms;
+}
+
+.play-editor-dialog-cancel:hover {
+  background-color: var(--accent);
+}
+
+.play-editor-dialog-cancel:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.play-editor-dialog-confirm {
+  padding: 0.5rem 1rem;
+  background-color: var(--action-button);
+  color: var(--action-button-foreground);
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  outline: none;
+  transition: all 200ms;
+}
+
+.play-editor-dialog-confirm:hover {
+  background-color: color-mix(in oklch, var(--action-button) 90%, transparent);
+}
+
+.play-editor-dialog-confirm:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.play-editor-dialog-confirm:disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.play-editor-dialog-delete {
+  padding: 0.5rem 1rem;
+  background-color: var(--destructive);
+  color: var(--destructive-foreground);
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  outline: none;
+  transition: all 200ms;
+}
+
+.play-editor-dialog-delete:hover {
+  background-color: color-mix(in oklch, var(--destructive) 90%, transparent);
+}
+
+.play-editor-dialog-delete:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.play-editor-dialog-message {
+  margin-bottom: 1rem;
+}

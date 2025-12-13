@@ -18,7 +18,12 @@ import { useTagsData, type Tag } from '../hooks/useTagsData'
 import type { Play } from '../hooks/usePlaybookData'
 import { eventBus } from '../services/EventBus'
 import { createDefaultLinemen } from '../utils/lineman.utils'
-import { Modal } from '../components/shared/Modal'
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from '../components/ui/dialog'
 import { Input } from '../components/ui/input'
 import { ConfirmDialog } from '../components/toolbar/dialogs/ConfirmDialog'
 import './play-editor-page.css'
@@ -578,10 +583,12 @@ function PlayEditorContent() {
 
 	if (!playbookId || !playId) {
 		return (
-			<div className="flex items-center justify-center h-screen">
-				<p className="text-red-500">
-					Playbook ID and Play ID are required
-				</p>
+			<div className="page-error">
+				<div className="page-error-content">
+					<p className="page-error-message">
+						Playbook ID and Play ID are required
+					</p>
+				</div>
 			</div>
 		)
 	}
@@ -653,87 +660,97 @@ function PlayEditorContent() {
 			</div>
 
 
-			{/* Rename Play Modal */}
-		<Modal
-			isOpen={showRenameModal}
-			onClose={() => {
-				setShowRenameModal(false)
-				setTargetPlayId(null)
-				setTargetPlayName('')
+			{/* Rename Play Dialog */}
+		<Dialog
+			open={showRenameModal}
+			onOpenChange={(open) => {
+				setShowRenameModal(open)
+				if (!open) {
+					setTargetPlayId(null)
+					setTargetPlayName('')
+				}
 			}}
-			title="Rename Play"
 		>
-			<div className="space-y-4">
-				<div>
-					<label className="block mb-2">Play Name</label>
-					<Input
-						type="text"
-						value={targetPlayName}
-						onChange={(e) => setTargetPlayName(e.target.value)}
-						onKeyDown={(e) => {
-							if (e.key === 'Enter') {
-								confirmRename()
-							}
-						}}
-						placeholder="Enter play name..."
-						autoFocus
-					/>
+			<DialogContent>
+				<DialogHeader>
+					<DialogTitle>Rename Play</DialogTitle>
+				</DialogHeader>
+				<div className="space-y-4">
+					<div>
+						<label className="play-editor-dialog-label">Play Name</label>
+						<Input
+							type="text"
+							value={targetPlayName}
+							onChange={(e) => setTargetPlayName(e.target.value)}
+							onKeyDown={(e) => {
+								if (e.key === 'Enter') {
+									confirmRename()
+								}
+							}}
+							placeholder="Enter play name..."
+							autoFocus
+						/>
+					</div>
+					<div className="play-editor-dialog-actions">
+						<button
+							onClick={() => {
+								setShowRenameModal(false)
+								setTargetPlayId(null)
+								setTargetPlayName('')
+							}}
+							className="play-editor-dialog-cancel"
+						>
+							Cancel
+						</button>
+						<button
+							onClick={confirmRename}
+							disabled={!targetPlayName.trim()}
+							className="play-editor-dialog-confirm"
+						>
+							Rename
+						</button>
+					</div>
 				</div>
-				<div className="flex justify-end gap-2 pt-2">
-					<button
-						onClick={() => {
-							setShowRenameModal(false)
-							setTargetPlayId(null)
-							setTargetPlayName('')
-						}}
-						className="px-4 py-2 border border-border rounded-lg hover:bg-accent transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-					>
-						Cancel
-					</button>
-					<button
-						onClick={confirmRename}
-						disabled={!targetPlayName.trim()}
-						className="px-4 py-2 bg-action-button text-action-button-foreground hover:bg-action-button/90 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-					>
-						Rename
-					</button>
-				</div>
-			</div>
-		</Modal>
+			</DialogContent>
+		</Dialog>
 
-		{/* Delete Play Confirmation Modal */}
-		<Modal
-			isOpen={showDeleteModal}
-			onClose={() => {
-				setShowDeleteModal(false)
-				setTargetPlayId(null)
+		{/* Delete Play Confirmation Dialog */}
+		<Dialog
+			open={showDeleteModal}
+			onOpenChange={(open) => {
+				setShowDeleteModal(open)
+				if (!open) setTargetPlayId(null)
 			}}
-			title="Delete Play"
 		>
-			<div className="space-y-4">
-				<p>
-					Are you sure you want to delete this play?
-					This action cannot be undone.
-				</p>
-				<div className="flex justify-end gap-2 pt-2">
-					<button
-						onClick={() => {
-							setShowDeleteModal(false)
-							setTargetPlayId(null)
-						}}
-						className="px-4 py-2 border border-border rounded-lg hover:bg-accent transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-					>
-						Cancel
-					</button>
-					<button
-						onClick={confirmDeleteFromBar}
-						className="px-4 py-2 bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-lg transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-					>
-						Delete
-					</button>
+			<DialogContent>
+				<DialogHeader>
+					<DialogTitle>Delete Play</DialogTitle>
+				</DialogHeader>
+				<div className="space-y-4">
+					<p className="play-editor-dialog-message">
+						Are you sure you want to delete this play?
+						This action cannot be undone.
+					</p>
+					<div className="play-editor-dialog-actions">
+						<button
+							onClick={() => {
+								setShowDeleteModal(false)
+								setTargetPlayId(null)
+							}}
+							className="play-editor-dialog-cancel"
+						>
+							Cancel
+						</button>
+						<button
+							onClick={confirmDeleteFromBar}
+							className="play-editor-dialog-delete"
+						>
+							Delete
+						</button>
+					</div>
 				</div>
-			</div>
-		</Modal>
+			</DialogContent>
+		</Dialog>
 
 		{/* Unsaved Changes Dialog */}
 		{showUnsavedChangesDialog && (
