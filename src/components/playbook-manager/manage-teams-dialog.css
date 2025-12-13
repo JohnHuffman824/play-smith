@@ -158,6 +158,10 @@
 	margin-bottom: 12px;
 }
 
+.manage-teams-section-title-spacing {
+	margin-top: 24px;
+}
+
 .manage-teams-member-list {
 	display: flex;
 	flex-direction: column;
@@ -236,4 +240,21 @@
 	border-radius: 8px;
 	color: var(--destructive);
 	font-size: 0.875rem;
+}
+
+/* || Form labels */
+.manage-teams-form-label {
+	display: block;
+	font-size: 0.875rem;
+	font-weight: 500;
+	margin-bottom: 8px;
+}
+
+/* || Fixed width elements */
+.manage-teams-select-width {
+	width: 120px;
+}
+
+.manage-teams-invite-email {
+	flex: 1;
 }

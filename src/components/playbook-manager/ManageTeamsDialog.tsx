@@ -302,7 +302,7 @@ export function ManageTeamsDialog({ isOpen, onClose }: ManageTeamsDialogProps) {
 						{view === 'create' && (
 							<div className="manage-teams-form">
 								<div>
-									<label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '8px' }}>Team Name</label>
+									<label className="manage-teams-form-label">Team Name</label>
 									<Input
 										type="text"
 										value={teamName}
@@ -334,7 +334,7 @@ export function ManageTeamsDialog({ isOpen, onClose }: ManageTeamsDialogProps) {
 						{view === 'edit' && selectedTeam && (
 							<div className="manage-teams-form">
 								<div>
-									<label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '8px' }}>Team Name</label>
+									<label className="manage-teams-form-label">Team Name</label>
 									<Input
 										type="text"
 										value={teamName}
@@ -403,7 +403,7 @@ export function ManageTeamsDialog({ isOpen, onClose }: ManageTeamsDialogProps) {
 																})
 															}
 														>
-															<SelectTrigger style={{ width: '120px' }}>
+															<SelectTrigger className="manage-teams-select-width">
 																<SelectValue />
 															</SelectTrigger>
 															<SelectContent>
@@ -430,7 +430,7 @@ export function ManageTeamsDialog({ isOpen, onClose }: ManageTeamsDialogProps) {
 								{selectedTeam.role === 'owner' && membersData?.pendingInvitations && membersData.pendingInvitations.length > 0 && (
 									<div>
 										<Separator />
-										<h3 className="manage-teams-section-title" style={{ marginTop: '24px' }}>Pending Invitations</h3>
+										<h3 className="manage-teams-section-title manage-teams-section-title-spacing">Pending Invitations</h3>
 										<div className="manage-teams-member-list">
 											{membersData.pendingInvitations.map((invitation) => (
 												<div
@@ -466,17 +466,17 @@ export function ManageTeamsDialog({ isOpen, onClose }: ManageTeamsDialogProps) {
 								{selectedTeam.role === 'owner' && (
 									<div>
 										<Separator />
-										<h3 className="manage-teams-section-title" style={{ marginTop: '24px' }}>Invite Member</h3>
+										<h3 className="manage-teams-section-title manage-teams-section-title-spacing">Invite Member</h3>
 										<div className="manage-teams-invite-form">
 											<Input
 												type="email"
 												value={inviteEmail}
 												onChange={(e) => setInviteEmail(e.target.value)}
 												placeholder="Email address"
-												style={{ flex: 1 }}
+												className="manage-teams-invite-email"
 											/>
 											<Select value={inviteRole} onValueChange={(value) => setInviteRole(value as 'editor' | 'viewer')}>
-												<SelectTrigger style={{ width: '120px' }}>
+												<SelectTrigger className="manage-teams-select-width">
 													<SelectValue />
 												</SelectTrigger>
 												<SelectContent>
