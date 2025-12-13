@@ -35,7 +35,7 @@ export function EditorSection() {
 					</div>
 					<div className="settings-control">
 						<Select value={positionNaming} onValueChange={setPositionNaming}>
-							<SelectTrigger className="w-[180px]">
+							<SelectTrigger className="settings-select-trigger">
 								<SelectValue />
 							</SelectTrigger>
 							<SelectContent>
@@ -57,7 +57,7 @@ export function EditorSection() {
 					</div>
 					<div className="settings-control">
 						<Select value={fieldLevel} onValueChange={setFieldLevel}>
-							<SelectTrigger className="w-[180px]">
+							<SelectTrigger className="settings-select-trigger">
 								<SelectValue />
 							</SelectTrigger>
 							<SelectContent>
@@ -79,7 +79,7 @@ export function EditorSection() {
 					</div>
 					<div className="settings-control">
 						<Select value={defaultPersonnel} onValueChange={setDefaultPersonnel}>
-							<SelectTrigger className="w-[180px]">
+							<SelectTrigger className="settings-select-trigger">
 								<SelectValue />
 							</SelectTrigger>
 							<SelectContent>

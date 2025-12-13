@@ -50,3 +50,8 @@
 .settings-control {
   flex-shrink: 0;
 }
+
+/* || Select Trigger Width */
+.settings-select-trigger {
+  width: 180px;
+}

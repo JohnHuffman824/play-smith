@@ -23,7 +23,7 @@ export function AppearanceSection() {
 				</div>
 				<div className="settings-control">
 					<Select value={theme} onValueChange={setTheme}>
-						<SelectTrigger className="w-[180px]">
+						<SelectTrigger className="settings-select-trigger">
 							<SelectValue />
 						</SelectTrigger>
 						<SelectContent>

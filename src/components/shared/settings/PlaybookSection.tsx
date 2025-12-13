@@ -33,7 +33,7 @@ export function PlaybookSection() {
 					</div>
 					<div className="settings-control">
 						<Select value={autoSaveInterval} onValueChange={setAutoSaveInterval}>
-							<SelectTrigger className="w-[180px]">
+							<SelectTrigger className="settings-select-trigger">
 								<SelectValue />
 							</SelectTrigger>
 							<SelectContent>

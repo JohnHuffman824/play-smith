@@ -25,7 +25,7 @@ export function DisplaySection() {
 					</div>
 					<div className="settings-control">
 						<Select value={viewMode} onValueChange={setViewMode}>
-							<SelectTrigger className="w-[180px]">
+							<SelectTrigger className="settings-select-trigger">
 								<SelectValue />
 							</SelectTrigger>
 							<SelectContent>
@@ -46,7 +46,7 @@ export function DisplaySection() {
 					</div>
 					<div className="settings-control">
 						<Select value={cardsPerRow.toString()} onValueChange={(val) => setCardsPerRow(Number(val))}>
-							<SelectTrigger className="w-[180px]">
+							<SelectTrigger className="settings-select-trigger">
 								<SelectValue />
 							</SelectTrigger>
 							<SelectContent>
