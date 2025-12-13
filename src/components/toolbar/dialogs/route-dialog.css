@@ -1,0 +1,102 @@
+/* || Base styles */
+.route-dialog {
+	position: absolute;
+	left: 96px;
+	top: 24px;
+	width: 320px;
+	border-radius: 16px;
+	box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+	background-color: var(--popover);
+	border: 1px solid var(--border);
+	padding: 16px;
+	z-index: 50;
+	max-height: calc(100vh - 64px);
+	overflow-y: auto;
+}
+
+/* || Header */
+.route-dialog-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 16px;
+	position: sticky;
+	top: 0;
+	padding-bottom: 8px;
+	border-bottom: 1px solid var(--border);
+	background-color: var(--popover);
+}
+
+.route-dialog-title {
+	color: var(--foreground);
+}
+
+/* || Route list */
+.route-dialog-list {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+/* || Route item button */
+.route-dialog-item {
+	width: 100%;
+	padding: 12px;
+	border-radius: 12px;
+	border: 1px solid var(--border);
+	background-color: var(--muted);
+	text-align: left;
+	cursor: pointer;
+	outline: none;
+	transition: all 200ms;
+}
+
+.route-dialog-item:hover {
+	background-color: var(--accent);
+	border-color: var(--action-button);
+}
+
+.route-dialog-item:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+/* || Route item content */
+.route-dialog-item-content {
+	display: flex;
+	align-items: start;
+	gap: 12px;
+}
+
+.route-dialog-item-badge {
+	width: 32px;
+	height: 32px;
+	border-radius: 8px;
+	background-color: var(--action-button);
+	color: var(--action-button-foreground);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	transition: transform 200ms;
+	font-weight: 600;
+	font-size: 0.875rem;
+}
+
+.route-dialog-item:hover .route-dialog-item-badge {
+	transform: scale(1.1);
+}
+
+.route-dialog-item-details {
+	flex: 1;
+	min-width: 0;
+}
+
+.route-dialog-item-name {
+	color: var(--foreground);
+	margin-bottom: 4px;
+}
+
+.route-dialog-item-description {
+	font-size: 0.75rem;
+	color: var(--muted-foreground);
+}
