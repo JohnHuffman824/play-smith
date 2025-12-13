@@ -44,3 +44,9 @@
 .selected-tags-overlay__remove:focus-visible {
 	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
 }
+
+/* || Remove button icon */
+.selected-tags-overlay__remove-icon {
+	width: 0.625rem;
+	height: 0.625rem;
+}

@@ -27,7 +27,7 @@ export function SelectedTagsOverlay({ tags, onRemoveTag }: SelectedTagsOverlayPr
 							className="selected-tags-overlay__remove"
 							aria-label={`Remove ${tag.name}`}
 						>
-							<X className="w-2.5 h-2.5" />
+							<X className="selected-tags-overlay__remove-icon" />
 						</button>
 					</span>
 				)
