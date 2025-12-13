@@ -2,6 +2,10 @@ import { useState } from 'react'
 import { Mail, Lock, Eye, EyeOff, User } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { Input } from '../ui/input'
+import {
+	Dialog,
+	DialogContent,
+} from '../ui/dialog'
 import './login-modal.css'
 
 type AuthMode = 'login' | 'register'
@@ -95,145 +99,136 @@ export function LoginModal() {
 	const displayError = validationError || error
 
 	return (
-		<>
-			{/* Backdrop */}
-			<div className="login-modal-backdrop" />
-
-			{/* Modal Container */}
-			<div className="login-modal-container">
-				<div className="login-modal">
-					{/* Header */}
-					<div className="login-modal-header">
-						<div className="login-modal-header-content">
-							<div className="login-modal-logo">
-								<span>PS</span>
-							</div>
-							<h2 className="login-modal-title">
-								Play Smith
-							</h2>
+		<Dialog open={true}>
+			<DialogContent className="login-modal" hideClose>
+				{/* Header */}
+				<div className="login-modal-header">
+					<div className="login-modal-header-content">
+						<div className="login-modal-logo">
+							<span>PS</span>
 						</div>
-
-						<p className="login-modal-subtitle">
-							{isLogin
-								? 'Sign in to access your playbooks'
-								: 'Create an account to get started'}
-						</p>
+						<h2 className="login-modal-title">
+							Play Smith
+						</h2>
 					</div>
 
-					{/* Form */}
-					<form onSubmit={handleSubmit} className="login-modal-form">
-						{displayError && (
-							<div className="login-modal-error">
-								{displayError}
-							</div>
-						)}
+					<p className="login-modal-subtitle">
+						{isLogin
+							? 'Sign in to access your playbooks'
+							: 'Create an account to get started'}
+					</p>
+				</div>
 
-						{/* Name Input (register only) */}
-						{!isLogin && (
-							<div className="login-modal-form-group">
-								<label htmlFor="name" className="login-modal-label">
-									Name
-								</label>
-								<div className="login-modal-input-wrapper">
-									<User className="login-modal-input-icon" />
-									<Input
-										id="name"
-										type="text"
-										value={name}
-										onChange={e => setName(e.target.value)}
-										placeholder="Your name"
-										className="h-12 pl-12 pr-4 rounded-2xl"
-										required={!isLogin}
-									/>
-								</div>
-							</div>
-						)}
+				{/* Form */}
+				<form onSubmit={handleSubmit} className="login-modal-form">
+					{displayError && (
+						<div className="login-modal-error">
+							{displayError}
+						</div>
+					)}
 
-						{/* Email Input */}
+					{/* Name Input (register only) */}
+					{!isLogin && (
 						<div className="login-modal-form-group">
-							<label htmlFor="email" className="login-modal-label">
-								{isLogin ? 'Username or Email' : 'Email'}
+							<label htmlFor="name" className="login-modal-label">
+								Name
 							</label>
 							<div className="login-modal-input-wrapper">
-								<Mail className="login-modal-input-icon" />
+								<User className="login-modal-input-icon" />
 								<Input
-									id="email"
-									type={isLogin ? 'text' : 'email'}
-									value={email}
-									onChange={e => setEmail(e.target.value)}
-									placeholder={isLogin ? 'JohnDoe@gmail.com' : 'coach@example.com'}
-									className="h-12 pl-12 pr-4 rounded-2xl"
-									required
+									id="name"
+									type="text"
+									value={name}
+									onChange={e => setName(e.target.value)}
+									placeholder="Your name"
+									required={!isLogin}
 								/>
 							</div>
 						</div>
+					)}
 
-						{/* Password Input */}
-						<div className="login-modal-form-group" style={{ marginBottom: '1.5rem' }}>
-							<label htmlFor="password" className="login-modal-label">
-								Password
-							</label>
-							<div className="login-modal-input-wrapper">
-								<Lock className="login-modal-input-icon" />
-								<Input
-									id="password"
-									type={showPassword ? 'text' : 'password'}
-									value={password}
-									onChange={e => setPassword(e.target.value)}
-									placeholder="Enter your password"
-									className="h-12 pl-12 pr-12 rounded-2xl"
-									required
-								/>
-								<button
-									type="button"
-									onClick={() => setShowPassword(!showPassword)}
-									className="login-modal-password-toggle"
-									aria-label="Toggle password visibility"
-								>
-									{showPassword
-										? <EyeOff className="w-5 h-5" />
-										: <Eye className="w-5 h-5" />
-									}
-								</button>
-							</div>
+					{/* Email Input */}
+					<div className="login-modal-form-group">
+						<label htmlFor="email" className="login-modal-label">
+							{isLogin ? 'Username or Email' : 'Email'}
+						</label>
+						<div className="login-modal-input-wrapper">
+							<Mail className="login-modal-input-icon" />
+							<Input
+								id="email"
+								type={isLogin ? 'text' : 'email'}
+								value={email}
+								onChange={e => setEmail(e.target.value)}
+								placeholder={isLogin ? 'JohnDoe@gmail.com' : 'coach@example.com'}
+								required
+							/>
 						</div>
+					</div>
 
-						{/* Submit Button */}
-						<button
-							type="submit"
-							disabled={isSubmitting}
-							className="login-modal-submit"
-						>
-							{isSubmitting
-								? 'Please wait...'
-								: isLogin ? 'Sign In' : 'Create Account'
-							}
-						</button>
-
-						{/* Divider */}
-						<div className="login-modal-divider">
-							<div className="login-modal-divider-text">
-								<span>or</span>
-							</div>
-						</div>
-
-						{/* Switch Mode Link */}
-						<p className="login-modal-switch">
-							{isLogin
-								? "Don't have an account? "
-								: 'Already have an account? '
-							}
+					{/* Password Input */}
+					<div className="login-modal-form-group" style={{ marginBottom: '1.5rem' }}>
+						<label htmlFor="password" className="login-modal-label">
+							Password
+						</label>
+						<div className="login-modal-input-wrapper has-toggle">
+							<Lock className="login-modal-input-icon" />
+							<Input
+								id="password"
+								type={showPassword ? 'text' : 'password'}
+								value={password}
+								onChange={e => setPassword(e.target.value)}
+								placeholder="Enter your password"
+								required
+							/>
 							<button
 								type="button"
-								onClick={switchMode}
-								className="login-modal-switch-button"
+								onClick={() => setShowPassword(!showPassword)}
+								className="login-modal-password-toggle"
+								aria-label="Toggle password visibility"
 							>
-								{isLogin ? 'Sign up' : 'Sign in'}
+								{showPassword
+									? <EyeOff />
+									: <Eye />
+								}
 							</button>
-						</p>
-					</form>
-				</div>
-			</div>
-		</>
+						</div>
+					</div>
+
+					{/* Submit Button */}
+					<button
+						type="submit"
+						disabled={isSubmitting}
+						className="login-modal-submit"
+					>
+						{isSubmitting
+							? 'Please wait...'
+							: isLogin ? 'Sign In' : 'Create Account'
+						}
+					</button>
+
+					{/* Divider */}
+					<div className="login-modal-divider">
+						<div className="login-modal-divider-text">
+							<span>or</span>
+						</div>
+					</div>
+
+					{/* Switch Mode Link */}
+					<p className="login-modal-switch">
+						{isLogin
+							? "Don't have an account? "
+							: 'Already have an account? '
+						}
+						<button
+							type="button"
+							onClick={switchMode}
+							className="login-modal-switch-button"
+						>
+							{isLogin ? 'Sign up' : 'Sign in'}
+						</button>
+					</p>
+				</form>
+			</DialogContent>
+		</Dialog>
 	)
 }
