@@ -32,7 +32,7 @@ export function SelectionOverlay({
 				className="selection-overlay-button-save"
 				title="Save selection as concept"
 			>
-				<Save className="w-4 h-4" />
+				<Save className="selection-overlay-icon" />
 				Save as Concept
 			</button>
 
@@ -41,7 +41,7 @@ export function SelectionOverlay({
 				className="selection-overlay-button-icon"
 				title="Duplicate selection"
 			>
-				<Copy className="w-4 h-4" />
+				<Copy className="selection-overlay-icon" />
 			</button>
 
 			<button
@@ -49,7 +49,7 @@ export function SelectionOverlay({
 				className="selection-overlay-button-delete"
 				title="Delete selection"
 			>
-				<Trash2 className="w-4 h-4" />
+				<Trash2 className="selection-overlay-icon" />
 			</button>
 		</div>
 	)
