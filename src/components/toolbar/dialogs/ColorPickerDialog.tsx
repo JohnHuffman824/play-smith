@@ -33,8 +33,8 @@ export function ColorPickerDialog({ currentColor, onColorChange, onClose, positi
   // Set default color based on theme if no color is set
   useEffect(() => {
     if (!currentColor || currentColor === '') {
-      const defaultColor = theme === 'dark' ? '#FFFFFF' : '#000000'
-      onColorChange(defaultColor)
+      const foregroundColor = getComputedStyle(document.documentElement).getPropertyValue('--foreground').trim()
+      onColorChange(foregroundColor || '#000000')
     }
   }, []) // Only run once on mount
 
