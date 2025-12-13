@@ -114,8 +114,11 @@ function PlaybookEditorContent({
     fieldLevel,
     setFieldLevel
   } = useTheme()
-  
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>(VIEW_MODE_GRID)
+
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>(() => {
+    const cached = localStorage.getItem('playbook-view-mode')
+    return (cached === 'grid' || cached === 'list') ? cached : VIEW_MODE_GRID
+  })
   const [searchQuery, setSearchQuery] = useState('')
   const [showNewPlayModal, setShowNewPlayModal] = useState(false)
   const [showNewSectionModal, setShowNewSectionModal] = useState(false)
@@ -175,6 +178,10 @@ function PlaybookEditorContent({
       document.documentElement.classList.remove(DARK_MODE_CLASS)
     }
   }, [theme])
+
+  useEffect(() => {
+    localStorage.setItem('playbook-view-mode', viewMode)
+  }, [viewMode])
 
   // Concept filtering (must be before early returns to follow Rules of Hooks)
   const filteredConcepts = useMemo(() => {

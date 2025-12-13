@@ -14,9 +14,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import {
-  PLAY_TYPE_PASS,
-} from './constants/playbook'
 import type { Play } from './types'
 import './play-list-view.css'
 
@@ -47,14 +44,11 @@ export function PlayListView({
         <div className="play-list-view-header-cell" style={{ gridColumn: 'span 1' }}>
           <Circle className="w-5 h-5" />
         </div>
-        <div className="play-list-view-header-cell" style={{ gridColumn: 'span 4' }}>
-          Name
+        <div className="play-list-view-header-cell" style={{ gridColumn: 'span 5' }}>
+          Play
         </div>
         <div className="play-list-view-header-cell" style={{ gridColumn: 'span 2' }}>
           Formation
-        </div>
-        <div className="play-list-view-header-cell" style={{ gridColumn: 'span 1' }}>
-          Type
         </div>
         <div className="play-list-view-header-cell" style={{ gridColumn: 'span 2' }}>
           Tags
@@ -68,9 +62,6 @@ export function PlayListView({
       <div className="play-list-view-rows">
         {plays.map((play) => {
           const isSelected = selectedPlays.has(play.id)
-          const typeClass = play.playType == PLAY_TYPE_PASS
-            ? 'play-list-view-type-badge-pass'
-            : 'play-list-view-type-badge-run'
 
           return (
             <div
@@ -92,7 +83,7 @@ export function PlayListView({
                 </button>
               </div>
 
-              <div className="play-list-view-cell" style={{ gridColumn: 'span 4' }}>
+              <div className="play-list-view-cell" style={{ gridColumn: 'span 5' }}>
                 <button
                   onClick={() => onOpen(play.id)}
                   className="play-list-view-name-button"
@@ -104,12 +95,6 @@ export function PlayListView({
               <div className="play-list-view-cell" style={{ gridColumn: 'span 2' }}>
                 <span className="play-list-view-formation">
                   {play.formation || '-'}
-                </span>
-              </div>
-
-              <div className="play-list-view-cell" style={{ gridColumn: 'span 1' }}>
-                <span className={`play-list-view-type-badge ${typeClass}`}>
-                  {play.playType}
                 </span>
               </div>
 
