@@ -4,7 +4,6 @@ import * as React from "react"
 import { Command as CommandPrimitive } from "cmdk"
 import { SearchIcon } from "lucide-react"
 
-import { cn } from "./utils"
 import {
   Dialog,
   DialogContent,
@@ -21,7 +20,7 @@ function Command({
   return (
     <CommandPrimitive
       data-slot="command"
-      className={cn("command", className)}
+      className={`command ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -63,7 +62,7 @@ function CommandInput({
       <SearchIcon className="size-4 shrink-0 opacity-50" />
       <CommandPrimitive.Input
         data-slot="command-input"
-        className={cn("command-input", className)}
+        className={`command-input ${className ?? ''}`.trim()}
         {...props}
       />
     </div>
@@ -77,7 +76,7 @@ function CommandList({
   return (
     <CommandPrimitive.List
       data-slot="command-list"
-      className={cn("command-list", className)}
+      className={`command-list ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -102,7 +101,7 @@ function CommandGroup({
   return (
     <CommandPrimitive.Group
       data-slot="command-group"
-      className={cn("command-group", className)}
+      className={`command-group ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -115,7 +114,7 @@ function CommandSeparator({
   return (
     <CommandPrimitive.Separator
       data-slot="command-separator"
-      className={cn("command-separator", className)}
+      className={`command-separator ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -128,7 +127,7 @@ function CommandItem({
   return (
     <CommandPrimitive.Item
       data-slot="command-item"
-      className={cn("command-item", className)}
+      className={`command-item ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -141,7 +140,7 @@ function CommandShortcut({
   return (
     <span
       data-slot="command-shortcut"
-      className={cn("command-shortcut", className)}
+      className={`command-shortcut ${className ?? ''}`.trim()}
       {...props}
     />
   )

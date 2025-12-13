@@ -4,7 +4,6 @@ import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { XIcon } from "lucide-react"
 
-import { cn } from "./utils"
 import "./dialog.css"
 
 function Dialog({
@@ -38,7 +37,7 @@ function DialogOverlay({
   return (
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
-      className={cn("dialog-overlay", className)}
+      className={`dialog-overlay ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -47,21 +46,24 @@ function DialogOverlay({
 function DialogContent({
   className,
   children,
+  hideClose,
   ...props
-}: React.ComponentProps<typeof DialogPrimitive.Content>) {
+}: React.ComponentProps<typeof DialogPrimitive.Content> & { hideClose?: boolean }) {
   return (
     <DialogPortal data-slot="dialog-portal">
       <DialogOverlay />
       <DialogPrimitive.Content
         data-slot="dialog-content"
-        className={cn("dialog-content", className)}
+        className={`dialog-content ${className ?? ''}`.trim()}
         {...props}
       >
         {children}
-        <DialogPrimitive.Close data-slot="dialog-close">
-          <XIcon />
-          <span className="sr-only">Close</span>
-        </DialogPrimitive.Close>
+        {!hideClose && (
+          <DialogPrimitive.Close data-slot="dialog-close">
+            <XIcon />
+            <span className="sr-only">Close</span>
+          </DialogPrimitive.Close>
+        )}
       </DialogPrimitive.Content>
     </DialogPortal>
   )
@@ -71,7 +73,7 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="dialog-header"
-      className={cn("dialog-header", className)}
+      className={`dialog-header ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -81,7 +83,7 @@ function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="dialog-footer"
-      className={cn("dialog-footer", className)}
+      className={`dialog-footer ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -94,7 +96,7 @@ function DialogTitle({
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("dialog-title", className)}
+      className={`dialog-title ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -107,7 +109,7 @@ function DialogDescription({
   return (
     <DialogPrimitive.Description
       data-slot="dialog-description"
-      className={cn("dialog-description", className)}
+      className={`dialog-description ${className ?? ''}`.trim()}
       {...props}
     />
   )

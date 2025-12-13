@@ -4,7 +4,6 @@ import * as React from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { DayPicker } from "react-day-picker"
 
-import { cn } from "./utils"
 import "./button.css"
 import "./calendar.css"
 
@@ -17,14 +16,15 @@ function Calendar({
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
-      className={cn("calendar", props.mode === "range" ? "calendar-range" : "calendar-single", className)}
+      data-mode={props.mode}
+      className={`calendar ${className ?? ''}`.trim()}
       classNames={{
         months: "calendar-months",
         month: "calendar-month",
         caption: "calendar-caption",
         caption_label: "calendar-caption-label",
         nav: "calendar-nav",
-        nav_button: cn("button calendar-nav-button"),
+        nav_button: "button calendar-nav-button",
         nav_button_previous: "calendar-nav-button-previous",
         nav_button_next: "calendar-nav-button-next",
         table: "calendar-table",
@@ -32,7 +32,7 @@ function Calendar({
         head_cell: "calendar-head-cell",
         row: "calendar-row",
         cell: "calendar-cell",
-        day: cn("button calendar-day"),
+        day: "button calendar-day",
         day_range_start: "day-range-start",
         day_range_end: "day-range-end",
         day_selected: "day-selected",
@@ -45,10 +45,10 @@ function Calendar({
       }}
       components={{
         IconLeft: ({ className, ...props }) => (
-          <ChevronLeft className={cn("size-4", className)} {...props} />
+          <ChevronLeft className={`size-4 ${className ?? ''}`.trim()} {...props} />
         ),
         IconRight: ({ className, ...props }) => (
-          <ChevronRight className={cn("size-4", className)} {...props} />
+          <ChevronRight className={`size-4 ${className ?? ''}`.trim()} {...props} />
         ),
       }}
       {...props}

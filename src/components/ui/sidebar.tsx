@@ -5,7 +5,6 @@ import { Slot } from "@radix-ui/react-slot"
 import { PanelLeftIcon } from "lucide-react"
 
 import { useIsMobile } from "./use-mobile"
-import { cn } from "./utils"
 import { Button } from "./button"
 import { Input } from "./input"
 import { Separator } from "./separator"
@@ -110,7 +109,6 @@ function SidebarProvider({
   }, [toggleSidebar])
 
   // We add a state so that we can do data-state="expanded" or "collapsed".
-  // This makes it easier to style the sidebar with Tailwind classes.
   const state = open ? "expanded" : "collapsed"
 
   const contextValue = React.useMemo<SidebarContextProps>(
@@ -138,7 +136,7 @@ function SidebarProvider({
               ...style,
             } as React.CSSProperties
           }
-          className={cn("group/sidebar-wrapper", className)}
+          className={`group/sidebar-wrapper ${className ?? ''}`.trim()}
           {...props}
         >
           {children}
@@ -418,7 +416,7 @@ function SidebarMenuItem({ className, ...props }: React.ComponentProps<"li">) {
     <li
       data-slot="sidebar-menu-item"
       data-sidebar="menu-item"
-      className={cn("group/menu-item", className)}
+      className={`group/menu-item ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -452,7 +450,7 @@ function SidebarMenuButton({
       data-size={size}
       data-active={isActive}
       data-variant={variant}
-      className={cn("peer/menu-button", className)}
+      className={`peer/menu-button ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -574,7 +572,7 @@ function SidebarMenuSubItem({
     <li
       data-slot="sidebar-menu-sub-item"
       data-sidebar="menu-sub-item"
-      className={cn("group/menu-sub-item", className)}
+      className={`group/menu-sub-item ${className ?? ''}`.trim()}
       {...props}
     />
   )
