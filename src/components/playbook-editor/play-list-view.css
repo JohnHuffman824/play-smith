@@ -115,21 +115,21 @@
   color: var(--muted-foreground);
 }
 
-/* || Tags */
-.play-list-view-tags {
+/* || Labels */
+.play-list-view-labels {
   display: flex;
   align-items: center;
   gap: 0.25rem;
 }
 
-.play-list-view-tag {
+.play-list-view-label {
   padding: 0.125rem 0.5rem;
   background: var(--muted);
   border-radius: 0.25rem;
   color: var(--muted-foreground);
 }
 
-.play-list-view-tag-count {
+.play-list-view-label-count {
   color: var(--muted-foreground);
 }
 

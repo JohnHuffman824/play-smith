@@ -222,18 +222,18 @@ export function PlayCard({
           </p>
         )}
 
-        <div className="play-card-tags">
-          {tagObjects?.map((tag) => (
+        <div className="play-card-labels">
+          {labelObjects?.map((label) => (
             <span
-              key={tag.id}
-              className="play-card-tag"
+              key={label.id}
+              className="play-card-label"
               style={{
-                backgroundColor: `${tag.color}20`,
-                color: tag.color,
-                borderColor: `${tag.color}40`
+                backgroundColor: `${label.color}20`,
+                color: label.color,
+                borderColor: `${label.color}40`
               }}
             >
-              {tag.name}
+              {label.name}
             </span>
           ))}
         </div>

@@ -274,8 +274,8 @@ function PlaybookEditorContent({
       (play) =>
         play.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         play.formation.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        play.tags.some((tag) => 
-          tag.toLowerCase().includes(searchQuery.toLowerCase())
+        play.labels.some((label) =>
+          label.toLowerCase().includes(searchQuery.toLowerCase())
         )
     ),
   })).filter((section) => section.plays.length > 0)

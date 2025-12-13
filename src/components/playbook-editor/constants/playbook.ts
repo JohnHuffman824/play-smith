@@ -9,10 +9,10 @@ export const VIEW_MODE_LIST = 'list'
 // Filter Types
 export const FILTER_ALL = 'all'
 export const FILTER_FORMATIONS = 'formations'
-export const FILTER_TAGS = 'tags'
+export const FILTER_LABELS = 'labels'
 
 // UI Constants
-export const MAX_VISIBLE_TAGS = 4
+export const MAX_VISIBLE_LABELS = 4
 export const DEFAULT_PLAYBOOK_NAME = 'Offensive Game Plan - Week 1'
 
 // These constants are now defined in CSS files:

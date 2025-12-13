@@ -208,8 +208,8 @@
   margin-bottom: 8px;
 }
 
-/* || Tags */
-.play-card-tags {
+/* || Labels */
+.play-card-labels {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
@@ -217,7 +217,7 @@
   min-height: 22px;
 }
 
-.play-card-tag {
+.play-card-label {
   padding: 2px 8px;
   border-radius: 4px;
   font-size: 0.75rem;

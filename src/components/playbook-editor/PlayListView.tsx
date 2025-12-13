@@ -103,15 +103,15 @@ export function PlayListView({
               </div>
 
               <div className="play-list-view-cell" style={{ gridColumn: 'span 2' }}>
-                <div className="play-list-view-tags">
-                  {play.tags.length > 0 ? (
+                <div className="play-list-view-labels">
+                  {play.labels.length > 0 ? (
                     <>
-                      <span className="play-list-view-tag">
-                        {play.tags[0]}
+                      <span className="play-list-view-label">
+                        {play.labels[0]}
                       </span>
-                      {play.tags.length > 1 && (
-                        <span className="play-list-view-tag-count">
-                          +{play.tags.length - 1}
+                      {play.labels.length > 1 && (
+                        <span className="play-list-view-label-count">
+                          +{play.labels.length - 1}
                         </span>
                       )}
                     </>
