@@ -48,3 +48,20 @@
 .resizable-handle[data-panel-group-direction="vertical"] > div {
 	transform: rotate(90deg);
 }
+
+.resizable-handle-grip {
+	z-index: 10;
+	display: flex;
+	height: 1rem;
+	width: 0.75rem;
+	align-items: center;
+	justify-content: center;
+	border-radius: 0.125rem;
+	border: 1px solid var(--border);
+	background-color: var(--border);
+}
+
+.resizable-handle-icon {
+	height: 0.625rem;
+	width: 0.625rem;
+}

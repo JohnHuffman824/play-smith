@@ -1,10 +1,10 @@
-import { useRef, useEffect, useState } from 'react'
-import type { DrawingState } from '../../types/play.types'
-import type { HashAlignment } from '../../types/field.types'
-import { useFieldCoordinates } from '../../hooks/useFieldCoordinates'
-import { usePlayContext } from '../../contexts/PlayContext'
-import { useCanvasViewport } from '../../contexts/CanvasViewportContext'
-import { eventBus } from '../../services/EventBus'
+import {useRef, useEffect, useState} from 'react'
+import type {DrawingState} from '../../types/play.types'
+import type {HashAlignment} from '../../types/field.types'
+import {useFieldCoordinates} from '../../hooks/useFieldCoordinates'
+import {usePlayContext} from '../../contexts/PlayContext'
+import {useCanvasViewport} from '../../contexts/CanvasViewportContext'
+import {eventBus} from '../../services/EventBus'
 import {
 	PLAYER_RADIUS_FEET,
 	INITIALIZATION_DELAY_MS,
@@ -21,21 +21,21 @@ import {
 	MAX_ZOOM,
 	ZOOM_SENSITIVITY,
 } from '../../constants/field.constants'
-import { SVGCanvas } from './SVGCanvas'
+import {SVGCanvas} from './SVGCanvas'
 import type {
 	ControlPoint,
 	Drawing,
 	PathStyle,
 } from '../../types/drawing.types'
-import { FootballField } from '../field/FootballField'
-import { Player } from '../player/Player'
-import { PlayerLabelDialog } from '../player/PlayerLabelDialog'
-import { DrawingPropertiesDialog } from '../toolbar/dialogs/DrawingPropertiesDialog'
-import { Pencil, PaintBucket } from 'lucide-react'
-import { calculateUnlinkPosition, findDrawingSnapTarget } from '../../utils/drawing.utils'
-import { applyLOSSnap } from '../../utils/los-snap.utils'
-import { convertToSharp, extractMainCoordinates } from '../../utils/curve.utils'
-import { processSmoothPath } from '../../utils/smooth-path.utils'
+import {FootballField} from '../field/FootballField'
+import {Player} from '../player/Player'
+import {PlayerLabelDialog} from '../player/PlayerLabelDialog'
+import {DrawingPropertiesDialog} from '../toolbar/dialogs/DrawingPropertiesDialog'
+import {Pencil, PaintBucket} from 'lucide-react'
+import {calculateUnlinkPosition, findDrawingSnapTarget} from '../../utils/drawing.utils'
+import {applyLOSSnap} from '../../utils/los-snap.utils'
+import {convertToSharp, extractMainCoordinates} from '../../utils/curve.utils'
+import {processSmoothPath} from '../../utils/smooth-path.utils'
 import './canvas.css'
 
 const HEADER_TOOLBAR_HEIGHT = 110
@@ -59,7 +59,7 @@ function dispatchFillEvent(
 	color: string,
 ) {
 	if (eventName == EVENT_FILL_PLAYER) {
-		eventBus.emit('player:fill', { id, color })
+		eventBus.emit('player:fill', {id, color})
 	}
 }
 
@@ -87,59 +87,59 @@ function computeUnlinkTarget(
 	neighborPoint: ControlPoint | null,
 ) {
 	if (!neighborPoint) {
-		return { x: player.x, y: player.y - UNLINK_DISTANCE_FEET }
+		return {x: player.x, y: player.y - UNLINK_DISTANCE_FEET}
 	}
 	return calculateUnlinkPosition(
-		{ x: player.x, y: player.y },
-		{ x: neighborPoint.x, y: neighborPoint.y },
+		{x: player.x, y: player.y},
+		{x: neighborPoint.x, y: neighborPoint.y},
 		UNLINK_DISTANCE_FEET,
 	)
 }
 
 export function Canvas({
-  drawingState,
-  hashAlignment: _hashAlignment,
-  showPlayBar,
-  playId: _playId,
-  containerMode = 'viewport',
-  showFieldMarkings: _showFieldMarkings = false,
-}: CanvasProps) {
-  const whiteboardRef = useRef<HTMLDivElement>(null);
+	                       drawingState,
+	                       hashAlignment: _hashAlignment,
+	                       showPlayBar,
+	                       playId: _playId,
+	                       containerMode = 'viewport',
+	                       showFieldMarkings: _showFieldMarkings = false,
+                       }: CanvasProps) {
+	const whiteboardRef = useRef<HTMLDivElement>(null);
 	const panStartRef = useRef<{ x: number; y: number } | null>(null);
 	const panOriginRef = useRef<{ x: number; y: number } | null>(null);
-  const [cursorPosition, setCursorPosition] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
-  const [isOverCanvas, setIsOverCanvas] = useState(false);
-  const [isHoveringDeletable, setIsHoveringDeletable] =
-    useState(false);
-  const [showLabelDialog, setShowLabelDialog] = useState(false);
-  const [selectedPlayerId, setSelectedPlayerId] = useState<
-    string | null
-  >(null);
-  const [labelDialogPosition, setLabelDialogPosition] =
-    useState({ x: 0, y: 0 });
-  const [editingDrawing, setEditingDrawing] = useState<{
-    drawing: Drawing;
-    position: { x: number; y: number };
-  } | null>(null);
-	const { state, setDrawings, setPlayers, dispatch } = usePlayContext()
-	const { drawings = [], players: contextPlayers = [] } = state || {}
+	const [cursorPosition, setCursorPosition] = useState<{
+		x: number;
+		y: number;
+	} | null>(null);
+	const [isOverCanvas, setIsOverCanvas] = useState(false);
+	const [isHoveringDeletable, setIsHoveringDeletable] =
+		useState(false);
+	const [showLabelDialog, setShowLabelDialog] = useState(false);
+	const [selectedPlayerId, setSelectedPlayerId] = useState<
+		string | null
+	>(null);
+	const [labelDialogPosition, setLabelDialogPosition] =
+		useState({x: 0, y: 0});
+	const [editingDrawing, setEditingDrawing] = useState<{
+		drawing: Drawing;
+		position: { x: number; y: number };
+	} | null>(null);
+	const {state, setDrawings, setPlayers, dispatch} = usePlayContext()
+	const {drawings = [], players: contextPlayers = []} = state || {}
 	const players = contextPlayers || []
 	const [canvasDimensions, setCanvasDimensions] = useState({
 		width: 0,
 		height: 0,
 	})
 
-  // Coordinate system for converting between feet and pixels
+	// Coordinate system for converting between feet and pixels
 	const coordSystem = useFieldCoordinates({
 		containerWidth: canvasDimensions.width,
 		containerHeight: canvasDimensions.height,
 	})
 
 	// Viewport state for zoom and pan
-	const { zoom, panX, panY, isPanning, panMode, setViewport } = useCanvasViewport()
+	const {zoom, panX, panY, isPanning, panMode, setViewport} = useCanvasViewport()
 
 	const strokeFeet =
 		coordSystem.scale > 0
@@ -234,55 +234,55 @@ export function Canvas({
 		return () => clearTimeout(timer)
 	}, [])
 
-  // Add resize handler to update dimensions and trigger re-render
-  useEffect(() => {
-    function handleResize() {
-      if (!whiteboardRef.current) return;
-      const rect =
-        whiteboardRef.current.getBoundingClientRect();
-      setCanvasDimensions({
-        width: rect.width,
-        height: rect.height,
-      });
-    }
+	// Add resize handler to update dimensions and trigger re-render
+	useEffect(() => {
+		function handleResize() {
+			if (!whiteboardRef.current) return;
+			const rect =
+				whiteboardRef.current.getBoundingClientRect();
+			setCanvasDimensions({
+				width: rect.width,
+				height: rect.height,
+			});
+		}
 
-    eventBus.on('system:resize', handleResize);
-    return () => eventBus.off('system:resize', handleResize);
-  }, []);
+		eventBus.on('system:resize', handleResize);
+		return () => eventBus.off('system:resize', handleResize);
+	}, []);
 
-  // Update dimensions when showPlayBar changes - synced with CSS transitions
-  useEffect(() => {
-    if (!whiteboardRef.current) return;
+	// Update dimensions when showPlayBar changes - synced with CSS transitions
+	useEffect(() => {
+		if (!whiteboardRef.current) return;
 
-    const whiteboard = whiteboardRef.current;
+		const whiteboard = whiteboardRef.current;
 
-    function updateDimensions() {
-      if (!whiteboard) return;
-      const rect = whiteboard.getBoundingClientRect();
-      setCanvasDimensions({
-        width: rect.width,
-        height: rect.height,
-      });
-    }
+		function updateDimensions() {
+			if (!whiteboard) return;
+			const rect = whiteboard.getBoundingClientRect();
+			setCanvasDimensions({
+				width: rect.width,
+				height: rect.height,
+			});
+		}
 
-    const resizeObserver = new ResizeObserver(() => {
-      updateDimensions();
-    });
+		const resizeObserver = new ResizeObserver(() => {
+			updateDimensions();
+		});
 
-    resizeObserver.observe(whiteboard);
-    updateDimensions();
+		resizeObserver.observe(whiteboard);
+		updateDimensions();
 
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [showPlayBar]);
+		return () => {
+			resizeObserver.disconnect();
+		};
+	}, [showPlayBar]);
 
 	// Attach wheel event listener for zoom (non-passive to allow preventDefault)
 	useEffect(() => {
 		const element = whiteboardRef.current
 		if (!element) return
 
-		element.addEventListener('wheel', handleWheel, { passive: false })
+		element.addEventListener('wheel', handleWheel, {passive: false})
 		return () => element.removeEventListener('wheel', handleWheel)
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [zoom, panX, panY, canvasDimensions])
@@ -320,33 +320,33 @@ export function Canvas({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [zoom, panMode, isPanning])
 
-  function getCursorStyle() {
+	function getCursorStyle() {
 		if (isPanning) return 'grabbing'
 		if (panMode === 'spacebar' && zoom > MIN_ZOOM) return 'grab'
 
-    switch (drawingState.tool) {
-      case TOOL_ERASE:
-      case TOOL_DRAW:
-      case TOOL_FILL:
-      case TOOL_ADD_PLAYER:
-        return "none";
-      default:
-        return "default";
-    }
-  }
+		switch (drawingState.tool) {
+			case TOOL_ERASE:
+			case TOOL_DRAW:
+			case TOOL_FILL:
+			case TOOL_ADD_PLAYER:
+				return "none";
+			default:
+				return "default";
+		}
+	}
 
-  // Helper to determine if custom cursor should be visible
-  function shouldShowCustomCursor(): boolean {
-    return !isPanning && panMode !== 'spacebar'
-  }
+	// Helper to determine if custom cursor should be visible
+	function shouldShowCustomCursor(): boolean {
+		return !isPanning && panMode !== 'spacebar'
+	}
 
-  function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
-    if (!whiteboardRef.current) return;
-    const rect = whiteboardRef.current.getBoundingClientRect();
-    setCursorPosition({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    });
+	function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+		if (!whiteboardRef.current) return;
+		const rect = whiteboardRef.current.getBoundingClientRect();
+		setCursorPosition({
+			x: e.clientX - rect.left,
+			y: e.clientY - rect.top,
+		});
 
 		// Handle panning
 		if (isPanning && panStartRef.current && panOriginRef.current) {
@@ -359,18 +359,18 @@ export function Canvas({
 			const newPanY = panOriginRef.current.y + deltaY
 
 			const clamped = clampPan(newPanX, newPanY, zoom)
-			setViewport({ panX: clamped.panX, panY: clamped.panY })
+			setViewport({panX: clamped.panX, panY: clamped.panY})
 		}
-  }
+	}
 
-  function handleMouseEnter() {
-    setIsOverCanvas(true);
-  }
+	function handleMouseEnter() {
+		setIsOverCanvas(true);
+	}
 
-  function handleMouseLeave() {
-    setIsOverCanvas(false);
-    setCursorPosition(null);
-  }
+	function handleMouseLeave() {
+		setIsOverCanvas(false);
+		setCursorPosition(null);
+	}
 
 	// Zoom/Pan helper functions
 	function calculateCursorCenteredZoom(
@@ -389,7 +389,7 @@ export function Canvas({
 		const newPanX = cursorX - canvasX * newZoom
 		const newPanY = cursorY - canvasY * newZoom
 
-		return { newPanX, newPanY }
+		return {newPanX, newPanY}
 	}
 
 	function clampPan(
@@ -437,7 +437,7 @@ export function Canvas({
 		if (newZoom < MIN_ZOOM) return
 
 		// Calculate cursor-centered zoom
-		const { newPanX, newPanY } = calculateCursorCenteredZoom(
+		const {newPanX, newPanY} = calculateCursorCenteredZoom(
 			cursorX,
 			cursorY,
 			zoom,
@@ -451,9 +451,9 @@ export function Canvas({
 
 		// Reset pan when returning to baseline
 		if (newZoom === MIN_ZOOM) {
-			setViewport({ zoom: MIN_ZOOM, panX: 0, panY: 0 })
+			setViewport({zoom: MIN_ZOOM, panX: 0, panY: 0})
 		} else {
-			setViewport({ zoom: newZoom, panX: clamped.panX, panY: clamped.panY })
+			setViewport({zoom: newZoom, panX: clamped.panX, panY: clamped.panY})
 		}
 	}
 
@@ -461,9 +461,9 @@ export function Canvas({
 		// Spacebar pan start (left-click while spacebar held)
 		if (panMode === 'spacebar' && event.button === 0) {
 			event.preventDefault()
-			setViewport({ isPanning: true })
-			panStartRef.current = { x: event.clientX, y: event.clientY }
-			panOriginRef.current = { x: panX, y: panY }
+			setViewport({isPanning: true})
+			panStartRef.current = {x: event.clientX, y: event.clientY}
+			panOriginRef.current = {x: panX, y: panY}
 			return
 		}
 
@@ -474,8 +474,8 @@ export function Canvas({
 				isPanning: true,
 				panMode: 'middleMouse',
 			})
-			panStartRef.current = { x: event.clientX, y: event.clientY }
-			panOriginRef.current = { x: panX, y: panY }
+			panStartRef.current = {x: event.clientX, y: event.clientY}
+			panOriginRef.current = {x: panX, y: panY}
 		}
 	}
 
@@ -531,7 +531,7 @@ export function Canvas({
 		}
 
 		setSelectedPlayerId(newPlayer.id)
-		setLabelDialogPosition({ x: e.clientX, y: e.clientY })
+		setLabelDialogPosition({x: e.clientX, y: e.clientY})
 		setShowLabelDialog(true)
 	}
 
@@ -543,15 +543,15 @@ export function Canvas({
 		// Just move the player without moving linked drawings
 		// Used when drawing is being moved and player should follow
 		setPlayers(
-			players.map((p) => (p.id == id ? { ...p, x, y } : p))
+			players.map((p) => (p.id == id ? {...p, x, y} : p))
 		)
 	}
 
-  function handlePlayerPositionChange(
-    id: string,
-    newX: number,
-    newY: number,
-  ) {
+	function handlePlayerPositionChange(
+		id: string,
+		newX: number,
+		newY: number,
+	) {
 		const player = players.find((p) => p.id == id)
 		if (!player) return
 
@@ -563,7 +563,7 @@ export function Canvas({
 			// Move all linemen by same offset
 			const updatedPlayers = players.map((p) => {
 				if (!p.isLineman) return p
-				return { ...p, x: p.x + offsetX, y: p.y + offsetY }
+				return {...p, x: p.x + offsetX, y: p.y + offsetY}
 			})
 			setPlayers(updatedPlayers)
 		} else {
@@ -571,7 +571,7 @@ export function Canvas({
 			const deltaY = newY - player.y
 
 			// Normal single-player update
-			dispatch({ type: 'UPDATE_PLAYER', id, updates: { x: newX, y: newY } })
+			dispatch({type: 'UPDATE_PLAYER', id, updates: {x: newX, y: newY}})
 
 			// Move any linked drawings by the same delta
 			const linkedDrawings = drawings.filter((d) => d.playerId == id)
@@ -596,104 +596,104 @@ export function Canvas({
 				)
 			}
 		}
-  }
+	}
 
-  function handlePlayerLabelClick(
-    id: string,
-    x: number,
-    y: number,
-  ) {
-    if (drawingState.tool == TOOL_SELECT) {
-      setSelectedPlayerId(id);
-      setLabelDialogPosition({ x, y });
-      setShowLabelDialog(true);
-    }
-  }
+	function handlePlayerLabelClick(
+		id: string,
+		x: number,
+		y: number,
+	) {
+		if (drawingState.tool == TOOL_SELECT) {
+			setSelectedPlayerId(id);
+			setLabelDialogPosition({x, y});
+			setShowLabelDialog(true);
+		}
+	}
 
-  function handlePlayerLabelChange(label: string) {
-    if (selectedPlayerId) {
-      setPlayers(
-        players.map((p) =>
-          p.id == selectedPlayerId ? { ...p, label } : p
-        )
-      );
-    }
-  }
+	function handlePlayerLabelChange(label: string) {
+		if (selectedPlayerId) {
+			setPlayers(
+				players.map((p) =>
+					p.id == selectedPlayerId ? {...p, label} : p
+				)
+			);
+		}
+	}
 
-  function handlePlayerDelete() {
-    if (selectedPlayerId) {
-      setPlayers(
-        players.filter((p) => p.id != selectedPlayerId)
-      );
-      setShowLabelDialog(false);
-      setSelectedPlayerId(null);
-    }
-  }
+	function handlePlayerDelete() {
+		if (selectedPlayerId) {
+			setPlayers(
+				players.filter((p) => p.id != selectedPlayerId)
+			);
+			setShowLabelDialog(false);
+			setSelectedPlayerId(null);
+		}
+	}
 
-  function handlePlayerDeleteById(id: string) {
-    const player = players.find((p) => p.id == id)
-    if (player?.isLineman) return // Protected from deletion
+	function handlePlayerDeleteById(id: string) {
+		const player = players.find((p) => p.id == id)
+		if (player?.isLineman) return // Protected from deletion
 
-    setPlayers(players.filter((p) => p.id != id));
-    // Reset hover state when deleting a player to show circular cursor again
-    setIsHoveringDeletable(false);
-    // If the deleted player was selected, close the dialog
-    if (selectedPlayerId == id) {
-      setShowLabelDialog(false);
-      setSelectedPlayerId(null);
-    }
-  }
+		setPlayers(players.filter((p) => p.id != id));
+		// Reset hover state when deleting a player to show circular cursor again
+		setIsHoveringDeletable(false);
+		// If the deleted player was selected, close the dialog
+		if (selectedPlayerId == id) {
+			setShowLabelDialog(false);
+			setSelectedPlayerId(null);
+		}
+	}
 
-  function handleFillPlayer(id: string) {
-    if (drawingState.tool == TOOL_FILL) {
-      dispatchFillEvent(
-        EVENT_FILL_PLAYER,
-        id,
-        drawingState.color,
-      );
-    }
-  }
+	function handleFillPlayer(id: string) {
+		if (drawingState.tool == TOOL_FILL) {
+			dispatchFillEvent(
+				EVENT_FILL_PLAYER,
+				id,
+				drawingState.color,
+			);
+		}
+	}
 
-  function handleDrawingSelectWithDialog(
-    id: string,
-    position: { x: number; y: number }
-  ) {
-    const drawing = drawings.find((d) => d.id == id);
-    if (drawing) {
-      setEditingDrawing({ drawing, position });
-    }
-  }
+	function handleDrawingSelectWithDialog(
+		id: string,
+		position: { x: number; y: number }
+	) {
+		const drawing = drawings.find((d) => d.id == id);
+		if (drawing) {
+			setEditingDrawing({drawing, position});
+		}
+	}
 
-  function handleDrawingStyleUpdate(updates: Partial<PathStyle>) {
-    if (!editingDrawing) return;
+	function handleDrawingStyleUpdate(updates: Partial<PathStyle>) {
+		if (!editingDrawing) return;
 
-    const drawing = editingDrawing.drawing;
-    let updatedDrawing = {
-      ...drawing,
-      style: { ...drawing.style, ...updates },
-    };
+		const drawing = editingDrawing.drawing;
+		let updatedDrawing = {
+			...drawing,
+			style: {...drawing.style, ...updates},
+		};
 
-    // If pathMode changed, convert geometry
-    if (updates.pathMode && updates.pathMode !== drawing.style.pathMode) {
-      if (updates.pathMode === 'curve') {
-        // Convert to smooth using smooth pipeline
-        const coords = extractMainCoordinates(drawing);
-        const { points, segments } = processSmoothPath(coords);
-        updatedDrawing = { ...updatedDrawing, points, segments };
-      } else {
-        // Convert to sharp using convertToSharp
-        const { points, segments } = convertToSharp(drawing);
-        updatedDrawing = { ...updatedDrawing, points, segments };
-      }
-    }
+		// If pathMode changed, convert geometry
+		if (updates.pathMode && updates.pathMode !== drawing.style.pathMode) {
+			if (updates.pathMode === 'curve') {
+				// Convert to smooth using smooth pipeline
+				const coords = extractMainCoordinates(drawing);
+				const {points, segments} = processSmoothPath(coords);
+				updatedDrawing = {...updatedDrawing, points, segments};
+			} else {
+				// Convert to sharp using convertToSharp
+				const {points, segments} = convertToSharp(drawing);
+				updatedDrawing = {...updatedDrawing, points, segments};
+			}
+		}
 
-    setDrawings(
-      drawings.map((d) =>
-        d.id == editingDrawing.drawing.id ? updatedDrawing : d
-      )
-    );
-    setEditingDrawing({ ...editingDrawing, drawing: updatedDrawing });
-  }
+		setDrawings(
+			drawings.map((d) =>
+				d.id == editingDrawing.drawing.id ? updatedDrawing : d
+			)
+		);
+		setEditingDrawing({...editingDrawing, drawing: updatedDrawing});
+	}
 
 	function handleLinkDrawingToPlayer(
 		drawingId: string,
@@ -828,8 +828,8 @@ export function Canvas({
 							? `calc(100vh - ${CANVAS_HEIGHT_WITH_PLAY_BAR}px)`
 							: `calc(100vh - ${HEADER_TOOLBAR_HEIGHT}px)`,
 					transition: containerMode === 'fill'
-					? undefined
-					: `height ${ANIMATION_DURATION_MS}ms ease-in-out`,
+						? undefined
+						: `height ${ANIMATION_DURATION_MS}ms ease-in-out`,
 					overflow: 'hidden',
 				}}
 				onMouseMove={handleMouseMove}
@@ -847,195 +847,196 @@ export function Canvas({
 					}}
 				>
 					{/* Field background fills the whiteboard */}
-					<FootballField />
+					<FootballField/>
 
 					{/* SVG layer for structured drawings */}
 					<div className='canvas-svg-layer'>
-					<SVGCanvas
-						width={canvasDimensions.width}
-						height={canvasDimensions.height}
-						coordSystem={coordSystem}
-						drawings={drawings}
-						players={players}
-						onChange={setDrawings}
-						activeTool={
-							drawingState.tool == TOOL_DRAW
-								? 'draw'
-								: drawingState.tool == TOOL_ERASE
-									? 'erase'
-									: drawingState.tool == TOOL_ADD_PLAYER
-										? 'addPlayer'
-										: 'select'
-						}
-						onDeleteDrawing={handleDeleteDrawing}
-						eraseSize={drawingState.eraseSize}
-						autoCorrect={true}
-						defaultStyle={defaultPathStyle}
-						snapThreshold={drawingState.snapThreshold}
-						zoom={zoom}
-						panX={panX}
-						panY={panY}
-						onLinkDrawingToPlayer={handleLinkDrawingToPlayer}
-						onAddPlayerAtNode={handleAddPlayerAtNode}
-						onMovePlayer={handleMovePlayerOnly}
-						isOverCanvas={isOverCanvas}
-						cursorPosition={cursorPosition}
-						onSelectWithPosition={handleDrawingSelectWithDialog}
-					/>
+						<SVGCanvas
+							width={canvasDimensions.width}
+							height={canvasDimensions.height}
+							coordSystem={coordSystem}
+							drawings={drawings}
+							players={players}
+							onChange={setDrawings}
+							activeTool={
+								drawingState.tool == TOOL_DRAW
+									? 'draw'
+									: drawingState.tool == TOOL_ERASE
+										? 'erase'
+										: drawingState.tool == TOOL_ADD_PLAYER
+											? 'addPlayer'
+											: 'select'
+							}
+							onDeleteDrawing={handleDeleteDrawing}
+							eraseSize={drawingState.eraseSize}
+							autoCorrect={true}
+							defaultStyle={defaultPathStyle}
+							snapThreshold={drawingState.snapThreshold}
+							zoom={zoom}
+							panX={panX}
+							panY={panY}
+							onLinkDrawingToPlayer={handleLinkDrawingToPlayer}
+							onAddPlayerAtNode={handleAddPlayerAtNode}
+							onMovePlayer={handleMovePlayerOnly}
+							isOverCanvas={isOverCanvas}
+							cursorPosition={cursorPosition}
+							onSelectWithPosition={handleDrawingSelectWithDialog}
+						/>
+					</div>
+
+					{/* Players - inside transform so they zoom/pan with content */}
+					<div className='canvas-players-layer'>
+						{players.map((player) => (
+							<Player
+								key={player.id}
+								id={player.id}
+								initialX={player.x}
+								initialY={player.y}
+								containerWidth={canvasDimensions.width}
+								containerHeight={canvasDimensions.height}
+								label={player.label}
+								color={player.color}
+								onPositionChange={handlePlayerPositionChange}
+								onLabelClick={handlePlayerLabelClick}
+								onFill={handleFillPlayer}
+								onDelete={handlePlayerDeleteById}
+								currentTool={drawingState.tool}
+								interactable={playerInteractable}
+								zoom={zoom}
+								panX={panX}
+								panY={panY}
+								onHoverChange={(isHovered) => {
+									// Only track hover state when erase tool is active
+									if (drawingState.tool == TOOL_ERASE) {
+										setIsHoveringDeletable(isHovered)
+									}
+								}}
+							/>
+						))}
+					</div>
 				</div>
+				{/* End transform container */}
 
-			{/* Players - inside transform so they zoom/pan with content */}
-          <div className='canvas-players-layer'>
-            {players.map((player) => (
-                <Player
-                  key={player.id}
-                  id={player.id}
-                  initialX={player.x}
-                  initialY={player.y}
-                  containerWidth={canvasDimensions.width}
-                  containerHeight={canvasDimensions.height}
-                  label={player.label}
-                  color={player.color}
-                  onPositionChange={handlePlayerPositionChange}
-                  onLabelClick={handlePlayerLabelClick}
-                  onFill={handleFillPlayer}
-                  onDelete={handlePlayerDeleteById}
-                  currentTool={drawingState.tool}
-                  interactable={playerInteractable}
-                  zoom={zoom}
-                  panX={panX}
-                  panY={panY}
-					onHoverChange={(isHovered) => {
-						// Only track hover state when erase tool is active
-						if (drawingState.tool == TOOL_ERASE) {
-							setIsHoveringDeletable(isHovered)
-						}
+				{/* Cursor overlay - OUTSIDE transform so cursors stay at mouse position */}
+				<div
+					className='canvas-cursor-overlay'
+					style={{
+						cursor: getCursorStyle(),
 					}}
-                />
-              ))}
-            </div>
-		</div> {/* End transform container */}
+				>
+					{/* Custom Pencil Cursor - only visible when draw tool is active */}
+					{drawingState.tool == TOOL_DRAW &&
+						isOverCanvas &&
+						cursorPosition &&
+						shouldShowCustomCursor() && (
+							<div
+								className='canvas-cursor-pencil'
+								style={{
+									left: cursorPosition.x,
+									top: cursorPosition.y,
+									zIndex: CURSOR_Z_INDEX,
+								}}
+							>
+								<Pencil size={24}/>
+							</div>
+						)}
 
-		{/* Cursor overlay - OUTSIDE transform so cursors stay at mouse position */}
-		<div
-			className='canvas-cursor-overlay'
-			style={{
-				cursor: getCursorStyle(),
-			}}
-		>
-          {/* Custom Pencil Cursor - only visible when draw tool is active */}
-          {drawingState.tool == TOOL_DRAW &&
-            isOverCanvas &&
-            cursorPosition &&
-            shouldShowCustomCursor() && (
-              <div
-                className='canvas-cursor-pencil'
-                style={{
-                  left: cursorPosition.x,
-                  top: cursorPosition.y,
-                  zIndex: CURSOR_Z_INDEX,
-                }}
-              >
-                <Pencil size={24} />
-              </div>
-            )}
+					{/* Custom Fill Cursor - paint bucket icon */}
+					{drawingState.tool == TOOL_FILL &&
+						isOverCanvas &&
+						cursorPosition &&
+						shouldShowCustomCursor() && (
+							<div
+								className='canvas-cursor-fill'
+								style={{
+									left: cursorPosition.x,
+									top: cursorPosition.y,
+									zIndex: CURSOR_Z_INDEX,
+								}}
+							>
+								<PaintBucket size={24}/>
+							</div>
+						)}
 
-          {/* Custom Fill Cursor - paint bucket icon */}
-          {drawingState.tool == TOOL_FILL &&
-            isOverCanvas &&
-            cursorPosition &&
-            shouldShowCustomCursor() && (
-              <div
-                className='canvas-cursor-fill'
-                style={{
-                  left: cursorPosition.x,
-                  top: cursorPosition.y,
-                  zIndex: CURSOR_Z_INDEX,
-                }}
-              >
-                <PaintBucket size={24} />
-              </div>
-            )}
+					{/* Custom Eraser Cursor */}
+					{drawingState.tool == TOOL_ERASE &&
+						isOverCanvas &&
+						cursorPosition &&
+						!isHoveringDeletable &&
+						shouldShowCustomCursor() && (
+							<div
+								className='canvas-cursor-eraser'
+								style={{
+									left: cursorPosition.x,
+									top: cursorPosition.y,
+									zIndex: CURSOR_Z_INDEX,
+								}}
+							>
+								<div
+									className='canvas-eraser-circle'
+									style={{
+										width: `${drawingState.eraseSize}px`,
+										height: `${drawingState.eraseSize}px`,
+									}}
+								/>
+							</div>
+						)}
 
-          {/* Custom Eraser Cursor */}
-          {drawingState.tool == TOOL_ERASE &&
-            isOverCanvas &&
-            cursorPosition &&
-            !isHoveringDeletable &&
-            shouldShowCustomCursor() && (
-              <div
-                className='canvas-cursor-eraser'
-                style={{
-                  left: cursorPosition.x,
-                  top: cursorPosition.y,
-                  zIndex: CURSOR_Z_INDEX,
-                }}
-              >
-                <div
-                  className='canvas-eraser-circle'
-                  style={{
-                    width: `${drawingState.eraseSize}px`,
-                    height: `${drawingState.eraseSize}px`,
-                  }}
-                />
-              </div>
-            )}
+					{/* Custom Add Player Cursor - Player circle preview */}
+					{drawingState.tool == TOOL_ADD_PLAYER &&
+						isOverCanvas &&
+						cursorPosition &&
+						shouldShowCustomCursor() && (
+							<div
+								className='canvas-cursor-add-player'
+								style={{
+									left: cursorPosition.x,
+									top: cursorPosition.y,
+									zIndex: CURSOR_Z_INDEX,
+								}}
+							>
+								<div
+									className='canvas-add-player-circle'
+									style={{
+										width: `${playerCursorDiameter}px`,
+										height: `${playerCursorDiameter}px`,
+										backgroundColor: drawingState.color,
+									}}
+								/>
+							</div>
+						)}
 
-          {/* Custom Add Player Cursor - Player circle preview */}
-          {drawingState.tool == TOOL_ADD_PLAYER &&
-            isOverCanvas &&
-            cursorPosition &&
-            shouldShowCustomCursor() && (
-              <div
-                className='canvas-cursor-add-player'
-                style={{
-                  left: cursorPosition.x,
-                  top: cursorPosition.y,
-                  zIndex: CURSOR_Z_INDEX,
-                }}
-              >
-                <div
-                  className='canvas-add-player-circle'
-                  style={{
-                    width: `${playerCursorDiameter}px`,
-                    height: `${playerCursorDiameter}px`,
-                    backgroundColor: drawingState.color,
-                  }}
-                />
-              </div>
-            )}
+				</div>
+			</div>
 
-        </div>
-      </div>
+			{/* Player Label Dialog */}
+			{showLabelDialog && selectedPlayerId && (
+				<PlayerLabelDialog
+					position={labelDialogPosition}
+					currentLabel={
+						players.find((p) => p.id == selectedPlayerId)
+							?.label ?? ''
+					}
+					hasLinkedDrawing={
+						drawings.some((d) => d.playerId == selectedPlayerId)
+					}
+					onLabelChange={handlePlayerLabelChange}
+					onUnlink={() => handleUnlinkDrawing(selectedPlayerId)}
+					onDelete={handlePlayerDelete}
+					onClose={() => setShowLabelDialog(false)}
+				/>
+			)}
 
-      {/* Player Label Dialog */}
-      {showLabelDialog && selectedPlayerId && (
-        <PlayerLabelDialog
-          position={labelDialogPosition}
-          currentLabel={
-            players.find((p) => p.id == selectedPlayerId)
-              ?.label ?? ''
-          }
-          hasLinkedDrawing={
-            drawings.some((d) => d.playerId == selectedPlayerId)
-          }
-          onLabelChange={handlePlayerLabelChange}
-          onUnlink={() => handleUnlinkDrawing(selectedPlayerId)}
-          onDelete={handlePlayerDelete}
-          onClose={() => setShowLabelDialog(false)}
-        />
-      )}
-
-      {/* Drawing Properties Dialog - outside transform */}
-      {editingDrawing && (
-        <DrawingPropertiesDialog
-          drawing={editingDrawing.drawing}
-          position={editingDrawing.position}
-          onUpdate={handleDrawingStyleUpdate}
-          onClose={() => setEditingDrawing(null)}
-          coordSystem={coordSystem}
-        />
-      )}
-    </div>
-  );
+			{/* Drawing Properties Dialog - outside transform */}
+			{editingDrawing && (
+				<DrawingPropertiesDialog
+					drawing={editingDrawing.drawing}
+					position={editingDrawing.position}
+					onUpdate={handleDrawingStyleUpdate}
+					onClose={() => setEditingDrawing(null)}
+					coordSystem={coordSystem}
+				/>
+			)}
+		</div>
+	);
 }

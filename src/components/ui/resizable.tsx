@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import * as ResizablePrimitive from "react-resizable-panels"
-
+import { GripVertical } from "lucide-react"
 
 import "./resizable.css"
 
@@ -27,6 +27,7 @@ function ResizablePanel({
 
 function ResizableHandle({
   className,
+  withHandle,
   ...props
 }: React.ComponentProps<typeof ResizablePrimitive.PanelResizeHandle> & {
   withHandle?: boolean
@@ -36,7 +37,13 @@ function ResizableHandle({
       data-slot="resizable-handle"
       className={`resizable-handle ${className ?? ''}`.trim()}
       {...props}
-    />
+    >
+      {withHandle && (
+        <div className="resizable-handle-grip">
+          <GripVertical className="resizable-handle-icon" />
+        </div>
+      )}
+    </ResizablePrimitive.PanelResizeHandle>
   )
 }
 
