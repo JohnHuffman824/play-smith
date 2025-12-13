@@ -170,7 +170,7 @@ export function PlayerLabelDialog({
             }}
             className="player-label-dialog-action-button player-label-dialog-delete-button"
           >
-            <Trash2 className="w-5 h-5" />
+            <Trash2 className="player-label-dialog-icon" />
           </button>
         </div>
       </div>

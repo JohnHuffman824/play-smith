@@ -76,7 +76,7 @@ export function FormationOnboardingDialog({
                   className={`formation-onboarding__option ${selectedSystem.has(f.name) ? 'formation-onboarding__option--selected' : ''}`}
                 >
                   <div className={`formation-onboarding__checkbox ${selectedSystem.has(f.name) ? 'formation-onboarding__checkbox--checked' : ''}`}>
-                    {selectedSystem.has(f.name) && <Check className="w-3 h-3" />}
+                    {selectedSystem.has(f.name) && <Check className="formation-onboarding__icon-sm" />}
                   </div>
                   <div className="formation-onboarding__option-text">
                     <div className="formation-onboarding__option-name">{f.name}</div>
@@ -99,7 +99,7 @@ export function FormationOnboardingDialog({
                     className={`formation-onboarding__option ${selectedTeam.has(f.id) ? 'formation-onboarding__option--selected' : ''}`}
                   >
                     <div className={`formation-onboarding__checkbox ${selectedTeam.has(f.id) ? 'formation-onboarding__checkbox--checked' : ''}`}>
-                      {selectedTeam.has(f.id) && <Check className="w-3 h-3" />}
+                      {selectedTeam.has(f.id) && <Check className="formation-onboarding__icon-sm" />}
                     </div>
                     <div className="formation-onboarding__option-text">
                       <div className="formation-onboarding__option-name">{f.name}</div>
@@ -115,7 +115,7 @@ export function FormationOnboardingDialog({
 
           {/* Create from scratch */}
           <button className="formation-onboarding__create" aria-label="Create from scratch">
-            <Plus className="w-4 h-4" />
+            <Plus className="formation-onboarding__icon-md" />
             <span>Create from scratch</span>
           </button>
         </div>

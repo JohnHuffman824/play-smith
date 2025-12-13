@@ -190,3 +190,14 @@
 	opacity: 0.5;
 	cursor: not-allowed;
 }
+
+/* || Icon sizes */
+.formation-onboarding__icon-sm {
+	width: 0.75rem;
+	height: 0.75rem;
+}
+
+.formation-onboarding__icon-md {
+	width: 1rem;
+	height: 1rem;
+}

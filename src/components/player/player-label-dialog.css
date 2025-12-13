@@ -150,3 +150,9 @@
 .player-label-dialog-delete-button:focus-visible {
   box-shadow: 0 0 0 3px rgb(var(--ring-rgb) / 50%);
 }
+
+/* || Icon sizes */
+.player-label-dialog-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
