@@ -80,13 +80,13 @@ export function SearchBar({
   return (
     <div className="search-bar">
       {/* Selected chips */}
-      <div className="search-bar__chips">
+      <div className="search-bar-chips">
         {selectedFormation && (
-          <Badge variant="secondary" className="flex items-center gap-1">
+          <Badge variant="secondary" className="search-bar-chip">
             {selectedFormation.name}
             {onRemove && (
-              <button onClick={() => onRemove(selectedFormation, 'formation')} aria-label={`Remove ${selectedFormation.name}`}>
-                <X className="w-3 h-3" />
+              <button className="search-bar-chip-remove" onClick={() => onRemove(selectedFormation, 'formation')} aria-label={`Remove ${selectedFormation.name}`}>
+                <X className="search-bar-chip-icon" />
               </button>
             )}
           </Badge>
@@ -95,12 +95,12 @@ export function SearchBar({
           <Badge
             key={concept.id || i}
             variant={concept.is_saved ? 'default' : 'outline'}
-            className="flex items-center gap-1"
+            className="search-bar-chip"
           >
             {getConceptDisplayName(concept)}
             {onRemove && (
-              <button onClick={() => onRemove(concept, 'concept')} aria-label={`Remove ${getConceptDisplayName(concept)}`}>
-                <X className="w-3 h-3" />
+              <button className="search-bar-chip-remove" onClick={() => onRemove(concept, 'concept')} aria-label={`Remove ${getConceptDisplayName(concept)}`}>
+                <X className="search-bar-chip-icon" />
               </button>
             )}
           </Badge>
@@ -120,16 +120,16 @@ export function SearchBar({
 
       {/* Results dropdown */}
       {isOpen && results && (
-        <div className="search-bar__dropdown">
+        <div className="search-bar-dropdown">
           {/* Formation results */}
           {results.results.formations?.map((f: any) => (
             <button
               key={f.id}
-              className="search-bar__dropdown-item"
+              className="search-bar-dropdown-item"
               onClick={() => handleSelect(f, 'formation')}
             >
-              <span className="search-bar__dropdown-label">{f.name}</span>
-              <span className="search-bar__dropdown-type">Formation</span>
+              <span className="search-bar-dropdown-label">{f.name}</span>
+              <span className="search-bar-dropdown-type">Formation</span>
             </button>
           ))}
 
@@ -137,11 +137,11 @@ export function SearchBar({
           {results.results.concepts?.map((c: any) => (
             <button
               key={c.id}
-              className="search-bar__dropdown-item"
+              className="search-bar-dropdown-item"
               onClick={() => handleSelect({ ...c, is_saved: true }, 'concept')}
             >
-              <span className="search-bar__dropdown-label">{c.name}</span>
-              <span className="search-bar__dropdown-type">
+              <span className="search-bar-dropdown-label">{c.name}</span>
+              <span className="search-bar-dropdown-type">
                 {c.is_motion ? 'Motion' : c.is_modifier ? 'Modifier' : 'Concept'}
               </span>
             </button>
@@ -150,27 +150,27 @@ export function SearchBar({
           {/* Composition suggestion */}
           {results.parseResult?.type === 'composition' && (
             <button
-              className="search-bar__dropdown-item search-bar__dropdown-divider"
+              className="search-bar-dropdown-item search-bar-dropdown-divider"
               onClick={() => handleSelect(results.parseResult.composition, 'concept')}
             >
-              <span className="search-bar__dropdown-label">
+              <span className="search-bar-dropdown-label">
                 {results.parseResult.composition.role} {results.parseResult.composition.template_name}
               </span>
-              <span className="search-bar__dropdown-type">Auto-compose (unsaved)</span>
+              <span className="search-bar-dropdown-type">Auto-compose (unsaved)</span>
             </button>
           )}
 
           {/* Needs role prompt */}
           {results.parseResult?.type === 'needs_role' && (
-            <div className="search-bar__dropdown-divider">
-              <span className="search-bar__dropdown-prompt">
+            <div className="search-bar-dropdown-divider">
+              <span className="search-bar-dropdown-prompt">
                 Apply "{results.parseResult.template_name}" to which player?
               </span>
-              <div className="search-bar__dropdown-roles">
+              <div className="search-bar-dropdown-roles">
                 {results.parseResult.availableRoles?.slice(0, 5).map((role: string) => (
                   <button
                     key={role}
-                    className="search-bar__role-button"
+                    className="search-bar-role-button"
                     onClick={() => handleSelect({
                       role,
                       template_name: results.parseResult.template_name,
@@ -186,8 +186,8 @@ export function SearchBar({
 
           {/* No match */}
           {results.parseResult?.type === 'no_match' && query && (
-            <div className="search-bar__dropdown-divider search-bar__dropdown-prompt">
-              No match found. <button className="search-bar__create-link">Create new concept?</button>
+            <div className="search-bar-dropdown-divider search-bar-dropdown-prompt">
+              No match found. <button className="search-bar-create-link">Create new concept?</button>
             </div>
           )}
         </div>
