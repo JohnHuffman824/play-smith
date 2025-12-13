@@ -22,6 +22,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import './playbook-editor.css'
 
 type ConceptType = 'concept' | 'formation' | 'group'
 
@@ -40,11 +41,6 @@ type ConceptToDelete = {
 	id: number
 	type: ConceptType
 }
-
-// Button style constants
-const BUTTON_ACTIVE =
-	'bg-action-button text-action-button-foreground hover:bg-action-button/90'
-const BUTTON_INACTIVE = 'border border-border hover:bg-accent'
 
 // Concept filters
 const CONCEPT_FILTERS = [
@@ -73,9 +69,6 @@ import {
   VIEW_MODE_GRID,
   VIEW_MODE_LIST,
   DEFAULT_PLAYBOOK_NAME,
-  BUTTON_BASE,
-  MODAL_BUTTON_BASE,
-  PRIMARY_BUTTON_BASE,
 } from './constants/playbook'
 import type { Play, Section } from './types'
 
@@ -490,30 +483,30 @@ function PlaybookEditorContent({
     : 'Export All'
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="border-b border-border bg-card px-6 py-4">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
+    <div className="playbook-editor">
+      <div className="playbook-editor-main">
+        <div className="playbook-editor-header">
+          <div className="playbook-editor-header-content">
+            <div className="playbook-editor-header-left">
               <button
                 onClick={onBack}
-                className={`${BUTTON_BASE} cursor-pointer`}
+                className="playbook-editor-icon-button"
                 title="Back to Playbooks"
               >
-                <ArrowLeft className="w-5 h-5" />
+                <ArrowLeft className="icon-md" />
               </button>
               <div>
-                <div className="flex items-baseline gap-3 mb-1">
+                <div className="playbook-editor-title-row">
                   <h1>{playbookName}</h1>
                   {teamName && (
-                    <span className="text-sm text-muted-foreground">
+                    <span className="playbook-editor-team-name">
                       {teamName}
                     </span>
                   )}
                 </div>
               </div>
-              
-              <div className="w-px self-stretch bg-border ml-2" />
+
+              <div className="playbook-editor-header-divider" />
 
               <SearchInput
                 value={searchQuery}
@@ -523,41 +516,41 @@ function PlaybookEditorContent({
               />
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="playbook-editor-header-right">
               <button
                 onClick={handleImport}
-                className={`${BUTTON_BASE} cursor-pointer`}
+                className="playbook-editor-icon-button"
                 title="Import Plays"
               >
-                <Upload className="w-5 h-5" />
+                <Upload className="icon-md" />
               </button>
               <button
                 onClick={handleExport}
-                className={`${BUTTON_BASE} cursor-pointer`}
+                className="playbook-editor-icon-button"
                 title={exportTitle}
               >
-                <Download className="w-5 h-5" />
+                <Download className="icon-md" />
               </button>
 
-              <div className="w-px h-6 bg-border" />
+              <div className="playbook-editor-header-divider-small" />
 
               <button
                 onClick={() => setShowShareDialog(true)}
-                className={`${BUTTON_BASE} cursor-pointer`}
+                className="playbook-editor-icon-button"
                 title="Share"
               >
-                <Share2 className="w-5 h-5" />
+                <Share2 className="icon-md" />
               </button>
 
-              <div className="w-px h-6 bg-border" />
+              <div className="playbook-editor-header-divider-small" />
 
-              <div className="flex items-center bg-muted rounded-lg p-1">
+              <div className="playbook-editor-view-toggle">
                 <button
                   onClick={() => setViewMode(VIEW_MODE_GRID)}
-                  className={`p-2 rounded transition-all duration-200 cursor-pointer ${
+                  className={`playbook-editor-view-button ${
                     viewMode == VIEW_MODE_GRID
-                      ? 'bg-card shadow-sm'
-                      : 'hover:bg-accent/50'
+                      ? 'playbook-editor-view-button-active'
+                      : 'playbook-editor-view-button-inactive'
                   }`}
                   title="Grid View"
                 >
@@ -565,10 +558,10 @@ function PlaybookEditorContent({
                 </button>
                 <button
                   onClick={() => setViewMode(VIEW_MODE_LIST)}
-                  className={`p-2 rounded transition-all duration-200 cursor-pointer ${
+                  className={`playbook-editor-view-button ${
                     viewMode == VIEW_MODE_LIST
-                      ? 'bg-card shadow-sm'
-                      : 'hover:bg-accent/50'
+                      ? 'playbook-editor-view-button-active'
+                      : 'playbook-editor-view-button-inactive'
                   }`}
                   title="List View"
                 >
@@ -576,33 +569,32 @@ function PlaybookEditorContent({
                 </button>
               </div>
 
-              <div className="w-px h-6 bg-border" />
+              <div className="playbook-editor-header-divider-small" />
 
               <button
                 onClick={() => setShowSettingsDialog(true)}
-                className={`${BUTTON_BASE} cursor-pointer`}
+                className="playbook-editor-icon-button"
                 title="Settings"
               >
-                <Settings className="w-5 h-5" />
+                <Settings className="icon-md" />
               </button>
             </div>
           </div>
         </div>
 
         {/* Combined Tab Bar and Toolbar */}
-        <div className="border-b border-border bg-card px-6 py-3">
-          <div className="flex items-center gap-4">
+        <div className="playbook-editor-tabs">
+          <div className="playbook-editor-tabs-content">
             {/* Tabs */}
-            <div className="flex gap-1">
+            <div className="playbook-editor-tabs-list">
               {(['plays', 'concepts'] as const).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`px-4 py-2 text-sm font-medium
-                    transition-colors capitalize rounded-lg ${
+                  className={`playbook-editor-tab ${
                       activeTab === tab
-                        ? 'bg-accent text-foreground'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                        ? 'playbook-editor-tab-active'
+                        : 'playbook-editor-tab-inactive'
                     }`}
                 >
                   {tab}
@@ -610,42 +602,40 @@ function PlaybookEditorContent({
               ))}
             </div>
 
-            <div className="w-px h-6 bg-border" />
+            <div className="playbook-editor-tabs-divider" />
 
             {/* Conditional Toolbar Content */}
             {activeTab === 'plays' ? (
               <>
-                <div className="flex items-center gap-2">
+                <div className="playbook-editor-toolbar-buttons">
                   <button
                     onClick={() => setShowNewPlayModal(true)}
-                    className={`${BUTTON_BASE} ${BUTTON_ACTIVE}
-                      flex items-center gap-2 cursor-pointer`}
+                    className="playbook-editor-action-button playbook-editor-action-button--primary"
                   >
-                    <Plus className="w-4 h-4" />
+                    <Plus className="icon-sm" />
                     <span>New Play</span>
                   </button>
 
                   <button
                     onClick={() => setShowNewSectionModal(true)}
-                    className={`${BUTTON_BASE} ${BUTTON_INACTIVE}
-                      flex items-center gap-2 cursor-pointer`}
+                    className="playbook-editor-action-button playbook-editor-action-button--secondary"
                     title="Create New Section"
                   >
-                    <FolderPlus className="w-4 h-4" />
+                    <FolderPlus className="icon-sm" />
                     <span>New Section</span>
                   </button>
                 </div>
 
-                <div className="w-px h-6 bg-border" />
+                <div className="playbook-editor-tabs-divider" />
 
-                <div className="flex items-center gap-2 flex-1">
+                <div className="playbook-editor-filter-buttons">
                   <button
                     onClick={() => setActiveSectionFilter(null)}
-                    className={`${BUTTON_BASE} ${
+                    className={`playbook-editor-filter-button ${
                       activeSectionFilter == null
-                        ? BUTTON_ACTIVE
-                        : BUTTON_INACTIVE
-                    } cursor-pointer`}
+                        ? 'playbook-editor-filter-button--active'
+                        : 'playbook-editor-filter-button--inactive'
+                    }`}
                   >
                     All Plays
                   </button>
@@ -654,11 +644,11 @@ function PlaybookEditorContent({
                     <button
                       key={section.id}
                       onClick={() => setActiveSectionFilter(section.id)}
-                      className={`${BUTTON_BASE} ${
+                      className={`playbook-editor-filter-button ${
                         activeSectionFilter == section.id
-                          ? BUTTON_ACTIVE
-                          : BUTTON_INACTIVE
-                      } cursor-pointer`}
+                          ? 'playbook-editor-filter-button--active'
+                          : 'playbook-editor-filter-button--inactive'
+                      }`}
                     >
                       {section.name}
                     </button>
@@ -672,24 +662,24 @@ function PlaybookEditorContent({
                     setEditingConcept(null)
                     setShowConceptDialog(true)
                   }}
-                  className={`${BUTTON_BASE} ${BUTTON_ACTIVE}
-                    flex items-center gap-2`}
+                  className="playbook-editor-action-button playbook-editor-action-button--primary"
                 >
-                  <Plus className="w-4 h-4" />
+                  <Plus className="icon-sm" />
                   <span>New Concept</span>
                 </button>
 
-                <div className="w-px h-6 bg-border" />
+                <div className="playbook-editor-tabs-divider" />
 
-                <div className="flex items-center gap-2 flex-1">
+                <div className="playbook-editor-filter-buttons">
                   {CONCEPT_FILTERS.map((filter) => (
                     <button
                       key={filter.id}
                       onClick={() => setConceptFilter(filter.id)}
-                      className={`${BUTTON_BASE}
-                        ${conceptFilter === filter.id
-                          ? BUTTON_ACTIVE
-                          : BUTTON_INACTIVE}`}
+                      className={`playbook-editor-filter-button ${
+                        conceptFilter === filter.id
+                          ? 'playbook-editor-filter-button--active'
+                          : 'playbook-editor-filter-button--inactive'
+                      }`}
                     >
                       {filter.label}
                     </button>
@@ -702,16 +692,12 @@ function PlaybookEditorContent({
 
         {activeTab === 'plays' ? (
           <>
-
-            <div className="flex-1 overflow-auto">
-              <div className="p-6">
+            <div className="playbook-editor-content">
             {displayedSections.length > 0 ? (
-              <div className="space-y-8">
+              <div className="playbook-editor-sections">
                 {displayedSections.map((section) => (
                   <div key={section.id}>
-                    <div
-                      className="flex items-center justify-between mb-4"
-                    >
+                    <div className="playbook-editor-section-header">
                       {section.section_type === 'ideas' ? (
                         <TooltipProvider>
                           <Tooltip>
@@ -728,23 +714,20 @@ function PlaybookEditorContent({
                       ) : (
                         <h2>{section.name}</h2>
                       )}
-                      <p className="text-muted-foreground">
+                      <p className="playbook-editor-section-count">
                         {section.plays.length} play
                         {section.plays.length != 1 ? 's' : ''}
                       </p>
                     </div>
 
                     {section.plays.length === 0 && section.section_type === 'ideas' ? (
-                      <div className="flex flex-col items-center justify-center py-12 px-4 border-2 border-dashed border-border rounded-lg">
-                        <p className="text-muted-foreground text-center">
+                      <div className="playbook-editor-ideas-empty">
+                        <p className="playbook-editor-ideas-empty-text">
                           This is a space for play ideas and experiments. Anyone on the team can add their ideas here - they won't be part of the main playbook until a coach promotes them.
                         </p>
                       </div>
                     ) : viewMode == VIEW_MODE_GRID ? (
-                      <div 
-                        className="grid grid-cols-1 sm:grid-cols-2 
-                          lg:grid-cols-3 xl:grid-cols-4 gap-4"
-                      >
+                      <div className="playbook-editor-grid">
                         {section.plays.map((play) => (
                           <PlayCard
                             key={play.id}
@@ -775,12 +758,8 @@ function PlaybookEditorContent({
                 ))}
               </div>
             ) : (
-              <div 
-                className="flex flex-col items-center 
-                  justify-center py-16"
-              >
-                <div className="text-center">
-                  <p className="text-muted-foreground mb-4">
+              <div className="playbook-editor-empty">
+                  <p className="playbook-editor-empty-text">
                     {searchQuery 
                       ? 'No plays found matching your search' 
                       : 'No plays in this playbook'
@@ -789,40 +768,36 @@ function PlaybookEditorContent({
                   {!searchQuery && (
                     <button
                       onClick={() => setShowNewPlayModal(true)}
-                      className={`${PRIMARY_BUTTON_BASE} px-6 py-2.5 cursor-pointer`}
+                      className="playbook-editor-empty-button"
                     >
                       Create Your First Play
                     </button>
                   )}
-                </div>
               </div>
             )}
-              </div>
             </div>
           </>
         ) : (
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="playbook-editor-content">
               {conceptsLoading ? (
-                <div className="flex items-center justify-center h-64">
-                  <p className="text-muted-foreground">Loading concepts...</p>
+                <div className="playbook-editor-concepts-loading">
+                  <p className="playbook-editor-concepts-loading-text">Loading concepts...</p>
                 </div>
               ) : filteredConcepts.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-64 gap-4">
-                  <p className="text-muted-foreground">No concepts found</p>
+                <div className="playbook-editor-concepts-empty">
+                  <p className="playbook-editor-concepts-empty-text">No concepts found</p>
                   <button
                     onClick={() => {
                       setEditingConcept(null)
                       setShowConceptDialog(true)
                     }}
-                    className="px-4 py-2 bg-action-button
-                      text-action-button-foreground rounded-lg
-                      hover:bg-action-button/90"
+                    className="playbook-editor-empty-button"
                   >
                     Create your first concept
                   </button>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div className="playbook-editor-grid">
                   {filteredConcepts.map((item) => (
                     <ConceptCard
                       key={`${item.type}-${item.id}`}
@@ -865,14 +840,14 @@ function PlaybookEditorContent({
         onClose={() => setShowDeleteConceptModal(false)}
         title="Delete Concept"
       >
-        <p className="text-muted-foreground mb-4">
+        <p className="playbook-editor-modal-message">
           Are you sure you want to delete this {conceptToDelete?.type}? This action cannot be undone.
         </p>
-        <div className="flex justify-end gap-2">
-          <button onClick={() => setShowDeleteConceptModal(false)} className="px-4 py-2 border border-border rounded-lg hover:bg-accent">
+        <div className="playbook-editor-modal-actions">
+          <button onClick={() => setShowDeleteConceptModal(false)} className="playbook-editor-modal-button playbook-editor-modal-button--secondary">
             Cancel
           </button>
-          <button onClick={confirmDeleteConcept} className="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg hover:bg-destructive/90">
+          <button onClick={confirmDeleteConcept} className="playbook-editor-modal-button playbook-editor-modal-button--destructive">
             Delete
           </button>
         </div>
@@ -883,9 +858,9 @@ function PlaybookEditorContent({
         onClose={closeNewPlayModal}
         title="Create New Play"
       >
-        <div className="space-y-4">
+        <div className="playbook-editor-modal-content">
           <div>
-            <label className="block mb-2">Play Name</label>
+            <label className="playbook-editor-modal-label">Play Name</label>
             <Input
               type="text"
               value={newItemName}
@@ -899,15 +874,14 @@ function PlaybookEditorContent({
               autoFocus
             />
           </div>
-          <div className="flex justify-end gap-2 pt-2">
-            <button onClick={closeNewPlayModal} className={`${MODAL_BUTTON_BASE} cursor-pointer`}>
+          <div className="playbook-editor-modal-actions">
+            <button onClick={closeNewPlayModal} className="playbook-editor-modal-button playbook-editor-modal-button--secondary">
               Cancel
             </button>
             <button
               onClick={handleNewPlay}
               disabled={!newItemName.trim()}
-              className={`${PRIMARY_BUTTON_BASE}
-                disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer`}
+              className="playbook-editor-modal-button playbook-editor-modal-button--primary"
             >
               Create
             </button>
@@ -920,9 +894,9 @@ function PlaybookEditorContent({
         onClose={closeNewSectionModal}
         title="Create New Section"
       >
-        <div className="space-y-4">
+        <div className="playbook-editor-modal-content">
           <div>
-            <label className="block mb-2">Section Name</label>
+            <label className="playbook-editor-modal-label">Section Name</label>
             <Input
               type="text"
               value={newItemName}
@@ -936,18 +910,17 @@ function PlaybookEditorContent({
               autoFocus
             />
           </div>
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="playbook-editor-modal-actions">
             <button
               onClick={closeNewSectionModal}
-              className={`${MODAL_BUTTON_BASE} cursor-pointer`}
+              className="playbook-editor-modal-button playbook-editor-modal-button--secondary"
             >
               Cancel
             </button>
             <button
               onClick={handleNewSection}
               disabled={!newItemName.trim()}
-              className={`${PRIMARY_BUTTON_BASE}
-                disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer`}
+              className="playbook-editor-modal-button playbook-editor-modal-button--primary"
             >
               Create
             </button>
@@ -981,9 +954,9 @@ function PlaybookEditorContent({
         onClose={closeRenameModal}
         title="Rename Play"
       >
-        <div className="space-y-4">
+        <div className="playbook-editor-modal-content">
           <div>
-            <label className="block mb-2">Play Name</label>
+            <label className="playbook-editor-modal-label">Play Name</label>
             <Input
               type="text"
               value={renamePlayName}
@@ -997,15 +970,14 @@ function PlaybookEditorContent({
               autoFocus
             />
           </div>
-          <div className="flex justify-end gap-2 pt-2">
-            <button onClick={closeRenameModal} className={`${MODAL_BUTTON_BASE} cursor-pointer`}>
+          <div className="playbook-editor-modal-actions">
+            <button onClick={closeRenameModal} className="playbook-editor-modal-button playbook-editor-modal-button--secondary">
               Cancel
             </button>
             <button
               onClick={confirmRename}
               disabled={!renamePlayName.trim()}
-              className={`${PRIMARY_BUTTON_BASE}
-                disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer`}
+              className="playbook-editor-modal-button playbook-editor-modal-button--primary"
             >
               Rename
             </button>
@@ -1018,21 +990,20 @@ function PlaybookEditorContent({
         onClose={closeDeleteConfirmModal}
         title="Delete Play"
       >
-        <div className="space-y-4">
-          <p>
+        <div className="playbook-editor-modal-content">
+          <p className="playbook-editor-modal-message">
             Are you sure you want to delete this play? This action cannot be undone.
           </p>
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="playbook-editor-modal-actions">
             <button
               onClick={closeDeleteConfirmModal}
-              className={`${MODAL_BUTTON_BASE} cursor-pointer`}
+              className="playbook-editor-modal-button playbook-editor-modal-button--secondary"
             >
               Cancel
             </button>
             <button
               onClick={confirmDelete}
-              className={`${PRIMARY_BUTTON_BASE} bg-destructive
-                hover:bg-destructive/90 cursor-pointer`}
+              className="playbook-editor-modal-button playbook-editor-modal-button--destructive"
             >
               Delete
             </button>

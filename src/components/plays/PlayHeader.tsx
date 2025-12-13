@@ -25,7 +25,7 @@ export function PlayHeader({
 				</div>
 
 				{onBackToPlaybook && (
-					<Button onClick={onBackToPlaybook}>
+					<Button variant="action" className="play-header__button" onClick={onBackToPlaybook}>
 						Back to Playbook
 					</Button>
 				)}

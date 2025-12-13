@@ -3,6 +3,7 @@
   display: flex;
   height: 100vh;
   background: var(--background);
+  overflow: hidden;
 }
 
 .play-editor-content {
@@ -10,9 +11,11 @@
   display: flex;
   flex-direction: column;
   position: relative;
+  overflow: hidden;
 }
 
 .play-editor-canvas-area {
   position: relative;
   flex: 1;
+  overflow: hidden;
 }

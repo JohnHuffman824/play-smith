@@ -12,8 +12,9 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
 	if (isLoading) {
 		return (
-			<div className='flex items-center justify-center h-screen'>
-				<div className='text-lg'>Loading...</div>
+			<div className="protected-route-loading">
+				<div className="protected-route-spinner" />
+				<div className="protected-route-loading-text">Loading...</div>
 			</div>
 		)
 	}

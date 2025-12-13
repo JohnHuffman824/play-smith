@@ -54,7 +54,7 @@ export function PlayCardsSection({
 		<div
 			className="play-cards-section"
 			style={{
-				height: showPlayBar ? '340px' : '0px',
+				height: showPlayBar ? '320px' : '0px',
 			}}
 		>
 			{/* Render content when visible OR during hide animation (delayed unmount) */}

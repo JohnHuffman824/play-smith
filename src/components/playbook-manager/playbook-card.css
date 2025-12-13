@@ -96,6 +96,9 @@
 }
 
 .playbook-card-title {
+	font-size: 1rem;
+	font-weight: 500;
+	line-height: 1.5;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -103,6 +106,7 @@
 }
 
 .playbook-card-meta {
+	font-size: 0.875rem;
 	color: var(--muted-foreground);
 }
 

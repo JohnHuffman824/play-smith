@@ -2,7 +2,7 @@
 .canvas-container {
 	display: flex;
 	flex: 1;
-	align-items: flex-start;
+	align-items: stretch;
 	justify-content: center;
 	overflow: hidden;
 	position: relative;
@@ -13,14 +13,16 @@
 }
 
 .canvas-container-viewport {
-	padding: 1rem 2rem;
+	padding: 1rem 1rem 0rem;
 }
 
 .canvas-whiteboard {
 	width: 100%;
-	border-radius: 16px;
+	height: 100%;
+	border-radius: 1rem;
 	position: relative;
 	box-shadow: 0 0 0 2px var(--border);
+	transition: height 800ms ease-in-out;
 }
 
 .canvas-transform-container {

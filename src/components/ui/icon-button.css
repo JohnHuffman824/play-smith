@@ -4,6 +4,11 @@
   outline: none;
   transition: all 200ms;
   border-radius: 8px;
+  background: transparent;
+  color: var(--foreground);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* || Size variants */
@@ -18,6 +23,7 @@
 /* || Style variants - default */
 .icon-button-default {
   border: 1px solid var(--border);
+  background: var(--background);
 }
 
 .icon-button-default:hover {

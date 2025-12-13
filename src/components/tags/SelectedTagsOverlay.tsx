@@ -1,5 +1,5 @@
 import { X } from 'lucide-react'
-import { getTagClasses } from '../playbook-editor/constants/playbook'
+import { getTagStyles } from '../playbook-editor/constants/playbook'
 import type { Tag } from '@/hooks/useTagsData'
 import './selected-tags-overlay.css'
 
@@ -14,11 +14,12 @@ export function SelectedTagsOverlay({ tags, onRemoveTag }: SelectedTagsOverlayPr
 	return (
 		<div className="selected-tags-overlay">
 			{tags.map(tag => {
-				const cls = getTagClasses(tag.color)
+				const tagStyle = getTagStyles(tag.color)
 				return (
 					<span
 						key={tag.id}
-						className={`selected-tags-overlay__tag ${cls.bg} ${cls.text}`}
+						className="selected-tags-overlay__tag"
+						style={tagStyle}
 					>
 						{tag.name}
 						<button

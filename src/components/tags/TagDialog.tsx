@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { X, Plus, Check } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { TAG_COLOR_PALETTE, getTagClasses } from '../playbook-editor/constants/playbook'
+import { TAG_COLOR_PALETTE, getTagStyles } from '../playbook-editor/constants/playbook'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import type { Tag } from '@/hooks/useTagsData'
@@ -50,11 +50,12 @@ export function TagDialog({ isOpen, onClose, availableTags, selectedTagIds, onTa
 						<h4 className="tag-dialog__section-title">Preset Tags</h4>
 						<div className="tag-dialog__tags">
 							{presets.map(tag => {
-								const cls = getTagClasses(tag.color)
+								const tagStyle = getTagStyles(tag.color)
 								const selected = selectedTagIds.includes(tag.id)
 								return (
 									<button key={tag.id} onClick={() => toggleTag(tag.id)}
-										className={`tag-dialog__tag-button ${cls.bg} ${cls.text} ${selected ? 'tag-dialog__tag-button--selected' : ''}`}>
+										className={`tag-dialog__tag-button ${selected ? 'tag-dialog__tag-button--selected' : ''}`}
+										style={tagStyle}>
 										{selected && <Check className="w-3 h-3" />}{tag.name}
 									</button>
 								)
@@ -66,11 +67,12 @@ export function TagDialog({ isOpen, onClose, availableTags, selectedTagIds, onTa
 							<h4 className="tag-dialog__section-title">Custom Tags</h4>
 							<div className="tag-dialog__tags">
 								{custom.map(tag => {
-									const cls = getTagClasses(tag.color)
+									const tagStyle = getTagStyles(tag.color)
 									const selected = selectedTagIds.includes(tag.id)
 									return (
 										<button key={tag.id} onClick={() => toggleTag(tag.id)}
-											className={`tag-dialog__tag-button ${cls.bg} ${cls.text} ${selected ? 'tag-dialog__tag-button--selected' : ''}`}>
+											className={`tag-dialog__tag-button ${selected ? 'tag-dialog__tag-button--selected' : ''}`}
+											style={tagStyle}>
 											{selected && <Check className="w-3 h-3" />}{tag.name}
 										</button>
 									)

@@ -1,6 +1,6 @@
 /* || Base styles */
 .color-picker-dialog {
-  width: 256px;
+  width: 280px;
   border-radius: 16px;
   box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
   border: 1px solid var(--border);
@@ -75,13 +75,13 @@
 /* || Preset color grid */
 .color-picker-dialog-preset-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 8px;
 }
 
 .color-picker-dialog-preset-button {
-  width: 40px;
-  height: 40px;
+  width: 100%;
+  aspect-ratio: 1;
   border-radius: 8px;
   transition: all 200ms;
   cursor: pointer;

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Tag as TagIcon, Plus, X } from 'lucide-react'
 import { TagDialog } from './TagDialog'
-import { getTagClasses } from '../playbook-editor/constants/playbook'
+import { getTagStyles } from '../playbook-editor/constants/playbook'
 import type { Tag } from '@/hooks/useTagsData'
 import './tag-selector.css'
 
@@ -25,9 +25,9 @@ export function TagSelector({ availableTags, selectedTags, onTagsChange, onCreat
 		<div>
 			<div className="tag-selector">
 				{selectedTags.map(tag => {
-					const cls = getTagClasses(tag.color)
+					const tagStyle = getTagStyles(tag.color)
 					return (
-						<span key={tag.id} className={`tag-selector__tag ${cls.bg} ${cls.text}`}>
+						<span key={tag.id} className="tag-selector__tag" style={tagStyle}>
 							{tag.name}
 							<button onClick={e => removeTag(tag.id, e)} className="tag-selector__tag-remove" aria-label={`Remove ${tag.name}`}>
 								<X className="w-3 h-3" />

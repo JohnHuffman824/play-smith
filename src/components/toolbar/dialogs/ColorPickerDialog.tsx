@@ -1,4 +1,6 @@
+import { useEffect } from 'react'
 import { DialogCloseButton } from '../../ui/dialog-close-button'
+import { useTheme } from '@/contexts/SettingsContext'
 import './color-picker-dialog.css'
 
 interface ColorPickerDialogProps {
@@ -22,12 +24,20 @@ const presetColors = [
   { name: 'Orange', value: '#F97316' },
   { name: 'Purple', value: '#8B5CF6' },
   { name: 'Pink', value: '#EC4899' },
-  { name: 'Teal', value: '#14B8A6' },
-  { name: 'Indigo', value: '#6366F1' },
   { name: 'Gray', value: '#6B7280' },
 ]
 
 export function ColorPickerDialog({ currentColor, onColorChange, onClose, position, useRelativePosition = false }: ColorPickerDialogProps) {
+  const { theme } = useTheme()
+
+  // Set default color based on theme if no color is set
+  useEffect(() => {
+    if (!currentColor || currentColor === '') {
+      const defaultColor = theme === 'dark' ? '#FFFFFF' : '#000000'
+      onColorChange(defaultColor)
+    }
+  }, []) // Only run once on mount
+
   return (
     <div
       data-color-dialog

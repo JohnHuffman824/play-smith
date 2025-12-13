@@ -103,11 +103,9 @@ export function PlaybookEditorPage() {
 	// Loading state
 	if (isLoading) {
 		return (
-			<div className="flex items-center justify-center h-screen">
-				<div className="text-center">
-					<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-foreground mx-auto mb-4"></div>
-					<p className="text-muted-foreground">Loading playbook...</p>
-				</div>
+			<div className="page-loading">
+				<div className="page-loading-spinner" />
+				<div className="page-loading-text">Loading playbook...</div>
 			</div>
 		)
 	}
@@ -115,14 +113,11 @@ export function PlaybookEditorPage() {
 	// Error state
 	if (error) {
 		return (
-			<div className="flex items-center justify-center h-screen">
-				<div className="text-center">
-					<h1 className="text-2xl font-bold text-destructive mb-4">Error</h1>
-					<p className="text-muted-foreground mb-6">{error}</p>
-					<button
-						onClick={handleBack}
-						className="px-4 py-2 bg-action-button text-action-button-foreground rounded-lg hover:bg-action-button/90 transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-					>
+			<div className="page-error">
+				<div className="page-error-content">
+					<h1 className="page-error-title" data-variant="error">Error</h1>
+					<p className="page-error-message">{error}</p>
+					<button onClick={handleBack} className="page-error-button">
 						Back to Playbooks
 					</button>
 				</div>
@@ -133,14 +128,11 @@ export function PlaybookEditorPage() {
 	// Not found state
 	if (!playbook) {
 		return (
-			<div className="flex items-center justify-center h-screen">
-				<div className="text-center">
-					<h1 className="text-2xl font-bold text-foreground mb-4">Playbook Not Found</h1>
-					<p className="text-muted-foreground mb-6">The playbook you're looking for doesn't exist.</p>
-					<button
-						onClick={handleBack}
-						className="px-4 py-2 bg-action-button text-action-button-foreground rounded-lg hover:bg-action-button/90 transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-					>
+			<div className="page-error">
+				<div className="page-error-content">
+					<h1 className="page-error-title" data-variant="info">Playbook Not Found</h1>
+					<p className="page-error-message">The playbook you're looking for doesn't exist.</p>
+					<button onClick={handleBack} className="page-error-button">
 						Back to Playbooks
 					</button>
 				</div>

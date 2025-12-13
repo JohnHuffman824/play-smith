@@ -186,16 +186,20 @@ export function PlaybookManagerPage() {
 
 	if (isLoading) {
 		return (
-			<div className="flex items-center justify-center h-screen bg-background">
-				<div className="text-lg text-foreground">Loading playbooks...</div>
+			<div className="page-loading">
+				<div className="page-loading-spinner" />
+				<div className="page-loading-text">Loading playbooks...</div>
 			</div>
 		)
 	}
 
 	if (error) {
 		return (
-			<div className="flex items-center justify-center h-screen bg-background">
-				<div className="text-red-500">Error: {error}</div>
+			<div className="page-error">
+				<div className="page-error-content">
+					<h1 className="page-error-title" data-variant="error">Error</h1>
+					<p className="page-error-message">{error}</p>
+				</div>
 			</div>
 		)
 	}
