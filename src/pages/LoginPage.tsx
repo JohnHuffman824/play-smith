@@ -2,6 +2,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useEffect } from 'react'
 import { LoginModal } from '../components/auth/LoginModal'
 import { useAuth } from '../contexts/AuthContext'
+import './login-page.css'
 
 export function LoginPage() {
 	const navigate = useNavigate()
@@ -17,7 +18,7 @@ export function LoginPage() {
 	}, [user, navigate, searchParams])
 
 	return (
-		<div className="min-h-screen bg-background flex items-center justify-center">
+		<div className="login-page">
 			<LoginModal />
 		</div>
 	)
