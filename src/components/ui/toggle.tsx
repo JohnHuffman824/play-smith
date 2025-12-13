@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import * as TogglePrimitive from "@radix-ui/react-toggle"
-import { cn } from "./utils"
 import "./toggle.css"
 
 type ToggleVariant = "default" | "outline"
@@ -24,7 +23,7 @@ function Toggle({
       data-slot="toggle"
       data-variant={variant}
       data-size={size}
-      className={cn("toggle", className)}
+      className={`toggle ${className ?? ''}`.trim()}
       {...props}
     />
   )

@@ -1,7 +1,6 @@
 import type { LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Tooltip, TooltipContent, TooltipTrigger } from './tooltip'
-import { cn } from './utils'
 import './toolbar-button.css'
 
 type ToolbarButtonProps = {
@@ -30,7 +29,7 @@ export function ToolbarButton({
 					onClick={onClick}
 					disabled={disabled}
 					data-active={isActive}
-					className={cn('toolbar-button', className)}
+					className={`toolbar-button ${className ?? ''}`.trim()}
 					style={!isActive ? { color: 'var(--icon-muted)' } : undefined}
 				>
 					<Icon />

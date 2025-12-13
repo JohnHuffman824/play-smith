@@ -1,5 +1,4 @@
 import { X } from 'lucide-react'
-import { cn } from './utils'
 import './dialog-close-button.css'
 
 type DialogCloseButtonProps = {
@@ -12,7 +11,7 @@ export function DialogCloseButton({ onClose, className }: DialogCloseButtonProps
 		<button
 			onClick={onClose}
 			aria-label="Close dialog"
-			className={cn('dialog-close-button', className)}
+			className={`dialog-close-button ${className ?? ''}`.trim()}
 		>
 			<X />
 		</button>
