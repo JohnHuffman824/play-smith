@@ -19,7 +19,7 @@ import { useTheme } from '@/contexts/SettingsContext'
 import { usePlayContext } from '../../contexts/PlayContext'
 import { areLinemenAtDefaultPositions } from '../../utils/lineman.utils'
 import { useDialogAutoClose } from '../../hooks/useDialogAutoClose'
-import { cn } from '../ui/utils'
+import './concept-toolbar.css'
 
 interface ConceptToolbarProps {
 	selectedTool: Tool
@@ -41,13 +41,6 @@ interface ConceptToolbarProps {
 	onBrushSizeChange: (size: number) => void
 	onPathModeChange: (mode: 'sharp' | 'curve') => void
 }
-
-// Base styles for custom buttons that don't use ToolbarButton
-const baseButtonClass = cn(
-	'w-14 h-14 rounded-xl flex items-center justify-center',
-	'cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50',
-	'transition-all duration-200'
-)
 
 export function ConceptToolbar({
 	selectedTool,
@@ -83,7 +76,7 @@ export function ConceptToolbar({
 
 	return (
 		<TooltipProvider>
-			<div className="w-20 h-full flex flex-col items-center justify-center bg-card border-r border-border" style={{ gap: '12px' }}>
+			<div className="concept-toolbar">
 				{/* Select Tool */}
 				<ToolbarButton
 					icon={MousePointer}
@@ -101,7 +94,7 @@ export function ConceptToolbar({
 				/>
 
 				{/* Draw Tool with Options Dialog */}
-				<div className="relative">
+				<div className="concept-toolbar-dialog-container">
 					<ToolbarButton
 						icon={Pencil}
 						tooltip="Draw (D)"
@@ -117,7 +110,7 @@ export function ConceptToolbar({
 					/>
 
 					{showDrawOptions && selectedTool === 'draw' && (
-						<div className="absolute left-full ml-2 top-0 z-50">
+						<div className="concept-toolbar-dialog">
 							<DrawOptionsDialog
 								lineStyle={lineStyle}
 								lineEnd={lineEnd}
@@ -139,13 +132,8 @@ export function ConceptToolbar({
 					<TooltipTrigger asChild>
 						<button
 							onClick={() => onToolChange('erase')}
-							className={cn(
-								baseButtonClass,
-								selectedTool === 'erase'
-									? "bg-action-button text-action-button-foreground shadow-lg"
-									: "border border-border hover:bg-accent hover:text-foreground"
-							)}
-							style={selectedTool !== 'erase' ? { color: 'var(--icon-muted)' } : undefined}
+							className="concept-toolbar-custom-button"
+							data-active={selectedTool === 'erase'}
 						>
 							<EraserIcon />
 						</button>
@@ -159,7 +147,6 @@ export function ConceptToolbar({
 					tooltip="Pick Color (C)"
 					isActive={showColorPicker}
 					onClick={() => onShowColorPickerChange(!showColorPicker)}
-					className="relative"
 				>
 					<ColorSwatchIndicator color={color} />
 				</ToolbarButton>
@@ -169,14 +156,8 @@ export function ConceptToolbar({
 					<TooltipTrigger asChild>
 						<button
 							onClick={() => onToolChange('fill')}
-							className={cn(
-								baseButtonClass,
-								"relative",
-								selectedTool === 'fill'
-									? "bg-action-button text-action-button-foreground shadow-lg"
-									: "border border-border hover:bg-accent hover:text-foreground"
-							)}
-							style={selectedTool !== 'fill' ? { color: 'var(--icon-muted)' } : undefined}
+							className="concept-toolbar-custom-button"
+							data-active={selectedTool === 'fill'}
 						>
 							<PaintBucket className="w-6 h-6" style={{ transform: 'scaleX(-1)' }} />
 						</button>
@@ -185,19 +166,14 @@ export function ConceptToolbar({
 				</Tooltip>
 
 				{/* Hash Marker Tool - Custom icon */}
-				<div className="relative">
+				<div className="concept-toolbar-dialog-container">
 					<Tooltip>
 						<TooltipTrigger asChild>
 							<button
 								onClick={() => setShowHashDialog(!showHashDialog)}
 								data-hash-dialog
-								className={cn(
-									baseButtonClass,
-									showHashDialog
-										? "bg-action-button text-action-button-foreground shadow-lg"
-										: "border border-border hover:bg-accent hover:text-foreground"
-								)}
-								style={!showHashDialog ? { color: 'var(--icon-muted)' } : undefined}
+								className="concept-toolbar-custom-button"
+								data-active={showHashDialog}
 							>
 								<HashIcon />
 							</button>
@@ -206,7 +182,7 @@ export function ConceptToolbar({
 					</Tooltip>
 
 					{showHashDialog && (
-						<div className="absolute left-full ml-2 top-0 z-50">
+						<div className="concept-toolbar-dialog">
 							<HashDialog
 								currentAlignment={hashAlignment}
 								linemenAtDefault={areLinemenAtDefaultPositions(players, hashAlignment)}
