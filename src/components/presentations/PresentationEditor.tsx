@@ -8,6 +8,7 @@ import {
 import { motion, AnimatePresence, Reorder } from 'framer-motion'
 import { Button } from '../ui/button'
 import { usePresentationDetail } from '../../hooks/usePresentationsData'
+import './presentation-editor.css'
 
 type PresentationEditorProps = {
 	presentationId: number
@@ -22,7 +23,7 @@ type PresentationEditorProps = {
 
 export function PresentationEditor({
 	presentationId,
-	playbookId,
+	playbookId: _playbookId,
 	availablePlays,
 	onClose
 }: PresentationEditorProps) {
@@ -66,25 +67,21 @@ export function PresentationEditor({
 
 	if (isLoading) {
 		return (
-			<div
-				className="flex items-center justify-center h-64"
-			>
+			<div className="presentation-editor__empty">
 				Loading...
 			</div>
 		)
 	}
 
 	return (
-		<div className="flex flex-col h-full bg-background">
+		<div className="presentation-editor">
 			{/* Header */}
-			<div
-				className="flex items-center justify-between border-b px-6 py-4"
-			>
+			<div className="presentation-editor__header">
 				<div>
-					<h2 className="text-lg font-semibold">
+					<h2 className="presentation-editor__title">
 						{presentation?.name}
 					</h2>
-					<p className="text-sm text-muted-foreground">
+					<p className="presentation-editor__subtitle">
 						{slides.length} slide
 						{slides.length !== 1 ? 's' : ''}
 					</p>
@@ -93,22 +90,23 @@ export function PresentationEditor({
 					variant="ghost"
 					size="icon"
 					onClick={onClose}
+					aria-label="Close"
 				>
-					<X className="size-5" />
+					<X className="presentation-editor__close-icon" />
 				</Button>
 			</div>
 
 			{/* Slide List */}
-			<div className="flex-1 overflow-auto p-6">
+			<div className="presentation-editor__content">
 				{slides.length === 0 ? (
-					<div className="text-center py-12">
-						<p className="text-muted-foreground mb-4">
+					<div className="presentation-editor__empty">
+						<p className="presentation-editor__empty-text">
 							No slides yet
 						</p>
 						<Button
 							onClick={() => setShowAddMenu(true)}
 						>
-							<Plus className="size-4 mr-2" />
+							<Plus className="presentation-editor__add-icon" />
 							Add First Slide
 						</Button>
 					</div>
@@ -117,27 +115,25 @@ export function PresentationEditor({
 						axis="y"
 						values={slides}
 						onReorder={handleReorder}
-						className="space-y-2"
+						className="presentation-editor__slides"
 					>
 						{slides.map((slide, index) => (
 							<Reorder.Item
 								key={slide.id}
 								value={slide}
-								className="flex items-center gap-3 p-3 bg-card rounded-lg border cursor-move"
+								className="presentation-editor__slide"
 							>
 								<GripVertical
-									className="size-5 text-muted-foreground"
+									className="presentation-editor__drag-handle"
 								/>
 								<span
-									className="text-sm font-medium text-muted-foreground w-8"
+									className="presentation-editor__slide-number"
 								>
 									{index + 1}
 								</span>
-								<div className="flex-1">
-									<p className="font-medium">
-										{slide.play_name ||
-											'Untitled Play'}
-									</p>
+								<div className="presentation-editor__slide-name">
+									{slide.play_name ||
+										'Untitled Play'}
 								</div>
 								<Button
 									variant="ghost"
@@ -145,9 +141,10 @@ export function PresentationEditor({
 									onClick={() =>
 										handleRemoveSlide(slide.id)
 									}
-									className="text-destructive hover:text-destructive"
+									className="presentation-editor__delete-button"
+									aria-label="Remove slide"
 								>
-									<Trash2 className="size-4" />
+									<Trash2 className="presentation-editor__icon" />
 								</Button>
 							</Reorder.Item>
 						))}
@@ -156,13 +153,13 @@ export function PresentationEditor({
 			</div>
 
 			{/* Add Button */}
-			<div className="border-t px-6 py-4">
+			<div className="presentation-editor__footer">
 				<Button
 					onClick={() => setShowAddMenu(true)}
 					disabled={playsToAdd.length === 0}
-					className="w-full"
+					className="presentation-editor__add-button"
 				>
-					<Plus className="size-4 mr-2" />
+					<Plus className="presentation-editor__add-icon" />
 					Add Slide
 				</Button>
 			</div>
@@ -174,33 +171,29 @@ export function PresentationEditor({
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
 						exit={{ opacity: 0 }}
-						className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center"
+						className="presentation-editor__modal-overlay"
 						onClick={() => setShowAddMenu(false)}
 					>
 						<motion.div
 							initial={{ scale: 0.95 }}
 							animate={{ scale: 1 }}
 							exit={{ scale: 0.95 }}
-							className="bg-background rounded-lg p-6 max-w-md w-full max-h-96 overflow-auto"
+							className="presentation-editor__modal"
 							onClick={(e) => e.stopPropagation()}
 						>
-							<h3
-								className="text-lg font-semibold mb-4"
-							>
+							<h3 className="presentation-editor__modal-title">
 								Add Play to Presentation
 							</h3>
 							{playsToAdd.length === 0 ? (
-								<p
-									className="text-muted-foreground"
-								>
+								<p className="presentation-editor__modal-empty">
 									All plays already added
 								</p>
 							) : (
-								<div className="space-y-2">
+								<div className="presentation-editor__modal-list">
 									{playsToAdd.map((play) => (
 										<button
 											key={play.id}
-											className="w-full p-3 text-left rounded-lg hover:bg-accent transition-colors"
+											className="presentation-editor__modal-item"
 											onClick={() =>
 												handleAddPlay(play.id)
 											}

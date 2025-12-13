@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { PlayViewerModal } from '../components/animation/PlayViewerModal'
 import { Loader2 } from 'lucide-react'
+import './play-animation-page.css'
 
 type PlayMetadata = {
 	id: string
@@ -67,10 +68,10 @@ export function PlayAnimationPage() {
 
 	if (loading) {
 		return (
-			<div className="flex h-screen items-center justify-center bg-background">
-				<div className="flex flex-col items-center gap-4">
-					<Loader2 className="size-12 animate-spin text-muted-foreground" />
-					<p className="text-sm text-muted-foreground">Loading animation...</p>
+			<div className="play-animation-page-loading">
+				<div className="play-animation-page-content">
+					<Loader2 className="play-animation-page-spinner animate-spin" />
+					<p className="play-animation-page-loading-text">Loading animation...</p>
 				</div>
 			</div>
 		)
@@ -78,15 +79,15 @@ export function PlayAnimationPage() {
 
 	if (error || !playbookId || !playId) {
 		return (
-			<div className="flex h-screen items-center justify-center bg-background">
-				<div className="flex flex-col items-center gap-4">
-					<p className="text-base text-destructive">Failed to load animation</p>
-					<p className="text-sm text-muted-foreground">
+			<div className="play-animation-page-error">
+				<div className="play-animation-page-content">
+					<p className="play-animation-page-error-message">Failed to load animation</p>
+					<p className="play-animation-page-error-detail">
 						{error || 'Missing playbook or play ID'}
 					</p>
 					<button
 						onClick={handleClose}
-						className="mt-4 px-4 py-2 bg-action-button text-action-button-foreground rounded-lg hover:bg-action-button/90 transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+						className="play-animation-page-button"
 					>
 						Back to Playbook
 					</button>

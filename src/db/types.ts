@@ -95,6 +95,7 @@ export interface Section {
 	playbook_id: number
 	name: string
 	display_order: number
+	section_type: 'standard' | 'ideas'
 	created_at: Date
 	updated_at: Date
 }
@@ -136,6 +137,8 @@ export interface BaseConcept {
 	targeting_mode: 'absolute_role' | 'relative_selector'
 	ball_position: 'left' | 'center' | 'right'
 	play_direction: 'left' | 'right' | 'na'
+	is_motion: boolean
+	is_modifier: boolean
 	created_by: number
 	created_at: Date
 	updated_at: Date
@@ -206,7 +209,7 @@ export interface PresetRoute {
 	updated_at: Date
 }
 
-export interface Tag {
+export interface Label {
 	id: number
 	team_id: number | null
 	name: string
@@ -217,19 +220,29 @@ export interface Tag {
 	updated_at: Date
 }
 
-export interface PlayTag {
+export interface PlayLabel {
 	id: number
 	play_id: number
-	tag_id: number
+	label_id: number
 	created_at: Date
 }
 
-export interface PlaybookTag {
+export interface PlaybookLabel {
 	id: number
 	playbook_id: number
-	tag_id: number
+	label_id: number
 	created_at: Date
 }
+
+// Backward compatibility aliases
+/** @deprecated Use Label instead. */
+export type Tag = Label
+
+/** @deprecated Use PlayLabel instead. */
+export type PlayTag = PlayLabel
+
+/** @deprecated Use PlaybookLabel instead. */
+export type PlaybookTag = PlaybookLabel
 
 export interface Presentation {
 	id: number

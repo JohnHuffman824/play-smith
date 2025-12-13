@@ -1,9 +1,10 @@
-import { X } from 'lucide-react'
-import { useTheme } from '@/contexts/SettingsContext'
+import { useEffect } from 'react'
+import { DialogCloseButton } from '../../ui/dialog-close-button'
+import './color-picker-dialog.css'
 
 interface ColorPickerDialogProps {
   currentColor: string
-  onColorChange: (color: string) => void
+  onColorChange: (_color: string) => void
   onClose: () => void
   position?: {
     left?: string
@@ -22,69 +23,62 @@ const presetColors = [
   { name: 'Orange', value: '#F97316' },
   { name: 'Purple', value: '#8B5CF6' },
   { name: 'Pink', value: '#EC4899' },
-  { name: 'Teal', value: '#14B8A6' },
-  { name: 'Indigo', value: '#6366F1' },
   { name: 'Gray', value: '#6B7280' },
 ]
 
-export function ColorPickerDialog({ currentColor, onColorChange, onClose, position, useRelativePosition = false }: ColorPickerDialogProps) {
-  const positionClasses = useRelativePosition
-    ? ''
-    : position
-      ? `${position.left || 'left-24'} ${position.top || 'top-72'}`
-      : 'left-24 top-72'
+export function ColorPickerDialog({ currentColor, onColorChange, onClose, useRelativePosition = false }: ColorPickerDialogProps) {
+  // Set default color based on theme if no color is set
+  useEffect(() => {
+    if (!currentColor || currentColor === '') {
+      const foregroundColor = getComputedStyle(document.documentElement).getPropertyValue('--foreground').trim()
+      onColorChange(foregroundColor || '#000000')
+    }
+  }, [currentColor, onColorChange]) // Only run when dependencies change
 
   return (
     <div
       data-color-dialog
-      className={`${useRelativePosition ? '' : `absolute ${positionClasses}`} w-64 rounded-2xl shadow-2xl border border-border bg-card p-4 z-50`}>
-      <div className="flex items-center justify-between mb-4">
-        <span className="text-foreground">Pick Color</span>
-        <button
-          onClick={onClose}
-          className="w-6 h-6 rounded-lg flex items-center justify-center cursor-pointer hover:bg-accent text-muted-foreground"
-        >
-          <X size={16} />
-        </button>
+      className="color-picker-dialog"
+      data-positioned={!useRelativePosition}>
+      <div className="color-picker-dialog-header">
+        <span className="color-picker-dialog-title">Pick Color</span>
+        <DialogCloseButton onClose={onClose} />
       </div>
 
       {/* Custom Color Input */}
-      <div className="mb-4">
-        <label className="block text-xs mb-2 text-muted-foreground">
+      <div className="color-picker-dialog-section">
+        <label className="color-picker-dialog-label">
           Custom Color
         </label>
-        <div className="flex gap-2 items-center">
+        <div className="color-picker-dialog-custom">
           <input
             type="color"
             value={currentColor}
             onChange={(e) => onColorChange(e.target.value)}
-            className="w-12 h-12 rounded-lg border border-border cursor-pointer"
+            className="color-picker-dialog-color-input"
           />
           <input
             type="text"
             value={currentColor}
             onChange={(e) => onColorChange(e.target.value)}
-            className="flex-1 px-3 py-2 rounded-lg border text-sm bg-input-background text-foreground border-input placeholder:text-muted-foreground"
+            className="color-picker-dialog-text-input"
             placeholder="#000000"
           />
         </div>
       </div>
 
       {/* Preset Colors */}
-      <div>
-        <label className="block text-xs mb-2 text-muted-foreground">
+      <div className="color-picker-dialog-section">
+        <label className="color-picker-dialog-label">
           Presets
         </label>
-        <div className="grid grid-cols-6 gap-2">
+        <div className="color-picker-dialog-preset-grid">
           {presetColors.map((color) => (
             <button
               key={color.value}
               onClick={() => onColorChange(color.value)}
-              className={`w-10 h-10 rounded-lg transition-all hover:scale-110 cursor-pointer ${
-                currentColor === color.value
-                  ? 'ring-2 ring-blue-500 ring-offset-2 scale-110'
-                  : 'border border-border'
-              }`}
+              className="color-picker-dialog-preset-button"
+              data-selected={currentColor === color.value}
               style={{ backgroundColor: color.value }}
               title={color.name}
             />

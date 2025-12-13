@@ -1,0 +1,108 @@
+/* || Presentation Viewer Modal */
+.presentation-viewer {
+	position: fixed;
+	inset: 0;
+	z-index: 50;
+	display: flex;
+	flex-direction: column;
+	background: rgb(0 0 0);
+}
+
+.presentation-viewer__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	border-bottom: 1px solid rgb(255 255 255 / 10%);
+	padding: 16px 24px;
+}
+
+.presentation-viewer__header-content {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+}
+
+.presentation-viewer__header-text {
+}
+
+.presentation-viewer__title {
+	font-size: 1.125rem;
+	font-weight: 600;
+	color: rgb(255 255 255);
+}
+
+.presentation-viewer__subtitle {
+	font-size: 0.75rem;
+	color: rgb(255 255 255 / 50%);
+}
+
+.presentation-viewer__canvas {
+	position: relative;
+	flex: 1;
+	overflow: hidden;
+}
+
+.presentation-viewer__loading,
+.presentation-viewer__error {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 16px;
+}
+
+.presentation-viewer__loading-spinner {
+	width: 48px;
+	height: 48px;
+	animation: spin 1s linear infinite;
+	color: rgb(255 255 255);
+}
+
+@keyframes spin {
+	to { transform: rotate(360deg); }
+}
+
+.presentation-viewer__loading-text {
+	font-size: 0.875rem;
+	color: rgb(255 255 255 / 70%);
+}
+
+.presentation-viewer__error-text {
+	color: rgb(239 68 68);
+}
+
+.presentation-viewer__controls {
+	border-top: 1px solid rgb(255 255 255 / 10%);
+	padding: 16px 24px;
+}
+
+/* || Buttons */
+.presentation-viewer__close-button {
+	color: rgb(255 255 255);
+}
+
+.presentation-viewer__close-button:hover {
+	background: rgb(255 255 255 / 10%);
+}
+
+.presentation-viewer__close-icon {
+	width: 24px;
+	height: 24px;
+}
+
+.presentation-viewer__edit-button {
+	gap: 8px;
+	border-color: rgb(255 255 255 / 20%);
+	background: rgb(255 255 255 / 10%);
+	color: rgb(255 255 255);
+}
+
+.presentation-viewer__edit-button:hover {
+	background: rgb(255 255 255 / 20%);
+}
+
+.presentation-viewer__edit-icon {
+	width: 16px;
+	height: 16px;
+}

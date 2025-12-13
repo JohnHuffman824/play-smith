@@ -22,7 +22,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '../ui/select'
-import { cn } from '../ui/utils'
 import { useAnimation } from '../../contexts/AnimationContext'
 import { ANIMATION_DEFAULTS } from '../../types/animation.types'
 import type { PlaybackSpeed } from '../../types/animation.types'
@@ -31,6 +30,7 @@ import {
 	useFormattedTime,
 	useFormattedDuration,
 } from '../../hooks/useAnimationEngine'
+import './animation-controls.css'
 
 type AnimationControlsProps = {
 	className?: string
@@ -163,15 +163,10 @@ export function AnimationControls({
 	])
 
 	return (
-		<div
-			className={cn(
-				'flex flex-col gap-3 rounded-lg bg-black/80 p-4',
-				className
-			)}
-		>
+		<div className={`animation-controls ${className || ''}`}>
 			{/* Progress scrubber */}
-			<div className='flex items-center gap-3'>
-				<span className='min-w-10 text-xs text-white'>
+			<div className='animation-controls-scrubber'>
+				<span className='animation-controls-time'>
 					{currentTime}
 				</span>
 				<Slider
@@ -182,20 +177,20 @@ export function AnimationControls({
 					className='flex-1'
 					aria-label='Animation progress'
 				/>
-				<span className='min-w-10 text-xs text-white'>
+				<span className='animation-controls-time'>
 					{totalDuration}
 				</span>
 			</div>
 
 			{/* Control buttons */}
-			<div className='flex items-center justify-center gap-4'>
+			<div className='animation-controls-buttons'>
 				<Button
 					variant='ghost'
 					size='icon'
 					onClick={onPrevPlay}
 					disabled={!hasPrevPlay}
 					aria-label='Previous play (Shift+Left)'
-					className='text-white hover:bg-white/10 disabled:opacity-30'
+					className='animation-controls-button-ghost'
 				>
 					<ChevronLeft className='size-6' />
 				</Button>
@@ -205,7 +200,7 @@ export function AnimationControls({
 					size='icon'
 					onClick={reset}
 					aria-label='Reset (R)'
-					className='text-white hover:bg-white/10'
+					className='animation-controls-button-ghost'
 				>
 					<RotateCcw className='size-5' />
 				</Button>
@@ -213,7 +208,7 @@ export function AnimationControls({
 				<Button
 					onClick={handlePlayPause}
 					aria-label={state.isPlaying ? 'Pause (Space)' : 'Play (Space)'}
-					className='size-12 rounded-full bg-blue-500 hover:bg-blue-600'
+					className='animation-controls-button-play'
 				>
 					{state.isPlaying ? (
 						<Pause className='size-6' />
@@ -227,10 +222,8 @@ export function AnimationControls({
 					size='icon'
 					onClick={toggleLoop}
 					aria-label={`Loop ${state.loopMode ? 'on' : 'off'} (L)`}
-					className={cn(
-						'text-white hover:bg-white/10',
-						state.loopMode ? 'text-blue-500' : 'opacity-50'
-					)}
+					className='animation-controls-button-ghost animation-controls-button-loop'
+					data-active={state.loopMode}
 				>
 					<Repeat className='size-5' />
 				</Button>
@@ -241,22 +234,22 @@ export function AnimationControls({
 					onClick={onNextPlay}
 					disabled={!hasNextPlay}
 					aria-label='Next play (Shift+Right)'
-					className='text-white hover:bg-white/10 disabled:opacity-30'
+					className='animation-controls-button-ghost'
 				>
 					<ChevronRight className='size-6' />
 				</Button>
 			</div>
 
 			{/* Secondary controls */}
-			<div className='flex items-center justify-center gap-4'>
-				<div className='flex items-center gap-2'>
-					<span className='text-xs text-white'>Speed:</span>
+			<div className='animation-controls-secondary'>
+				<div className='animation-controls-speed-group'>
+					<span className='animation-controls-speed-label'>Speed:</span>
 					<Select
 						value={String(state.playbackSpeed)}
 						onValueChange={handleSpeedChange}
 					>
 						<SelectTrigger
-							className='h-8 w-20 border-white/20 bg-white/10 text-white'
+							className='animation-controls-speed-select'
 							aria-label='Playback speed'
 						>
 							<SelectValue />
@@ -276,18 +269,16 @@ export function AnimationControls({
 					size='sm'
 					onClick={toggleGhostTrail}
 					aria-label={`Ghost trail ${state.showGhostTrail ? 'on' : 'off'} (G)`}
-					className={cn(
-						'gap-1 text-white hover:bg-white/10',
-						state.showGhostTrail ? 'text-blue-500' : 'opacity-50'
-					)}
+					className='animation-controls-button-ghost animation-controls-button-ghost-trail'
+					data-active={state.showGhostTrail}
 				>
 					<Ghost className='size-4' />
-					<span className='text-xs'>Trail</span>
+					<span className='animation-controls-ghost-trail-text'>Trail</span>
 				</Button>
 			</div>
 
 			{/* Keyboard hints */}
-			<div className='flex justify-center gap-4 text-[10px] text-white/40'>
+			<div className='animation-controls-hints'>
 				<span>Space: Play/Pause</span>
 				<span>←/→: Step</span>
 				<span>1-5: Speed</span>

@@ -1,4 +1,4 @@
--- Migration 012: Create Tags System
+-- Migration 012: Create Tags System (DEPRECATED - renamed to labels in migration 018)
 CREATE TABLE tags (
     id BIGSERIAL PRIMARY KEY,
     team_id BIGINT REFERENCES teams(id) ON DELETE CASCADE,

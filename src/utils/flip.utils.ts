@@ -1,5 +1,6 @@
 import type { Player } from '../contexts/PlayContext'
-import type { Drawing, ControlPoint, Coordinate } from '../types/drawing.types'
+import type { Drawing, ControlPoint } from '../types/drawing.types'
+import type { Coordinate } from '../types/field.types'
 import { FIELD_WIDTH_FEET } from '../constants/field.constants'
 
 /**

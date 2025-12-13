@@ -19,8 +19,8 @@ export interface Play {
 	personnel?: string
 	playType: string
 	defensiveFormation: string
-	tags: string[]
-	tagObjects?: { id: number; name: string; color: string }[]
+	labels: string[]
+	labelObjects?: { id: number; name: string; color: string }[]
 	lastModified: string
 	drawings?: Drawing[]
 	players?: Player[]
@@ -29,6 +29,7 @@ export interface Play {
 export interface Section {
 	id: string
 	name: string
+	section_type?: 'standard' | 'ideas'
 	plays: Play[]
 }
 
@@ -49,7 +50,7 @@ interface UsePlaybookDataReturn {
 export function usePlaybookData(playbookId: string | undefined): UsePlaybookDataReturn {
 	const navigate = useNavigate()
 	const [sections, setSections] = useState<Section[]>([])
-	const [plays, setPlays] = useState<Play[]>([])
+	const [_plays, setPlays] = useState<Play[]>([])
 	const [isLoading, setIsLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
 
@@ -63,8 +64,8 @@ export function usePlaybookData(playbookId: string | undefined): UsePlaybookData
 			personnel: apiPlay.personnel_id ? String(apiPlay.personnel_id) : undefined,
 			playType: apiPlay.play_type || '',
 			defensiveFormation: apiPlay.defensive_formation_id ? String(apiPlay.defensive_formation_id) : '',
-			tags: (apiPlay.tags || []).map((t: any) => typeof t === 'string' ? t : t.name),
-			tagObjects: apiPlay.tags || [],
+			labels: (apiPlay.labels || []).map((l: any) => typeof l === 'string' ? l : l.name),
+			labelObjects: apiPlay.labels || [],
 			lastModified: apiPlay.updated_at ? new Date(apiPlay.updated_at).toLocaleDateString() : new Date().toLocaleDateString(),
 			drawings: apiPlay.drawings || [],
 			players: apiPlay.players || []
@@ -72,7 +73,7 @@ export function usePlaybookData(playbookId: string | undefined): UsePlaybookData
 	}, [])
 
 	// Helper to group plays by section
-	const groupPlaysBySections = useCallback((allPlays: Play[], allSections: Array<{ id: string; name: string }>) => {
+	const groupPlaysBySections = useCallback((allPlays: Play[], allSections: Array<{ id: string; name: string; section_type?: 'standard' | 'ideas' }>) => {
 		const sections = allSections.map(section => ({
 			...section,
 			plays: allPlays.filter(play => play.section_id === section.id)
@@ -84,6 +85,7 @@ export function usePlaybookData(playbookId: string | undefined): UsePlaybookData
 			sections.unshift({
 				id: '__unsectioned__',
 				name: 'Plays',
+				section_type: 'standard' as const,
 				plays: unsectionedPlays
 			})
 		}
@@ -133,13 +135,13 @@ export function usePlaybookData(playbookId: string | undefined): UsePlaybookData
 	}, [fetchData])
 
 	// Create play
-	const createPlay = useCallback(async (name: string, sectionId: string | null): Promise<Play> => {
+	const createPlay = useCallback(async (_name: string, _sectionId: string | null): Promise<Play> => {
 		if (!playbookId) throw new Error('No playbook ID')
 
 		const response = await fetch(`/api/playbooks/${playbookId}/plays`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ name, section_id: sectionId })
+			body: JSON.stringify({ name: _name, section_id: _sectionId })
 		})
 
 		if (response.status === 403) {

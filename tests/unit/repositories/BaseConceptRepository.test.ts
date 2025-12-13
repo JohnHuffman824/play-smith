@@ -14,17 +14,21 @@ describe('BaseConceptRepository', () => {
 	// Sample drawing data for testing
 	const sampleDrawing: Drawing = {
 		id: 'test-drawing-1',
-		type: 'path',
-		points: [
-			{ x: 0, y: 0 },
-			{ x: 10, y: 10 }
+		points: {
+			'start-1': { id: 'start-1', type: 'start', x: 0, y: 0 },
+			'end-1': { id: 'end-1', type: 'end', x: 10, y: 10 }
+		},
+		segments: [
+			{ type: 'line', pointIds: ['start-1', 'end-1'] }
 		],
 		style: {
 			color: '#000000',
-			lineWidth: 2,
+			strokeWidth: 2,
 			lineStyle: 'solid',
-			lineEnd: 'arrow'
-		}
+			lineEnd: 'arrow',
+			pathMode: 'sharp'
+		},
+		annotations: []
 	}
 
 	beforeEach(async () => {
@@ -90,8 +94,8 @@ describe('BaseConceptRepository', () => {
 			expect(result.ball_position).toBe('center')
 			expect(result.play_direction).toBe('na')
 			expect(result.assignments).toHaveLength(2)
-			expect(result.assignments[0].role).toBe('x')
-			expect(result.assignments[1].role).toBe('y')
+			expect(result.assignments[0]?.role).toBe('x')
+			expect(result.assignments[1]?.role).toBe('y')
 		})
 
 		test('creates concept with relative_selector targeting', async () => {
@@ -120,8 +124,8 @@ describe('BaseConceptRepository', () => {
 
 			expect(result.targeting_mode).toBe('relative_selector')
 			expect(result.assignments).toHaveLength(2)
-			expect(result.assignments[0].selector_type).toBe('leftmost_receiver')
-			expect(result.assignments[1].selector_type).toBe('rightmost_receiver')
+			expect(result.assignments[0]?.selector_type).toBe('leftmost_receiver')
+			expect(result.assignments[1]?.selector_type).toBe('rightmost_receiver')
 		})
 
 		test('creates playbook-scoped concept', async () => {
@@ -165,16 +169,19 @@ describe('BaseConceptRepository', () => {
 
 			// Verify drawing data is stored
 			const assignment = result.assignments[0]
-			expect(assignment.drawing_data).toBeDefined()
+			expect(assignment?.drawing_data).toBeDefined()
 
 			// drawing_data might be string or object depending on postgres.js JSONB handling
-			const drawingData = typeof assignment.drawing_data === 'string'
+			const drawingData = typeof assignment?.drawing_data === 'string'
 				? JSON.parse(assignment.drawing_data)
-				: assignment.drawing_data
+				: assignment?.drawing_data
 
-			expect(drawingData.type).toBe('path')
-			expect(drawingData.points).toHaveLength(2)
+			expect(drawingData.segments).toBeDefined()
+			expect(drawingData.segments).toHaveLength(1)
+			expect(drawingData.segments[0]?.type).toBe('line')
+			expect(Object.keys(drawingData.points)).toHaveLength(2)
 			expect(drawingData.style.color).toBe('#000000')
+			expect(drawingData.style.strokeWidth).toBe(2)
 		})
 
 		test('initializes usage tracking fields', async () => {
@@ -225,11 +232,11 @@ describe('BaseConceptRepository', () => {
 			const result = await repo.findById(created.id)
 
 			expect(result).not.toBeNull()
-			expect(result!.id).toBe(created.id)
-			expect(result!.name).toBe('Test Concept')
-			expect(result!.assignments).toHaveLength(2)
-			expect(result!.assignments[0].order_index).toBe(0)
-			expect(result!.assignments[1].order_index).toBe(1)
+			expect(result?.id).toBe(created.id)
+			expect(result?.name).toBe('Test Concept')
+			expect(result?.assignments).toHaveLength(2)
+			expect(result?.assignments[0]?.order_index).toBe(0)
+			expect(result?.assignments[1]?.order_index).toBe(1)
 		})
 
 		test('returns null for non-existent concept', async () => {

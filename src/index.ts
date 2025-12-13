@@ -16,10 +16,10 @@ import { rolesAPI } from './api/roles'
 import { presetRoutesAPI } from './api/preset-routes'
 import { unifiedSearchAPI } from './api/unified-search'
 import { modifierOverridesAPI } from './api/modifierOverrides'
-import { tagsAPI, playTagsAPI, playbookTagsAPI } from './api/tags'
+import { labelsAPI, playLabelsAPI, playbookLabelsAPI } from './api/labels'
 import { handleCallSheetExport } from './api/exports'
 
-const server = serve({
+const _server = serve({
   routes: {
     // API routes (must be defined BEFORE catch-all)
     // These routes handle server-side requests and return JSON
@@ -124,25 +124,25 @@ const server = serve({
       POST: playsAPI.duplicate
     },
 
-    // Tag API endpoints
-    '/api/tags/presets': {
-      GET: tagsAPI.listPresets
+    // Label API endpoints
+    '/api/labels/presets': {
+      GET: labelsAPI.listPresets
     },
-    '/api/teams/:teamId/tags': {
-      GET: tagsAPI.listTeamTags,
-      POST: tagsAPI.create
+    '/api/teams/:teamId/labels': {
+      GET: labelsAPI.listTeamLabels,
+      POST: labelsAPI.create
     },
-    '/api/tags/:tagId': {
-      PUT: tagsAPI.update,
-      DELETE: tagsAPI.delete
+    '/api/labels/:labelId': {
+      PUT: labelsAPI.update,
+      DELETE: labelsAPI.delete
     },
-    '/api/plays/:playId/tags': {
-      GET: playTagsAPI.list,
-      PUT: playTagsAPI.set
+    '/api/plays/:playId/labels': {
+      GET: playLabelsAPI.list,
+      PUT: playLabelsAPI.set
     },
-    '/api/playbooks/:playbookId/tags': {
-      GET: playbookTagsAPI.list,
-      PUT: playbookTagsAPI.set
+    '/api/playbooks/:playbookId/labels': {
+      GET: playbookLabelsAPI.list,
+      PUT: playbookLabelsAPI.set
     },
 
     // Team API endpoints
@@ -244,13 +244,13 @@ const server = serve({
 
     // Example API endpoints
     "/api/hello": {
-      async GET(req) {
+      async GET(_req) {
         return Response.json({
           message: "Hello, world!",
           method: "GET",
         })
       },
-      async PUT(req) {
+      async PUT(_req) {
         return Response.json({
           message: "Hello, world!",
           method: "PUT",

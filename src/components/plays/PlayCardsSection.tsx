@@ -2,6 +2,7 @@ import { useRef, useEffect, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { PlayCard } from '../playbook-editor/PlayCard'
 import type { Play } from '../../hooks/usePlaybookData'
+import './play-cards-section.css'
 
 const ANIMATION_DURATION = 800 // ms - must match CSS transition duration
 
@@ -50,26 +51,22 @@ export function PlayCardsSection({
 
 	return (
 		<div
-			className="border-t border-border relative"
+			className="play-cards-section"
 			style={{
-				height: showPlayBar ? '340px' : '0px',
-				overflow: 'visible',
-				zIndex: 0,
-				transition: 'height 800ms ease-in-out',
+				height: showPlayBar ? '324px' : '0px',
 			}}
 		>
 			{/* Render content when visible OR during hide animation (delayed unmount) */}
 			{shouldRenderContent && (
-				<div className="h-[340px] px-4 pt-4 flex items-start">
+				<div className="play-cards-section__content">
 					<div
 						ref={scrollContainerRef}
-						className="flex gap-4 overflow-x-auto overflow-y-visible py-2"
-						style={{ scrollbarGutter: 'stable' }}
+						className="play-cards-section__scroll"
 					>
 						{plays
 							.filter((play) => play.id !== currentPlayId)
 							.map((play) => (
-								<div key={play.id} className="flex-shrink-0 px-1">
+								<div key={play.id} className="play-cards-section__card-wrapper">
 									<PlayCard
 										{...play}
 												onOpen={onOpenPlay}
@@ -83,35 +80,27 @@ export function PlayCardsSection({
 						<button
 							onClick={onAddPlay}
 							disabled={isAddingPlay}
-							className={`flex-shrink-0 w-64 h-[283px]
-								rounded-xl border-2 border-dashed
-								transition-all duration-200 flex flex-col
-								items-center justify-center gap-2
-								bg-muted border-border text-muted-foreground
-								outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50
-								${isAddingPlay
-									? 'cursor-wait opacity-50'
-									: 'cursor-pointer hover:border-action-button hover:bg-accent hover:text-action-button'
-								}`}
+							className="play-cards-section__add-button"
+							aria-label="Add Play"
 						>
 							{isAddingPlay ? (
 								<>
-									<div className="w-12 h-12 rounded-xl flex items-center justify-center bg-muted">
-										<div className="animate-spin rounded-full h-6 w-6 border-b-2 border-muted-foreground" />
+									<div className="play-cards-section__add-icon">
+										<div className="play-cards-section__add-spinner" />
 									</div>
-									<span className="text-sm font-medium">Creating...</span>
+									<span className="play-cards-section__add-text">Creating...</span>
 								</>
 							) : (
 								<>
-									<div className="w-12 h-12 rounded-xl flex items-center justify-center bg-muted">
+									<div className="play-cards-section__add-icon">
 										<Plus size={24} />
 									</div>
-									<span className="text-sm font-medium">Add Play</span>
+									<span className="play-cards-section__add-text">Add Play</span>
 								</>
 							)}
 						</button>
 						{plays.length === 0 && (
-							<div className="flex items-center justify-center w-full text-muted-foreground">
+							<div className="play-cards-section__empty">
 								No plays in this playbook
 							</div>
 						)}

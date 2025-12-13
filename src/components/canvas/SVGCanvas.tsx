@@ -17,6 +17,7 @@ import {
 	insertPointIntoDrawing
 } from '../../utils/drawing.utils'
 import { PLAYER_RADIUS_FEET } from '../../constants/field.constants'
+import './svg-canvas.css'
 
 // Constants
 const NODE_PROXIMITY_THRESHOLD = 20
@@ -35,11 +36,11 @@ interface SVGCanvasProps {
 	coordSystem: FieldCoordinateSystem
 	drawings: Drawing[]
 	players?: Player[]
-	onChange: (drawings: Drawing[]) => void
+	onChange: (_drawings: Drawing[]) => void
 	activeTool: 'draw' | 'select' | 'erase' | 'addPlayer'
 	autoCorrect: boolean
 	defaultStyle: PathStyle
-	onDeleteDrawing?: (id: string) => void
+	onDeleteDrawing?: (_id: string) => void
 	eraseSize?: number
 	snapThreshold: number
 	selectedDrawingIds?: string[]
@@ -47,9 +48,9 @@ interface SVGCanvasProps {
 	panX?: number
 	panY?: number
 	onLinkDrawingToPlayer?: (
-		drawingId: string,
-		pointId: string,
-		playerId: string,
+		_drawingId: string,
+		_pointId: string,
+		_playerId: string,
 	) => void
 	onAddPlayerAtNode?: (
 		drawingId: string,
@@ -100,7 +101,7 @@ export function SVGCanvas({
 	onDrawingHoverChange,
 	onSelectWithPosition,
 }: SVGCanvasProps) {
-	const [selectedDrawingId, setSelectedDrawingId] = useState<string | null>(
+	const [_selectedDrawingId, setSelectedDrawingId] = useState<string | null>(
 		null,
 	)
 	const [lastDrawnDrawingId, setLastDrawnDrawingId] =
@@ -441,7 +442,7 @@ export function SVGCanvas({
 		setWholeDrawingSnapTarget(null)
 	}
 
-	function handleDrawingDoubleClick(
+	function _handleDrawingDoubleClick(
 		drawingId: string,
 		position: { x: number; y: number },
 	) {
@@ -449,11 +450,12 @@ export function SVGCanvas({
 	}
 
 	return (
-		<div className='absolute top-0 left-0 w-full h-full overflow-hidden' style={{ borderRadius: 'inherit' }}>
+		<div className='svg-canvas-container'>
 			<svg
 				width={width}
 				height={height}
-				className='absolute top-0 left-0 w-full h-full pointer-events-auto'
+				className='svg-canvas'
+				style={{ pointerEvents: activeTool === 'draw' ? 'none' : undefined }}
 				onPointerMove={handleDrawingDragMove}
 				onPointerUp={(e) => handleDrawingDragEnd(e)}
 				onPointerDown={(e) => {
@@ -571,10 +573,7 @@ export function SVGCanvas({
 					stroke='#3b82f6'
 					strokeWidth={3}
 					pointerEvents='none'
-					className='animate-pulse'
-					style={{
-						filter: 'drop-shadow(0 0 6px rgba(59,130,246,0.6))',
-					}}
+					className='svg-canvas-snap-indicator'
 				/>
 			)}
 			</svg>
@@ -592,11 +591,11 @@ export function SVGCanvas({
 			/>
 
 		{activeTool === 'draw' && lastDrawnDrawingId && isOverCanvas && (
-			<div className='absolute top-0 left-0 w-full h-full pointer-events-none'>
+			<div className='svg-canvas-overlay-wrapper'>
 				<svg
 					width={width}
 					height={height}
-					className='absolute top-0 left-0 w-full h-full pointer-events-none'
+					className='svg-canvas-overlay-svg'
 				>
 					<ControlPointOverlay
 						drawing={

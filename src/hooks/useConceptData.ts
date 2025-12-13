@@ -208,7 +208,7 @@ export function useConceptData(
 
 			return { previous }
 		},
-		onError: (err, variables, context) => {
+		onError: (err, _variables, context) => {
 			// Rollback on error
 			if (context?.previous) {
 				queryClient.setQueryData(
@@ -244,7 +244,7 @@ export function useConceptData(
 
 			return { previous }
 		},
-		onError: (err, variables, context) => {
+		onError: (err, _variables, context) => {
 			if (context?.previous) {
 				queryClient.setQueryData(
 					conceptKeys.formations(teamId!),
@@ -294,7 +294,7 @@ export function useConceptData(
 
 			return { previous }
 		},
-		onError: (err, variables, context) => {
+		onError: (err, _variables, context) => {
 			if (context?.previous) {
 				queryClient.setQueryData(
 					conceptKeys.baseConcepts(teamId!, playbookId),
@@ -328,7 +328,7 @@ export function useConceptData(
 
 			return { previous }
 		},
-		onError: (err, variables, context) => {
+		onError: (err, _variables, context) => {
 			if (context?.previous) {
 				queryClient.setQueryData(
 					conceptKeys.baseConcepts(teamId!, playbookId),
@@ -378,7 +378,7 @@ export function useConceptData(
 
 			return { previous }
 		},
-		onError: (err, variables, context) => {
+		onError: (err, _variables, context) => {
 			if (context?.previous) {
 				queryClient.setQueryData(
 					conceptKeys.conceptGroups(teamId!, playbookId),
@@ -412,7 +412,7 @@ export function useConceptData(
 
 			return { previous }
 		},
-		onError: (err, variables, context) => {
+		onError: (err, _variables, context) => {
 			if (context?.previous) {
 				queryClient.setQueryData(
 					conceptKeys.conceptGroups(teamId!, playbookId),
@@ -433,7 +433,7 @@ export function useConceptData(
 	// =========================================================================
 
 	const updateRolesMutation = useMutation({
-		mutationFn: (roles: RoleTerminology[]) => apiUpdateRoles(teamId!, roles),
+		mutationFn: (_roles: RoleTerminology[]) => apiUpdateRoles(teamId!, _roles),
 		onSuccess: () => {
 			queryClient.invalidateQueries({
 				queryKey: conceptKeys.roles(teamId!)

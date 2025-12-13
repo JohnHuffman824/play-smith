@@ -241,7 +241,7 @@ export function pointToLineDistance(
  */
 export function isPointNearDrawing(
 	clickPixelPoint: Coordinate,
-	drawing: DrawingObject,
+	_drawing: DrawingObject,
 	pixelPoints: Array<Coordinate>,
 	brushSize: number = 15,
 ): boolean {

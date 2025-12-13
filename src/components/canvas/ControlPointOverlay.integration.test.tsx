@@ -2,6 +2,7 @@ import { afterEach, describe, test, expect, beforeEach } from 'bun:test'
 import { cleanup, render, fireEvent } from '@testing-library/react'
 import { ControlPointOverlay } from './ControlPointOverlay'
 import { FieldCoordinateSystem } from '../../utils/coordinates'
+import { SettingsProvider } from '@/contexts/SettingsContext'
 import type { Drawing } from '../../types/drawing.types'
 
 describe('ControlPointOverlay - Node Linking Integration', () => {
@@ -45,6 +46,7 @@ describe('ControlPointOverlay - Node Linking Integration', () => {
 		strokeWidth: 2,
 		lineStyle: 'solid',
 		lineEnd: 'none',
+		pathMode: 'sharp',
 	},
 		annotations: [],
 	}
@@ -66,22 +68,25 @@ describe('ControlPointOverlay - Node Linking Integration', () => {
 		strokeWidth: 2,
 		lineStyle: 'solid',
 		lineEnd: 'none',
+		pathMode: 'sharp',
 	},
 		annotations: [],
 	}
 
 	test('triggers onMerge when dragging node near another drawing', () => {
 		const { container } = render(
-			<svg width={800} height={400}>
-				<ControlPointOverlay
-					drawing={drawing1}
-					drawings={[drawing1, drawing2]}
-					coordSystem={mockCoordSystem}
-					snapThreshold={10}
-					onDragPoint={mockOnDragPoint}
-					onMerge={mockOnMerge}
-				/>
-			</svg>
+			<SettingsProvider>
+				<svg width={800} height={400}>
+					<ControlPointOverlay
+						drawing={drawing1}
+						drawings={[drawing1, drawing2]}
+						coordSystem={mockCoordSystem}
+						snapThreshold={10}
+						onDragPoint={mockOnDragPoint}
+						onMerge={mockOnMerge}
+					/>
+				</svg>
+			</SettingsProvider>
 		)
 
 		// Find the control point for p2 (end point of drawing1 at 20, 10)
@@ -141,6 +146,7 @@ describe('ControlPointOverlay - Node Linking Integration', () => {
 				strokeWidth: 2,
 				lineStyle: 'solid',
 				lineEnd: 'none',
+				pathMode: 'sharp',
 			},
 			annotations: [],
 		}
@@ -163,21 +169,24 @@ describe('ControlPointOverlay - Node Linking Integration', () => {
 				strokeWidth: 2,
 				lineStyle: 'solid',
 				lineEnd: 'none',
+				pathMode: 'sharp',
 			},
 			annotations: [],
 		}
 
 		const { container } = render(
-			<svg width={800} height={400}>
-				<ControlPointOverlay
-					drawing={userDrawing1}
-					drawings={[userDrawing1, userDrawing2]}
-					coordSystem={mockCoordSystem}
-					snapThreshold={10}
-					onDragPoint={mockOnDragPoint}
-					onMerge={mockOnMerge}
-				/>
-			</svg>
+			<SettingsProvider>
+				<svg width={800} height={400}>
+					<ControlPointOverlay
+						drawing={userDrawing1}
+						drawings={[userDrawing1, userDrawing2]}
+						coordSystem={mockCoordSystem}
+						snapThreshold={10}
+						onDragPoint={mockOnDragPoint}
+						onMerge={mockOnMerge}
+					/>
+				</svg>
+			</SettingsProvider>
 		)
 
 		// Drag node 'b' (20, 30) to node 'c' (20, 20)
@@ -221,16 +230,18 @@ describe('ControlPointOverlay - Node Linking Integration', () => {
 
 	test('does not trigger merge when dragging far from other nodes', () => {
 		const { container } = render(
-			<svg width={800} height={400}>
-				<ControlPointOverlay
-					drawing={drawing1}
-					drawings={[drawing1, drawing2]}
-					coordSystem={mockCoordSystem}
-					snapThreshold={10}
-					onDragPoint={mockOnDragPoint}
-					onMerge={mockOnMerge}
-				/>
-			</svg>
+			<SettingsProvider>
+				<svg width={800} height={400}>
+					<ControlPointOverlay
+						drawing={drawing1}
+						drawings={[drawing1, drawing2]}
+						coordSystem={mockCoordSystem}
+						snapThreshold={10}
+						onDragPoint={mockOnDragPoint}
+						onMerge={mockOnMerge}
+					/>
+				</svg>
+			</SettingsProvider>
 		)
 
 		const p2Pixel = mockCoordSystem.feetToPixels(20, 10)
@@ -258,16 +269,18 @@ describe('ControlPointOverlay - Node Linking Integration', () => {
 
 	test('shows green indicator when dragging near another node', () => {
 		const { container } = render(
-			<svg width={800} height={400}>
-				<ControlPointOverlay
-					drawing={drawing1}
-					drawings={[drawing1, drawing2]}
-					coordSystem={mockCoordSystem}
-					snapThreshold={10}
-					onDragPoint={mockOnDragPoint}
-					onMerge={mockOnMerge}
-				/>
-			</svg>
+			<SettingsProvider>
+				<svg width={800} height={400}>
+					<ControlPointOverlay
+						drawing={drawing1}
+						drawings={[drawing1, drawing2]}
+						coordSystem={mockCoordSystem}
+						snapThreshold={10}
+						onDragPoint={mockOnDragPoint}
+						onMerge={mockOnMerge}
+					/>
+				</svg>
+			</SettingsProvider>
 		)
 
 		const p2Pixel = mockCoordSystem.feetToPixels(20, 10)

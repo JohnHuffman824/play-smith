@@ -1,6 +1,7 @@
 import { X } from 'lucide-react'
 import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
+import './modal.css'
 
 interface ModalProps {
   isOpen: boolean
@@ -31,32 +32,21 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
-      />
-
-      <div 
-        className="relative bg-popover border border-border rounded-xl 
-          shadow-2xl w-full max-w-md mx-4 max-h-[90vh] overflow-auto"
-      >
-        <div
-          className="flex items-center justify-between px-6 py-4
-            border-b border-border"
-        >
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
           <h2>{title}</h2>
           <Button
             onClick={onClose}
             variant="ghost"
             size="icon"
-            className="h-auto w-auto p-1"
+            className="modal-close-button"
           >
-            <X className="w-5 h-5" />
+            <X />
           </Button>
         </div>
 
-        <div className="px-6 py-4">{children}</div>
+        <div className="modal-body">{children}</div>
       </div>
     </div>
   )

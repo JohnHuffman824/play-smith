@@ -1,22 +1,25 @@
 import { useSettings } from '@/contexts/SettingsContext'
 import { Switch } from '@/components/ui/switch'
+import './settings-section.css'
 
 export function PlaybackSection() {
 	const { moveSkillsOnHashChange, setMoveSkillsOnHashChange } = useSettings()
 
 	return (
-		<div>
-			<h3 className="text-lg font-medium mb-4">Playback</h3>
-			<div className="space-y-4">
+		<div className="settings-section">
+			<h3 className="settings-section-title">Playback</h3>
+			<div className="settings-section-content">
 				{/* Move Skills on Hash Change */}
-				<div className="flex items-center justify-between">
-					<div>
-						<label className="font-medium">Move Skills on Hash Change</label>
-						<p className="text-sm text-muted-foreground">
+				<div className="settings-row">
+					<div className="settings-label-group">
+						<label className="settings-label">Move Skills on Hash Change</label>
+						<p className="settings-description">
 							Automatically move skill position players when hash position changes
 						</p>
 					</div>
-					<Switch checked={moveSkillsOnHashChange} onCheckedChange={setMoveSkillsOnHashChange} />
+					<div className="settings-control">
+						<Switch checked={moveSkillsOnHashChange} onCheckedChange={setMoveSkillsOnHashChange} />
+					</div>
 				</div>
 			</div>
 		</div>

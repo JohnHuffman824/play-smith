@@ -1,0 +1,89 @@
+/* || Navigation Component */
+
+/* || Nav Container */
+.navigation {
+  background: var(--card);
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 5%);
+  border-bottom: 1px solid var(--border);
+}
+
+.navigation-inner {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+@media (width >= 640px) {
+  .navigation-inner {
+    padding: 0 1.5rem;
+  }
+}
+
+@media (width >= 1024px) {
+  .navigation-inner {
+    padding: 0 2rem;
+  }
+}
+
+.navigation-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 4rem;
+}
+
+/* || Left Section */
+.navigation-left {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.navigation-logo {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--foreground);
+  text-decoration: none;
+}
+
+.navigation-link {
+  color: var(--foreground);
+  text-decoration: none;
+  transition: color 200ms;
+}
+
+.navigation-link:hover {
+  color: color-mix(in oklch, var(--foreground) 80%, transparent);
+}
+
+/* || Right Section */
+.navigation-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.navigation-username {
+  color: var(--foreground);
+}
+
+/* || Logout Button */
+.navigation-logout {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  color: var(--foreground);
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  outline: none;
+  transition: all 200ms;
+}
+
+.navigation-logout:hover {
+  background: var(--accent);
+}
+
+.navigation-logout:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}

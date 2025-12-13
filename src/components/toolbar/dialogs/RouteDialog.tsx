@@ -1,5 +1,6 @@
-import { X } from 'lucide-react'
 import { eventBus } from '../../../services/EventBus'
+import { DialogCloseButton } from '../../ui/dialog-close-button'
+import './route-dialog.css'
 
 interface RouteDialogProps {
   onClose: () => void
@@ -18,19 +19,6 @@ const routes = [
 ]
 
 export function RouteDialog({ onClose }: RouteDialogProps) {
-  const containerClass = [
-    'absolute left-24 top-6 w-80 rounded-2xl shadow-2xl bg-card',
-    'border border-border p-4 z-50 max-h-[calc(100vh-4rem)] overflow-y-auto',
-  ].join(' ')
-  const headerClass =
-    'flex items-center justify-between mb-4 sticky top-0 pb-2 border-b border-border bg-card'
-  const itemClass =
-    'w-full p-3 rounded-xl border border-border bg-muted hover:bg-accent hover:border-action-button transition-all duration-200 text-left group cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50'
-  const numberBadgeClass =
-    'w-8 h-8 rounded-lg bg-action-button text-action-button-foreground flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform font-semibold'
-  const closeButtonClass =
-    'w-6 h-6 rounded-lg flex items-center justify-center cursor-pointer hover:bg-accent text-muted-foreground outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50'
-
   const handleRouteSelect = (route: typeof routes[0]) => {
     eventBus.emit('drawing:add', { drawing: route })
     onClose()
@@ -39,33 +27,28 @@ export function RouteDialog({ onClose }: RouteDialogProps) {
   return (
     <div
       data-drawing-dialog
-      className={containerClass}>
-      <div className={headerClass}>
-        <span className="text-foreground">Add Drawing</span>
-        <button
-          onClick={onClose}
-          className={closeButtonClass}
-        >
-          <X size={16} />
-        </button>
+      className="route-dialog">
+      <div className="route-dialog-header">
+        <span className="route-dialog-title">Add Drawing</span>
+        <DialogCloseButton onClose={onClose} />
       </div>
 
-      <div className="space-y-2">
+      <div className="route-dialog-list">
         {routes.map((route) => (
           <button
             key={route.number}
             onClick={() => handleRouteSelect(route)}
-            className={itemClass}
+            className="route-dialog-item"
           >
-            <div className="flex items-start gap-3">
-              <div className={numberBadgeClass}>
+            <div className="route-dialog-item-content">
+              <div className="route-dialog-item-badge">
                 {route.number}
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-foreground mb-1">
+              <div className="route-dialog-item-details">
+                <div className="route-dialog-item-name">
                   {route.name}
                 </div>
-                <div className="text-xs text-muted-foreground">
+                <div className="route-dialog-item-description">
                   {route.description}
                 </div>
               </div>

@@ -1,4 +1,4 @@
-import type { RoleDefinition, SelectorDefinition, RelativeSelector } from '../types/concept.types'
+import type { RoleDefinition, SelectorDefinition } from '../types/concept.types'
 
 // Chip type constants - eliminates magic strings
 export const CHIP_TYPE_FORMATION = 'formation' as const
@@ -73,8 +73,8 @@ export const RELATIVE_SELECTORS: SelectorDefinition[] = [
 ]
 
 export const CHIP_STYLES = {
-	formation: 'bg-secondary text-secondary-foreground border-border',
-	concept: 'bg-secondary text-secondary-foreground border-border',
-	concept_group: 'bg-secondary text-secondary-foreground border-border',
-	text: 'bg-secondary text-secondary-foreground border-border'
+	formation: 'concept-chip--formation',
+	concept: 'concept-chip--concept',
+	concept_group: 'concept-chip--concept-group',
+	text: 'concept-chip--text'
 } as const

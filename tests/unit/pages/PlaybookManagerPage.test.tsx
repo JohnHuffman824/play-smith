@@ -121,7 +121,7 @@ describe('PlaybookManagerPage - Error Handling', () => {
 
 		// Wait for error to appear
 		await waitFor(() => {
-			expect(screen.getByText(/Error:/)).toBeDefined()
+			expect(screen.getByText('Error')).toBeDefined()
 			expect(screen.getByText(/Failed to fetch playbooks/)).toBeDefined()
 		})
 	})
@@ -163,7 +163,7 @@ describe('PlaybookManagerPage - Error Handling', () => {
 
 		// Should not show loading or error
 		expect(screen.queryByText('Loading playbooks...')).toBeNull()
-		expect(screen.queryByText(/Error:/)).toBeNull()
+		expect(screen.queryByText('Error')).toBeNull()
 	})
 
 	// Skipped: Bun test runner treats React Query mutation errors as test failures

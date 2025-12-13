@@ -2,6 +2,7 @@ import { afterEach, describe, test, expect } from 'bun:test'
 import { cleanup, render, fireEvent, waitFor } from '@testing-library/react'
 import { SVGCanvas } from './SVGCanvas'
 import { FieldCoordinateSystem } from '../../utils/coordinates'
+import { SettingsProvider } from '../../contexts/SettingsContext'
 import type { Drawing } from '../../types/drawing.types'
 
 describe('SVGCanvas - Full Link Integration', () => {
@@ -15,9 +16,10 @@ describe('SVGCanvas - Full Link Integration', () => {
 	let changeCount = 0
 const DEFAULT_STYLE = {
 	color: '#000000',
-	lineWidth: 2,
+	strokeWidth: 2,
 	lineStyle: 'solid',
 	lineEnd: 'none',
+	pathMode: 'sharp',
 }
 
 	const handleChange = (newDrawings: Drawing[]) => {
@@ -42,6 +44,7 @@ const DEFAULT_STYLE = {
 		strokeWidth: 2,
 		lineStyle: 'solid',
 		lineEnd: 'none',
+		pathMode: 'sharp',
 	},
 		annotations: [],
 	}
@@ -63,6 +66,7 @@ const DEFAULT_STYLE = {
 		strokeWidth: 2,
 		lineStyle: 'solid',
 		lineEnd: 'none',
+		pathMode: 'sharp',
 	},
 		annotations: [],
 	}
@@ -72,19 +76,21 @@ const DEFAULT_STYLE = {
 		changeCount = 0
 
 		const { container } = render(
-			<SVGCanvas
-				width={800}
-				height={400}
-				coordSystem={mockCoordSystem}
-				drawings={drawings}
-				onChange={handleChange}
-				activeTool='select'
-				autoCorrect={false}
-				defaultStyle={DEFAULT_STYLE}
-				snapThreshold={10}
-				isOverCanvas={true}
-				selectedDrawingIds={['drawing-1', 'drawing-2']}
-			/>
+			<SettingsProvider>
+				<SVGCanvas
+					width={800}
+					height={400}
+					coordSystem={mockCoordSystem}
+					drawings={drawings}
+					onChange={handleChange}
+					activeTool='select'
+					autoCorrect={false}
+					defaultStyle={DEFAULT_STYLE}
+					snapThreshold={10}
+					isOverCanvas={true}
+					selectedDrawingIds={['drawing-1', 'drawing-2']}
+				/>
+			</SettingsProvider>
 		)
 
 		// Find control node for p2 (end of drawing1 at 20, 10)
@@ -134,19 +140,21 @@ const DEFAULT_STYLE = {
 		changeCount = 0
 
 		const { container } = render(
-			<SVGCanvas
-				width={800}
-				height={400}
-				coordSystem={mockCoordSystem}
-				drawings={drawings}
-				onChange={handleChange}
-				activeTool='select'
-				autoCorrect={false}
-				defaultStyle={DEFAULT_STYLE}
-				snapThreshold={10}
-				isOverCanvas={true}
-				selectedDrawingIds={['drawing-1', 'drawing-2']}
-			/>
+			<SettingsProvider>
+				<SVGCanvas
+					width={800}
+					height={400}
+					coordSystem={mockCoordSystem}
+					drawings={drawings}
+					onChange={handleChange}
+					activeTool='select'
+					autoCorrect={false}
+					defaultStyle={DEFAULT_STYLE}
+					snapThreshold={10}
+					isOverCanvas={true}
+					selectedDrawingIds={['drawing-1', 'drawing-2']}
+				/>
+			</SettingsProvider>
 		)
 
 		// Find control node for p3 (start of drawing2 at 25, 10)
@@ -210,6 +218,7 @@ const DEFAULT_STYLE = {
 		strokeWidth: 2,
 		lineStyle: 'solid',
 		lineEnd: 'none',
+		pathMode: 'sharp',
 	},
 			annotations: [],
 		}
@@ -232,6 +241,7 @@ const DEFAULT_STYLE = {
 		strokeWidth: 2,
 		lineStyle: 'solid',
 		lineEnd: 'none',
+		pathMode: 'sharp',
 	},
 			annotations: [],
 		}
@@ -240,19 +250,21 @@ const DEFAULT_STYLE = {
 		changeCount = 0
 
 		const { container } = render(
-			<SVGCanvas
-				width={800}
-				height={400}
-				coordSystem={mockCoordSystem}
-				drawings={drawings}
-				onChange={handleChange}
-				activeTool='select'
-				autoCorrect={false}
-				defaultStyle={DEFAULT_STYLE}
-				snapThreshold={10}
-				isOverCanvas={true}
-				selectedDrawingIds={['d1', 'd2']}
-			/>
+			<SettingsProvider>
+				<SVGCanvas
+					width={800}
+					height={400}
+					coordSystem={mockCoordSystem}
+					drawings={drawings}
+					onChange={handleChange}
+					activeTool='select'
+					autoCorrect={false}
+					defaultStyle={DEFAULT_STYLE}
+					snapThreshold={10}
+					isOverCanvas={true}
+					selectedDrawingIds={['d1', 'd2']}
+				/>
+			</SettingsProvider>
 		)
 
 		// Find node 'b' at (20, 30)
@@ -327,19 +339,21 @@ const DEFAULT_STYLE = {
 		changeCount = 0
 
 		const { container } = render(
-			<SVGCanvas
-				width={800}
-				height={400}
-				coordSystem={mockCoordSystem}
-				drawings={drawings}
-				onChange={handleChange}
-				activeTool='select'
-				autoCorrect={false}
-				defaultStyle={DEFAULT_STYLE}
-				snapThreshold={10}
-				isOverCanvas={true}
-				selectedDrawingIds={['drawing-1', 'drawing-2']}
-			/>
+			<SettingsProvider>
+				<SVGCanvas
+					width={800}
+					height={400}
+					coordSystem={mockCoordSystem}
+					drawings={drawings}
+					onChange={handleChange}
+					activeTool='select'
+					autoCorrect={false}
+					defaultStyle={DEFAULT_STYLE}
+					snapThreshold={10}
+					isOverCanvas={true}
+					selectedDrawingIds={['drawing-1', 'drawing-2']}
+				/>
+			</SettingsProvider>
 		)
 
 		const p2Pixel = mockCoordSystem.feetToPixels(20, 10)
@@ -379,7 +393,7 @@ const DEFAULT_STYLE = {
 					pointIds: ['a', 'b'],
 				},
 			],
-			style: { color: '#ff0000', strokeWidth: 2, lineStyle: 'solid', lineEnd: 'none' },
+			style: { color: '#ff0000', strokeWidth: 2, lineStyle: 'solid', lineEnd: 'none', pathMode: 'sharp' },
 			annotations: [],
 		}
 
@@ -401,6 +415,7 @@ const DEFAULT_STYLE = {
 		strokeWidth: 2,
 		lineStyle: 'solid',
 		lineEnd: 'none',
+		pathMode: 'sharp',
 	},
 			annotations: [],
 		}
@@ -409,19 +424,21 @@ const DEFAULT_STYLE = {
 		changeCount = 0
 
 		const { container, rerender } = render(
-			<SVGCanvas
-				width={800}
-				height={400}
-				coordSystem={mockCoordSystem}
-				drawings={drawings}
-				onChange={handleChange}
-				activeTool='select'
-				autoCorrect={false}
-				defaultStyle={DEFAULT_STYLE}
-				snapThreshold={10}
-				isOverCanvas={true}
-				selectedDrawingIds={['d1', 'd2']}
-			/>
+			<SettingsProvider>
+				<SVGCanvas
+					width={800}
+					height={400}
+					coordSystem={mockCoordSystem}
+					drawings={drawings}
+					onChange={handleChange}
+					activeTool='select'
+					autoCorrect={false}
+					defaultStyle={DEFAULT_STYLE}
+					snapThreshold={10}
+					isOverCanvas={true}
+					selectedDrawingIds={['d1', 'd2']}
+				/>
+			</SettingsProvider>
 		)
 
 		// Before merge: 4 control points (2 per drawing)
@@ -458,19 +475,21 @@ const DEFAULT_STYLE = {
 
 		// Rerender with merged drawings
 		rerender(
-			<SVGCanvas
-				width={800}
-				height={400}
-				coordSystem={mockCoordSystem}
-				drawings={drawings}
-				onChange={handleChange}
-				activeTool="select"
-				autoCorrect={false}
-				defaultStyle={{ color: '#000000', lineWidth: 2, lineStyle: 'solid', lineEnd: 'none' }}
-				snapThreshold={10}
-				isOverCanvas={true}
-				selectedDrawingIds={drawings.map(d => d.id)}
-			/>
+			<SettingsProvider>
+				<SVGCanvas
+					width={800}
+					height={400}
+					coordSystem={mockCoordSystem}
+					drawings={drawings}
+					onChange={handleChange}
+					activeTool="select"
+					autoCorrect={false}
+					defaultStyle={{ color: '#000000', strokeWidth: 2, lineStyle: 'solid', lineEnd: 'none', pathMode: 'sharp' }}
+					snapThreshold={10}
+					isOverCanvas={true}
+					selectedDrawingIds={drawings.map(d => d.id)}
+				/>
+			</SettingsProvider>
 		)
 
 		// After merge: Should have exactly 3 control points
@@ -512,7 +531,7 @@ const DEFAULT_STYLE = {
 				type: 'line',
 				pointIds: ['a', 'b'],
 			}],
-			style: { color: '#ff0000', strokeWidth: 2, lineStyle: 'solid', lineEnd: 'none' },
+			style: { color: '#ff0000', strokeWidth: 2, lineStyle: 'solid', lineEnd: 'none', pathMode: 'sharp' },
 			annotations: [],
 		}
 
@@ -527,7 +546,7 @@ const DEFAULT_STYLE = {
 				type: 'line',
 				pointIds: ['c', 'd'],
 			}],
-			style: { color: '#00ff00', strokeWidth: 2, lineStyle: 'solid', lineEnd: 'none' },
+			style: { color: '#00ff00', strokeWidth: 2, lineStyle: 'solid', lineEnd: 'none', pathMode: 'sharp' },
 			annotations: [],
 		}
 
@@ -535,19 +554,21 @@ const DEFAULT_STYLE = {
 		changeCount = 0
 
 		const { container, rerender } = render(
-			<SVGCanvas
-				width={800}
-				height={400}
-				coordSystem={mockCoordSystem}
-				drawings={drawings}
-				onChange={handleChange}
-				activeTool="select"
-				autoCorrect={false}
-				defaultStyle={{ color: '#000000', lineWidth: 2, lineStyle: 'solid', lineEnd: 'none' }}
-				snapThreshold={10}
-				isOverCanvas={true}
-				selectedDrawingIds={['d1', 'd2']}
-			/>
+			<SettingsProvider>
+				<SVGCanvas
+					width={800}
+					height={400}
+					coordSystem={mockCoordSystem}
+					drawings={drawings}
+					onChange={handleChange}
+					activeTool="select"
+					autoCorrect={false}
+					defaultStyle={{ color: '#000000', strokeWidth: 2, lineStyle: 'solid', lineEnd: 'none', pathMode: 'sharp' }}
+					snapThreshold={10}
+					isOverCanvas={true}
+					selectedDrawingIds={['d1', 'd2']}
+				/>
+			</SettingsProvider>
 		)
 
 		// Perform merge: drag 'b' to 'c'
@@ -571,19 +592,21 @@ const DEFAULT_STYLE = {
 
 		// Rerender with merged drawing
 		rerender(
-			<SVGCanvas
-				width={800}
-				height={400}
-				coordSystem={mockCoordSystem}
-				drawings={drawings}
-				onChange={handleChange}
-				activeTool="select"
-				autoCorrect={false}
-				defaultStyle={{ color: '#000000', lineWidth: 2, lineStyle: 'solid', lineEnd: 'none' }}
-				snapThreshold={10}
-				isOverCanvas={true}
-				selectedDrawingIds={drawings.map(d => d.id)}
-			/>
+			<SettingsProvider>
+				<SVGCanvas
+					width={800}
+					height={400}
+					coordSystem={mockCoordSystem}
+					drawings={drawings}
+					onChange={handleChange}
+					activeTool="select"
+					autoCorrect={false}
+					defaultStyle={{ color: '#000000', strokeWidth: 2, lineStyle: 'solid', lineEnd: 'none', pathMode: 'sharp' }}
+					snapThreshold={10}
+					isOverCanvas={true}
+					selectedDrawingIds={drawings.map(d => d.id)}
+				/>
+			</SettingsProvider>
 		)
 
 		// Now drag the merged junction point at (20, 20) to (25, 25)
@@ -610,19 +633,21 @@ const DEFAULT_STYLE = {
 
 		// Rerender after dragging junction
 		rerender(
-			<SVGCanvas
-				width={800}
-				height={400}
-				coordSystem={mockCoordSystem}
-				drawings={drawings}
-				onChange={handleChange}
-				activeTool="select"
-				autoCorrect={false}
-				defaultStyle={{ color: '#000000', lineWidth: 2, lineStyle: 'solid', lineEnd: 'none' }}
-				snapThreshold={10}
-				isOverCanvas={true}
-				selectedDrawingIds={drawings.map(d => d.id)}
-			/>
+			<SettingsProvider>
+				<SVGCanvas
+					width={800}
+					height={400}
+					coordSystem={mockCoordSystem}
+					drawings={drawings}
+					onChange={handleChange}
+					activeTool="select"
+					autoCorrect={false}
+					defaultStyle={{ color: '#000000', strokeWidth: 2, lineStyle: 'solid', lineEnd: 'none', pathMode: 'sharp' }}
+					snapThreshold={10}
+					isOverCanvas={true}
+					selectedDrawingIds={drawings.map(d => d.id)}
+				/>
+			</SettingsProvider>
 		)
 
 		// Should still have exactly 3 control points (no phantom at old junction position)

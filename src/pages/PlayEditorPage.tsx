@@ -6,21 +6,27 @@ import { PlayHeader } from '../components/plays/PlayHeader'
 import { PlayCardsSection } from '../components/plays/PlayCardsSection'
 import { ConceptDialog } from '../components/concepts/ConceptDialog'
 import { SelectionOverlay } from '../components/canvas/SelectionOverlay'
-import { SelectedTagsOverlay } from '../components/tags/SelectedTagsOverlay'
-import { TagDialog } from '../components/tags/TagDialog'
+import { SelectedLabelsOverlay } from '../components/labels/SelectedLabelsOverlay'
+import { LabelDialog } from '../components/labels/LabelDialog'
 import { useTheme } from '@/contexts/SettingsContext'
 import { PlayProvider, usePlayContext } from '../contexts/PlayContext'
 import { ConceptProvider, useConcept } from '../contexts/ConceptContext'
 import { CanvasViewportProvider } from '../contexts/CanvasViewportContext'
 import { useConceptData } from '../hooks/useConceptData'
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
-import { useTagsData, type Tag } from '../hooks/useTagsData'
+import { useLabelsData, type Label } from '../hooks/useLabelsData'
 import type { Play } from '../hooks/usePlaybookData'
 import { eventBus } from '../services/EventBus'
 import { createDefaultLinemen } from '../utils/lineman.utils'
-import { Modal } from '../components/shared/Modal'
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from '../components/ui/dialog'
 import { Input } from '../components/ui/input'
 import { ConfirmDialog } from '../components/toolbar/dialogs/ConfirmDialog'
+import './play-editor-page.css'
 import {
 	CHIP_TYPE_FORMATION,
 	CHIP_TYPE_CONCEPT,
@@ -40,7 +46,7 @@ interface ApiPlay {
 	personnel_id: number | null
 	play_type: string
 	defensive_formation_id: number | null
-	tags: Array<string | { name: string; color: string }>
+	labels: Array<string | { name: string; color: string }>
 	updated_at: string
 	drawings: unknown[]
 	players: unknown[]
@@ -86,9 +92,9 @@ function PlayEditorContent() {
 
 	const [selectedObjectIds, setSelectedObjectIds] = useState<string[]>([])
 
-	const { tags: availableTags, createTag } = useTagsData(teamId)
-	const [selectedTags, setSelectedTags] = useState<Tag[]>([])
-	const [showTagDialog, setShowTagDialog] = useState(false)
+	const { labels: availableLabels, createLabel } = useLabelsData(teamId)
+	const [selectedLabels, setSelectedLabels] = useState<Label[]>([])
+	const [showLabelDialog, setShowLabelDialog] = useState(false)
 	const [isPlayLoaded, setIsPlayLoaded] = useState(false)
 	const [playbookPlays, setPlaybookPlays] = useState<Play[]>([])
 	const [isAddingPlay, setIsAddingPlay] = useState(false)
@@ -162,11 +168,11 @@ function PlayEditorContent() {
 						error: errorData.error || 'Failed to save play'
 					})
 				} else {
-					// Save tags
-					await fetch(`/api/plays/${playId}/tags`, {
+					// Save labels
+					await fetch(`/api/plays/${playId}/labels`, {
 						method: 'PUT',
 						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify({ tag_ids: selectedTags.map(t => t.id) })
+						body: JSON.stringify({ label_ids: selectedLabels.map(l => l.id) })
 					})
 
 					// Mark as clean after successful save
@@ -185,12 +191,13 @@ function PlayEditorContent() {
 
 		eventBus.on('canvas:save', handleSave)
 		return () => eventBus.off('canvas:save', handleSave)
-	}, [playId, playState.players, playState.drawings, playState.play, playState.hashAlignment, selectedTags, markClean])
+	}, [playId, playState.players, playState.drawings, playState.play, playState.hashAlignment, selectedLabels, markClean])
 
 	// Load play data on mount - also sets teamId for concept data
 	useEffect(() => {
 		// Reset loading state when playId changes
 		setIsPlayLoaded(false)
+		setIsAddingPlay(false) // Reset add play loading state
 
 		async function loadPlay() {
 			if (!playId) return
@@ -236,11 +243,11 @@ function PlayEditorContent() {
 					dispatch({ type: 'SET_DRAWINGS', drawings: play.drawings })
 				}
 
-				// Load tags
-				const tagsRes = await fetch(`/api/plays/${playId}/tags`)
-				if (tagsRes.ok) {
-					const tagsData = await tagsRes.json()
-					setSelectedTags(tagsData.tags || [])
+				// Load labels
+				const labelsRes = await fetch(`/api/plays/${playId}/labels`)
+				if (labelsRes.ok) {
+					const labelsData = await labelsRes.json()
+					setSelectedLabels(labelsData.labels || [])
 				}
 
 				// Mark play as loaded after all data is fetched
@@ -283,10 +290,10 @@ function PlayEditorContent() {
 					defensiveFormation: apiPlay.defensive_formation_id
 						? String(apiPlay.defensive_formation_id)
 						: '',
-					tags: (apiPlay.tags || []).map((t) =>
-						typeof t === 'string' ? t : t.name
+					labels: (apiPlay.labels || []).map((l) =>
+						typeof l === 'string' ? l : l.name
 					),
-					tagObjects: apiPlay.tags || [],
+					labelObjects: apiPlay.labels || [],
 					lastModified: apiPlay.updated_at
 						? new Date(apiPlay.updated_at).toLocaleDateString()
 						: new Date().toLocaleDateString(),
@@ -325,14 +332,14 @@ function PlayEditorContent() {
 		return () => eventBus.off('selection:delete', handleDeleteSelection)
 	}, [selectedObjectIds, deleteSelectedObjects])
 
-	// Listen for tags:openDialog event from toolbar
+	// Listen for labels:openDialog event from toolbar
 	useEffect(() => {
-		function handleOpenTagDialog() {
-			setShowTagDialog(true)
+		function handleOpenLabelDialog() {
+			setShowLabelDialog(true)
 		}
 
-		eventBus.on('tags:openDialog', handleOpenTagDialog)
-		return () => eventBus.off('tags:openDialog', handleOpenTagDialog)
+		eventBus.on('labels:openDialog', handleOpenLabelDialog)
+		return () => eventBus.off('labels:openDialog', handleOpenLabelDialog)
 	}, [])
 
 	function handleBackToPlaybook() {
@@ -352,8 +359,8 @@ function PlayEditorContent() {
 		}
 	}
 
-	function handleRemoveTag(tagId: number) {
-		setSelectedTags(prev => prev.filter(t => t.id !== tagId))
+	function handleRemoveLabel(labelId: number) {
+		setSelectedLabels(prev => prev.filter(l => l.id !== labelId))
 	}
 
 	async function handleAddPlay() {
@@ -510,8 +517,8 @@ function PlayEditorContent() {
 					defensiveFormation: newPlay.defensive_formation_id
 						? String(newPlay.defensive_formation_id)
 						: '',
-					tags: [],
-					tagObjects: [],
+					labels: [],
+					labelObjects: [],
 					lastModified: new Date().toLocaleDateString(),
 					drawings: newPlay.custom_drawings || [],
 					players: newPlay.custom_players || []
@@ -576,10 +583,12 @@ function PlayEditorContent() {
 
 	if (!playbookId || !playId) {
 		return (
-			<div className="flex items-center justify-center h-screen">
-				<p className="text-red-500">
-					Playbook ID and Play ID are required
-				</p>
+			<div className="page-error">
+				<div className="page-error-content">
+					<p className="page-error-message">
+						Playbook ID and Play ID are required
+					</p>
+				</div>
 			</div>
 		)
 	}
@@ -588,19 +597,15 @@ function PlayEditorContent() {
 	// Concepts can load in the background after the canvas appears
 	if (!isPlayLoaded) {
 		return (
-			<div className="flex items-center justify-center h-screen bg-background">
-				<div className="text-center">
-					<div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
-					<p className="text-foreground">
-						Loading play...
-					</p>
-				</div>
+			<div className="page-loading">
+				<div className="page-loading-spinner" />
+				<div className="page-loading-text">Loading play...</div>
 			</div>
 		)
 	}
 
 	return (
-		<main className="flex h-screen bg-background">
+		<main className="play-editor-page">
 			<Toolbar
 				drawingState={playState.drawingState}
 				setDrawingState={setDrawingState}
@@ -611,13 +616,13 @@ function PlayEditorContent() {
 				playId={playId}
 				onDeletePlay={handleDeletePlay}
 			/>
-			<div className='flex-1 flex flex-col relative'>
+			<div className="play-editor-content">
 				<PlayHeader
 					teamId={teamId}
 					playbookId={playbookId}
 					onBackToPlaybook={handleBackToPlaybook}
 				/>
-				<div className="relative flex-1">
+				<div className="play-editor-canvas-area">
 					<CanvasViewportProvider>
 						<Canvas
 							drawingState={playState.drawingState}
@@ -627,10 +632,10 @@ function PlayEditorContent() {
 							onSelectionChange={setSelectedObjectIds}
 						/>
 					</CanvasViewportProvider>
-					{/* Selected Tags Overlay */}
-					<SelectedTagsOverlay
-						tags={selectedTags}
-						onRemoveTag={handleRemoveTag}
+					{/* Selected Labels Overlay */}
+					<SelectedLabelsOverlay
+						labels={selectedLabels}
+						onRemoveLabel={handleRemoveLabel}
 					/>
 				</div>
 				<PlayCardsSection
@@ -655,87 +660,97 @@ function PlayEditorContent() {
 			</div>
 
 
-			{/* Rename Play Modal */}
-		<Modal
-			isOpen={showRenameModal}
-			onClose={() => {
-				setShowRenameModal(false)
-				setTargetPlayId(null)
-				setTargetPlayName('')
+			{/* Rename Play Dialog */}
+		<Dialog
+			open={showRenameModal}
+			onOpenChange={(open) => {
+				setShowRenameModal(open)
+				if (!open) {
+					setTargetPlayId(null)
+					setTargetPlayName('')
+				}
 			}}
-			title="Rename Play"
 		>
-			<div className="space-y-4">
-				<div>
-					<label className="block mb-2">Play Name</label>
-					<Input
-						type="text"
-						value={targetPlayName}
-						onChange={(e) => setTargetPlayName(e.target.value)}
-						onKeyDown={(e) => {
-							if (e.key === 'Enter') {
-								confirmRename()
-							}
-						}}
-						placeholder="Enter play name..."
-						autoFocus
-					/>
+			<DialogContent>
+				<DialogHeader>
+					<DialogTitle>Rename Play</DialogTitle>
+				</DialogHeader>
+				<div className="space-y-4">
+					<div>
+						<label className="play-editor-dialog-label">Play Name</label>
+						<Input
+							type="text"
+							value={targetPlayName}
+							onChange={(e) => setTargetPlayName(e.target.value)}
+							onKeyDown={(e) => {
+								if (e.key === 'Enter') {
+									confirmRename()
+								}
+							}}
+							placeholder="Enter play name..."
+							autoFocus
+						/>
+					</div>
+					<div className="play-editor-dialog-actions">
+						<button
+							onClick={() => {
+								setShowRenameModal(false)
+								setTargetPlayId(null)
+								setTargetPlayName('')
+							}}
+							className="play-editor-dialog-cancel"
+						>
+							Cancel
+						</button>
+						<button
+							onClick={confirmRename}
+							disabled={!targetPlayName.trim()}
+							className="play-editor-dialog-confirm"
+						>
+							Rename
+						</button>
+					</div>
 				</div>
-				<div className="flex justify-end gap-2 pt-2">
-					<button
-						onClick={() => {
-							setShowRenameModal(false)
-							setTargetPlayId(null)
-							setTargetPlayName('')
-						}}
-						className="px-4 py-2 border border-border rounded-lg hover:bg-accent transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-					>
-						Cancel
-					</button>
-					<button
-						onClick={confirmRename}
-						disabled={!targetPlayName.trim()}
-						className="px-4 py-2 bg-action-button text-action-button-foreground hover:bg-action-button/90 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-					>
-						Rename
-					</button>
-				</div>
-			</div>
-		</Modal>
+			</DialogContent>
+		</Dialog>
 
-		{/* Delete Play Confirmation Modal */}
-		<Modal
-			isOpen={showDeleteModal}
-			onClose={() => {
-				setShowDeleteModal(false)
-				setTargetPlayId(null)
+		{/* Delete Play Confirmation Dialog */}
+		<Dialog
+			open={showDeleteModal}
+			onOpenChange={(open) => {
+				setShowDeleteModal(open)
+				if (!open) setTargetPlayId(null)
 			}}
-			title="Delete Play"
 		>
-			<div className="space-y-4">
-				<p>
-					Are you sure you want to delete this play?
-					This action cannot be undone.
-				</p>
-				<div className="flex justify-end gap-2 pt-2">
-					<button
-						onClick={() => {
-							setShowDeleteModal(false)
-							setTargetPlayId(null)
-						}}
-						className="px-4 py-2 border border-border rounded-lg hover:bg-accent transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-					>
-						Cancel
-					</button>
-					<button
-						onClick={confirmDeleteFromBar}
-						className="px-4 py-2 bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-lg transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-					>
-						Delete
-					</button>
+			<DialogContent>
+				<DialogHeader>
+					<DialogTitle>Delete Play</DialogTitle>
+				</DialogHeader>
+				<div className="space-y-4">
+					<p className="play-editor-dialog-message">
+						Are you sure you want to delete this play?
+						This action cannot be undone.
+					</p>
+					<div className="play-editor-dialog-actions">
+						<button
+							onClick={() => {
+								setShowDeleteModal(false)
+								setTargetPlayId(null)
+							}}
+							className="play-editor-dialog-cancel"
+						>
+							Cancel
+						</button>
+						<button
+							onClick={confirmDeleteFromBar}
+							className="play-editor-dialog-delete"
+						>
+							Delete
+						</button>
+					</div>
 				</div>
-			</div>
-		</Modal>
+			</DialogContent>
+		</Dialog>
 
 		{/* Unsaved Changes Dialog */}
 		{showUnsavedChangesDialog && (
@@ -763,14 +778,14 @@ function PlayEditorContent() {
 			/>
 		)}
 
-		{/* Tag Dialog */}
-			<TagDialog
-				isOpen={showTagDialog}
-				onClose={() => setShowTagDialog(false)}
-				availableTags={availableTags}
-				selectedTagIds={selectedTags.map(t => t.id)}
-				onTagsChange={ids => setSelectedTags(availableTags.filter(t => ids.includes(t.id)))}
-				onCreateTag={createTag}
+		{/* Label Dialog */}
+			<LabelDialog
+				isOpen={showLabelDialog}
+				onClose={() => setShowLabelDialog(false)}
+				availableLabels={availableLabels}
+				selectedLabelIds={selectedLabels.map(l => l.id)}
+				onLabelsChange={ids => setSelectedLabels(availableLabels.filter(l => ids.includes(l.id)))}
+				onCreateLabel={createLabel}
 			/>
 
 

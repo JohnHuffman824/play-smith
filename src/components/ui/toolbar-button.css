@@ -1,0 +1,47 @@
+.toolbar-button {
+	/* Base */
+	width: 3.5rem;
+	height: 3.5rem;
+	background-color: var(--muted);
+	border-radius: 8px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	outline: none;
+	transition: all 200ms;
+	position: relative;
+}
+
+.toolbar-button:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.toolbar-button:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+/* Inactive state */
+.toolbar-button:not([data-active="true"]) {
+	border: 1px solid var(--border);
+	color: var(--icon-muted);
+}
+
+.toolbar-button:not([data-active="true"]):hover {
+	background-color: var(--accent);
+	color: var(--foreground);
+}
+
+/* Active state */
+.toolbar-button[data-active="true"] {
+	background-color: var(--action-button);
+	color: var(--action-button-foreground);
+	box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+	border: none;
+}
+
+.toolbar-button svg {
+	width: 1.5rem;
+	height: 1.5rem;
+}

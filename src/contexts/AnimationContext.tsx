@@ -13,7 +13,7 @@ import type {
 	PlayerAnimationState,
 	LoadPlayPayload,
 } from '../types/animation.types'
-import { initialAnimationState, ANIMATION_DEFAULTS } from '../types/animation.types'
+import { initialAnimationState } from '../types/animation.types'
 import { getPositionAlongRoute, calculateProgress } from '../utils/animation.utils'
 
 type AnimationContextType = {

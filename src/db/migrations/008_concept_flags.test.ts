@@ -1,6 +1,5 @@
 import { describe, test, expect, beforeAll, afterAll } from 'bun:test'
 import { Database } from 'bun:sqlite'
-import { readFileSync } from 'fs'
 
 describe('008_concept_flags migration', () => {
   let db: Database

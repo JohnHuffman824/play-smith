@@ -1,4 +1,5 @@
 import { Plus } from 'lucide-react'
+import './concepts-toolbar.css'
 
 export type ConceptFilter =
 	| 'all'
@@ -11,14 +12,9 @@ export type ConceptFilter =
 type ConceptsToolbarProps = {
 	onNewConcept: () => void
 	activeFilter: ConceptFilter
+	 
 	onFilterChange: (filter: ConceptFilter) => void
 }
-
-const BUTTON_ACTIVE =
-	'bg-action-button text-action-button-foreground hover:bg-action-button/90'
-const BUTTON_INACTIVE = 'border border-border hover:bg-accent'
-const BUTTON_BASE =
-	'px-4 py-2 rounded-lg transition-all duration-200 cursor-pointer'
 
 const FILTERS = [
 	{ id: 'all', label: 'All' },
@@ -35,28 +31,25 @@ export function ConceptsToolbar({
 	onFilterChange
 }: ConceptsToolbarProps) {
 	return (
-		<div className="border-b border-border bg-card px-6 py-3">
-			<div className="flex items-center gap-4 flex-1">
+		<div className="concepts-toolbar">
+			<div className="concepts-toolbar-content">
 				<button
 					onClick={onNewConcept}
-					className={`${BUTTON_BASE} ${BUTTON_ACTIVE}
-						flex items-center gap-2`}
+					className="concepts-toolbar-button concepts-toolbar-button-new"
 				>
-					<Plus className="w-4 h-4" />
+					<Plus className="concepts-toolbar-icon" />
 					<span>New Concept</span>
 				</button>
 
-				<div className="w-px h-6 bg-border" />
+				<div className="concepts-toolbar-divider" />
 
-				<div className="flex items-center gap-2">
+				<div className="concepts-toolbar-filters">
 					{FILTERS.map((filter) => (
 						<button
 							key={filter.id}
 							onClick={() => onFilterChange(filter.id)}
-							className={`${BUTTON_BASE}
-								${activeFilter === filter.id
-									? BUTTON_ACTIVE
-									: BUTTON_INACTIVE}`}
+							data-active={activeFilter === filter.id}
+							className="concepts-toolbar-button concepts-toolbar-button-filter"
 						>
 							{filter.label}
 						</button>

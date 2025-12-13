@@ -67,7 +67,7 @@ describe('PlaybookRepository', () => {
 		const playbooks = await playbookRepo.getTeamPlaybooks(testTeamId)
 
 		expect(playbooks.length).toBeGreaterThan(0)
-		expect(playbooks[0].id).toBe(testPlaybookId)
+		expect(playbooks[0]?.id).toBe(testPlaybookId)
 	})
 
 	test('update playbook', async () => {

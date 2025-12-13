@@ -1,5 +1,6 @@
 import { db } from '../connection'
 import type { Playbook } from '../types'
+import { SectionRepository } from './SectionRepository'
 
 type PlaybookUpdate = {
 	name?: string
@@ -8,7 +9,10 @@ type PlaybookUpdate = {
 }
 
 export class PlaybookRepository {
+	private sectionRepo = new SectionRepository()
+
 	// Inserts a playbook and returns DB defaults in one call
+	// Auto-creates an Ideas section for the playbook
 	async create(data: {
 		team_id: number | null
 		name: string
@@ -25,6 +29,9 @@ export class PlaybookRepository {
 			)
 			RETURNING *
 		`
+
+		// Auto-create Ideas section with display_order 0
+		await this.sectionRepo.create(playbook.id, 'Ideas', 0, 'ideas')
 
 		return playbook
 	}

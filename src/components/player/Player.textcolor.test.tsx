@@ -1,6 +1,7 @@
 import { afterEach, describe, test, expect } from 'bun:test'
 import { cleanup, render } from '@testing-library/react'
 import { Player } from './Player'
+import { SettingsProvider } from '@/contexts/SettingsContext'
 
 /**
  * TDD RED: Tests for player text color visibility
@@ -30,7 +31,9 @@ describe('Player - Text Color Visibility', () => {
 
 	test('text color is black when player color is white', () => {
 		const { container } = render(
-			<Player {...defaultProps} color="#FFFFFF" />
+			<SettingsProvider>
+				<Player {...defaultProps} color="#FFFFFF" />
+			</SettingsProvider>
 		)
 
 		// Find the label text element - it's the innermost div with the label text
@@ -44,7 +47,9 @@ describe('Player - Text Color Visibility', () => {
 
 	test('text color is white when player color is dark blue', () => {
 		const { container } = render(
-			<Player {...defaultProps} color="#3b82f6" />
+			<SettingsProvider>
+				<Player {...defaultProps} color="#3b82f6" />
+			</SettingsProvider>
 		)
 
 		const textElement = container.querySelector('[style*="color"]') as HTMLElement
@@ -56,7 +61,9 @@ describe('Player - Text Color Visibility', () => {
 
 	test('text color is black when player color is light yellow', () => {
 		const { container } = render(
-			<Player {...defaultProps} color="#FEF08A" />
+			<SettingsProvider>
+				<Player {...defaultProps} color="#FEF08A" />
+			</SettingsProvider>
 		)
 
 		const textElement = container.querySelector('[style*="color"]') as HTMLElement
@@ -68,7 +75,9 @@ describe('Player - Text Color Visibility', () => {
 
 	test('text color is white when player color is dark red', () => {
 		const { container } = render(
-			<Player {...defaultProps} color="#DC2626" />
+			<SettingsProvider>
+				<Player {...defaultProps} color="#DC2626" />
+			</SettingsProvider>
 		)
 
 		const textElement = container.querySelector('[style*="color"]') as HTMLElement
@@ -80,7 +89,9 @@ describe('Player - Text Color Visibility', () => {
 
 	test('text color adapts when color changes dynamically', () => {
 		const { container, rerender } = render(
-			<Player {...defaultProps} color="#000000" />
+			<SettingsProvider>
+				<Player {...defaultProps} color="#000000" />
+			</SettingsProvider>
 		)
 
 		// Initially black background, should have white text
@@ -89,7 +100,11 @@ describe('Player - Text Color Visibility', () => {
 		expect(styleAttr).toMatch(/color:\s*(white|#ffffff|rgb\(255,\s*255,\s*255\))/i)
 
 		// Change to white background
-		rerender(<Player {...defaultProps} color="#FFFFFF" />)
+		rerender(
+			<SettingsProvider>
+				<Player {...defaultProps} color="#FFFFFF" />
+			</SettingsProvider>
+		)
 
 		// Should now have black text
 		textElement = container.querySelector('[style*="color"]') as HTMLElement

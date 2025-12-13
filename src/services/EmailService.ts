@@ -6,7 +6,7 @@
  */
 
 export interface EmailService {
-	sendTeamInvitation(params: {
+	sendTeamInvitation(_params: {
 		to: string
 		teamName: string
 		inviterName: string
@@ -29,15 +29,15 @@ export class ConsoleEmailService implements EmailService {
 		inviteLink: string
 		role: string
 	}): Promise<void> {
-		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
-		console.log('📧 TEAM INVITATION EMAIL (Console)')
-		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
-		console.log(`To: ${params.to}`)
-		console.log(`Team: ${params.teamName}`)
-		console.log(`Invited by: ${params.inviterName}`)
-		console.log(`Role: ${params.role}`)
-		console.log(`Invitation Link: ${params.inviteLink}`)
-		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
+		console.warn('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
+		console.warn('📧 TEAM INVITATION EMAIL (Console)')
+		console.warn('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
+		console.warn(`To: ${params.to}`)
+		console.warn(`Team: ${params.teamName}`)
+		console.warn(`Invited by: ${params.inviterName}`)
+		console.warn(`Role: ${params.role}`)
+		console.warn(`Invitation Link: ${params.inviteLink}`)
+		console.warn('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
 	}
 }
 

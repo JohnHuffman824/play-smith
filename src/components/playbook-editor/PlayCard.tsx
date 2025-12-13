@@ -17,13 +17,11 @@ import {
 } from '@/components/ui/dropdown-menu'
 import {
   PLAY_TYPE_PASS,
-  PLAY_TYPE_BADGE_PASS,
-  PLAY_TYPE_BADGE_RUN,
 } from './constants/playbook'
-import { formatDateDayMonthYear } from '@/utils/date.utils'
 import { PlayThumbnailSVG } from './PlayThumbnailSVG'
 import type { Drawing } from '@/types/drawing.types'
 import { createDefaultLinemen } from '@/utils/lineman.utils'
+import './play-card.css'
 
 export interface Player {
   id: string
@@ -45,6 +43,8 @@ type PlayCardProps = {
   drawings?: Drawing[]
   players?: Player[]
   personnel?: string
+  labels?: string[]
+  labelObjects?: { id: number; name: string; color: string }[]
   selected?: boolean
   onSelect?: (id: string) => void
   onOpen: (id: string) => void
@@ -65,46 +65,39 @@ type PlayCardThumbnailProps = {
 }
 
 function PlayCardThumbnail({
-  thumbnail,
+  _thumbnail,
   drawings,
   players,
-  name,
+  _name,
   playType,
   onOpen,
   onAnimate
 }: PlayCardThumbnailProps) {
   const badgeClass = playType == PLAY_TYPE_PASS
-    ? PLAY_TYPE_BADGE_PASS
-    : PLAY_TYPE_BADGE_RUN
+    ? 'play-card-type-badge-pass'
+    : 'play-card-type-badge-run'
 
   // Use default linemen if no players provided
   const defaultLinemen = createDefaultLinemen('middle')
   const displayPlayers = (players && players.length > 0) ? players : defaultLinemen
 
   return (
-    <div className="relative group/thumbnail">
+    <div className="play-card-thumbnail">
       <div
         onClick={onOpen}
-        className="aspect-video bg-muted flex items-center
-          justify-center cursor-pointer hover:bg-accent
-          transition-colors duration-200"
+        className="play-card-thumbnail-button"
       >
         <PlayThumbnailSVG
           drawings={drawings || []}
           players={displayPlayers}
-          className="w-full h-full"
+          className="play-card-icon-full"
         />
       </div>
 
       {playType && (
-        <div className="absolute top-2 right-2">
-          <span
-            className={`px-2.5 py-1 rounded-md text-xs shadow-sm
-              backdrop-blur-sm ${badgeClass}`}
-          >
-            {playType}
-          </span>
-        </div>
+        <span className={`play-card-type-badge ${badgeClass}`}>
+          {playType}
+        </span>
       )}
 
       {onAnimate && (
@@ -113,13 +106,10 @@ function PlayCardThumbnail({
             e.stopPropagation()
             onAnimate()
           }}
-          className="absolute left-1/2 top-1/2 z-10 flex size-10 -translate-x-1/2 -translate-y-1/2
-            items-center justify-center rounded-full bg-blue-500 shadow-lg
-            opacity-0 transition-all duration-200
-            group-hover/thumbnail:opacity-100 hover:bg-blue-600 hover:scale-110"
+          className="play-card-animate-button"
           aria-label="Animate play"
         >
-          <Play className="size-5 fill-white text-white" />
+          <Play className="play-card-icon-large play-card-icon-white" />
         </button>
       )}
     </div>
@@ -133,11 +123,13 @@ export function PlayCard({
   formation,
   playType,
   defensiveFormation,
-  lastModified,
+  _lastModified,
   thumbnail,
   drawings,
   players,
   personnel,
+  _labels,
+  labelObjects,
   selected = false,
   onSelect,
   onOpen,
@@ -146,15 +138,8 @@ export function PlayCard({
   onDelete,
   onDuplicate,
 }: PlayCardProps) {
-  const cardClass = `group relative bg-card border border-border
-    rounded-xl overflow-hidden hover:ring-4 hover:ring-blue-500/50
-    hover:border-blue-500
-    transition-all duration-200 ${
-      selected ? 'ring-2 ring-primary' : ''
-    }`
-
   return (
-    <div className={cardClass}>
+    <div className={`play-card ${selected ? 'play-card-selected' : ''}`.trim()}>
       <PlayCardThumbnail
         thumbnail={thumbnail}
         drawings={drawings}
@@ -171,72 +156,60 @@ export function PlayCard({
             e.stopPropagation()
             onSelect(id)
           }}
-          className="absolute top-2 left-2 p-1 bg-background/80
-            backdrop-blur-sm rounded-full hover:bg-background
-            transition-all duration-200"
+          className="play-card-select-button"
         >
           {selected ? (
-            <CheckCircle2 className="w-5 h-5 text-primary" />
+            <CheckCircle2 className="play-card-icon-large play-card-icon-primary" />
           ) : (
-            <Circle
-              className="w-5 h-5 text-muted-foreground opacity-0
-                group-hover:opacity-100 transition-opacity"
-            />
+            <Circle className="play-card-icon-large play-card-icon-muted play-card-select-icon-hidden" />
           )}
         </button>
       )}
 
-      <div className="p-4">
-        <div className="flex items-start justify-between gap-2 mb-3">
-          <h3 className="flex-1 line-clamp-1">{name}</h3>
+      <div className="play-card-content">
+        <div className="play-card-header">
+          <h3 className="play-card-title">{name}</h3>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button
-                className="p-1 hover:bg-accent rounded
-                  transition-all duration-200 opacity-0
-                  group-hover:opacity-100 cursor-pointer"
-              >
-                <MoreVertical className="w-4 h-4" />
+              <button className="play-card-menu-button">
+                <MoreVertical className="play-card-icon" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               {onAnimate && (
                 <DropdownMenuItem onClick={() => onAnimate(id)}>
-                  <Play className="w-4 h-4" />
+                  <Play className="play-card-icon" />
                   Animate
                 </DropdownMenuItem>
               )}
               <DropdownMenuItem onClick={() => onRename(id)}>
-                <Edit className="w-4 h-4" />
+                <Edit className="play-card-icon" />
                 Rename
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => onDuplicate(id)}>
-                <Copy className="w-4 h-4" />
+                <Copy className="play-card-icon" />
                 Duplicate
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => onDelete(id)} variant="destructive">
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="play-card-icon" />
                 Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
 
-        <div className="flex items-center gap-2 mb-2">
+        <div className="play-card-meta">
           {formation && (
-            <span className="text-muted-foreground">
+            <span className="play-card-formation">
               {formation}
             </span>
           )}
           {personnel && (
             <>
-              <span className="text-muted-foreground">•</span>
-              <span 
-                className="px-2 py-0.5 bg-muted rounded 
-                  text-muted-foreground text-xs"
-              >
+              <span className="play-card-separator">•</span>
+              <span className="play-card-personnel">
                 {personnel}
               </span>
             </>
@@ -244,13 +217,25 @@ export function PlayCard({
         </div>
 
         {defensiveFormation && (
-          <p className="text-muted-foreground mb-3">
+          <p className="play-card-defensive-formation">
             vs {defensiveFormation}
           </p>
         )}
 
-        <div className="pt-2 border-t border-border">
-          <p className="text-muted-foreground">{formatDateDayMonthYear(lastModified)}</p>
+        <div className="play-card-labels">
+          {labelObjects?.map((label) => (
+            <span
+              key={label.id}
+              className="play-card-label"
+              style={{
+                backgroundColor: `${label.color}20`,
+                color: label.color,
+                borderColor: `${label.color}40`
+              }}
+            >
+              {label.name}
+            </span>
+          ))}
         </div>
       </div>
     </div>

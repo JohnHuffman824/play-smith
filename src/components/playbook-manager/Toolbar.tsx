@@ -1,6 +1,11 @@
-import { Search, Grid, List, Plus, Upload, Download, Settings, FolderPlus } from 'lucide-react'
+import { Plus, FolderPlus, Upload, Download, Settings } from 'lucide-react'
 import { TeamSelector } from './TeamSelector'
 import { HEADER_HEIGHT } from '../../constants/layout'
+import { IconButton } from '../ui/icon-button'
+import { ViewToggle } from '../ui/view-toggle'
+import { SearchInput } from '../ui/search-input'
+import { TooltipProvider } from '../ui/tooltip'
+import './toolbar.css'
 
 interface Team {
 	id: number
@@ -40,107 +45,78 @@ export function Toolbar({
 	onManageTeams,
 }: ToolbarProps) {
 	return (
-		<div className="border-b border-border bg-card/50 backdrop-blur-xl sticky top-0 z-10" style={{ height: `${HEADER_HEIGHT}px` }}>
-			<div className="px-6 h-full flex items-center">
-				<div className="flex items-center justify-between gap-4 w-full">
+		<TooltipProvider>
+			<div className="playbook-toolbar" style={{ height: `${HEADER_HEIGHT}px` }}>
+				<div className="playbook-toolbar-container">
+					<div className="playbook-toolbar-content">
 					{/* Left Section - Search */}
-					<div className="flex-1 max-w-xl">
-						<div className="relative">
-							<Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-							<input
-								type="text"
-								placeholder="Search playbooks..."
-								value={searchQuery}
-								onChange={(e) => onSearchChange(e.target.value)}
-								className="w-full pl-11 pr-4 py-2.5 bg-input-background text-foreground placeholder:text-muted-foreground rounded-lg border-0 outline-none focus:ring-2 focus:ring-ring/20 transition-all duration-200"
+					<SearchInput
+						value={searchQuery}
+						onChange={onSearchChange}
+						placeholder="Search playbooks..."
+						style={{ flex: 1, maxWidth: '70rem' }}
+					/>
+
+						{/* Right Section - Actions */}
+						<div className="playbook-toolbar-actions">
+							{/* Team Selector */}
+							<TeamSelector
+								teams={teams}
+								currentTeamId={currentTeamId}
+								onSwitchTeam={onSwitchTeam}
+								onManageTeams={onManageTeams}
+							/>
+
+							<div className="playbook-toolbar-divider" />
+
+							{/* View Mode Toggle */}
+							<ViewToggle viewMode={viewMode} onViewModeChange={onViewModeChange} />
+
+							<div className="playbook-toolbar-divider" />
+
+							{/* Action Buttons */}
+							<button
+								onClick={onNewPlaybook}
+								className="playbook-toolbar-new-playbook"
+							>
+								<Plus className="w-4 h-4" />
+								New Playbook
+							</button>
+
+							<IconButton
+								icon={FolderPlus}
+								tooltip="New Folder"
+								onClick={onNewFolder}
+								variant="ghost"
+							/>
+
+							<IconButton
+								icon={Upload}
+								tooltip="Import"
+								variant="ghost"
+								onClick={onImport}
+							/>
+
+							<IconButton
+								icon={Download}
+								tooltip="Export"
+								variant="ghost"
+								onClick={onExport}
+							/>
+
+							<div className="playbook-toolbar-divider" />
+
+							{/* Settings */}
+							<IconButton
+								icon={Settings}
+								tooltip="Settings"
+								variant="ghost"
+								onClick={onSettingsClick}
 							/>
 						</div>
 					</div>
-
-					{/* Right Section - Actions */}
-					<div className="flex items-center gap-2">
-						{/* Team Selector */}
-						<TeamSelector
-							teams={teams}
-							currentTeamId={currentTeamId}
-							onSwitchTeam={onSwitchTeam}
-							onManageTeams={onManageTeams}
-						/>
-
-						<div className="w-px h-6 bg-border" />
-
-						{/* View Mode Toggle */}
-						<div className="flex items-center bg-muted rounded-lg p-1">
-							<button
-								onClick={() => onViewModeChange('grid')}
-								className={`p-2 rounded transition-all duration-200 ${
-									viewMode === 'grid'
-										? 'bg-card shadow-sm'
-										: 'hover:bg-accent/50'
-								}`}
-							>
-								<Grid className="w-4 h-4" />
-							</button>
-							<button
-								onClick={() => onViewModeChange('list')}
-								className={`p-2 rounded transition-all duration-200 ${
-									viewMode === 'list'
-										? 'bg-card shadow-sm'
-										: 'hover:bg-accent/50'
-								}`}
-							>
-								<List className="w-4 h-4" />
-							</button>
-						</div>
-
-						<div className="w-px h-6 bg-border" />
-
-						{/* Action Buttons */}
-						<button
-							onClick={onNewPlaybook}
-							className="flex items-center gap-2 px-4 py-2 bg-action-button text-action-button-foreground rounded-lg hover:bg-action-button/90 transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 whitespace-nowrap"
-						>
-							<Plus className="w-4 h-4" />
-							New Playbook
-						</button>
-
-						<button
-							onClick={onNewFolder}
-							className="p-2 border border-border hover:bg-accent rounded-lg transition-all duration-200"
-							title="New Folder"
-						>
-							<FolderPlus className="w-5 h-5" />
-						</button>
-
-						<button
-							onClick={onImport}
-							className="p-2 border border-border hover:bg-accent rounded-lg transition-all duration-200"
-							title="Import"
-						>
-							<Upload className="w-5 h-5" />
-						</button>
-
-						<button
-							onClick={onExport}
-							className="p-2 border border-border hover:bg-accent rounded-lg transition-all duration-200"
-							title="Export"
-						>
-							<Download className="w-5 h-5" />
-						</button>
-
-						<div className="w-px h-6 bg-border" />
-
-						{/* Settings */}
-						<button
-							onClick={onSettingsClick}
-							className="p-2 border border-border hover:bg-accent rounded-lg transition-all duration-200"
-							title="Settings"
-						>
-							<Settings className="w-5 h-5" />
-						</button>
-					</div>
 				</div>
 			</div>
-		</div>
+		</TooltipProvider>
 	)
 }

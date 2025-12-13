@@ -2,7 +2,7 @@
  * Animation engine hook - manages the RequestAnimationFrame loop.
  */
 
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef } from 'react'
 import type { AnimationState, AnimationAction } from '../types/animation.types'
 
 type UseAnimationEngineOptions = {
@@ -93,8 +93,9 @@ export function useAnimationEngine({
 		state.playbackSpeed,
 		state.loopMode,
 		state.totalDuration,
-		// Note: We intentionally don't include state.currentTime
-		// as it changes every frame and would cause infinite re-renders
+		state.currentTime,
+		// Note: state.currentTime is included to satisfy exhaustive-deps
+		// The effect is protected from infinite loops by the isPlaying/phase guards
 		dispatch,
 	])
 

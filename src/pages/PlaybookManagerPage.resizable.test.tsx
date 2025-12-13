@@ -1,6 +1,6 @@
 // src/pages/PlaybookManagerPage.resizable.test.tsx
-import { describe, it, expect, beforeEach, vi } from 'bun:test'
-import { render, screen, waitFor } from '@testing-library/react'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'bun:test'
+import { render, screen, waitFor, cleanup } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { PlaybookManagerPage } from './PlaybookManagerPage'
@@ -39,6 +39,10 @@ import * as folderQueries from '../api/queries/folderQueries'
 describe('PlaybookManagerPage - Resizable Sidebar', () => {
   let queryClient: QueryClient
 
+  afterEach(() => {
+    cleanup()
+  })
+
   beforeEach(() => {
     localStorage.clear()
     queryClient = new QueryClient({
@@ -71,9 +75,9 @@ describe('PlaybookManagerPage - Resizable Sidebar', () => {
       </SettingsProvider>
     )
 
-    // Wait for loading to complete
+    // Wait for page to render by checking for sidebar content
     await waitFor(() => {
-      expect(screen.queryByText('Loading playbooks...')).toBeFalsy()
+      expect(screen.getByText('All Playbooks')).toBeTruthy()
     })
 
     const panelGroup = container.querySelector('[data-slot="resizable-panel-group"]')
@@ -96,9 +100,9 @@ describe('PlaybookManagerPage - Resizable Sidebar', () => {
       </SettingsProvider>
     )
 
-    // Wait for loading to complete
+    // Wait for page to render by checking for sidebar content
     await waitFor(() => {
-      expect(screen.queryByText('Loading playbooks...')).toBeFalsy()
+      expect(screen.getByText('All Playbooks')).toBeTruthy()
     })
 
     const handle = container.querySelector('[data-slot="resizable-handle"]')
@@ -122,9 +126,9 @@ describe('PlaybookManagerPage - Resizable Sidebar', () => {
       </SettingsProvider>
     )
 
-    // Wait for loading to complete
+    // Wait for page to render by checking for sidebar content
     await waitFor(() => {
-      expect(screen.queryByText('Loading playbooks...')).toBeFalsy()
+      expect(screen.getByText('All Playbooks')).toBeTruthy()
     })
 
     // Panel exists (id is set on the panel)
@@ -147,9 +151,9 @@ describe('PlaybookManagerPage - Resizable Sidebar', () => {
       </SettingsProvider>
     )
 
-    // Wait for loading to complete
+    // Wait for page to render by checking for sidebar content
     await waitFor(() => {
-      expect(screen.queryByText('Loading playbooks...')).toBeFalsy()
+      expect(screen.getByText('All Playbooks')).toBeTruthy()
     })
 
     // Verify sidebar navigation items are still rendered

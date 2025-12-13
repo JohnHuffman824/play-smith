@@ -323,15 +323,10 @@ function isStartPoint(drawing: Drawing, pointId: string): boolean {
 	return firstPointId == pointId
 }
 
-function reindexSegments(segments: PathSegment[]): PathSegment[] {
-	let counter = 0
-	return segments.map((segment) => ({
-		...segment,
-		points: segment.points.map((point) => {
-			const nextId = `p-${counter++}`
-			return { ...point, id: nextId }
-		}),
-	}))
+function _reindexSegments(segments: PathSegment[]): PathSegment[] {
+	// Note: This function is deprecated since segments now use pointIds
+	// Keeping for backward compatibility but segments should just be returned as-is
+	return segments
 }
 
 function reverseSegments(segments: PathSegment[]): PathSegment[] {
@@ -342,7 +337,7 @@ function reverseSegments(segments: PathSegment[]): PathSegment[] {
 	return reversedSegments
 }
 
-function ensurePointIsStart(
+function _ensurePointIsStart(
 	drawing: Drawing,
 	pointId: string,
 ): PathSegment[] {
@@ -353,7 +348,7 @@ function ensurePointIsStart(
 	return drawing.segments
 }
 
-function ensurePointIsEnd(drawing: Drawing, pointId: string): PathSegment[] {
+function _ensurePointIsEnd(drawing: Drawing, pointId: string): PathSegment[] {
 	const isEnd = isEndPoint(drawing, pointId)
 	const isStart = isStartPoint(drawing, pointId)
 	if (isEnd) return drawing.segments
@@ -377,10 +372,10 @@ function getEndPoint(drawing: Drawing): ControlPoint | null {
 	return drawing.points[lastPointId] ?? null
 }
 
-function cloneSegments(segments: PathSegment[]): PathSegment[] {
+function _cloneSegments(segments: PathSegment[]): PathSegment[] {
 	return segments.map((segment) => ({
 		...segment,
-		points: segment.points.map((point) => ({ ...point })),
+		pointIds: [...segment.pointIds],
 	}))
 }
 
@@ -547,6 +542,8 @@ export function findClosestSegmentPosition(
 		for (let i = 0; i < smoothedPixels.length - 1; i++) {
 			const p1 = smoothedPixels[i]
 			const p2 = smoothedPixels[i + 1]
+			if (!p1 || !p2) continue
+
 			const { distance, t } = pointToSegmentInfo(clickPixel, p1, p2)
 			if (distance < minDist) {
 				minDist = distance
@@ -565,6 +562,9 @@ export function findClosestSegmentPosition(
 		// Calculate insert position by interpolating on the smoothed curve
 		const p1 = smoothedPixels[closestSmoothedIndex]
 		const p2 = smoothedPixels[closestSmoothedIndex + 1]
+		if (!p1 || !p2) {
+			return null
+		}
 		const insertPixel = {
 			x: p1.x + closestT * (p2.x - p1.x),
 			y: p1.y + closestT * (p2.y - p1.y)
@@ -582,14 +582,19 @@ export function findClosestSegmentPosition(
 
 		for (let i = 0; i < drawing.segments.length; i++) {
 			const segment = drawing.segments[i]
+			if (!segment) continue
+
 			const points = segment.pointIds
 				.map(id => drawing.points[id])
 				.filter(Boolean) as ControlPoint[]
 
 			if (points.length < 2) continue
 
-			const p1Pixel = coordSystem.feetToPixels(points[0].x, points[0].y)
+			const firstPoint = points[0]
 			const lastPoint = points[points.length - 1]
+			if (!firstPoint || !lastPoint) continue
+
+			const p1Pixel = coordSystem.feetToPixels(firstPoint.x, firstPoint.y)
 			const p2Pixel = coordSystem.feetToPixels(lastPoint.x, lastPoint.y)
 
 			const { distance, t } = pointToSegmentInfo(clickPixel, p1Pixel, p2Pixel)
@@ -597,8 +602,8 @@ export function findClosestSegmentPosition(
 			if (distance < bestDistance) {
 				bestDistance = distance
 				const insertFeet = {
-					x: points[0].x + t * (lastPoint.x - points[0].x),
-					y: points[0].y + t * (lastPoint.y - points[0].y)
+					x: firstPoint.x + t * (lastPoint.x - firstPoint.x),
+					y: firstPoint.y + t * (lastPoint.y - firstPoint.y)
 				}
 				bestResult = {
 					segmentIndex: i,
@@ -626,6 +631,8 @@ function chaikinSubdivideSimple(
 	for (let i = 0; i < points.length - 1; i++) {
 		const p0 = points[i]
 		const p1 = points[i + 1]
+
+		if (!p0 || !p1) continue
 
 		const q = { x: 0.75 * p0.x + 0.25 * p1.x, y: 0.75 * p0.y + 0.25 * p1.y }
 		const r = { x: 0.25 * p0.x + 0.75 * p1.x, y: 0.25 * p0.y + 0.75 * p1.y }
@@ -723,6 +730,8 @@ export function insertPointIntoDrawing(
 	// Split the segment into two
 	const startPointId = segment.pointIds[0]
 	const endPointId = segment.pointIds[segment.pointIds.length - 1]
+
+	if (!startPointId || !endPointId) return drawing
 
 	const newSegment1: PathSegment = {
 		type: 'line',

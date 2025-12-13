@@ -96,8 +96,7 @@ export function usePlaybooksData(
 				break
 			case 'all':
 			default:
-				// All non-deleted playbooks
-				result = result
+				// All non-deleted playbooks (no filtering needed)
 				break
 		}
 
@@ -137,7 +136,7 @@ export function usePlaybooksData(
 
 			return { previous }
 		},
-		onError: (err, variables, context) => {
+		onError: (err, _variables, context) => {
 			if (context?.previous) {
 				queryClient.setQueryData(playbookKeys.list(), context.previous)
 			}
@@ -162,7 +161,7 @@ export function usePlaybooksData(
 
 			return { previous }
 		},
-		onError: (err, variables, context) => {
+		onError: (err, _variables, context) => {
 			if (context?.previous) {
 				queryClient.setQueryData(playbookKeys.list(), context.previous)
 			}
@@ -187,7 +186,7 @@ export function usePlaybooksData(
 
 			return { previous }
 		},
-		onError: (err, variables, context) => {
+		onError: (err, _variables, context) => {
 			if (context?.previous) {
 				queryClient.setQueryData(playbookKeys.list(), context.previous)
 			}
@@ -212,7 +211,7 @@ export function usePlaybooksData(
 
 			return { previous }
 		},
-		onError: (err, variables, context) => {
+		onError: (err, _variables, context) => {
 			if (context?.previous) {
 				queryClient.setQueryData(playbookKeys.list(), context.previous)
 			}
@@ -237,7 +236,7 @@ export function usePlaybooksData(
 
 			return { previous }
 		},
-		onError: (err, variables, context) => {
+		onError: (err, _variables, context) => {
 			if (context?.previous) {
 				queryClient.setQueryData(playbookKeys.list(), context.previous)
 			}
@@ -259,11 +258,11 @@ export function usePlaybooksData(
 
 	// WRAPPER FUNCTIONS (maintain API compatibility)
 	const createPlaybook = async (
-		name: string,
-		teamId: number | null,
-		description?: string
+		_name: string,
+		_teamId: number | null,
+		_description?: string
 	): Promise<Playbook> => {
-		return createMutation.mutateAsync({ name, team_id: teamId, description })
+		return createMutation.mutateAsync({ name: _name, team_id: _teamId, description: _description })
 	}
 
 	const updatePlaybook = async (

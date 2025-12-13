@@ -173,9 +173,27 @@ export async function cleanupTestFixture(fixture: TestFixtures) {
 
 /**
  * Cleans up only test-specific data (plays, sections) while keeping user/team/playbook
+ * Preserves the Ideas section to maintain playbook integrity
  * Useful when sharing fixtures across tests in beforeAll/afterAll
  */
 export async function cleanupTestData(playbookId: number) {
 	await db`DELETE FROM plays WHERE playbook_id = ${playbookId}`
-	await db`DELETE FROM sections WHERE playbook_id = ${playbookId}`
+	await db`DELETE FROM sections WHERE playbook_id = ${playbookId} AND section_type != 'ideas'`
+}
+
+/**
+ * Cleans all test data from the database
+ * Use this before test suites that need a completely clean database state
+ */
+export async function cleanupAllTestData() {
+	// Delete in reverse dependency order to avoid foreign key violations
+	await db`DELETE FROM plays`
+	await db`DELETE FROM sections`
+	await db`DELETE FROM playbook_shares`
+	await db`DELETE FROM playbooks`
+	await db`DELETE FROM folders`
+	await db`DELETE FROM team_members`
+	await db`DELETE FROM teams`
+	await db`DELETE FROM sessions`
+	await db`DELETE FROM users`
 }

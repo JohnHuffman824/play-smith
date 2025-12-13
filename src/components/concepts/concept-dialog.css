@@ -1,0 +1,254 @@
+/* || Base styles */
+.concept-dialog-overlay {
+	position: fixed;
+	inset: 0;
+	background-color: rgb(0 0 0 / 50%);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 50;
+}
+
+.concept-dialog {
+	background-color: var(--popover);
+	border: 1px solid var(--border);
+	border-radius: 1rem;
+	box-shadow: 0 20px 25px -5px rgb(0 0 0 / 10%), 0 10px 10px -5px rgb(0 0 0 / 4%);
+	width: 85vw;
+	height: 85vh;
+	max-width: 72rem;
+	display: flex;
+	flex-direction: column;
+}
+
+.concept-dialog-header {
+	padding: 1rem 1.5rem;
+	display: flex;
+	align-items: flex-start;
+	gap: 1rem;
+}
+
+.concept-dialog-header-content {
+	flex: 1;
+}
+
+.concept-dialog-label {
+	display: block;
+	font-size: 0.875rem;
+	font-weight: 500;
+	margin-bottom: 0.25rem;
+}
+
+.concept-dialog-error {
+	margin-top: 0.25rem;
+	font-size: 0.875rem;
+	color: var(--destructive);
+}
+
+.concept-dialog-scope {
+	display: flex;
+	gap: 0.5rem;
+}
+
+.concept-dialog-scope-button {
+	padding: 0.5rem 1rem;
+	border-radius: 0.375rem;
+	font-size: 0.875rem;
+	font-weight: 500;
+	transition: all 200ms;
+	cursor: pointer;
+	border: none;
+	outline: none;
+}
+
+.concept-dialog-scope-button-inactive {
+	background-color: var(--secondary);
+	color: var(--secondary-foreground);
+}
+
+.concept-dialog-scope-button-inactive:hover {
+	background-color: var(--accent);
+}
+
+.concept-dialog-scope-button-inactive:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.concept-dialog-scope-button-active {
+	background-color: rgb(59 130 246);
+	color: rgb(255 255 255);
+}
+
+.concept-dialog-scope-button-active:hover {
+	background-color: rgb(37 99 235);
+}
+
+.concept-dialog-scope-button-active:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.concept-dialog-scope-button-disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+	pointer-events: none;
+}
+
+.concept-dialog-close-button {
+	padding: 0.5rem;
+	border: 1px solid var(--border);
+	border-radius: 0.25rem;
+	transition: all 200ms;
+	cursor: pointer;
+	margin-left: auto;
+	background-color: transparent;
+	color: var(--foreground);
+	outline: none;
+}
+
+.concept-dialog-close-button:hover {
+	background-color: var(--accent);
+}
+
+.concept-dialog-close-button:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.concept-dialog-canvas-area {
+	flex: 1;
+	display: flex;
+	min-height: 0;
+	position: relative;
+	padding-right: 1.5rem;
+}
+
+.concept-dialog-canvas-container {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	border-radius: 1rem;
+	border: 2px solid var(--border);
+}
+
+.concept-dialog-color-picker {
+	position: absolute;
+	left: 7rem;
+	top: 6rem;
+	z-index: 50;
+}
+
+.concept-dialog-footer {
+	padding: 1rem 1.5rem;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.concept-dialog-footer-controls {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+}
+
+.concept-dialog-control-group {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.concept-dialog-control-label {
+	font-size: 0.875rem;
+	font-weight: 500;
+}
+
+.concept-dialog-flip-button {
+	padding: 0.375rem 0.75rem;
+	border: 1px solid var(--border);
+	border-radius: 0.375rem;
+	transition: all 200ms;
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	cursor: pointer;
+	background-color: transparent;
+	color: var(--foreground);
+	outline: none;
+	font-size: 0.875rem;
+}
+
+.concept-dialog-flip-button:hover {
+	background-color: var(--accent);
+}
+
+.concept-dialog-flip-button:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.concept-dialog-type-controls {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	margin-left: 1rem;
+}
+
+.concept-dialog-checkbox-label {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	cursor: pointer;
+}
+
+.concept-dialog-checkbox-text {
+	font-size: 0.875rem;
+}
+
+.concept-dialog-action-buttons {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.concept-dialog-cancel-button {
+	padding: 0.5rem 1rem;
+	border: 1px solid var(--border);
+	border-radius: 0.375rem;
+	transition: all 200ms;
+	cursor: pointer;
+	background-color: transparent;
+	color: var(--foreground);
+	outline: none;
+	font-size: 0.875rem;
+}
+
+.concept-dialog-cancel-button:hover {
+	background-color: var(--accent);
+}
+
+.concept-dialog-cancel-button:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.concept-dialog-save-button {
+	padding: 0.5rem 1rem;
+	background-color: rgb(59 130 246);
+	color: rgb(255 255 255);
+	border-radius: 0.375rem;
+	transition: all 200ms;
+	cursor: pointer;
+	border: none;
+	outline: none;
+	font-size: 0.875rem;
+}
+
+.concept-dialog-save-button:hover {
+	background-color: rgb(37 99 235);
+}
+
+.concept-dialog-save-button:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.concept-dialog-save-button:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+	pointer-events: none;
+}

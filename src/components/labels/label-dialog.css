@@ -1,0 +1,125 @@
+/* || Label Dialog */
+.label-dialog {
+	max-width: calc(100% - 2rem);
+}
+
+@media (width >= 640px) {
+	.label-dialog {
+		max-width: 28rem;
+	}
+}
+
+.label-dialog__content {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+/* || Section */
+.label-dialog__section-title {
+	font-size: 0.875rem;
+	font-weight: 500;
+	margin-bottom: 8px;
+}
+
+.label-dialog__labels {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+/* || Label button */
+.label-dialog__label-button {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 6px 12px;
+	border-radius: 9999px;
+	cursor: pointer;
+	border: none;
+	outline: none;
+	transition: all 200ms;
+}
+
+.label-dialog__label-button:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.label-dialog__label-button--selected {
+	box-shadow: 0 0 0 2px var(--action-button);
+}
+
+/* || Create section */
+.label-dialog__create {
+	padding-top: 8px;
+	border-top: 1px solid var(--border);
+}
+
+.label-dialog__create-form {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.label-dialog__color-palette {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.label-dialog__color-button {
+	width: 32px;
+	height: 32px;
+	border-radius: 9999px;
+	cursor: pointer;
+	border: none;
+	outline: none;
+	transition: all 200ms;
+}
+
+.label-dialog__color-button:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.label-dialog__color-button--selected {
+	box-shadow: 0 0 0 2px var(--action-button), 0 0 0 4px var(--background);
+}
+
+.label-dialog__form-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+}
+
+.label-dialog__create-toggle {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 0.875rem;
+	color: var(--muted-foreground);
+	background: none;
+	border: none;
+	padding: 0;
+	cursor: pointer;
+	outline: none;
+	transition: color 200ms;
+}
+
+.label-dialog__create-toggle:hover {
+	color: var(--foreground);
+}
+
+.label-dialog__create-toggle:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+/* || Icon sizes */
+.label-dialog__icon-sm {
+	width: 0.75rem;
+	height: 0.75rem;
+}
+
+.label-dialog__icon-md {
+	width: 1rem;
+	height: 1rem;
+}

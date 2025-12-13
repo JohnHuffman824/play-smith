@@ -1,0 +1,6 @@
+/* || Base styles */
+.toaster {
+  /* Sonner library uses inline styles with CSS variables */
+  /* The component already uses CSS variables: --normal-bg, --normal-text, --normal-border */
+  /* No additional styles needed - preserving existing behavior */
+}

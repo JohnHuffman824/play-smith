@@ -88,7 +88,7 @@ describe('PlaybookShareRepository', () => {
 			// Verify only one share exists
 			const shares = await shareRepo.getPlaybookShares(playbookId)
 			expect(shares.length).toBe(1)
-			expect(shares[0].permission).toBe('edit')
+			expect(shares[0]?.permission).toBe('edit')
 		})
 
 		test('can share with multiple teams', async () => {
@@ -145,7 +145,7 @@ describe('PlaybookShareRepository', () => {
 
 			const shares = await shareRepo.getPlaybookShares(playbookId)
 			expect(shares.length).toBe(1)
-			expect(shares[0].shared_with_team_id).toBe(team1Id)
+			expect(shares[0]?.shared_with_team_id).toBe(team1Id)
 		})
 
 		test('handles non-existent share gracefully', async () => {
@@ -170,9 +170,9 @@ describe('PlaybookShareRepository', () => {
 			const playbooks = await shareRepo.getPlaybooksSharedWithTeams([team2Id])
 
 			expect(playbooks.length).toBe(1)
-			expect(playbooks[0].id).toBe(playbookId)
-			expect(playbooks[0].name).toBe('Test Playbook')
-			expect(playbooks[0].play_count).toBe(0)
+			expect(playbooks[0]?.id).toBe(playbookId)
+			expect(playbooks[0]?.name).toBe('Test Playbook')
+			expect(playbooks[0]?.play_count).toBe(0)
 		})
 
 		test('returns empty array for empty team list', async () => {
@@ -225,8 +225,8 @@ describe('PlaybookShareRepository', () => {
 
 			const playbooks = await shareRepo.getPlaybooksSharedWithTeams([team2Id])
 			expect(playbooks.length).toBe(2)
-			expect(playbooks[0].id).toBe(playbook2.id) // Most recent first
-			expect(playbooks[1].id).toBe(playbookId)
+			expect(playbooks[0]?.id).toBe(playbook2.id) // Most recent first
+			expect(playbooks[1]?.id).toBe(playbookId)
 		})
 
 		test('handles multiple teams', async () => {
@@ -320,10 +320,10 @@ describe('PlaybookShareRepository', () => {
 			const shares = await shareRepo.getPlaybookSharesWithTeams(playbookId)
 
 			expect(shares.length).toBe(1)
-			expect(shares[0].playbook_id).toBe(playbookId)
-			expect(shares[0].shared_with_team_id).toBe(team2Id)
-			expect(shares[0].team_name).toBe('Test Team 2')
-			expect(shares[0].permission).toBe('view')
+			expect(shares[0]?.playbook_id).toBe(playbookId)
+			expect(shares[0]?.shared_with_team_id).toBe(team2Id)
+			expect(shares[0]?.team_name).toBe('Test Team 2')
+			expect(shares[0]?.permission).toBe('view')
 		})
 
 		test('returns multiple shares with team names', async () => {

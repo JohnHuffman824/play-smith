@@ -22,12 +22,17 @@ export function chaikinSubdivide(
 
 	// Preserve first endpoint if requested
 	if (preserveEndpoints) {
-		result.push(points[0])
+		const first = points[0]
+		if (first) {
+			result.push(first)
+		}
 	}
 
 	for (let i = 0; i < points.length - 1; i++) {
 		const p0 = points[i]
 		const p1 = points[i + 1]
+
+		if (!p0 || !p1) continue
 
 		// For first/last segments with endpoint preservation, only add one point
 		if (preserveEndpoints && i === 0) {
@@ -57,7 +62,10 @@ export function chaikinSubdivide(
 
 	// Preserve last endpoint if requested
 	if (preserveEndpoints) {
-		result.push(points[points.length - 1])
+		const last = points[points.length - 1]
+		if (last) {
+			result.push(last)
+		}
 	}
 
 	return result

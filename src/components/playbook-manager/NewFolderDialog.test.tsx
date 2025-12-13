@@ -201,6 +201,7 @@ describe('NewFolderDialog', () => {
 
 	test('shows loading state during folder creation', async () => {
 		// Create a promise that we can control
+		 
 		let resolveCreate: (value: any) => void
 		const slowCreateFolder = mock(() => new Promise(resolve => {
 			resolveCreate = resolve
@@ -248,6 +249,7 @@ describe('NewFolderDialog', () => {
 
 	test('disables input and buttons during creation', async () => {
 		// Create a promise that we can control
+		 
 		let resolveCreate: (value: any) => void
 		const slowCreateFolder = mock(() => new Promise(resolve => {
 			resolveCreate = resolve

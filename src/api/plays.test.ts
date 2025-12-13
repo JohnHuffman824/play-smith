@@ -19,7 +19,7 @@ describe('Plays API', () => {
 
 	beforeAll(async () => {
 		// Start test server once
-		const { url } = await startTestServer()
+		const { url} = await startTestServer()
 		baseUrl = url
 
 		// Create shared fixture (user, team, playbook, session)
@@ -29,6 +29,8 @@ describe('Plays API', () => {
 	afterAll(async () => {
 		// Clean up shared fixture
 		await cleanupTestFixture(fixture)
+		// Additional cleanup to prevent test pollution
+		await db`DELETE FROM playbook_shares WHERE playbook_id = ${fixture.playbookId}`
 		await stopTestServer()
 	})
 

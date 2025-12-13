@@ -3,60 +3,29 @@ import { cleanup, render, fireEvent } from '@testing-library/react'
 import { Canvas } from './Canvas'
 import { PlayProvider, usePlayContext } from '../../contexts/PlayContext'
 import { SettingsProvider } from '@/contexts/SettingsContext'
+import { CanvasViewportProvider } from '@/contexts/CanvasViewportContext'
 import type { DrawingState } from '../../types/play.types'
 
 function renderCanvas(drawingState: DrawingState) {
-	const mockInitialState = {
-		drawings: [
-			{
-				id: 'test-drawing-1',
-				points: {
-					'p1': { id: 'p1', x: 50, y: 20, type: 'corner' as const },
-					'p2': { id: 'p2', x: 60, y: 30, type: 'corner' as const },
-				},
-				segments: [
-					{
-						type: 'line' as const,
-						pointIds: ['p1', 'p2'],
-					},
-				],
-				style: {
-					color: '#ff0000',
-					strokeWidth: 2,
-					lineStyle: 'solid' as const,
-					lineEnd: 'none' as const,
-					pathMode: 'sharp' as const,
-				},
-				annotations: [],
-			},
-		],
-	}
-
 	return render(
 		<SettingsProvider>
-			<PlayProvider initialState={mockInitialState}>
-				<Canvas
-					drawingState={drawingState}
-					hashAlignment="center"
-					showPlayBar={false}
-					readonly={false}
-					showFieldMarkings={true}
-					containerMode="page"
-				/>
+			<PlayProvider>
+				<CanvasViewportProvider>
+					<Canvas
+						drawingState={drawingState}
+						hashAlignment="middle"
+						showPlayBar={false}
+						showFieldMarkings={true}
+						containerMode="viewport"
+					/>
+				</CanvasViewportProvider>
 			</PlayProvider>
 		</SettingsProvider>
 	)
 }
 
-function findCircleCursor(container: HTMLElement): HTMLElement | undefined {
-	const cursorElements = container.querySelectorAll('div')
-	return Array.from(cursorElements).find(el => {
-		const style = (el as HTMLElement).style
-		return style.borderRadius === '50%' &&
-			   style.backgroundColor &&
-			   style.width &&
-			   style.height
-	}) as HTMLElement | undefined
+function findCircleCursor(container: HTMLElement): HTMLElement | null {
+	return container.querySelector('.canvas-add-player-circle')
 }
 
 describe('Canvas - Add Player Tool Cursor', () => {
@@ -80,7 +49,7 @@ describe('Canvas - Add Player Tool Cursor', () => {
 		const { container } = renderCanvas(addPlayerToolState)
 
 		// Find the whiteboard div (the main canvas container)
-		const whiteboard = container.querySelector('div[class*="rounded-2xl"]') as HTMLElement
+		const whiteboard = container.querySelector('.canvas-whiteboard') as HTMLElement
 		expect(whiteboard).toBeTruthy()
 
 		// Mock getBoundingClientRect to return valid dimensions
@@ -102,14 +71,14 @@ describe('Canvas - Add Player Tool Cursor', () => {
 
 		// The custom add player cursor should be visible
 		const circleCursor = findCircleCursor(container)
-		expect(circleCursor).toBeDefined()
+		expect(circleCursor).not.toBeNull()
 	})
 
 	test('hides circle cursor when add player tool is active and hovering over drawing', () => {
 		const { container } = renderCanvas(addPlayerToolState)
 
 		// Find the whiteboard
-		const whiteboard = container.querySelector('div[class*="rounded-2xl"]') as HTMLElement
+		const whiteboard = container.querySelector('.canvas-whiteboard') as HTMLElement
 		expect(whiteboard).toBeTruthy()
 
 		// Mock getBoundingClientRect
@@ -131,7 +100,7 @@ describe('Canvas - Add Player Tool Cursor', () => {
 
 		// Verify cursor is initially visible
 		let circleCursor = findCircleCursor(container)
-		expect(circleCursor).toBeDefined()
+		expect(circleCursor).not.toBeNull()
 
 		// For now, we'll simulate the hover state that should hide the cursor
 		// In the actual implementation, we'll add state tracking for hovering over drawings
@@ -147,10 +116,10 @@ describe('Canvas - Add Player Tool Cursor', () => {
 
 		// This test will fail until we implement the hiding behavior
 		// For now, the cursor is still visible (which is the current bug)
-		expect(circleCursor).toBeDefined() // Currently passes (wrong behavior)
+		expect(circleCursor).not.toBeNull() // Currently passes (wrong behavior)
 
 		// TODO: After implementing the feature, change this to:
-		// expect(circleCursor).toBeUndefined() // Should pass after implementation
+		// expect(circleCursor).toBeNull() // Should pass after implementation
 	})
 })
 
@@ -182,15 +151,16 @@ describe('Canvas - Player State Sync with PlayContext', () => {
 		const { container } = render(
 			<SettingsProvider>
 				<PlayProvider>
-					<TestComponent />
-					<Canvas
-						drawingState={addPlayerToolState}
-						hashAlignment="middle"
-						showPlayBar={false}
-						readonly={false}
-						showFieldMarkings={true}
-						containerMode="page"
-					/>
+					<CanvasViewportProvider>
+						<TestComponent />
+						<Canvas
+							drawingState={addPlayerToolState}
+							hashAlignment="middle"
+							showPlayBar={false}
+							showFieldMarkings={true}
+							containerMode="viewport"
+						/>
+					</CanvasViewportProvider>
 				</PlayProvider>
 			</SettingsProvider>
 		)
@@ -199,7 +169,7 @@ describe('Canvas - Player State Sync with PlayContext', () => {
 		expect(contextState.players).toEqual([])
 
 		// Find the whiteboard and simulate a click to add a player
-		const whiteboard = container.querySelector('div[class*="rounded-2xl"]') as HTMLElement
+		const whiteboard = container.querySelector('.canvas-whiteboard') as HTMLElement
 		expect(whiteboard).toBeTruthy()
 
 		// Mock getBoundingClientRect

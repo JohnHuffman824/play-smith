@@ -2,6 +2,7 @@ import { afterEach, describe, test, expect } from 'bun:test'
 import { cleanup, render, fireEvent, waitFor } from '@testing-library/react'
 import { SVGCanvas } from '../../../../src/components/canvas/SVGCanvas'
 import { FieldCoordinateSystem } from '../../../../src/utils/coordinates'
+import { SettingsProvider } from '../../../../src/contexts/SettingsContext'
 import type { Drawing } from '../../../../src/types/drawing.types'
 
 describe('SVGCanvas - Add Player from Control Point Node', () => {
@@ -34,26 +35,28 @@ describe('SVGCanvas - Add Player from Control Point Node', () => {
 
 	test('control points are visible when addPlayer tool is active', () => {
 		const { container } = render(
-			<SVGCanvas
-				width={800}
-				height={400}
-				coordSystem={mockCoordSystem}
-				drawings={[mockDrawing]}
-				players={mockPlayers}
-				onChange={() => {}}
-				activeTool="addPlayer"
-				autoCorrect={false}
-				defaultStyle={{
-					color: '#000',
-					strokeWidth: 2,
-					lineStyle: 'solid',
-					lineEnd: 'none',
-					pathMode: 'sharp',
-				}}
-				snapThreshold={10}
-				isOverCanvas={true}
-				selectedDrawingIds={['drawing-1']}
-			/>,
+			<SettingsProvider>
+				<SVGCanvas
+					width={800}
+					height={400}
+					coordSystem={mockCoordSystem}
+					drawings={[mockDrawing]}
+					players={mockPlayers}
+					onChange={() => {}}
+					activeTool="addPlayer"
+					autoCorrect={false}
+					defaultStyle={{
+						color: '#000',
+						strokeWidth: 2,
+						lineStyle: 'solid',
+						lineEnd: 'none',
+						pathMode: 'sharp',
+					}}
+					snapThreshold={10}
+					isOverCanvas={true}
+					selectedDrawingIds={['drawing-1']}
+				/>
+			</SettingsProvider>,
 		)
 
 		// Control points should be rendered (circles with r=6)
@@ -81,27 +84,29 @@ describe('SVGCanvas - Add Player from Control Point Node', () => {
 		}
 
 		const { container } = render(
-			<SVGCanvas
-				width={800}
-				height={400}
-				coordSystem={mockCoordSystem}
-				drawings={[mockDrawing]}
-				players={mockPlayers}
-				onChange={() => {}}
-				activeTool="addPlayer"
-				autoCorrect={false}
-				defaultStyle={{
-					color: '#000',
-					strokeWidth: 2,
-					lineStyle: 'solid',
-					lineEnd: 'none',
-					pathMode: 'sharp',
-				}}
-				snapThreshold={10}
-				isOverCanvas={true}
-				selectedDrawingIds={['drawing-1']}
-				onAddPlayerAtNode={handleAddPlayerAtNode}
-			/>,
+			<SettingsProvider>
+				<SVGCanvas
+					width={800}
+					height={400}
+					coordSystem={mockCoordSystem}
+					drawings={[mockDrawing]}
+					players={mockPlayers}
+					onChange={() => {}}
+					activeTool="addPlayer"
+					autoCorrect={false}
+					defaultStyle={{
+						color: '#000',
+						strokeWidth: 2,
+						lineStyle: 'solid',
+						lineEnd: 'none',
+						pathMode: 'sharp',
+					}}
+					snapThreshold={10}
+					isOverCanvas={true}
+					selectedDrawingIds={['drawing-1']}
+					onAddPlayerAtNode={handleAddPlayerAtNode}
+				/>
+			</SettingsProvider>,
 		)
 
 		// Find and click control point p1 at (10, 10)
@@ -146,30 +151,32 @@ describe('SVGCanvas - Add Player from Control Point Node', () => {
 		}
 
 		const { container } = render(
-			<SVGCanvas
-				width={800}
-				height={400}
-				coordSystem={mockCoordSystem}
-				drawings={[drawingWithPlayer]}
-				players={[
-					...mockPlayers,
-					{ id: 'existing-player', x: 10, y: 10, label: 'X', color: '#ff0000' },
-				]}
-				onChange={() => {}}
-				activeTool="addPlayer"
-				autoCorrect={false}
-				defaultStyle={{
-					color: '#000',
-					strokeWidth: 2,
-					lineStyle: 'solid',
-					lineEnd: 'none',
-					pathMode: 'sharp',
-				}}
-				snapThreshold={10}
-				isOverCanvas={true}
-				selectedDrawingIds={['drawing-1']}
-				onAddPlayerAtNode={handleAddPlayerAtNode}
-			/>,
+			<SettingsProvider>
+				<SVGCanvas
+					width={800}
+					height={400}
+					coordSystem={mockCoordSystem}
+					drawings={[drawingWithPlayer]}
+					players={[
+						...mockPlayers,
+						{ id: 'existing-player', x: 10, y: 10, label: 'X', color: '#ff0000' },
+					]}
+					onChange={() => {}}
+					activeTool="addPlayer"
+					autoCorrect={false}
+					defaultStyle={{
+						color: '#000',
+						strokeWidth: 2,
+						lineStyle: 'solid',
+						lineEnd: 'none',
+						pathMode: 'sharp',
+					}}
+					snapThreshold={10}
+					isOverCanvas={true}
+					selectedDrawingIds={['drawing-1']}
+					onAddPlayerAtNode={handleAddPlayerAtNode}
+				/>
+			</SettingsProvider>,
 		)
 
 		// Find and click control point p2 (p1 is hidden because linked)
@@ -203,27 +210,29 @@ describe('SVGCanvas - Add Player from Control Point Node', () => {
 		}
 
 		const { container } = render(
-			<SVGCanvas
-				width={800}
-				height={400}
-				coordSystem={mockCoordSystem}
-				drawings={[mockDrawing]}
-				players={mockPlayers}
-				onChange={mockOnChange}
-				activeTool="addPlayer"
-				autoCorrect={false}
-				defaultStyle={{
-					color: '#000',
-					strokeWidth: 2,
-					lineStyle: 'solid',
-					lineEnd: 'none',
-					pathMode: 'sharp',
-				}}
-				snapThreshold={10}
-				isOverCanvas={true}
-				selectedDrawingIds={['drawing-1']}
-				onAddPlayerAtNode={() => {}}
-			/>,
+			<SettingsProvider>
+				<SVGCanvas
+					width={800}
+					height={400}
+					coordSystem={mockCoordSystem}
+					drawings={[mockDrawing]}
+					players={mockPlayers}
+					onChange={mockOnChange}
+					activeTool="addPlayer"
+					autoCorrect={false}
+					defaultStyle={{
+						color: '#000',
+						strokeWidth: 2,
+						lineStyle: 'solid',
+						lineEnd: 'none',
+						pathMode: 'sharp',
+					}}
+					snapThreshold={10}
+					isOverCanvas={true}
+					selectedDrawingIds={['drawing-1']}
+					onAddPlayerAtNode={() => {}}
+				/>
+			</SettingsProvider>,
 		)
 
 		const p1Pixel = mockCoordSystem.feetToPixels(10, 10)

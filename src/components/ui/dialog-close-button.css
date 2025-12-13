@@ -1,0 +1,34 @@
+.dialog-close-button {
+	/* Size and shape */
+	width: 1.5rem;
+	height: 1.5rem;
+	border-radius: 0.5rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	/* Interactive states */
+	cursor: pointer;
+	outline: none;
+	transition: all 200ms;
+
+	/* Colors */
+	color: var(--muted-foreground);
+	background-color: transparent;
+	border: none;
+}
+
+.dialog-close-button:hover {
+	color: var(--foreground);
+	background-color: var(--accent);
+}
+
+.dialog-close-button:focus-visible {
+	ring: 3px solid color-mix(in srgb, var(--ring) 50%, transparent);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 50%, transparent);
+}
+
+.dialog-close-button svg {
+	width: 1rem;
+	height: 1rem;
+}

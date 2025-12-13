@@ -1,8 +1,6 @@
 import postgres from 'postgres'
 
 const DATABASE_URL_REQUIRED = 'DATABASE_URL environment variable is required'
-const CONNECTION_SUCCESS_MESSAGE = '✅ Database connection successful'
-const CONNECTION_FAILURE_MESSAGE = '❌ Database connection failed:'
 
 if (!process.env.DATABASE_URL) {
 	throw new Error(DATABASE_URL_REQUIRED)

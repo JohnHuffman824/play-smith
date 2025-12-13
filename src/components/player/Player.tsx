@@ -37,14 +37,17 @@ interface PlayerProps {
   containerWidth: number // Container width in pixels
   containerHeight: number // Container height in pixels
   label: string
-  onPositionChange: (id: string, x: number, y: number) => void // Expects feet coordinates
-  onLabelClick: (id: string, x: number, y: number) => void
-  onFill: (id: string) => void
-  onDelete?: (id: string) => void
+  onPositionChange: (_id: string, _x: number, _y: number) => void // Expects feet coordinates
+  onLabelClick: (_id: string, _x: number, _y: number) => void
+  onFill: (_id: string) => void
+  onDelete?: (_id: string) => void
   interactable: boolean
   currentTool?: string
   color?: string
-  onHoverChange?: (isHovered: boolean) => void
+  onHoverChange?: (_isHovered: boolean) => void
+  zoom?: number
+  panX?: number
+  panY?: number
 }
 
 export function Player({

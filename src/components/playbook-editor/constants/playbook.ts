@@ -9,19 +9,15 @@ export const VIEW_MODE_LIST = 'list'
 // Filter Types
 export const FILTER_ALL = 'all'
 export const FILTER_FORMATIONS = 'formations'
-export const FILTER_TAGS = 'tags'
+export const FILTER_LABELS = 'labels'
 
 // UI Constants
-export const MAX_VISIBLE_TAGS = 4
+export const MAX_VISIBLE_LABELS = 4
 export const DEFAULT_PLAYBOOK_NAME = 'Offensive Game Plan - Week 1'
 
-// Play Type Badge Styles
-export const PLAY_TYPE_BADGE_PASS = 'bg-blue-500/90 text-white'
-export const PLAY_TYPE_BADGE_RUN = 'bg-green-500/90 text-white'
-
-// Play Type List Styles
-export const PLAY_TYPE_LIST_PASS = 'bg-blue-500/10 text-blue-500'
-export const PLAY_TYPE_LIST_RUN = 'bg-green-500/10 text-green-500'
+// These constants are now defined in CSS files:
+// - PLAY_TYPE_BADGE_PASS/RUN moved to play-card.css
+// - PLAY_TYPE_LIST_PASS/RUN moved to play-list-view.css
 
 // Common Class Names
 export const BUTTON_BASE = 'p-2 hover:bg-accent rounded-lg transition-all duration-200'
@@ -32,27 +28,8 @@ export const PRIMARY_BUTTON_BASE = 'px-4 py-2 bg-primary text-primary-foreground
 // Personnel Options
 export const PERSONNEL_OPTIONS = ['11', '10', '12', '13', '21', '22'] as const
 
-// Tag Colors (from design document)
-export const TAG_COLORS: Record<string, { bg: string; text: string }> = {
-  'Short Yardage': { bg: 'bg-green-500/15', text: 'text-green-600 dark:text-green-400' },
-  'Mid Yardage': { bg: 'bg-yellow-500/15', text: 'text-yellow-600 dark:text-yellow-400' },
-  'Long Yardage': { bg: 'bg-orange-500/15', text: 'text-orange-600 dark:text-orange-400' },
-  'Redzone': { bg: 'bg-red-500/15', text: 'text-red-600 dark:text-red-400' },
-  'Red Zone': { bg: 'bg-red-500/15', text: 'text-red-600 dark:text-red-400' },
-  '3rd Down': { bg: 'bg-blue-500/15', text: 'text-blue-600 dark:text-blue-400' },
-  'Quick Game': { bg: 'bg-purple-500/15', text: 'text-purple-600 dark:text-purple-400' },
-  'Play Action': { bg: 'bg-indigo-500/15', text: 'text-indigo-600 dark:text-indigo-400' },
-  'Bootleg': { bg: 'bg-cyan-500/15', text: 'text-cyan-600 dark:text-cyan-400' },
-  'Power': { bg: 'bg-amber-500/15', text: 'text-amber-600 dark:text-amber-400' },
-  'Goal Line': { bg: 'bg-rose-500/15', text: 'text-rose-600 dark:text-rose-400' },
-  'Fade': { bg: 'bg-pink-500/15', text: 'text-pink-600 dark:text-pink-400' },
-  'Draw': { bg: 'bg-lime-500/15', text: 'text-lime-600 dark:text-lime-400' },
-  'Mesh': { bg: 'bg-teal-500/15', text: 'text-teal-600 dark:text-teal-400' },
-}
-
-export const DEFAULT_TAG_COLOR = { bg: 'bg-muted', text: 'text-muted-foreground' }
-
-export const TAG_COLOR_PALETTE = [
+// Label Color Palette
+export const LABEL_COLOR_PALETTE = [
 	{ name: 'Green', value: '#10B981' },
 	{ name: 'Yellow', value: '#FBBF24' },
 	{ name: 'Orange', value: '#F97316' },
@@ -67,21 +44,30 @@ export const TAG_COLOR_PALETTE = [
 	{ name: 'Amber', value: '#F59E0B' },
 ]
 
-const HEX_TO_TAILWIND: Record<string, { bg: string; text: string }> = {
-	'#10B981': { bg: 'bg-green-500/15', text: 'text-green-600 dark:text-green-400' },
-	'#FBBF24': { bg: 'bg-yellow-500/15', text: 'text-yellow-600 dark:text-yellow-400' },
-	'#F97316': { bg: 'bg-orange-500/15', text: 'text-orange-600 dark:text-orange-400' },
-	'#EF4444': { bg: 'bg-red-500/15', text: 'text-red-600 dark:text-red-400' },
-	'#F43F5E': { bg: 'bg-rose-500/15', text: 'text-rose-600 dark:text-rose-400' },
-	'#3B82F6': { bg: 'bg-blue-500/15', text: 'text-blue-600 dark:text-blue-400' },
-	'#8B5CF6': { bg: 'bg-purple-500/15', text: 'text-purple-600 dark:text-purple-400' },
-	'#6366F1': { bg: 'bg-indigo-500/15', text: 'text-indigo-600 dark:text-indigo-400' },
-	'#14B8A6': { bg: 'bg-teal-500/15', text: 'text-teal-600 dark:text-teal-400' },
-	'#06B6D4': { bg: 'bg-cyan-500/15', text: 'text-cyan-600 dark:text-cyan-400' },
-	'#EC4899': { bg: 'bg-pink-500/15', text: 'text-pink-600 dark:text-pink-400' },
-	'#F59E0B': { bg: 'bg-amber-500/15', text: 'text-amber-600 dark:text-amber-400' },
+// Label color styles mapping
+const HEX_TO_STYLES: Record<string, { bg: string; text: string }> = {
+	'#10B981': { bg: 'rgba(16, 185, 129, 0.3)', text: '#10B981' },
+	'#FBBF24': { bg: 'rgba(251, 191, 36, 0.3)', text: '#B8860B' },
+	'#F97316': { bg: 'rgba(249, 115, 22, 0.3)', text: '#F97316' },
+	'#EF4444': { bg: 'rgba(239, 68, 68, 0.3)', text: '#EF4444' },
+	'#F43F5E': { bg: 'rgba(244, 63, 94, 0.3)', text: '#F43F5E' },
+	'#3B82F6': { bg: 'rgba(59, 130, 246, 0.3)', text: '#3B82F6' },
+	'#8B5CF6': { bg: 'rgba(139, 92, 246, 0.3)', text: '#8B5CF6' },
+	'#6366F1': { bg: 'rgba(99, 102, 241, 0.3)', text: '#6366F1' },
+	'#14B8A6': { bg: 'rgba(20, 184, 166, 0.3)', text: '#14B8A6' },
+	'#06B6D4': { bg: 'rgba(6, 182, 212, 0.3)', text: '#0891B2' },
+	'#EC4899': { bg: 'rgba(236, 72, 153, 0.3)', text: '#EC4899' },
+	'#F59E0B': { bg: 'rgba(245, 158, 11, 0.3)', text: '#D97706' },
 }
 
-export function getTagClasses(hexColor: string): { bg: string; text: string } {
-	return HEX_TO_TAILWIND[hexColor.toUpperCase()] || DEFAULT_TAG_COLOR
+export function getLabelStyles(hexColor: string): React.CSSProperties {
+	const hex = hexColor.toUpperCase()
+	const colors = HEX_TO_STYLES[hex]
+	if (!colors) {
+		return { backgroundColor: 'var(--muted)', color: 'var(--muted-foreground)' }
+	}
+	return {
+		backgroundColor: colors.bg,
+		color: colors.text,
+	}
 }

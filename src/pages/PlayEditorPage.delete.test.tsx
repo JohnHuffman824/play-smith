@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeAll, beforeEach, afterAll, afterEach } from 'bun:test'
-import { cleanup, render, fireEvent, waitFor } from '@testing-library/react'
+import { cleanup, render, waitFor } from '@testing-library/react'
 import { PlayEditorPage } from './PlayEditorPage'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -120,7 +120,7 @@ describe('PlayEditorPage - Unified Delete Functionality', () => {
 	}
 
 	test('delete keybind should trigger unified delete method', async () => {
-		const { container } = await renderPlayEditor()
+		await renderPlayEditor()
 
 		// Simulate keyboard shortcut (Delete key)
 		// This should emit 'selection:delete' event
@@ -140,7 +140,7 @@ describe('PlayEditorPage - Unified Delete Functionality', () => {
 	})
 
 	test('SelectionOverlay delete button should trigger unified delete method', async () => {
-		const { container, getByTitle } = await renderPlayEditor()
+		const { container: _container, getByTitle: _getByTitle } = await renderPlayEditor()
 
 		// First, we need to select 2+ objects to show the SelectionOverlay
 		// Then click the delete button

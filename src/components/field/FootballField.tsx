@@ -28,6 +28,7 @@ import {
   NUMBER_HEIGHT,
   NUMBER_FROM_EDGE,
 } from '../../constants/field.constants'
+import './football-field.css'
 
 interface FootballFieldProps {
   className?: string
@@ -40,12 +41,12 @@ export function FootballField({ className, onDimensionsChange }: FootballFieldPr
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
 
   // Theme-aware colors
-  const fieldBg = theme === 'dark' ? '#1f2937' : '#f2f2f2'
+  const _fieldBg = theme === 'dark' ? '#1f2937' : '#f2f2f2'
   const lineColor = theme === 'dark' ? '#4b5563' : '#a9a9a9'
-  const losLineColor = theme === 'dark' ? '#6b7280' : '#8a8a8a'
+  const losLineColor = theme === 'dark' ? '#60A5FA' : '#3B82F6' // Blue for better visibility
   const textColor = theme === 'dark' ? '#6b7280' : '#919191'
-  const lineOpacity = theme === 'dark' ? 0.6 : 0.4
-  const losOpacity = theme === 'dark' ? 0.9 : 0.7
+  const _lineOpacity = theme === 'dark' ? 0.6 : 0.4
+  const losOpacity = theme === 'dark' ? 0.9 : 0.8
   const textOpacity = theme === 'dark' ? 0.5 : 0.3
 
   // Update dimensions when container size changes
@@ -191,28 +192,16 @@ export function FootballField({ className, onDimensionsChange }: FootballFieldPr
   }
 
   return (
-    <div 
+    <div
       ref={containerRef}
-      className={className}
-      style={{
-        width: '100%',
-        height: '100%',
-        backgroundColor: fieldBg,
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        borderRadius: 'inherit',
-      }}
+      className={`football-field ${className || ''}`}
+      data-theme={theme}
     >
       {dimensions.width > 0 && dimensions.height > 0 && (
         <svg
           width={dimensions.width}
           height={dimensions.height}
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-          }}
+          className='football-field-svg'
         >
           {fieldMarkers}
         </svg>

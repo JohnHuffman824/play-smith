@@ -14,7 +14,7 @@
  */
 
 import { FIELD_WIDTH_FEET } from '../constants/field.constants'
-import { Coordinate, FeetCoordinate, PixelCoordinate } from '../types/field.types'
+import type { FeetCoordinate, PixelCoordinate } from '../types/field.types'
 
 export class FieldCoordinateSystem {
 	private containerWidth: number

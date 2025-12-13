@@ -1,7 +1,8 @@
 import { afterEach, describe, test, expect } from 'bun:test'
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, render } from '@testing-library/react'
 import { SVGCanvas } from './SVGCanvas'
 import { FieldCoordinateSystem } from '../../utils/coordinates'
+import { SettingsProvider } from '../../contexts/SettingsContext'
 import type { Drawing } from '../../types/drawing.types'
 
 describe('SVGCanvas - Control Node Visibility', () => {
@@ -25,7 +26,7 @@ describe('SVGCanvas - Control Node Visibility', () => {
 				pointIds: ['p1', 'p2'],
 			},
 		],
-		style: { color: '#ff0000', strokeWidth: 2, lineStyle: 'solid', lineEnd: 'none' },
+		style: { color: '#ff0000', strokeWidth: 2, lineStyle: 'solid', lineEnd: 'none', pathMode: 'sharp' },
 		annotations: [],
 	}
 
@@ -41,25 +42,27 @@ describe('SVGCanvas - Control Node Visibility', () => {
 				pointIds: ['p3', 'p4'],
 			},
 		],
-		style: { color: '#00ff00', strokeWidth: 2, lineStyle: 'solid', lineEnd: 'none' },
+		style: { color: '#00ff00', strokeWidth: 2, lineStyle: 'solid', lineEnd: 'none', pathMode: 'sharp' },
 		annotations: [],
 	}
 
 	test('shows control nodes for all drawings when SELECT tool is active and hovering', () => {
 		const { container } = render(
-			<SVGCanvas
-				width={800}
-				height={400}
-				coordSystem={mockCoordSystem}
-				drawings={[drawing1, drawing2]}
-				onChange={mockOnChange}
-				activeTool="select"
-				autoCorrect={false}
-				defaultStyle={{ color: '#000000', lineWidth: 2 }}
-				snapThreshold={10}
-				isOverCanvas={true}
-				selectedDrawingIds={['drawing-1', 'drawing-2']}
-			/>
+			<SettingsProvider>
+				<SVGCanvas
+					width={800}
+					height={400}
+					coordSystem={mockCoordSystem}
+					drawings={[drawing1, drawing2]}
+					onChange={mockOnChange}
+					activeTool="select"
+					autoCorrect={false}
+					defaultStyle={{ color: '#000000', strokeWidth: 2, lineStyle: 'solid', lineEnd: 'none', pathMode: 'sharp' }}
+					snapThreshold={10}
+					isOverCanvas={true}
+					selectedDrawingIds={['drawing-1', 'drawing-2']}
+				/>
+			</SettingsProvider>
 		)
 
 		// Should render control nodes (circles) for ALL drawings, not just one
@@ -72,19 +75,21 @@ describe('SVGCanvas - Control Node Visibility', () => {
 
 	test('shows control nodes for drawing1 points', () => {
 		const { container } = render(
-			<SVGCanvas
-				width={800}
-				height={400}
-				coordSystem={mockCoordSystem}
-				drawings={[drawing1, drawing2]}
-				onChange={mockOnChange}
-				activeTool="select"
-				autoCorrect={false}
-				defaultStyle={{ color: '#000000', lineWidth: 2 }}
-				snapThreshold={10}
-				isOverCanvas={true}
-				selectedDrawingIds={['drawing-1', 'drawing-2']}
-			/>
+			<SettingsProvider>
+				<SVGCanvas
+					width={800}
+					height={400}
+					coordSystem={mockCoordSystem}
+					drawings={[drawing1, drawing2]}
+					onChange={mockOnChange}
+					activeTool="select"
+					autoCorrect={false}
+					defaultStyle={{ color: '#000000', strokeWidth: 2, lineStyle: 'solid', lineEnd: 'none', pathMode: 'sharp' }}
+					snapThreshold={10}
+					isOverCanvas={true}
+					selectedDrawingIds={['drawing-1', 'drawing-2']}
+				/>
+			</SettingsProvider>
 		)
 
 		// Verify nodes exist at the pixel positions for drawing1's points
@@ -108,19 +113,21 @@ describe('SVGCanvas - Control Node Visibility', () => {
 
 	test('shows control nodes for drawing2 points', () => {
 		const { container } = render(
-			<SVGCanvas
-				width={800}
-				height={400}
-				coordSystem={mockCoordSystem}
-				drawings={[drawing1, drawing2]}
-				onChange={mockOnChange}
-				activeTool="select"
-				autoCorrect={false}
-				defaultStyle={{ color: '#000000', lineWidth: 2 }}
-				snapThreshold={10}
-				isOverCanvas={true}
-				selectedDrawingIds={['drawing-1', 'drawing-2']}
-			/>
+			<SettingsProvider>
+				<SVGCanvas
+					width={800}
+					height={400}
+					coordSystem={mockCoordSystem}
+					drawings={[drawing1, drawing2]}
+					onChange={mockOnChange}
+					activeTool="select"
+					autoCorrect={false}
+					defaultStyle={{ color: '#000000', strokeWidth: 2, lineStyle: 'solid', lineEnd: 'none', pathMode: 'sharp' }}
+					snapThreshold={10}
+					isOverCanvas={true}
+					selectedDrawingIds={['drawing-1', 'drawing-2']}
+				/>
+			</SettingsProvider>
 		)
 
 		// Verify nodes exist at the pixel positions for drawing2's points
@@ -144,18 +151,20 @@ describe('SVGCanvas - Control Node Visibility', () => {
 
 	test('hides control nodes when not hovering over canvas', () => {
 		const { container } = render(
-			<SVGCanvas
-				width={800}
-				height={400}
-				coordSystem={mockCoordSystem}
-				drawings={[drawing1, drawing2]}
-				onChange={mockOnChange}
-				activeTool="select"
-				autoCorrect={false}
-				defaultStyle={{ color: '#000000', lineWidth: 2 }}
-				snapThreshold={10}
-				isOverCanvas={false}
-			/>
+			<SettingsProvider>
+				<SVGCanvas
+					width={800}
+					height={400}
+					coordSystem={mockCoordSystem}
+					drawings={[drawing1, drawing2]}
+					onChange={mockOnChange}
+					activeTool="select"
+					autoCorrect={false}
+					defaultStyle={{ color: '#000000', strokeWidth: 2, lineStyle: 'solid', lineEnd: 'none', pathMode: 'sharp' }}
+					snapThreshold={10}
+					isOverCanvas={false}
+				/>
+			</SettingsProvider>
 		)
 
 		const controlNodes = container.querySelectorAll('circle[r="6"]')

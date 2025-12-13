@@ -1,0 +1,173 @@
+/* || Presentation Editor */
+.presentation-editor {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	background: var(--background);
+}
+
+/* || Header */
+.presentation-editor__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	border-bottom: 1px solid var(--border);
+	padding: 16px 24px;
+}
+
+.presentation-editor__title {
+	font-size: 1.125rem;
+	font-weight: 600;
+}
+
+.presentation-editor__subtitle {
+	font-size: 0.875rem;
+	color: var(--muted-foreground);
+}
+
+/* || Content */
+.presentation-editor__content {
+	flex: 1;
+	overflow: auto;
+	padding: 24px;
+}
+
+.presentation-editor__empty {
+	text-align: center;
+	padding: 48px 0;
+}
+
+.presentation-editor__empty-text {
+	color: var(--muted-foreground);
+	margin-bottom: 16px;
+}
+
+.presentation-editor__slides {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+/* || Slide item */
+.presentation-editor__slide {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 12px;
+	background: var(--card);
+	border-radius: 8px;
+	border: 1px solid var(--border);
+	cursor: move;
+}
+
+.presentation-editor__drag-handle {
+	width: 20px;
+	height: 20px;
+	color: var(--muted-foreground);
+	flex-shrink: 0;
+}
+
+.presentation-editor__slide-number {
+	font-size: 0.875rem;
+	font-weight: 500;
+	color: var(--muted-foreground);
+	width: 32px;
+	flex-shrink: 0;
+}
+
+.presentation-editor__slide-name {
+	flex: 1;
+	font-weight: 500;
+}
+
+/* || Footer */
+.presentation-editor__footer {
+	border-top: 1px solid var(--border);
+	padding: 16px 24px;
+}
+
+.presentation-editor__add-button {
+	width: 100%;
+}
+
+/* || Icons */
+.presentation-editor__close-icon {
+	width: 20px;
+	height: 20px;
+}
+
+.presentation-editor__add-icon {
+	width: 16px;
+	height: 16px;
+	margin-right: 8px;
+}
+
+.presentation-editor__icon {
+	width: 16px;
+	height: 16px;
+}
+
+.presentation-editor__delete-button {
+	color: var(--destructive);
+}
+
+.presentation-editor__delete-button:hover {
+	color: var(--destructive);
+}
+
+/* || Add Modal */
+.presentation-editor__modal-overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 50;
+	background: rgb(0 0 0 / 50%);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.presentation-editor__modal {
+	background: var(--background);
+	border-radius: 8px;
+	padding: 24px;
+	max-width: 448px;
+	width: 100%;
+	max-height: 384px;
+	overflow: auto;
+}
+
+.presentation-editor__modal-title {
+	font-size: 1.125rem;
+	font-weight: 600;
+	margin-bottom: 16px;
+}
+
+.presentation-editor__modal-empty {
+	color: var(--muted-foreground);
+}
+
+.presentation-editor__modal-list {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.presentation-editor__modal-item {
+	width: 100%;
+	padding: 12px;
+	text-align: left;
+	border-radius: 8px;
+	background: none;
+	border: none;
+	cursor: pointer;
+	outline: none;
+	transition: background 200ms;
+}
+
+.presentation-editor__modal-item:hover {
+	background: var(--accent);
+}
+
+.presentation-editor__modal-item:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}

@@ -1,0 +1,203 @@
+/* || Formation Onboarding Dialog */
+.formation-onboarding {
+	position: fixed;
+	inset: 0;
+	background: rgb(0 0 0 / 50%);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 50;
+}
+
+.formation-onboarding__dialog {
+	background: var(--popover);
+	border: 1px solid var(--border);
+	border-radius: 16px;
+	box-shadow: 0 25px 50px -12px rgb(0 0 0 / 25%);
+	width: 600px;
+	max-height: 80vh;
+	display: flex;
+	flex-direction: column;
+}
+
+.formation-onboarding__header {
+	padding: 16px 24px;
+	border-bottom: 1px solid var(--border);
+}
+
+.formation-onboarding__title {
+	font-size: 1.25rem;
+	font-weight: 600;
+}
+
+.formation-onboarding__subtitle {
+	font-size: 0.875rem;
+	color: var(--muted-foreground);
+	margin-top: 4px;
+}
+
+.formation-onboarding__content {
+	flex: 1;
+	overflow: auto;
+	padding: 24px;
+}
+
+.formation-onboarding__section {
+	margin-bottom: 24px;
+}
+
+.formation-onboarding__section:last-child {
+	margin-bottom: 0;
+}
+
+.formation-onboarding__section-title {
+	font-size: 0.875rem;
+	font-weight: 500;
+	color: var(--muted-foreground);
+	margin-bottom: 12px;
+}
+
+.formation-onboarding__grid {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 8px;
+}
+
+.formation-onboarding__option {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 12px;
+	border-radius: 8px;
+	border: 1px solid var(--border);
+	text-align: left;
+	transition: all 200ms;
+	cursor: pointer;
+	background: none;
+	outline: none;
+}
+
+.formation-onboarding__option:hover {
+	border-color: var(--accent);
+}
+
+.formation-onboarding__option:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.formation-onboarding__option--selected {
+	border-color: var(--action-button);
+	background: color-mix(in oklch, var(--action-button) 10%, transparent);
+}
+
+.formation-onboarding__checkbox {
+	width: 20px;
+	height: 20px;
+	border-radius: 4px;
+	border: 1px solid var(--border);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+}
+
+.formation-onboarding__checkbox--checked {
+	background: var(--action-button);
+	border-color: var(--action-button);
+	color: var(--action-button-foreground);
+}
+
+.formation-onboarding__option-text {
+}
+
+.formation-onboarding__option-name {
+	font-weight: 500;
+}
+
+.formation-onboarding__option-description {
+	font-size: 0.75rem;
+	color: var(--muted-foreground);
+}
+
+.formation-onboarding__create {
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 12px;
+	border: 2px dashed var(--border);
+	border-radius: 8px;
+	background: none;
+	cursor: pointer;
+	outline: none;
+	transition: border-color 200ms;
+}
+
+.formation-onboarding__create:hover {
+	border-color: var(--muted-foreground);
+}
+
+.formation-onboarding__create:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.formation-onboarding__footer {
+	padding: 16px 24px;
+	border-top: 1px solid var(--border);
+	display: flex;
+	justify-content: space-between;
+}
+
+.formation-onboarding__skip {
+	padding: 8px 16px;
+	color: var(--muted-foreground);
+	background: none;
+	border: none;
+	cursor: pointer;
+	outline: none;
+	transition: color 200ms;
+}
+
+.formation-onboarding__skip:hover {
+	color: var(--foreground);
+}
+
+.formation-onboarding__skip:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.formation-onboarding__import {
+	padding: 8px 16px;
+	background: var(--action-button);
+	color: var(--action-button-foreground);
+	border: none;
+	border-radius: 6px;
+	cursor: pointer;
+	outline: none;
+	transition: all 200ms;
+}
+
+.formation-onboarding__import:hover:not(:disabled) {
+	background: color-mix(in oklch, var(--action-button) 90%, var(--foreground));
+}
+
+.formation-onboarding__import:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.formation-onboarding__import:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+/* || Icon sizes */
+.formation-onboarding__icon-sm {
+	width: 0.75rem;
+	height: 0.75rem;
+}
+
+.formation-onboarding__icon-md {
+	width: 1rem;
+	height: 1rem;
+}

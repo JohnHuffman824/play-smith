@@ -2,6 +2,7 @@ import { UserRepository } from '../db/repositories/UserRepository'
 import { SessionRepository } from '../db/repositories/SessionRepository'
 import { TeamRepository } from '../db/repositories/TeamRepository'
 import { AuthService } from '../services/AuthService'
+import { loginRateLimiter, registerRateLimiter } from './middleware/rateLimit'
 
 const userRepo = new UserRepository()
 const sessionRepo = new SessionRepository()
@@ -12,6 +13,42 @@ const SESSION_COOKIE_NAME = 'session_token'
 const INVALID_CREDENTIALS = 'Invalid email or password'
 const EMAIL_EXISTS = 'Email already registered'
 
+interface ValidationResult {
+	valid: boolean
+	error?: string
+}
+
+function validateEmail(email: string): ValidationResult {
+	// Basic email format validation
+	const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+	if (!emailRegex.test(email)) {
+		return { valid: false, error: 'Invalid email format' }
+	}
+	if (email.length > 254) {
+		return { valid: false, error: 'Email address is too long' }
+	}
+	return { valid: true }
+}
+
+function validatePassword(password: string): ValidationResult {
+	if (password.length < 8) {
+		return { valid: false, error: 'Password must be at least 8 characters' }
+	}
+	if (password.length > 128) {
+		return { valid: false, error: 'Password must be less than 128 characters' }
+	}
+	if (!/[a-z]/.test(password)) {
+		return { valid: false, error: 'Password must contain at least one lowercase letter' }
+	}
+	if (!/[A-Z]/.test(password)) {
+		return { valid: false, error: 'Password must contain at least one uppercase letter' }
+	}
+	if (!/[0-9]/.test(password)) {
+		return { valid: false, error: 'Password must contain at least one number' }
+	}
+	return { valid: true }
+}
+
 // Parses session token from cookie header
 function getSessionToken(req: Request): string | null {
 	const cookies = req.headers.get('cookie') ?? ''
@@ -21,8 +58,11 @@ function getSessionToken(req: Request): string | null {
 
 // Creates HTTP-only session cookie
 function createSessionCookie(token: string, maxAge: number): string {
+	const isProduction = process.env.NODE_ENV === 'production'
+	const secureFlag = isProduction ? 'Secure; ' : ''
+
 	return `${SESSION_COOKIE_NAME}=${token}; HttpOnly; Path=/; ` +
-		`Max-Age=${maxAge}; SameSite=Strict`
+		`${secureFlag}Max-Age=${maxAge}; SameSite=Strict`
 }
 
 // Creates cookie that expires the session
@@ -33,12 +73,25 @@ function createExpiredCookie(): string {
 export const authAPI = {
 	// POST /api/auth/login - Authenticate user and create session
 	async login(req: Request): Promise<Response> {
+		// Check rate limit first
+		const rateLimitResponse = await loginRateLimiter(req)
+		if (rateLimitResponse) return rateLimitResponse
+
 		const body = await req.json()
 		const { email, password } = body
 
 		if (!email || !password) {
 			return Response.json(
 				{ error: 'Email and password are required' },
+				{ status: 400 }
+			)
+		}
+
+		// Validate email format
+		const emailValidation = validateEmail(email)
+		if (!emailValidation.valid) {
+			return Response.json(
+				{ error: emailValidation.error },
 				{ status: 400 }
 			)
 		}
@@ -80,12 +133,34 @@ export const authAPI = {
 
 	// POST /api/auth/register - Create new user account
 	async register(req: Request): Promise<Response> {
+		// Check rate limit first
+		const rateLimitResponse = await registerRateLimiter(req)
+		if (rateLimitResponse) return rateLimitResponse
+
 		const body = await req.json()
 		const { email, name, password } = body
 
 		if (!email || !name || !password) {
 			return Response.json(
 				{ error: 'Email, name, and password are required' },
+				{ status: 400 }
+			)
+		}
+
+		// Validate email format
+		const emailValidation = validateEmail(email)
+		if (!emailValidation.valid) {
+			return Response.json(
+				{ error: emailValidation.error },
+				{ status: 400 }
+			)
+		}
+
+		// Validate password strength
+		const passwordValidation = validatePassword(password)
+		if (!passwordValidation.valid) {
+			return Response.json(
+				{ error: passwordValidation.error },
 				{ status: 400 }
 			)
 		}

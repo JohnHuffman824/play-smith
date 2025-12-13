@@ -1,4 +1,5 @@
 import { useTheme } from '@/contexts/SettingsContext'
+import './color-swatch-indicator.css'
 
 interface ColorSwatchIndicatorProps {
 	color: string
@@ -12,16 +13,10 @@ interface ColorSwatchIndicatorProps {
 export function ColorSwatchIndicator({ color }: ColorSwatchIndicatorProps) {
 	const { theme } = useTheme()
 
-	const swatchClass = [
-		'absolute -right-1 -bottom-1 w-4 h-4 rounded-full',
-		'border-2 shadow-sm',
-	].join(' ')
-
 	return (
 		<div
-			className={`${swatchClass} ${
-				theme === 'dark' ? 'border-gray-800' : 'border-white'
-			}`}
+			className="color-swatch-indicator"
+			data-theme={theme}
 			style={{ backgroundColor: color }}
 		/>
 	)

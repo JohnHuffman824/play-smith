@@ -8,15 +8,16 @@ type SectionUpdate = {
 
 export class SectionRepository {
 	// Creates a section and returns DB defaults in one call
-	async create(playbookId: number, name: string, displayOrder: number): Promise<Section> {
+	async create(playbookId: number, name: string, displayOrder: number, sectionType: 'standard' | 'ideas' = 'standard'): Promise<Section> {
 		const [section] = await db<Section[]>`
-			INSERT INTO sections (playbook_id, name, display_order)
+			INSERT INTO sections (playbook_id, name, display_order, section_type)
 			VALUES (
 				${playbookId},
 				${name},
-				${displayOrder}
+				${displayOrder},
+				${sectionType}
 			)
-			RETURNING id, playbook_id, name, display_order, created_at, updated_at
+			RETURNING id, playbook_id, name, display_order, section_type, created_at, updated_at
 		`
 
 		return section
@@ -25,7 +26,7 @@ export class SectionRepository {
 	// Fetches a section by id or null when missing
 	async findById(id: number): Promise<Section | null> {
 		const [section] = await db<Section[]>`
-			SELECT id, playbook_id, name, display_order, created_at, updated_at
+			SELECT id, playbook_id, name, display_order, section_type, created_at, updated_at
 			FROM sections
 			WHERE id = ${id}
 		`
@@ -36,11 +37,28 @@ export class SectionRepository {
 	// Lists sections for a playbook ordered by display_order
 	async findByPlaybookId(playbookId: number): Promise<Section[]> {
 		return await db<Section[]>`
-			SELECT id, playbook_id, name, display_order, created_at, updated_at
+			SELECT id, playbook_id, name, display_order, section_type, created_at, updated_at
 			FROM sections
 			WHERE playbook_id = ${playbookId}
 			ORDER BY display_order ASC
 		`
+	}
+
+	// Finds the Ideas section for a playbook
+	async findIdeasSection(playbookId: number): Promise<Section | null> {
+		const [section] = await db<Section[]>`
+			SELECT id, playbook_id, name, display_order, section_type, created_at, updated_at
+			FROM sections
+			WHERE playbook_id = ${playbookId} AND section_type = 'ideas'
+		`
+
+		return section ?? null
+	}
+
+	// Checks if a section is an Ideas section
+	async isIdeasSection(id: number): Promise<boolean> {
+		const section = await this.findById(id)
+		return section?.section_type === 'ideas'
 	}
 
 	// Applies provided fields to an existing section
@@ -71,7 +89,7 @@ export class SectionRepository {
 			UPDATE sections
 			SET ${setClause}
 			WHERE id = $${updates.length + 1}
-			RETURNING id, playbook_id, name, display_order, created_at, updated_at
+			RETURNING id, playbook_id, name, display_order, section_type, created_at, updated_at
 		`
 
 		const [section] = await db.unsafe(query, [...values, id])
@@ -89,12 +107,27 @@ export class SectionRepository {
 	}
 
 	// Batch updates display_order for multiple sections
+	// Ensures Ideas section always has the highest display_order
 	async reorder(playbookId: number, sectionOrders: { id: number; display_order: number }[]): Promise<void> {
 		if (sectionOrders.length === 0) return
 
+		// Find the Ideas section
+		const ideasSection = await this.findIdeasSection(playbookId)
+
+		if (ideasSection) {
+			// Adjust orders to ensure Ideas section is last
+			const maxOrder = Math.max(...sectionOrders.map(s => s.display_order))
+			const adjustedOrders = sectionOrders.map(s =>
+				s.id === ideasSection.id
+					? { ...s, display_order: maxOrder + 1 }
+					: s
+			)
+			sectionOrders = adjustedOrders
+		}
+
 		// Use a single UPDATE with CASE to avoid N+1 queries
 		const ids = sectionOrders.map(s => s.id)
-		const whenClauses = sectionOrders.map((s, i) => `WHEN $${i * 2 + 1} THEN $${i * 2 + 2}`).join(' ')
+		const whenClauses = sectionOrders.map((_s, i) => `WHEN $${i * 2 + 1} THEN $${i * 2 + 2}`).join(' ')
 		const params = sectionOrders.flatMap(s => [s.id, s.display_order])
 
 		const query = `

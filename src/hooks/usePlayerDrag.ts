@@ -3,7 +3,8 @@
  * Eliminates duplicated drag code between Player and Lineman components
  */
 
-import { useState, useEffect, useRef, RefObject } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import type { RefObject } from 'react'
 import { FieldCoordinateSystem } from '../utils/coordinates'
 import { applyLOSSnap } from '../utils/los-snap.utils'
 
@@ -12,8 +13,8 @@ interface UsePlayerDragOptions<T extends string | number> {
 	containerWidth: number
 	containerHeight: number
 	coordSystem: FieldCoordinateSystem
-	elementRef: RefObject<HTMLDivElement>
-	onPositionChange: (id: T, x: number, y: number) => void
+	elementRef: RefObject<HTMLDivElement | null>
+	onPositionChange: (_id: T, _x: number, _y: number) => void
 	zoom?: number
 	panX?: number
 	panY?: number
@@ -22,10 +23,10 @@ interface UsePlayerDragOptions<T extends string | number> {
 interface UsePlayerDragReturn {
 	isDragging: boolean
 	dragOffset: { x: number; y: number }
-	setIsDragging: (dragging: boolean) => void
-	setDragOffset: (offset: { x: number; y: number }) => void
+	setIsDragging: (_dragging: boolean) => void
+	setDragOffset: (_offset: { x: number; y: number }) => void
 	position: { x: number; y: number }
-	setPosition: (position: { x: number; y: number }) => void
+	setPosition: (_position: { x: number; y: number }) => void
 }
 
 /**

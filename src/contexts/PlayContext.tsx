@@ -13,7 +13,7 @@ import type { Formation, BaseConcept, ConceptGroup } from '../types/concept.type
 import { useTheme } from './SettingsContext'
 import { repositionLinemenForHash } from '../utils/lineman.utils'
 
-interface Player {
+export interface Player {
 	id: string
 	x: number
 	y: number
@@ -63,21 +63,21 @@ interface PlayContextType {
 	state: PlayState
 	dispatch: React.Dispatch<PlayAction>
 	// Convenience methods
-	setTool: (tool: Tool) => void
-	setDrawingState: (updates: Partial<DrawingState>) => void
-	setFormation: (formation: string) => void
-	setPlay: (play: string) => void
-	setDefensiveFormation: (formation: string) => void
-	setHashAlignment: (alignment: HashAlignment) => void
-	setShowPlayBar: (show: boolean) => void
-	setPlayers: (players: Player[]) => void
-	setDrawings: (drawings: Drawing[]) => void
-	addDrawing: (drawing: Drawing) => void
-	deleteDrawing: (id: string) => void
-	updateDrawing: (id: string, updates: Partial<Drawing>) => void
-	applyFormation: (formation: Formation) => void
-	applyConcept: (concept: BaseConcept) => void
-	applyConceptGroup: (conceptGroup: ConceptGroup) => void
+	setTool: (_tool: Tool) => void
+	setDrawingState: (_updates: Partial<DrawingState>) => void
+	setFormation: (_formation: string) => void
+	setPlay: (_play: string) => void
+	setDefensiveFormation: (_formation: string) => void
+	setHashAlignment: (_alignment: HashAlignment) => void
+	setShowPlayBar: (_show: boolean) => void
+	setPlayers: (_players: Player[]) => void
+	setDrawings: (_drawings: Drawing[]) => void
+	addDrawing: (_drawing: Drawing) => void
+	deleteDrawing: (_id: string) => void
+	updateDrawing: (_id: string, _updates: Partial<Drawing>) => void
+	applyFormation: (_formation: Formation) => void
+	applyConcept: (_concept: BaseConcept) => void
+	applyConceptGroup: (_conceptGroup: ConceptGroup) => void
 	markClean: () => void
 }
 

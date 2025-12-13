@@ -36,11 +36,11 @@ describe('Folders API', () => {
 	// GET /api/folders - List folders
 	test('GET /api/folders returns user folders', async () => {
 		// Create test folders
-		const folder1 = await createTestFolder({
+		await createTestFolder({
 			userId: fixture.userId,
 			name: 'Folder A'
 		})
-		const folder2 = await createTestFolder({
+		await createTestFolder({
 			userId: fixture.userId,
 			name: 'Folder B'
 		})

@@ -17,7 +17,7 @@ describe('AnimatedRoute - Smooth Rendering', () => {
 			id: 'test-sharp',
 			points: {
 				p1: { id: 'p1', x: 10, y: 10, type: 'start' },
-				p2: { id: 'p2', x: 20, y: 10, type: 'intermediate' },
+				p2: { id: 'p2', x: 20, y: 10, type: 'corner' },
 				p3: { id: 'p3', x: 30, y: 20, type: 'end' },
 			},
 			segments: [
@@ -64,7 +64,7 @@ describe('AnimatedRoute - Smooth Rendering', () => {
 			id: 'test-smooth',
 			points: {
 				p1: { id: 'p1', x: 10, y: 10, type: 'start' },
-				p2: { id: 'p2', x: 20, y: 10, type: 'intermediate' },
+				p2: { id: 'p2', x: 20, y: 10, type: 'corner' },
 				p3: { id: 'p3', x: 30, y: 20, type: 'end' },
 			},
 			segments: [
@@ -116,8 +116,8 @@ describe('AnimatedRoute - Smooth Rendering', () => {
 			id: 'test-cubic',
 			points: {
 				p1: { id: 'p1', x: 10, y: 10, type: 'start' },
-				p2: { id: 'p2', x: 15, y: 15, type: 'control' },
-				p3: { id: 'p3', x: 20, y: 15, type: 'control' },
+				p2: { id: 'p2', x: 15, y: 15, type: 'corner' },
+				p3: { id: 'p3', x: 20, y: 15, type: 'corner' },
 				p4: { id: 'p4', x: 30, y: 20, type: 'end' },
 			},
 			segments: [

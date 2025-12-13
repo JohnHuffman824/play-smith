@@ -1,0 +1,52 @@
+/* || Base styles */
+.textarea {
+  display: flex;
+  width: 100%;
+  min-height: 4rem;
+  resize: none;
+  field-sizing: content;
+  border-radius: 6px;
+  border: 1px solid var(--input);
+  background: var(--input-background);
+  color: var(--foreground);
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  transition: color 200ms, box-shadow 200ms;
+  outline: none;
+}
+
+.textarea::placeholder {
+  color: var(--muted-foreground);
+}
+
+/* || States */
+.textarea:focus-visible {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.textarea:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.textarea[aria-invalid="true"] {
+  border-color: var(--destructive);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--destructive) 20%, transparent);
+}
+
+/* || Media queries */
+@media (width >= 768px) {
+  .textarea {
+    font-size: 0.875rem;
+  }
+}
+
+/* || Dark mode styles */
+.dark .textarea {
+  background: color-mix(in oklch, var(--input) 30%, transparent);
+}
+
+.dark .textarea[aria-invalid="true"] {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--destructive) 40%, transparent);
+}

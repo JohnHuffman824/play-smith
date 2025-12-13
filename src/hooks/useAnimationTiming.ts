@@ -53,7 +53,7 @@ export function useAnimationTiming(
 
 			// Get route ID and start position
 			const routeId = linkedDrawing?.id ?? null
-			const routeTiming = routeId ? routeTimings.get(routeId) : null
+			const _routeTiming = routeId ? routeTimings.get(routeId) : null
 
 			// Start position is either the drawing start or player position
 			let startPosition = { x: player.x, y: player.y }

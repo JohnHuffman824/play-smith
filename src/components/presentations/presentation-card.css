@@ -1,0 +1,116 @@
+/* || Presentation Card */
+.presentation-card {
+	position: relative;
+	background: var(--card);
+	border-radius: 12px;
+	border: 1px solid var(--border);
+	overflow: hidden;
+	cursor: pointer;
+	outline: none;
+	transition: all 200ms;
+}
+
+.presentation-card:hover {
+	box-shadow: 0 10px 15px -3px rgb(0 0 0 / 10%), 0 4px 6px -4px rgb(0 0 0 / 10%);
+}
+
+.presentation-card:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+/* || Thumbnail */
+.presentation-card__thumbnail {
+	aspect-ratio: 4 / 3;
+	background: var(--muted);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+	overflow: hidden;
+}
+
+.presentation-card__gradient {
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(to bottom right, rgb(168 85 247 / 20%), var(--muted));
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.presentation-card__icon {
+	width: 64px;
+	height: 64px;
+	color: color-mix(in oklch, var(--muted-foreground) 40%, transparent);
+	stroke-width: 1.5;
+}
+
+/* || Action buttons */
+.presentation-card__button {
+	position: absolute;
+	padding: 6px;
+	border-radius: 8px;
+	background: color-mix(in oklch, var(--card) 90%, transparent);
+	backdrop-filter: blur(4px);
+	border: 1px solid var(--border);
+	opacity: 0;
+	transition: opacity 200ms;
+	z-index: 10;
+	cursor: pointer;
+	outline: none;
+}
+
+.presentation-card__button-icon {
+	width: 16px;
+	height: 16px;
+}
+
+.presentation-card:hover .presentation-card__button {
+	opacity: 1;
+}
+
+.presentation-card__button:hover {
+	background: var(--accent);
+}
+
+.presentation-card__button:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.presentation-card__button--edit {
+	top: 8px;
+	left: 8px;
+}
+
+.presentation-card__button--present {
+	top: 8px;
+	right: 44px;
+}
+
+.presentation-card__button--more {
+	top: 8px;
+	right: 8px;
+}
+
+/* || Info */
+.presentation-card__info {
+	padding: 16px;
+}
+
+.presentation-card__name {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	margin-bottom: 4px;
+}
+
+.presentation-card__count {
+	font-size: 0.875rem;
+	color: var(--muted-foreground);
+}
+
+.presentation-card__date {
+	font-size: 0.75rem;
+	color: var(--muted-foreground);
+	margin-top: 4px;
+}

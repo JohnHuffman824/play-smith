@@ -45,7 +45,7 @@ describe('Complete Auth Flow Integration', () => {
 
 	test('complete registration, login, session check, logout flow', async () => {
 		const testEmail = `integration-test-${Date.now()}@example.com`
-		const testPassword = 'testpassword123'
+		const testPassword = 'TestPassword123'
 		const testName = 'Integration Test'
 
 		// Step 1: Register

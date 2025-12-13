@@ -15,7 +15,7 @@ export interface CallSheetConfig {
 	title: string
 	sections: CallSheetSection[]
 	columns: ('number' | 'name' | 'formation' | 'personnel' | 'playType')[]
-	groupBy?: 'section' | 'formation' | 'personnel' | 'tag'
+	groupBy?: 'section' | 'formation' | 'personnel' | 'label'
 }
 
 export interface ExportCallSheetRequest {

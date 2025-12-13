@@ -1,0 +1,9 @@
+/* || Base styles */
+.clickable-button {
+  cursor: pointer;
+}
+
+/* || States */
+.clickable-button:disabled {
+  cursor: not-allowed;
+}

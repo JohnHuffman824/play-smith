@@ -7,6 +7,7 @@ import {
 	SelectValue,
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
+import './settings-section.css'
 
 export function PlaybookSection() {
 	const {
@@ -19,51 +20,57 @@ export function PlaybookSection() {
 	} = useSettings()
 
 	return (
-		<div>
-			<h3 className="text-lg font-medium mb-4">Playbooks</h3>
-			<div className="space-y-4">
+		<div className="settings-section">
+			<h3 className="settings-section-title">Playbooks</h3>
+			<div className="settings-section-content">
 				{/* Auto-save Interval */}
-				<div className="flex items-center justify-between">
-					<div>
-						<label className="font-medium">Auto-save Interval</label>
-						<p className="text-sm text-muted-foreground">
+				<div className="settings-row">
+					<div className="settings-label-group">
+						<label className="settings-label">Auto-save Interval</label>
+						<p className="settings-description">
 							How often to automatically save changes
 						</p>
 					</div>
-					<Select value={autoSaveInterval} onValueChange={setAutoSaveInterval}>
-						<SelectTrigger className="w-[180px]">
-							<SelectValue />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="10">10 seconds</SelectItem>
-							<SelectItem value="30">30 seconds</SelectItem>
-							<SelectItem value="60">1 minute</SelectItem>
-							<SelectItem value="300">5 minutes</SelectItem>
-							<SelectItem value="manual">Manual only</SelectItem>
-						</SelectContent>
-					</Select>
+					<div className="settings-control">
+						<Select value={autoSaveInterval} onValueChange={setAutoSaveInterval}>
+							<SelectTrigger className="settings-select-trigger">
+								<SelectValue />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="10">10 seconds</SelectItem>
+								<SelectItem value="30">30 seconds</SelectItem>
+								<SelectItem value="60">1 minute</SelectItem>
+								<SelectItem value="300">5 minutes</SelectItem>
+								<SelectItem value="manual">Manual only</SelectItem>
+							</SelectContent>
+						</Select>
+					</div>
 				</div>
 
 				{/* Show Play Count */}
-				<div className="flex items-center justify-between">
-					<div>
-						<label className="font-medium">Show Play Count</label>
-						<p className="text-sm text-muted-foreground">
+				<div className="settings-row">
+					<div className="settings-label-group">
+						<label className="settings-label">Show Play Count</label>
+						<p className="settings-description">
 							Display the number of plays on playbook cards
 						</p>
 					</div>
-					<Switch checked={showPlayCount} onCheckedChange={setShowPlayCount} />
+					<div className="settings-control">
+						<Switch checked={showPlayCount} onCheckedChange={setShowPlayCount} />
+					</div>
 				</div>
 
 				{/* Confirm Before Delete */}
-				<div className="flex items-center justify-between">
-					<div>
-						<label className="font-medium">Confirm Before Delete</label>
-						<p className="text-sm text-muted-foreground">
+				<div className="settings-row">
+					<div className="settings-label-group">
+						<label className="settings-label">Confirm Before Delete</label>
+						<p className="settings-description">
 							Show confirmation dialog when deleting playbooks or plays
 						</p>
 					</div>
-					<Switch checked={confirmBeforeDelete} onCheckedChange={setConfirmBeforeDelete} />
+					<div className="settings-control">
+						<Switch checked={confirmBeforeDelete} onCheckedChange={setConfirmBeforeDelete} />
+					</div>
 				</div>
 			</div>
 		</div>

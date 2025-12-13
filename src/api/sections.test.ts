@@ -29,6 +29,8 @@ describe('Sections API', () => {
 	afterAll(async () => {
 		// Clean up shared fixture
 		await cleanupTestFixture(fixture)
+		// Additional cleanup to prevent test pollution
+		await db`DELETE FROM playbook_shares WHERE playbook_id = ${fixture.playbookId}`
 		await stopTestServer()
 	})
 
@@ -37,7 +39,7 @@ describe('Sections API', () => {
 		await cleanupTestData(fixture.playbookId)
 	})
 
-	test('GET /api/playbooks/:playbookId/sections returns empty array when no sections', async () => {
+	test('GET /api/playbooks/:playbookId/sections returns only Ideas section when no custom sections', async () => {
 		const response = await fetch(`${baseUrl}/api/playbooks/${fixture.playbookId}/sections`, {
 			headers: {
 				Cookie: `session_token=${fixture.sessionToken}`
@@ -47,14 +49,16 @@ describe('Sections API', () => {
 		expect(response.status).toBe(200)
 		const data = await response.json()
 		expect(data.sections).toBeArray()
-		expect(data.sections.length).toBe(0)
+		expect(data.sections.length).toBe(1)
+		expect(data.sections[0].name).toBe('Ideas')
+		expect(data.sections[0].section_type).toBe('ideas')
 	})
 
 	test('GET /api/playbooks/:playbookId/sections returns sections ordered by display_order', async () => {
-		// Create test sections
-		await createTestSection({ playbookId: fixture.playbookId, name: 'Section 1', displayOrder: 0 })
-		await createTestSection({ playbookId: fixture.playbookId, name: 'Section 2', displayOrder: 1 })
-		await createTestSection({ playbookId: fixture.playbookId, name: 'Section 3', displayOrder: 2 })
+		// Ideas section already exists at display_order 0, create additional sections
+		await createTestSection({ playbookId: fixture.playbookId, name: 'Section 1', displayOrder: 1 })
+		await createTestSection({ playbookId: fixture.playbookId, name: 'Section 2', displayOrder: 2 })
+		await createTestSection({ playbookId: fixture.playbookId, name: 'Section 3', displayOrder: 3 })
 
 		const response = await fetch(`${baseUrl}/api/playbooks/${fixture.playbookId}/sections`, {
 			headers: {
@@ -65,13 +69,15 @@ describe('Sections API', () => {
 		expect(response.status).toBe(200)
 		const data = await response.json()
 		expect(data.sections).toBeArray()
-		expect(data.sections.length).toBe(3)
-		expect(data.sections[0].name).toBe('Section 1')
-		expect(data.sections[1].name).toBe('Section 2')
-		expect(data.sections[2].name).toBe('Section 3')
+		expect(data.sections.length).toBe(4)
+		expect(data.sections[0].name).toBe('Ideas')
+		expect(data.sections[1].name).toBe('Section 1')
+		expect(data.sections[2].name).toBe('Section 2')
+		expect(data.sections[3].name).toBe('Section 3')
 		expect(data.sections[0].display_order).toBe(0)
 		expect(data.sections[1].display_order).toBe(1)
 		expect(data.sections[2].display_order).toBe(2)
+		expect(data.sections[3].display_order).toBe(3)
 	})
 
 	test('GET /api/playbooks/:playbookId/sections returns 401 when not authenticated', async () => {
@@ -141,16 +147,16 @@ describe('Sections API', () => {
 		const data = await response.json()
 		expect(data.section.name).toBe('New Section')
 		expect(data.section.playbook_id).toBe(fixture.playbookId)
-		expect(data.section.display_order).toBe(0)
+		expect(data.section.display_order).toBe(1) // Ideas section is at 0
 		expect(data.section.id).toBeNumber()
 	})
 
 	test('POST /api/playbooks/:playbookId/sections auto-increments display_order', async () => {
-		// Create first section
-		await createTestSection({ playbookId: fixture.playbookId, name: 'Section 1', displayOrder: 0 })
-		await createTestSection({ playbookId: fixture.playbookId, name: 'Section 2', displayOrder: 1 })
+		// Ideas section is at display_order 0, create additional sections
+		await createTestSection({ playbookId: fixture.playbookId, name: 'Section 1', displayOrder: 1 })
+		await createTestSection({ playbookId: fixture.playbookId, name: 'Section 2', displayOrder: 2 })
 
-		// Create new section via API
+		// Create new section via API - should get next display_order
 		const response = await fetch(`${baseUrl}/api/playbooks/${fixture.playbookId}/sections`, {
 			method: 'POST',
 			headers: {
@@ -164,7 +170,7 @@ describe('Sections API', () => {
 
 		expect(response.status).toBe(201)
 		const data = await response.json()
-		expect(data.section.display_order).toBe(2)
+		expect(data.section.display_order).toBe(3)
 	})
 
 	test('POST /api/playbooks/:playbookId/sections validates required name field', async () => {
@@ -231,7 +237,7 @@ describe('Sections API', () => {
 	})
 
 	test('PUT /api/sections/:sectionId updates section name', async () => {
-		const section = await createTestSection({ playbookId: fixture.playbookId, name: 'Original Name', displayOrder: 0 })
+		const section = await createTestSection({ playbookId: fixture.playbookId, name: 'Original Name', displayOrder: 1 })
 
 		const response = await fetch(`${baseUrl}/api/sections/${section.id}`, {
 			method: 'PUT',
@@ -247,11 +253,11 @@ describe('Sections API', () => {
 		expect(response.status).toBe(200)
 		const data = await response.json()
 		expect(data.section.name).toBe('Updated Name')
-		expect(data.section.display_order).toBe(0)
+		expect(data.section.display_order).toBe(1)
 	})
 
 	test('PUT /api/sections/:sectionId updates section display_order', async () => {
-		const section = await createTestSection({ playbookId: fixture.playbookId, name: 'Section', displayOrder: 0 })
+		const section = await createTestSection({ playbookId: fixture.playbookId, name: 'Section', displayOrder: 1 })
 
 		const response = await fetch(`${baseUrl}/api/sections/${section.id}`, {
 			method: 'PUT',
@@ -271,7 +277,7 @@ describe('Sections API', () => {
 	})
 
 	test('PUT /api/sections/:sectionId updates both name and display_order', async () => {
-		const section = await createTestSection({ playbookId: fixture.playbookId, name: 'Original', displayOrder: 0 })
+		const section = await createTestSection({ playbookId: fixture.playbookId, name: 'Original', displayOrder: 1 })
 
 		const response = await fetch(`${baseUrl}/api/sections/${section.id}`, {
 			method: 'PUT',
@@ -292,7 +298,7 @@ describe('Sections API', () => {
 	})
 
 	test('PUT /api/sections/:sectionId returns 401 when not authenticated', async () => {
-		const section = await createTestSection({ playbookId: fixture.playbookId, name: 'Section', displayOrder: 0 })
+		const section = await createTestSection({ playbookId: fixture.playbookId, name: 'Section', displayOrder: 1 })
 
 		const response = await fetch(`${baseUrl}/api/sections/${section.id}`, {
 			method: 'PUT',
@@ -319,7 +325,7 @@ describe('Sections API', () => {
 			name: 'Other Playbook',
 			createdBy: otherUser.id
 		})
-		const otherSection = await createTestSection({ playbookId: otherPlaybook.id, name: 'Other Section', displayOrder: 0 })
+		const otherSection = await createTestSection({ playbookId: otherPlaybook.id, name: 'Other Section', displayOrder: 1 })
 
 		// Try to update with test user's session
 		const response = await fetch(`${baseUrl}/api/sections/${otherSection.id}`, {
@@ -361,7 +367,7 @@ describe('Sections API', () => {
 	})
 
 	test('DELETE /api/sections/:sectionId deletes section', async () => {
-		const section = await createTestSection({ playbookId: fixture.playbookId, name: 'To Delete', displayOrder: 0 })
+		const section = await createTestSection({ playbookId: fixture.playbookId, name: 'To Delete', displayOrder: 1 })
 
 		const response = await fetch(`${baseUrl}/api/sections/${section.id}`, {
 			method: 'DELETE',
@@ -378,7 +384,7 @@ describe('Sections API', () => {
 	})
 
 	test('DELETE /api/sections/:sectionId returns 401 when not authenticated', async () => {
-		const section = await createTestSection({ playbookId: fixture.playbookId, name: 'Section', displayOrder: 0 })
+		const section = await createTestSection({ playbookId: fixture.playbookId, name: 'Section', displayOrder: 1 })
 
 		const response = await fetch(`${baseUrl}/api/sections/${section.id}`, {
 			method: 'DELETE'
@@ -403,7 +409,7 @@ describe('Sections API', () => {
 			name: 'Other Playbook',
 			createdBy: otherUser.id
 		})
-		const otherSection = await createTestSection({ playbookId: otherPlaybook.id, name: 'Protected', displayOrder: 0 })
+		const otherSection = await createTestSection({ playbookId: otherPlaybook.id, name: 'Protected', displayOrder: 1 })
 
 		// Try to delete with test user's session
 		const response = await fetch(`${baseUrl}/api/sections/${otherSection.id}`, {

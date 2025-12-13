@@ -1,0 +1,136 @@
+/* || Search Bar */
+.search-bar {
+	position: relative;
+}
+
+.search-bar-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-bottom: 8px;
+}
+
+.search-bar-chip {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.search-bar-chip-remove {
+	display: inline-flex;
+	background: none;
+	border: none;
+	padding: 0;
+	cursor: pointer;
+	outline: none;
+	color: inherit;
+	opacity: 0.7;
+	transition: opacity 200ms;
+}
+
+.search-bar-chip-remove:hover {
+	opacity: 1;
+}
+
+.search-bar-chip-icon {
+	width: 12px;
+	height: 12px;
+}
+
+/* || Dropdown */
+.search-bar-dropdown {
+	position: absolute;
+	top: 100%;
+	left: 0;
+	right: 0;
+	margin-top: 4px;
+	background: var(--popover);
+	border: 1px solid var(--border);
+	border-radius: 8px;
+	box-shadow: 0 10px 15px -3px rgb(0 0 0 / 10%), 0 4px 6px -4px rgb(0 0 0 / 10%);
+	z-index: 50;
+	max-height: 256px;
+	overflow: auto;
+}
+
+.search-bar-dropdown-item {
+	width: 100%;
+	text-align: left;
+	padding: 8px 12px;
+	background: none;
+	border: none;
+	cursor: pointer;
+	outline: none;
+	transition: background 200ms;
+}
+
+.search-bar-dropdown-item:hover {
+	background: var(--accent);
+}
+
+.search-bar-dropdown-item:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.search-bar-dropdown-label {
+	font-weight: 500;
+}
+
+.search-bar-dropdown-type {
+	font-size: 0.875rem;
+	color: var(--muted-foreground);
+	margin-left: 8px;
+}
+
+.search-bar-dropdown-divider {
+	border-top: 1px solid var(--border);
+	padding: 8px 12px;
+}
+
+.search-bar-dropdown-prompt {
+	font-size: 0.875rem;
+	color: var(--muted-foreground);
+}
+
+.search-bar-dropdown-roles {
+	display: flex;
+	gap: 8px;
+	margin-top: 4px;
+}
+
+.search-bar-role-button {
+	padding: 4px 8px;
+	font-size: 0.875rem;
+	background: var(--secondary);
+	color: var(--secondary-foreground);
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	outline: none;
+	transition: background 200ms;
+}
+
+.search-bar-role-button:hover {
+	background: color-mix(in oklch, var(--secondary) 80%, var(--foreground));
+}
+
+.search-bar-role-button:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.search-bar-create-link {
+	color: var(--action-button);
+	background: none;
+	border: none;
+	padding: 0;
+	cursor: pointer;
+	outline: none;
+}
+
+.search-bar-create-link:hover {
+	text-decoration: underline;
+}
+
+.search-bar-create-link:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}

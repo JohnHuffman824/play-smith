@@ -1,0 +1,81 @@
+/* || Base styles */
+.conflict-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgb(0 0 0 / 50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.conflict-dialog {
+  background: var(--popover);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 25%);
+  padding: 24px;
+  max-width: 448px;
+}
+
+/* || Header */
+.conflict-dialog-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.conflict-dialog-icon {
+  width: 24px;
+  height: 24px;
+  color: rgb(234 179 8);
+}
+
+.conflict-dialog-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+/* || Content */
+.conflict-dialog-message {
+  margin-bottom: 16px;
+  color: var(--muted-foreground);
+}
+
+/* || Actions */
+.conflict-dialog-actions {
+  display: flex;
+  justify-content: end;
+  gap: 8px;
+}
+
+.conflict-dialog-cancel {
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  transition: all 200ms;
+  cursor: pointer;
+}
+
+.conflict-dialog-cancel:hover {
+  background: var(--accent);
+}
+
+.conflict-dialog-confirm {
+  padding: 8px 16px;
+  background: var(--action-button);
+  color: var(--action-button-foreground);
+  border-radius: 8px;
+  transition: all 200ms;
+  cursor: pointer;
+  outline: none;
+}
+
+.conflict-dialog-confirm:hover {
+  background: rgb(var(--action-button-rgb) / 90%);
+}
+
+.conflict-dialog-confirm:focus-visible {
+  box-shadow: 0 0 0 3px rgb(var(--ring-rgb) / 50%);
+}

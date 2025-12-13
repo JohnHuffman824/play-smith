@@ -8,7 +8,7 @@ import { eventBus } from '../services/EventBus'
 import type { DrawingState, Tool } from '../types/play.types'
 
 interface KeyboardShortcutHandlers {
-	setDrawingState: (updater: (prev: DrawingState) => DrawingState) => void
+	setDrawingState: (_updater: (_prev: DrawingState) => DrawingState) => void
 }
 
 /**
@@ -111,7 +111,7 @@ export function useKeyboardShortcuts({
 * Useful for displaying shortcuts in tooltips
 */
 export function getShortcutForTool(tool: Tool): string | undefined {
-	const entry = Object.entries(SHORTCUTS).find(([_, value]) => value == tool)
+	const entry = Object.entries(SHORTCUTS).find(([_key, value]) => value == tool)
 	return entry?.[0].toUpperCase()
 }
 

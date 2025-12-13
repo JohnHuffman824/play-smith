@@ -24,21 +24,21 @@ interface ControlPointOverlayProps {
 	panX?: number
 	panY?: number
 	onDragPoint?: (
-		drawingId: string,
-		pointId: string,
-		x: number,
-		y: number,
+		_drawingId: string,
+		_pointId: string,
+		_x: number,
+		_y: number,
 	) => void
 	onMerge?: (
-		sourceDrawingId: string,
-		sourcePointId: string,
-		targetDrawingId: string,
-		targetPointId: string,
+		_sourceDrawingId: string,
+		_sourcePointId: string,
+		_targetDrawingId: string,
+		_targetPointId: string,
 	) => void
 	onLinkToPlayer?: (
-		drawingId: string,
-		pointId: string,
-		playerId: string,
+		_drawingId: string,
+		_pointId: string,
+		_playerId: string,
 	) => void
 }
 
@@ -64,8 +64,8 @@ export function ControlPointOverlay({
 	panX = 0,
 	panY = 0,
 }: ControlPointOverlayProps) {
-	if (!drawing) return null
-	const { theme } = useTheme()
+	// Call all hooks BEFORE any conditional returns
+	const { theme: _theme } = useTheme()
 	const [dragState, setDragState] = useState<DragState | null>(null)
 	const [snapTarget, setSnapTarget] = useState<SnapTarget | null>(null)
 	const [playerSnapTarget, setPlayerSnapTarget] = useState<
@@ -167,6 +167,9 @@ export function ControlPointOverlay({
 			drawings,
 			players,
 			snapThreshold,
+			zoom,
+			panX,
+			panY,
 		],
 	)
 
@@ -175,6 +178,9 @@ export function ControlPointOverlay({
 		window.addEventListener('pointermove', handlePointerMove)
 		return () => window.removeEventListener('pointermove', handlePointerMove)
 	}, [dragState, handlePointerMove])
+
+	// Early return AFTER all hooks
+	if (!drawing) return null
 
 	function startDrag(pointId: string) {
 		return (event: React.PointerEvent) => {
@@ -210,9 +216,10 @@ export function ControlPointOverlay({
 				}
 
 				const pixel = coordSystem.feetToPixels(point.x, point.y)
-				// Control node colors: light mode = white fill + black outline, dark mode = dark fill + white outline
-				const nodeFill = theme === 'dark' ? '#1f1f1f' : 'white'
-				const nodeStroke = theme === 'dark' ? 'white' : 'black'
+				// Control node colors from CSS variables
+				const computedStyle = getComputedStyle(document.documentElement)
+				const nodeFill = computedStyle.getPropertyValue('--control-point-fill').trim() || 'white'
+				const nodeStroke = computedStyle.getPropertyValue('--control-point-stroke').trim() || 'black'
 
 				return (
 					<circle

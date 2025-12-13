@@ -11,7 +11,7 @@ export type Play = {
 	formation: string
 	playType: string
 	defensiveFormation: string
-	tags: string[]
+	labels: string[]
 	lastModified: string
 	thumbnail?: string
 	drawings?: Drawing[]
@@ -21,5 +21,6 @@ export type Play = {
 export type Section = {
 	id: string
 	name: string
+	section_type?: 'standard' | 'ideas'
 	plays: Play[]
 }

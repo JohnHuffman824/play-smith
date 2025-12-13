@@ -1,0 +1,73 @@
+/* || Base styles */
+.icon-button {
+  cursor: pointer;
+  outline: none;
+  transition: all 200ms;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--foreground);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* || Size variants */
+.icon-button-sm {
+  padding: 6px;
+}
+
+.icon-button-md {
+  padding: 8px;
+}
+
+/* || Style variants - default */
+.icon-button-default {
+  border: 1px solid var(--border);
+  background: var(--background);
+}
+
+.icon-button-default:hover {
+  background: var(--accent);
+}
+
+/* || Style variants - ghost */
+.icon-button-ghost {
+  border: none;
+}
+
+.icon-button-ghost:hover {
+  background: var(--accent);
+}
+
+/* || Style variants - destructive */
+.icon-button-destructive {
+  border: none;
+}
+
+.icon-button-destructive:hover {
+  background: color-mix(in oklch, var(--destructive) 10%, transparent);
+  color: var(--destructive);
+}
+
+/* || States - focus */
+.icon-button:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+/* || States - disabled */
+.icon-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* || Icon sizing */
+.icon-button-sm .icon-button-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.icon-button-md .icon-button-icon {
+  width: 20px;
+  height: 20px;
+}

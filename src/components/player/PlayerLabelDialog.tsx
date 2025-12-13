@@ -1,12 +1,13 @@
 import { Trash2 } from 'lucide-react'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import unlinkIconPath from '../../imports/unlink-icon.svg'
+import './player-label-dialog.css'
 
 interface PlayerLabelDialogProps {
   position: { x: number; y: number }
   currentLabel: string
   hasLinkedDrawing: boolean
-  onLabelChange: (label: string) => void
+  onLabelChange: (_label: string) => void
   onUnlink: () => void
   onDelete: () => void
   onClose: () => void
@@ -81,59 +82,34 @@ export function PlayerLabelDialog({
 
   return (
     <>
-      {/* Backdrop to close dialog when clicking outside */}
-      <div
-        className="fixed inset-0 z-40"
-        onClick={onClose}
-      />
-      
-      {/* Dialog */}
+      <div className="player-label-dialog-backdrop" onClick={onClose} />
+
       <div
         data-player-label-dialog
-        className="fixed z-50 rounded-2xl shadow-2xl border border-border bg-card p-3"
+        className="player-label-dialog"
         style={{
           left: `${position.x}px`,
-          top: `${position.y - 200}px`, // Position higher above the player
+          top: `${position.y - 200}px`,
           transform: 'translateX(-50%)',
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Arrow pointing down */}
-        <div
-          className="absolute left-1/2 -translate-x-1/2 w-0 h-0"
-          style={{
-            bottom: '-8px',
-            borderLeft: '8px solid transparent',
-            borderRight: '8px solid transparent',
-            borderTop: '8px solid hsl(var(--card))',
-          }}
-        />
-        {/* Border arrow for the carat */}
-        <div
-          className="absolute left-1/2 -translate-x-1/2 w-0 h-0"
-          style={{
-            bottom: '-9px',
-            borderLeft: '9px solid transparent',
-            borderRight: '9px solid transparent',
-            borderTop: '9px solid hsl(var(--border))',
-            zIndex: -1,
-          }}
-        />
+        <div className="player-label-dialog-arrow" />
+        <div className="player-label-dialog-arrow-border" />
 
-        {/* Row 1 */}
-        <div className="flex gap-2">
+        <div className="player-label-dialog-row">
           {labelsRow1.map((label, index) => (
             <button
               key={index}
               onClick={() => handleLabelSelect(label)}
-              className={`w-10 h-10 rounded-lg transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
+              className={`player-label-dialog-label-button ${
                 currentLabel === label
-                  ? 'bg-action-button text-action-button-foreground shadow-md scale-110'
-                  : 'bg-secondary text-secondary-foreground hover:bg-accent'
+                  ? 'player-label-dialog-label-button-active'
+                  : 'player-label-dialog-label-button-inactive'
               }`}
             >
               {label === '' ? (
-                <span className="text-xs text-muted-foreground">—</span>
+                <span className="player-label-dialog-placeholder">—</span>
               ) : (
                 label
               )}
@@ -141,20 +117,19 @@ export function PlayerLabelDialog({
           ))}
         </div>
 
-        {/* Row 2 */}
-        <div className="flex gap-2 mt-2">
+        <div className="player-label-dialog-row">
           {labelsRow2.map((label, index) => (
             <button
               key={index}
               onClick={() => handleLabelSelect(label)}
-              className={`w-10 h-10 rounded-lg transition-all duration-200 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
+              className={`player-label-dialog-label-button ${
                 currentLabel === label
-                  ? 'bg-action-button text-action-button-foreground shadow-md scale-110'
-                  : 'bg-secondary text-secondary-foreground hover:bg-accent'
+                  ? 'player-label-dialog-label-button-active'
+                  : 'player-label-dialog-label-button-inactive'
               }`}
             >
               {label === '' ? (
-                <span className="text-xs text-muted-foreground">—</span>
+                <span className="player-label-dialog-placeholder">—</span>
               ) : (
                 label
               )}
@@ -162,8 +137,7 @@ export function PlayerLabelDialog({
           ))}
         </div>
 
-        {/* Custom Label Input and Delete Button */}
-        <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border">
+        <div className="player-label-dialog-custom">
           <input
             ref={inputRef}
             type="text"
@@ -171,7 +145,7 @@ export function PlayerLabelDialog({
             value={customLabel}
             onChange={(e) => setCustomLabel(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="h-10 px-3 rounded-lg transition-all outline-none bg-input-background text-foreground placeholder:text-muted-foreground border border-input focus:ring-2 focus:ring-ring/20"
+            className="player-label-dialog-input"
             style={{ width: hasLinkedDrawing ? '96px' : '136px' }}
             maxLength={3}
           />
@@ -181,7 +155,7 @@ export function PlayerLabelDialog({
                 onUnlink()
                 onClose()
               }}
-              className="w-10 h-10 rounded-lg transition-all cursor-pointer flex items-center justify-center flex-shrink-0 bg-secondary text-secondary-foreground hover:bg-accent"
+              className="player-label-dialog-action-button player-label-dialog-unlink-button"
               title="Unlink drawing"
             >
               <svg width="18" height="18" viewBox="0 0 512 509.84" fill="currentColor">
@@ -194,9 +168,9 @@ export function PlayerLabelDialog({
               onDelete()
               onClose()
             }}
-            className="w-10 h-10 rounded-lg transition-all duration-200 cursor-pointer flex items-center justify-center flex-shrink-0 bg-destructive/10 text-destructive hover:bg-destructive/20 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            className="player-label-dialog-action-button player-label-dialog-delete-button"
           >
-            <Trash2 className="w-5 h-5" />
+            <Trash2 className="player-label-dialog-icon" />
           </button>
         </div>
       </div>

@@ -7,50 +7,45 @@ import {
 	PaintBucket
 } from 'lucide-react'
 import type { Tool } from '../../types/play.types'
-import type { HashAlignment } from '../../types/play.types'
+import type { HashAlignment } from '../../types/field.types'
 import { HashDialog } from '../toolbar/dialogs/HashDialog'
 import { DrawOptionsDialog } from '../toolbar/dialogs/DrawOptionsDialog'
-import { Tooltip } from '../toolbar/Tooltip'
-import { ToolButton } from '../toolbar/ToolButton'
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip'
+import { ToolbarButton } from '../ui/toolbar-button'
 import { EraserIcon } from '../toolbar/icons/EraserIcon'
 import { HashIcon } from '../toolbar/icons/HashIcon'
 import { ColorSwatchIndicator } from '../toolbar/ColorSwatchIndicator'
-import { useTheme } from '@/contexts/SettingsContext'
 import { usePlayContext } from '../../contexts/PlayContext'
 import { areLinemenAtDefaultPositions } from '../../utils/lineman.utils'
 import { useDialogAutoClose } from '../../hooks/useDialogAutoClose'
+import './concept-toolbar.css'
 
 interface ConceptToolbarProps {
 	selectedTool: Tool
-	onToolChange: (tool: Tool) => void
+	onToolChange: (_tool: Tool) => void
 	color: string
-	onColorChange: (color: string) => void
+	onColorChange: (_color: string) => void
 	hashAlignment: HashAlignment
-	onHashAlignmentChange: (alignment: HashAlignment) => void
+	onHashAlignmentChange: (_alignment: HashAlignment) => void
 	showColorPicker: boolean
-	onShowColorPickerChange: (show: boolean) => void
+	onShowColorPickerChange: (_show: boolean) => void
 	showDrawOptions: boolean
-	onShowDrawOptionsChange: (show: boolean) => void
+	onShowDrawOptionsChange: (_show: boolean) => void
 	lineStyle: 'solid' | 'dashed'
 	lineEnd: 'none' | 'arrow' | 'tShape'
 	brushSize: number
 	pathMode: 'sharp' | 'curve'
-	onLineStyleChange: (style: 'solid' | 'dashed') => void
-	onLineEndChange: (end: 'none' | 'arrow' | 'tShape') => void
-	onBrushSizeChange: (size: number) => void
-	onPathModeChange: (mode: 'sharp' | 'curve') => void
+	onLineStyleChange: (_style: 'solid' | 'dashed') => void
+	onLineEndChange: (_end: 'none' | 'arrow' | 'tShape') => void
+	onBrushSizeChange: (_size: number) => void
+	onPathModeChange: (_mode: 'sharp' | 'curve') => void
 }
-
-const TOOLS = [
-	{ id: 'select' as Tool, icon: MousePointer, label: 'Select (V)' },
-	{ id: 'addPlayer' as Tool, icon: UserPlus, label: 'Add Player (P)' }
-]
 
 export function ConceptToolbar({
 	selectedTool,
 	onToolChange,
 	color,
-	onColorChange,
+	_onColorChange,
 	hashAlignment,
 	onHashAlignmentChange,
 	showColorPicker,
@@ -66,7 +61,6 @@ export function ConceptToolbar({
 	onBrushSizeChange,
 	onPathModeChange
 }: ConceptToolbarProps) {
-	const { theme } = useTheme()
 	const { state } = usePlayContext()
 	const players = state.players || []
 	const [showHashDialog, setShowHashDialog] = useState(false)
@@ -79,111 +73,128 @@ export function ConceptToolbar({
 	})
 
 	return (
-		<div className="w-20 h-full flex flex-col items-center justify-center bg-card border-r border-border" style={{ gap: '12px' }}>
-			{/* Tools */}
-			{TOOLS.map(tool => {
-				const Icon = tool.icon
-				return (
-					<ToolButton
-						key={tool.id}
-						icon={<Icon size={22} />}
-						label={tool.label}
-						isSelected={selectedTool === tool.id}
-						onClick={() => onToolChange(tool.id)}
+		<TooltipProvider>
+			<div className="concept-toolbar">
+				{/* Select Tool */}
+				<ToolbarButton
+					icon={MousePointer}
+					tooltip="Select (V)"
+					isActive={selectedTool === 'select'}
+					onClick={() => onToolChange('select')}
+				/>
+
+				{/* Add Player Tool */}
+				<ToolbarButton
+					icon={UserPlus}
+					tooltip="Add Player (P)"
+					isActive={selectedTool === 'addPlayer'}
+					onClick={() => onToolChange('addPlayer')}
+				/>
+
+				{/* Draw Tool with Options Dialog */}
+				<div className="concept-toolbar-dialog-container">
+					<ToolbarButton
+						icon={Pencil}
+						tooltip="Draw (D)"
+						isActive={selectedTool === 'draw'}
+						onClick={() => {
+							if (selectedTool === 'draw') {
+								onShowDrawOptionsChange(!showDrawOptions)
+							} else {
+								onToolChange('draw')
+								onShowDrawOptionsChange(true)
+							}
+						}}
 					/>
-				)
-			})}
 
-			{/* Draw Tool with Options Dialog */}
-			<div className="relative">
-				<ToolButton
-					icon={<Pencil size={22} />}
-					label="Draw (D)"
-					isSelected={selectedTool === 'draw'}
-					onClick={() => {
-						if (selectedTool === 'draw') {
-							onShowDrawOptionsChange(!showDrawOptions)
-						} else {
-							onToolChange('draw')
-							onShowDrawOptionsChange(true)
-						}
-					}}
-				/>
+					{showDrawOptions && selectedTool === 'draw' && (
+						<div className="concept-toolbar-dialog">
+							<DrawOptionsDialog
+								lineStyle={lineStyle}
+								lineEnd={lineEnd}
+								brushSize={brushSize}
+								pathMode={pathMode}
+								onLineStyleChange={onLineStyleChange}
+								onLineEndChange={onLineEndChange}
+								onBrushSizeChange={onBrushSizeChange}
+								onPathModeChange={onPathModeChange}
+								onClose={() => onShowDrawOptionsChange(false)}
+								useRelativePosition={true}
+							/>
+						</div>
+					)}
+				</div>
 
-				{showDrawOptions && selectedTool === 'draw' && (
-					<div className="absolute left-full ml-2 top-0 z-50">
-						<DrawOptionsDialog
-							lineStyle={lineStyle}
-							lineEnd={lineEnd}
-							brushSize={brushSize}
-							pathMode={pathMode}
-							onLineStyleChange={onLineStyleChange}
-							onLineEndChange={onLineEndChange}
-							onBrushSizeChange={onBrushSizeChange}
-							onPathModeChange={onPathModeChange}
-							onClose={() => onShowDrawOptionsChange(false)}
-						useRelativePosition={true}
-						/>
-					</div>
-				)}
-			</div>
+				{/* Erase Tool - Custom icon (EraserIcon not a Lucide icon) */}
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<button
+							onClick={() => onToolChange('erase')}
+							className="concept-toolbar-custom-button"
+							data-active={selectedTool === 'erase'}
+						>
+							<EraserIcon />
+						</button>
+					</TooltipTrigger>
+					<TooltipContent side="right">Erase (E)</TooltipContent>
+				</Tooltip>
 
-			{/* Erase Tool */}
-			<ToolButton
-				icon={<EraserIcon />}
-				label="Erase (E)"
-				isSelected={selectedTool === 'erase'}
-				onClick={() => onToolChange('erase')}
-			/>
-
-			{/* Color Selector */}
-			<Tooltip content="Pick Color (C)">
-				<button
+				{/* Color Tool - Custom with color swatch overlay */}
+				<ToolbarButton
+					icon={Palette}
+					tooltip="Pick Color (C)"
+					isActive={showColorPicker}
 					onClick={() => onShowColorPickerChange(!showColorPicker)}
-					className={`w-14 h-14 rounded-xl flex items-center justify-center transition-all cursor-pointer relative ${
-						showColorPicker
-							? 'bg-blue-500 text-white shadow-lg scale-105'
-							: 'bg-secondary text-secondary-foreground hover:bg-accent'
-					}`}
-					aria-label="Color picker"
 				>
-					<Palette size={22} />
 					<ColorSwatchIndicator color={color} />
-				</button>
-			</Tooltip>
+				</ToolbarButton>
 
-			{/* Fill Tool */}
-			<ToolButton
-				icon={<PaintBucket size={22} style={{ transform: 'scaleX(-1)' }} />}
-				label="Fill (F)"
-				isSelected={selectedTool === 'fill'}
-				onClick={() => onToolChange('fill')}
-			/>
+				{/* Fill Tool - Custom icon transform */}
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<button
+							onClick={() => onToolChange('fill')}
+							className="concept-toolbar-custom-button"
+							data-active={selectedTool === 'fill'}
+						>
+							<PaintBucket className="w-6 h-6" style={{ transform: 'scaleX(-1)' }} />
+						</button>
+					</TooltipTrigger>
+					<TooltipContent side="right">Fill (F)</TooltipContent>
+				</Tooltip>
 
-			{/* Ball on Hash Button */}
-			<div className="relative">
-				<ToolButton
-					icon={<HashIcon />}
-					label="Ball on Hash (H)"
-					onClick={() => setShowHashDialog(!showHashDialog)}
-					dataAttribute="data-hash-dialog"
-				/>
+				{/* Hash Marker Tool - Custom icon */}
+				<div className="concept-toolbar-dialog-container">
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<button
+								onClick={() => setShowHashDialog(!showHashDialog)}
+								data-hash-dialog
+								className="concept-toolbar-custom-button"
+								data-active={showHashDialog}
+							>
+								<HashIcon />
+							</button>
+						</TooltipTrigger>
+						<TooltipContent side="right">Ball on Hash (H)</TooltipContent>
+					</Tooltip>
 
-				{showHashDialog && (
-					<div className="absolute left-full ml-2 top-0 z-50">
-						<HashDialog
-							currentAlignment={hashAlignment}
-							linemenAtDefault={areLinemenAtDefaultPositions(players, hashAlignment)}
-							onAlignmentChange={alignment => {
-								onHashAlignmentChange(alignment)
-								setShowHashDialog(false)
-							}}
-							onClose={() => setShowHashDialog(false)}
-							useRelativePosition={true}
-						/>
-					</div>
-				)}
+					{showHashDialog && (
+						<div className="concept-toolbar-dialog">
+							<HashDialog
+								currentAlignment={hashAlignment}
+								linemenAtDefault={areLinemenAtDefaultPositions(players, hashAlignment)}
+								onAlignmentChange={alignment => {
+									onHashAlignmentChange(alignment)
+									setShowHashDialog(false)
+								}}
+								onClose={() => setShowHashDialog(false)}
+								useRelativePosition={true}
+							/>
+						</div>
+					)}
+				</div>
 			</div>
-		</div>
+		</TooltipProvider>
 	)
 }

@@ -14,21 +14,23 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import {
-  PLAY_TYPE_PASS,
-  PLAY_TYPE_LIST_PASS,
-  PLAY_TYPE_LIST_RUN,
-} from './constants/playbook'
-import type { Play } from './types'
+import type { Play as PlayType } from './types'
+import './play-list-view.css'
 
 type PlayListViewProps = {
-  plays: Play[]
+  plays: PlayType[]
   selectedPlays: Set<string>
+   
   onSelect: (id: string) => void
+   
   onOpen: (id: string) => void
+   
   onAnimate?: (id: string) => void
+   
   onRename: (id: string) => void
+   
   onDelete: (id: string) => void
+   
   onDuplicate: (id: string) => void
 }
 
@@ -43,142 +45,113 @@ export function PlayListView({
   onDuplicate,
 }: PlayListViewProps) {
   return (
-    <div 
-      className="bg-card border border-border rounded-xl 
-        overflow-hidden"
-    >
-      <div 
-        className="grid grid-cols-12 gap-4 px-4 py-3 
-          border-b border-border bg-muted"
-      >
-        <div className="col-span-1 flex items-center">
-          <Circle className="w-5 h-5 text-muted-foreground" />
+    <div className="play-list-view">
+      <div className="play-list-view-header">
+        <div className="play-list-view-header-cell" style={{ gridColumn: 'span 1' }}>
+          <Circle />
         </div>
-        <div className="col-span-4">
-          <span className="text-muted-foreground">Name</span>
+        <div className="play-list-view-header-cell" style={{ gridColumn: 'span 5' }}>
+          Play
         </div>
-        <div className="col-span-2">
-          <span className="text-muted-foreground">Formation</span>
+        <div className="play-list-view-header-cell" style={{ gridColumn: 'span 2' }}>
+          Formation
         </div>
-        <div className="col-span-1">
-          <span className="text-muted-foreground">Type</span>
+        <div className="play-list-view-header-cell" style={{ gridColumn: 'span 2' }}>
+          Labels
         </div>
-        <div className="col-span-2">
-          <span className="text-muted-foreground">Tags</span>
+        <div className="play-list-view-header-cell" style={{ gridColumn: 'span 1' }}>
+          Modified
         </div>
-        <div className="col-span-1">
-          <span className="text-muted-foreground">Modified</span>
-        </div>
-        <div className="col-span-1"></div>
+        <div className="play-list-view-header-cell" style={{ gridColumn: 'span 1' }}></div>
       </div>
 
-      <div className="divide-y divide-border">
+      <div className="play-list-view-rows">
         {plays.map((play) => {
           const isSelected = selectedPlays.has(play.id)
-          const typeClass = play.playType == PLAY_TYPE_PASS 
-            ? PLAY_TYPE_LIST_PASS 
-            : PLAY_TYPE_LIST_RUN
 
           return (
             <div
               key={play.id}
-              className={`grid grid-cols-12 gap-4 px-4 py-3 
-                hover:bg-accent transition-colors duration-200 ${
-                  isSelected ? 'bg-accent/50' : ''
-                }`}
+              className={`play-list-view-row ${isSelected ? 'play-list-view-row-selected' : ''}`.trim()}
             >
-              <div className="col-span-1 flex items-center">
+              <div className="play-list-view-cell" style={{ gridColumn: 'span 1' }}>
                 <button
                   onClick={() => onSelect(play.id)}
-                  className="p-1 hover:bg-accent rounded 
-                    transition-all duration-200"
+                  className="play-list-view-select-button"
                 >
                   {isSelected ? (
-                    <CheckCircle2 className="w-5 h-5 text-primary" />
+                    <CheckCircle2 className="icon-selected" />
                   ) : (
-                    <Circle className="w-5 h-5 text-muted-foreground" />
+                    <Circle className="icon-unselected" />
                   )}
                 </button>
               </div>
 
-              <div className="col-span-4 flex items-center">
+              <div className="play-list-view-cell" style={{ gridColumn: 'span 5' }}>
                 <button
                   onClick={() => onOpen(play.id)}
-                  className="hover:underline text-left"
+                  className="play-list-view-name-button"
                 >
                   {play.name}
                 </button>
               </div>
 
-              <div className="col-span-2 flex items-center">
-                <span className="text-muted-foreground">
+              <div className="play-list-view-cell" style={{ gridColumn: 'span 2' }}>
+                <span className="play-list-view-formation">
                   {play.formation || '-'}
                 </span>
               </div>
 
-              <div className="col-span-1 flex items-center">
-                <span className={`px-2 py-0.5 rounded text-xs ${typeClass}`}>
-                  {play.playType}
-                </span>
-              </div>
-
-              <div className="col-span-2 flex items-center gap-1">
-                {play.tags.length > 0 ? (
-                  <>
-                    <span 
-                      className="px-2 py-0.5 bg-muted rounded 
-                        text-muted-foreground"
-                    >
-                      {play.tags[0]}
-                    </span>
-                    {play.tags.length > 1 && (
-                      <span className="text-muted-foreground">
-                        +{play.tags.length - 1}
+              <div className="play-list-view-cell" style={{ gridColumn: 'span 2' }}>
+                <div className="play-list-view-labels">
+                  {play.labels.length > 0 ? (
+                    <>
+                      <span className="play-list-view-label">
+                        {play.labels[0]}
                       </span>
-                    )}
-                  </>
-                ) : (
-                  <span className="text-muted-foreground">-</span>
-                )}
+                      {play.labels.length > 1 && (
+                        <span className="play-list-view-label-count">
+                          +{play.labels.length - 1}
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    <span className="play-list-view-formation">-</span>
+                  )}
+                </div>
               </div>
 
-              <div className="col-span-1 flex items-center">
-                <span className="text-muted-foreground">
+              <div className="play-list-view-cell" style={{ gridColumn: 'span 1' }}>
+                <span className="play-list-view-modified">
                   {play.lastModified}
                 </span>
               </div>
 
-              <div
-                className="col-span-1 flex items-center
-                  justify-end"
-              >
+              <div className="play-list-view-cell play-list-view-actions" style={{ gridColumn: 'span 1' }}>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button
-                      className="p-1 hover:bg-accent rounded
-                        transition-all duration-200 cursor-pointer"
-                    >
-                      <MoreVertical className="w-4 h-4" />
+                    <button className="play-list-view-menu-button">
+                      <MoreVertical />
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     {onAnimate && (
                       <DropdownMenuItem onClick={() => onAnimate(play.id)}>
-                        <Play className="w-4 h-4" />
+                        <Play />
                         Animate
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuItem onClick={() => onRename(play.id)}>
-                      <Edit className="w-4 h-4" />
+                      <Edit />
                       Rename
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => onDuplicate(play.id)}>
-                      <Copy className="w-4 h-4" />
+                      <Copy />
                       Duplicate
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => onDelete(play.id)} variant="destructive">
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 />
                       Delete
                     </DropdownMenuItem>
                   </DropdownMenuContent>

@@ -1,0 +1,54 @@
+/* || Popover Component */
+
+/* Base popover - no styling needed as Radix handles behavior */
+.popover {
+  /* Placeholder for future styling if needed */
+}
+
+.popover-trigger {
+  /* Placeholder for future styling if needed */
+}
+
+.popover-anchor {
+  /* Placeholder for future styling if needed */
+}
+
+/* Popover content */
+.popover-content {
+  z-index: 50;
+  width: 18rem;
+  transform-origin: var(--radix-popover-content-transform-origin);
+  border-radius: 0.375rem;
+  border: 1px solid var(--border);
+  padding: 1rem;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  outline: none;
+  background: var(--popover);
+  color: var(--popover-foreground);
+}
+
+/* Animation states */
+.popover-content[data-state="open"] {
+  animation: fade-in 200ms, zoom-in 200ms;
+}
+
+.popover-content[data-state="closed"] {
+  animation: fade-out 200ms, zoom-out 200ms;
+}
+
+/* Directional slide animations */
+.popover-content[data-side="bottom"] {
+  animation: fade-in 200ms, zoom-in 200ms, slide-in-from-top 200ms;
+}
+
+.popover-content[data-side="left"] {
+  animation: fade-in 200ms, zoom-in 200ms, slide-in-from-right 200ms;
+}
+
+.popover-content[data-side="right"] {
+  animation: fade-in 200ms, zoom-in 200ms, slide-in-from-left 200ms;
+}
+
+.popover-content[data-side="top"] {
+  animation: fade-in 200ms, zoom-in 200ms, slide-in-from-bottom 200ms;
+}

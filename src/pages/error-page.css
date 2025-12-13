@@ -1,0 +1,62 @@
+.error-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: var(--background);
+}
+
+.error-page-title {
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.error-page-message {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  color: var(--muted-foreground);
+  margin-bottom: 0.5rem;
+}
+
+.error-page-details {
+  color: var(--muted-foreground);
+  margin-bottom: 2rem;
+}
+
+.error-page-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.error-page-button {
+  padding: 0.5rem 1.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  outline: none;
+  transition: all 200ms;
+}
+
+.error-page-button:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.error-page-button-secondary {
+  border: 1px solid var(--border);
+  background-color: transparent;
+}
+
+.error-page-button-secondary:hover {
+  background-color: var(--accent);
+}
+
+.error-page-button-primary {
+  background-color: var(--action-button);
+  color: var(--action-button-foreground);
+}
+
+.error-page-button-primary:hover {
+  background-color: color-mix(in oklch, var(--action-button) 90%, transparent);
+}

@@ -1,0 +1,101 @@
+/* || Play Cards Section */
+.play-cards-section {
+	border-top: 1px solid var(--border);
+	position: relative;
+	overflow: visible;
+	z-index: 0;
+	transition: height 800ms ease-in-out;
+}
+
+.play-cards-section__content {
+	height: 20rem;
+	padding: 1rem;
+	display: flex;
+	align-items: flex-start;
+}
+
+.play-cards-section__scroll {
+	display: flex;
+	gap: 1rem;
+	overflow-x: auto;
+	overflow-y: visible;
+	padding: 0.5rem;
+	margin: -0.5rem;
+	scrollbar-gutter: stable;
+	scroll-behavior: smooth;
+}
+
+.play-cards-section__card-wrapper {
+	flex-shrink: 0;
+	width: 20rem;
+}
+
+/* || Add Play Button */
+.play-cards-section__add-button {
+	flex-shrink: 0;
+	width: 20rem;
+	height: 18.3rem;
+	border-radius: 0.75rem;
+	border: 2px dashed var(--border);
+	background: var(--muted);
+	color: var(--muted-foreground);
+	transition: all 200ms;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	cursor: pointer;
+	outline: none;
+}
+
+.play-cards-section__add-button:hover:not(:disabled) {
+	border-color: var(--action-button);
+	background: var(--accent);
+	color: var(--action-button);
+}
+
+.play-cards-section__add-button:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.play-cards-section__add-button:disabled {
+	cursor: wait;
+	opacity: 0.5;
+}
+
+.play-cards-section__add-icon {
+	width: 3rem;
+	height: 3rem;
+	border-radius: 0.75rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--muted);
+}
+
+.play-cards-section__add-spinner {
+	animation: spin 1s linear infinite;
+	border-radius: 50%;
+	height: 1.5rem;
+	width: 1.5rem;
+	border: 2px solid transparent;
+	border-bottom-color: var(--muted-foreground);
+}
+
+@keyframes spin {
+	to { transform: rotate(360deg); }
+}
+
+.play-cards-section__add-text {
+	font-size: 0.875rem;
+	font-weight: 500;
+}
+
+.play-cards-section__empty {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	color: var(--muted-foreground);
+}

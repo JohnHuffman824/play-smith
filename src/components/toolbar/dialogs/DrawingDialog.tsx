@@ -1,7 +1,9 @@
-import { X, Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { eventBus } from '../../../services/EventBus'
 import type { Drawing } from '../../../types/drawing.types'
+import { DialogCloseButton } from '../../ui/dialog-close-button'
+import './drawing-dialog.css'
 
 interface DrawingDialogProps {
 	onClose: () => void
@@ -25,21 +27,6 @@ export function DrawingDialog({ onClose }: DrawingDialogProps) {
 	const [routes, setRoutes] = useState<PresetRoute[]>([])
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
-
-	const containerClass = [
-		'absolute left-24 top-6 w-80 rounded-2xl shadow-2xl bg-card',
-		'border border-border p-4 z-50 max-h-[calc(100vh-4rem)] overflow-y-auto',
-	].join(' ')
-	const numberBadgeClass = [
-		'w-8 h-8 rounded-lg bg-action-button text-action-button-foreground flex items-center',
-		'justify-center flex-shrink-0 group-hover:scale-110 transition-transform font-semibold text-sm',
-	].join(' ')
-	const headerClass =
-		'flex items-center justify-between mb-4 sticky top-0 pb-2 border-b border-border bg-card'
-	const itemClass =
-		'w-full p-3 rounded-xl border border-border bg-muted hover:bg-accent hover:border-action-button transition-all text-left group cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50'
-	const closeButtonClass =
-		'w-6 h-6 rounded-lg flex items-center justify-center cursor-pointer hover:bg-accent text-muted-foreground outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50'
 
 	useEffect(() => {
 		async function fetchRoutes() {
@@ -82,47 +69,41 @@ export function DrawingDialog({ onClose }: DrawingDialogProps) {
 	return (
 		<div
 			data-drawing-dialog
-			className={containerClass}>
-			<div className={headerClass}>
-				<span className="text-foreground">Add Drawing</span>
-				<button
-					onClick={onClose}
-					className={closeButtonClass}
-				>
-					<X size={16} />
-				</button>
+			className="drawing-dialog">
+			<div className="drawing-dialog-header">
+				<span className="drawing-dialog-title">Add Drawing</span>
+				<DialogCloseButton onClose={onClose} />
 			</div>
 
 			{loading && (
-				<div className='flex items-center justify-center py-8'>
-					<Loader2 size={24} className="animate-spin text-muted-foreground" />
+				<div className="drawing-dialog-loading">
+					<Loader2 size={24} className="drawing-dialog-loading-spinner animate-spin" />
 				</div>
 			)}
 
 			{error && (
-				<div className="text-center py-8 text-destructive">
+				<div className="drawing-dialog-error">
 					{error}
 				</div>
 			)}
 
 			{!loading && !error && (
-				<div className='space-y-2'>
+				<div className="drawing-dialog-list">
 					{routes.map((route) => (
 						<button
 							key={route.id}
 							onClick={() => handleDrawingSelect(route)}
-							className={itemClass}
+							className="drawing-dialog-item"
 						>
-							<div className='flex items-start gap-3'>
-								<div className={numberBadgeClass}>
+							<div className="drawing-dialog-item-content">
+								<div className="drawing-dialog-item-badge">
 									{route.route_number ?? route.name.charAt(0).toUpperCase()}
 								</div>
-								<div className='flex-1 min-w-0'>
-									<div className="text-foreground mb-1">
+								<div className="drawing-dialog-item-details">
+									<div className="drawing-dialog-item-name">
 										{route.name}
 									</div>
-									<div className="text-xs text-muted-foreground">
-										{/* Description from drawing_template or placeholder */}
+									<div className="drawing-dialog-item-description">
 										{route.route_number ? `Route ${route.route_number}` : 'Special route'}
 									</div>
 								</div>

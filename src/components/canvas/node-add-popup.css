@@ -1,0 +1,30 @@
+/* || Base styles */
+.node-add-popup {
+	position: absolute;
+	z-index: 50;
+	transform: translateX(-50%);
+}
+
+.node-add-button {
+	padding: 0.5rem;
+	background: white;
+	border-radius: 8px;
+	box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+	border: 1px solid rgb(229 231 235);
+	transition: all 200ms;
+	cursor: pointer;
+	outline: none;
+}
+
+.node-add-button:hover {
+	background: rgb(240 253 244);
+	border-color: rgb(134 239 172);
+}
+
+.node-add-button:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.node-add-icon {
+	color: rgb(34 197 94);
+}

@@ -1,5 +1,6 @@
 "use client"
 
+import "./aspect-ratio.css"
 import * as AspectRatioPrimitive from "@radix-ui/react-aspect-ratio"
 
 function AspectRatio({

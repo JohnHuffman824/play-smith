@@ -1,5 +1,14 @@
 import { Window } from 'happy-dom'
 
+// Set test environment flag for database connection
+process.env.NODE_ENV = 'test'
+
+// Clean database once at test suite startup to prevent pollution from previous runs
+// Import dynamically to ensure database connection is established first
+import('./helpers/factories').then(({ cleanupAllTestData }) => {
+	cleanupAllTestData().catch(console.error)
+})
+
 const window = new Window()
 const document = window.document
 

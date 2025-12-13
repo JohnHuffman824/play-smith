@@ -1,0 +1,61 @@
+/* || Container */
+.concept-toolbar {
+  width: 80px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--card);
+  border-right: 1px solid var(--border);
+  gap: 12px;
+}
+
+/* || Custom button base (for erase and fill buttons) */
+.concept-toolbar-custom-button {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  outline: none;
+  transition: all 200ms;
+}
+
+.concept-toolbar-custom-button:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+/* Inactive state */
+.concept-toolbar-custom-button:not([data-active="true"]) {
+  border: 1px solid var(--border);
+  color: var(--icon-muted);
+}
+
+.concept-toolbar-custom-button:not([data-active="true"]):hover {
+  background-color: var(--accent);
+  color: var(--foreground);
+}
+
+/* Active state */
+.concept-toolbar-custom-button[data-active="true"] {
+  background-color: var(--action-button);
+  color: var(--action-button-foreground);
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  border: none;
+}
+
+/* || Dialog container */
+.concept-toolbar-dialog-container {
+  position: relative;
+}
+
+.concept-toolbar-dialog {
+  position: absolute;
+  left: 100%;
+  margin-left: 8px;
+  top: 0;
+  z-index: 50;
+}

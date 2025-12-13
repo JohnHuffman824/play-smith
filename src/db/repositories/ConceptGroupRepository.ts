@@ -50,7 +50,11 @@ export class ConceptGroupRepository {
 			)
 		}
 
-		return await this.findById(group.id) as unknown as Promise<ConceptGroupWithDetails>
+		const result = await this.findById(group.id)
+		if (!result) {
+			throw new Error('Failed to retrieve created concept group')
+		}
+		return result
 	}
 
 	async findById(id: number): Promise<ConceptGroupWithDetails | null> {
@@ -69,7 +73,7 @@ export class ConceptGroupRepository {
                     SELECT id, team_id, name, description, created_by, created_at, updated_at
                     FROM formations
                     WHERE id = ${group.formation_id}
-			`.then(rows => rows[0] ?? null)
+			`.then((rows: Formation[]) => rows[0] ?? null)
 			: null
 
 		const concepts = await db<Array<BaseConcept & { order_index: number }>>`

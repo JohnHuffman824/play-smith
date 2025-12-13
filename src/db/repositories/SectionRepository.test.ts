@@ -98,13 +98,17 @@ describe('SectionRepository', () => {
 
 		const sections = await sectionRepo.findByPlaybookId(testPlaybookId)
 
-		expect(sections.length).toBe(3)
-		expect(sections[0].name).toBe('First Down')
-		expect(sections[1].name).toBe('Second Down')
-		expect(sections[2].name).toBe('Third Down')
-		expect(sections[0].display_order).toBe(1)
-		expect(sections[1].display_order).toBe(2)
-		expect(sections[2].display_order).toBe(3)
+		// Should have 4 sections: Ideas (auto-created), First Down, Second Down, Third Down
+		expect(sections.length).toBe(4)
+		expect(sections[0]?.name).toBe('Ideas')
+		expect(sections[0]?.section_type).toBe('ideas')
+		expect(sections[0]?.display_order).toBe(0)
+		expect(sections[1]?.name).toBe('First Down')
+		expect(sections[1]?.display_order).toBe(1)
+		expect(sections[2]?.name).toBe('Second Down')
+		expect(sections[2]?.display_order).toBe(2)
+		expect(sections[3]?.name).toBe('Third Down')
+		expect(sections[3]?.display_order).toBe(3)
 	})
 
 	test('update section name', async () => {
@@ -144,12 +148,17 @@ describe('SectionRepository', () => {
 
 		const sections = await sectionRepo.findByPlaybookId(testPlaybookId)
 
-		expect(sections[0].id).toBe(testSection2Id)
-		expect(sections[0].display_order).toBe(1)
-		expect(sections[1].id).toBe(testSection3Id)
-		expect(sections[1].display_order).toBe(2)
-		expect(sections[2].id).toBe(testSectionId)
-		expect(sections[2].display_order).toBe(3)
+		// Ideas section is not included in reorder, so it stays at display_order 0
+		// So we expect: Ideas (0), Second Down (1), Third Down (2), First Down (3)
+		expect(sections.length).toBe(4)
+		expect(sections[0]?.name).toBe('Ideas')
+		expect(sections[0]?.display_order).toBe(0)
+		expect(sections[1]?.id).toBe(testSection2Id)
+		expect(sections[1]?.display_order).toBe(1)
+		expect(sections[2]?.id).toBe(testSection3Id)
+		expect(sections[2]?.display_order).toBe(2)
+		expect(sections[3]?.id).toBe(testSectionId)
+		expect(sections[3]?.display_order).toBe(3)
 	})
 
 	test('delete section', async () => {
@@ -159,7 +168,8 @@ describe('SectionRepository', () => {
 		expect(section).toBeNull()
 
 		const sections = await sectionRepo.findByPlaybookId(testPlaybookId)
-		expect(sections.length).toBe(2)
+		// Should have 3 sections remaining: Ideas, First Down, Second Down
+		expect(sections.length).toBe(3)
 
 		// Clear the ID so cleanup doesn't try to delete again
 		testSection3Id = 0

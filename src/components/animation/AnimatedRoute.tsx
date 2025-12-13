@@ -5,7 +5,7 @@
 
 import { useMemo } from 'react'
 import type { Drawing } from '../../types/drawing.types'
-import type { RouteTiming } from '../../types/animation.types'
+import type { RouteTiming as _RouteTiming } from '../../types/animation.types'
 import type { FieldCoordinateSystem } from '../../utils/coordinates'
 import type { Coordinate } from '../../types/field.types'
 import {
@@ -122,20 +122,20 @@ function buildPathWithLength(
 	// Get smoothed points in pixel coordinates
 	const smoothed = getSmoothedPoints(drawing, (point) => toPixels(point, coordSystem))
 
-	if (smoothed) {
+	if (smoothed && smoothed.length >= 2) {
 
 		// Build path from smoothed points
-		const commands: string[] = [`M ${smoothed[0].x} ${smoothed[0].y}`]
+		const commands: string[] = [`M ${smoothed[0]!.x} ${smoothed[0]!.y}`]
 		let pathLength = 0
 
 		for (let i = 1; i < smoothed.length; i++) {
-			commands.push(`L ${smoothed[i].x} ${smoothed[i].y}`)
-			pathLength += distance(smoothed[i - 1], smoothed[i])
+			commands.push(`L ${smoothed[i]!.x} ${smoothed[i]!.y}`)
+			pathLength += distance(smoothed[i - 1]!, smoothed[i]!)
 		}
 
 		// Calculate end direction from smoothed path for arrow rendering
-		const lastSmoothed = smoothed[smoothed.length - 1]
-		const prevSmoothed = smoothed[smoothed.length - 2]
+		const lastSmoothed = smoothed[smoothed.length - 1]!
+		const prevSmoothed = smoothed[smoothed.length - 2]!
 		const endAngle = Math.atan2(
 			lastSmoothed.y - prevSmoothed.y,
 			lastSmoothed.x - prevSmoothed.x
@@ -145,7 +145,7 @@ function buildPathWithLength(
 		return {
 			d: commands.join(' '),
 			pathLength,
-			endPoints: [smoothed[0], smoothed[smoothed.length - 1]],
+			endPoints: [smoothed[0]!, smoothed[smoothed.length - 1]!],
 			endDirection: { angle: endAngle, point: lastSmoothed }
 		}
 	}

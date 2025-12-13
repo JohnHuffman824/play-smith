@@ -1,4 +1,6 @@
 import { UnifiedSearchBar } from '../search/UnifiedSearchBar'
+import { Button } from '@/components/ui/button'
+import './play-header.css'
 
 interface PlayHeaderProps {
 	teamId: string
@@ -12,9 +14,9 @@ export function PlayHeader({
 	onBackToPlaybook
 }: PlayHeaderProps) {
 	return (
-		<div className="px-8 pt-6 pb-1">
-			<div className="flex gap-4 items-center">
-				<div className="flex-1">
+		<div className="play-header">
+			<div className="play-header__content">
+				<div className="play-header__search">
 					<UnifiedSearchBar
 						teamId={teamId}
 						playbookId={playbookId}
@@ -23,12 +25,9 @@ export function PlayHeader({
 				</div>
 
 				{onBackToPlaybook && (
-					<button
-						onClick={onBackToPlaybook}
-						className="px-4 py-2 rounded-lg bg-action-button text-action-button-foreground hover:bg-action-button/90 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg whitespace-nowrap cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-					>
+					<Button variant="action" className="play-header__button" onClick={onBackToPlaybook}>
 						Back to Playbook
-					</button>
+					</Button>
 				)}
 			</div>
 		</div>

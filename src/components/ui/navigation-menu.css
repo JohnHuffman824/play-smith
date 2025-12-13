@@ -1,0 +1,315 @@
+/* || Base styles */
+.navigation-menu {
+	position: relative;
+	display: flex;
+	max-width: max-content;
+	flex: 1 1 0%;
+	align-items: center;
+	justify-content: center;
+}
+
+.navigation-menu-list {
+	display: flex;
+	flex: 1 1 0%;
+	list-style: none;
+	align-items: center;
+	justify-content: center;
+	gap: 4px;
+	margin: 0;
+	padding: 0;
+}
+
+.navigation-menu-item {
+	position: relative;
+}
+
+/* || Trigger */
+.navigation-menu-trigger {
+	display: inline-flex;
+	height: 2.25rem;
+	width: max-content;
+	align-items: center;
+	justify-content: center;
+	border-radius: 8px;
+	background: var(--background);
+	padding: 8px 16px;
+	font-size: 0.875rem;
+	font-weight: 500;
+	outline: none;
+	transition: color 200ms, box-shadow 200ms;
+	cursor: pointer;
+}
+
+.navigation-menu-trigger:hover {
+	background: var(--accent);
+	color: var(--accent-foreground);
+}
+
+.navigation-menu-trigger:focus {
+	background: var(--accent);
+	color: var(--accent-foreground);
+}
+
+.navigation-menu-trigger:disabled {
+	pointer-events: none;
+	opacity: 0.5;
+}
+
+.navigation-menu-trigger[data-state="open"]:hover {
+	background: var(--accent);
+}
+
+.navigation-menu-trigger[data-state="open"]:focus {
+	background: var(--accent);
+}
+
+.navigation-menu-trigger[data-state="open"] {
+	background: color-mix(in oklch, var(--accent) 50%, transparent);
+	color: var(--accent-foreground);
+}
+
+.navigation-menu-trigger:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+	outline: 1px solid var(--ring);
+}
+
+.navigation-menu-trigger svg {
+	position: relative;
+	top: 1px;
+	margin-left: 4px;
+	width: 0.75rem;
+	height: 0.75rem;
+	transition: transform 300ms;
+}
+
+.navigation-menu-trigger[data-state="open"] svg {
+	transform: rotate(180deg);
+}
+
+/* || Content */
+.navigation-menu-content {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	padding: 8px;
+	padding-right: 10px;
+}
+
+@media (width >= 768px) {
+	.navigation-menu-content {
+		width: auto;
+	}
+}
+
+/* Motion animations for viewport mode */
+.navigation-menu-content[data-motion^="from-"] {
+	animation-name: fade-in;
+	animation-duration: 200ms;
+	animation-timing-function: ease-out;
+	animation-fill-mode: both;
+}
+
+.navigation-menu-content[data-motion^="to-"] {
+	animation-name: fade-out;
+	animation-duration: 200ms;
+	animation-timing-function: ease-out;
+	animation-fill-mode: both;
+}
+
+.navigation-menu-content[data-motion="from-end"] {
+	animation-name: slide-in-from-right-52, fade-in;
+}
+
+.navigation-menu-content[data-motion="from-start"] {
+	animation-name: slide-in-from-left-52, fade-in;
+}
+
+.navigation-menu-content[data-motion="to-end"] {
+	animation-name: slide-out-to-right-52, fade-out;
+}
+
+.navigation-menu-content[data-motion="to-start"] {
+	animation-name: slide-out-to-left-52, fade-out;
+}
+
+@keyframes slide-in-from-right-52 {
+	from { transform: translateX(13rem); }
+	to { transform: translateX(0); }
+}
+
+@keyframes slide-in-from-left-52 {
+	from { transform: translateX(-13rem); }
+	to { transform: translateX(0); }
+}
+
+@keyframes slide-out-to-right-52 {
+	from { transform: translateX(0); }
+	to { transform: translateX(13rem); }
+}
+
+@keyframes slide-out-to-left-52 {
+	from { transform: translateX(0); }
+	to { transform: translateX(-13rem); }
+}
+
+/* No viewport mode styling */
+.navigation-menu[data-viewport="false"] .navigation-menu-content {
+	position: absolute;
+	top: 100%;
+	left: 0;
+	margin-top: 6px;
+	overflow: hidden;
+	border-radius: 8px;
+	border: 1px solid var(--border);
+	background: var(--popover);
+	color: var(--popover-foreground);
+	box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.navigation-menu[data-viewport="false"] .navigation-menu-content[data-state="open"] {
+	animation: zoom-in 200ms ease-out, fade-in 200ms ease-out;
+}
+
+.navigation-menu[data-viewport="false"] .navigation-menu-content[data-state="closed"] {
+	animation: zoom-out 200ms ease-out, fade-out 200ms ease-out;
+}
+
+/* Remove focus rings from links inside content */
+.navigation-menu-content [data-slot="navigation-menu-link"]:focus {
+	box-shadow: none;
+}
+
+.navigation-menu-content [data-slot="navigation-menu-link"]:focus {
+	outline: none;
+}
+
+/* || Viewport */
+.navigation-menu-viewport-wrapper {
+	position: absolute;
+	top: 100%;
+	left: 0;
+	isolation: isolate;
+	z-index: 50;
+	display: flex;
+	justify-content: center;
+}
+
+.navigation-menu-viewport {
+	position: relative;
+	margin-top: 6px;
+	height: var(--radix-navigation-menu-viewport-height);
+	width: 100%;
+	overflow: hidden;
+	border-radius: 8px;
+	border: 1px solid var(--border);
+	background: var(--popover);
+	color: var(--popover-foreground);
+	box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+	transform-origin: top center;
+}
+
+@media (width >= 768px) {
+	.navigation-menu-viewport {
+		width: var(--radix-navigation-menu-viewport-width);
+	}
+}
+
+.navigation-menu-viewport[data-state="open"] {
+	animation: zoom-in-90 200ms ease-out, fade-in 200ms ease-out;
+}
+
+.navigation-menu-viewport[data-state="closed"] {
+	animation: zoom-out-95 200ms ease-out, fade-out 200ms ease-out;
+}
+
+@keyframes zoom-in-90 {
+	from { opacity: 0; transform: scale(0.90); }
+	to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes zoom-out-95 {
+	from { opacity: 1; transform: scale(1); }
+	to { opacity: 0; transform: scale(0.95); }
+}
+
+/* || Link */
+.navigation-menu-link {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	border-radius: 2px;
+	padding: 8px;
+	font-size: 0.875rem;
+	transition: all 200ms;
+	outline: none;
+	cursor: pointer;
+}
+
+.navigation-menu-link:hover {
+	background: var(--accent);
+	color: var(--accent-foreground);
+}
+
+.navigation-menu-link:focus {
+	background: var(--accent);
+	color: var(--accent-foreground);
+}
+
+.navigation-menu-link:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+	outline: 1px solid var(--ring);
+}
+
+.navigation-menu-link[data-active="true"] {
+	background: color-mix(in oklch, var(--accent) 50%, transparent);
+	color: var(--accent-foreground);
+}
+
+.navigation-menu-link[data-active="true"]:focus {
+	background: var(--accent);
+}
+
+.navigation-menu-link[data-active="true"]:hover {
+	background: var(--accent);
+}
+
+.navigation-menu-link svg:not([class*='text-']) {
+	color: var(--muted-foreground);
+}
+
+.navigation-menu-link svg:not([class*='size-']) {
+	width: 1rem;
+	height: 1rem;
+}
+
+/* || Indicator */
+.navigation-menu-indicator {
+	position: relative;
+	top: 100%;
+	z-index: 1;
+	display: flex;
+	height: 6px;
+	align-items: flex-end;
+	justify-content: center;
+	overflow: hidden;
+}
+
+.navigation-menu-indicator[data-state="visible"] {
+	animation: fade-in 200ms ease-out;
+}
+
+.navigation-menu-indicator[data-state="hidden"] {
+	animation: fade-out 200ms ease-out;
+}
+
+.navigation-menu-indicator-arrow {
+	position: relative;
+	top: 60%;
+	height: 8px;
+	width: 8px;
+	transform: rotate(45deg);
+	border-top-left-radius: 2px;
+	background: var(--border);
+	box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}

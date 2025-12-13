@@ -7,6 +7,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu'
+import './team-selector.css'
 
 type Team = {
 	id: number
@@ -27,32 +28,32 @@ export function TeamSelector({ teams, currentTeamId, onSwitchTeam, onManageTeams
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<button
-					className="flex items-center gap-2 px-3 py-2 bg-accent hover:bg-accent/80 rounded-lg transition-all duration-200 cursor-pointer"
-				>
-					<Users className="w-4 h-4" />
-					<span className="max-w-[150px] truncate">{currentTeam?.name || 'Select Team'}</span>
-					<ChevronDown className="w-4 h-4" />
+				<button className="team-selector-button">
+					<Users className="team-selector-icon" />
+					<span className="team-selector-name">{currentTeam?.name || 'Select Team'}</span>
+					<ChevronDown className="team-selector-icon" />
 				</button>
 			</DropdownMenuTrigger>
-			<DropdownMenuContent align="start" className="min-w-[250px]">
+			<DropdownMenuContent align="start" style={{ minWidth: '250px' }}>
 				<DropdownMenuLabel>Switch Team</DropdownMenuLabel>
 				{teams.map((team) => (
 					<DropdownMenuItem
 						key={team.id}
 						onClick={() => onSwitchTeam(team.id)}
-						className={`cursor-pointer ${team.id === currentTeamId ? 'bg-accent/50' : ''}`}
+						className={`team-selector-item ${team.id === currentTeamId ? 'team-selector-item-active' : ''}`.trim()}
 					>
-						<Users className="w-4 h-4" />
-						<span className="flex-1">{team.name}</span>
-						{team.id === currentTeamId && (
-							<Check className="w-4 h-4 text-primary" />
-						)}
+						<div className="team-selector-item-content">
+							<Users className="team-selector-icon" />
+							<span className="team-selector-item-name">{team.name}</span>
+							{team.id === currentTeamId && (
+								<Check className="team-selector-icon team-selector-item-check" />
+							)}
+						</div>
 					</DropdownMenuItem>
 				))}
 				<DropdownMenuSeparator />
-				<DropdownMenuItem onClick={() => onManageTeams()} className="cursor-pointer">
-					<Settings className="w-4 h-4" />
+				<DropdownMenuItem onClick={() => onManageTeams()} className="team-selector-manage">
+					<Settings className="team-selector-icon" />
 					Manage Teams
 				</DropdownMenuItem>
 			</DropdownMenuContent>

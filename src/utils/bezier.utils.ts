@@ -122,7 +122,11 @@ export function calculateRouteTiming(
 		let currentTime = 0
 
 		for (let i = 0; i < smoothedPoints.length - 1; i++) {
-			const points = [smoothedPoints[i], smoothedPoints[i + 1]]
+			const p0 = smoothedPoints[i]
+			const p1 = smoothedPoints[i + 1]
+			if (!p0 || !p1) continue
+
+			const points = [p0, p1]
 			const segment: PathSegment = { type: 'line', pointIds: [] }
 
 			const segmentTiming = buildSegmentTiming(

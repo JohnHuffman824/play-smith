@@ -114,6 +114,9 @@ export function useMultiplePlayContent(
 	const [isLoading, setIsLoading] = useState(false)
 	const [errors, setErrors] = useState<Map<string, string>>(new Map())
 
+	// Extract to variable to avoid complex expression in dependency array
+	const playIdsKey = playIds.join(',')
+
 	useEffect(() => {
 		if (!enabled || playIds.length === 0) {
 			setPlaysContent(new Map())
@@ -146,7 +149,7 @@ export function useMultiplePlayContent(
 			setErrors(newErrors)
 			setIsLoading(false)
 		})
-	}, [playIds.join(','), enabled])
+	}, [playIdsKey, enabled, playIds])
 
 	return { playsContent, isLoading, errors }
 }

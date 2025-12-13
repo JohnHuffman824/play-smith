@@ -12,7 +12,7 @@ async function seedDevAdmin(): Promise<void> {
 
 	const existing = await userRepo.findByEmail(ADMIN_EMAIL)
 	if (existing) {
-		console.log('✓ Admin user already exists, skipping seed')
+		console.warn('✓ Admin user already exists, skipping seed')
 		return
 	}
 
@@ -23,8 +23,8 @@ async function seedDevAdmin(): Promise<void> {
 		password_hash: passwordHash,
 	})
 
-	console.log(`✓ Created admin user: ${user.email} (id: ${user.id})`)
-	console.log('  Login with: admin / ALtt98xzH!')
+	console.warn(`✓ Created admin user: ${user.email} (id: ${user.id})`)
+	console.warn('  Login with: admin / ALtt98xzH!')
 }
 
 seedDevAdmin()

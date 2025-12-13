@@ -12,6 +12,8 @@ type BaseConceptUpdate = {
 	targeting_mode?: 'absolute_role' | 'relative_selector'
 	ball_position?: 'left' | 'center' | 'right'
 	play_direction?: 'left' | 'right' | 'na'
+	is_motion?: boolean
+	is_modifier?: boolean
 }
 
 /**
@@ -65,6 +67,8 @@ export class BaseConceptRepository {
 		targeting_mode: 'absolute_role' | 'relative_selector'
 		ball_position?: 'left' | 'center' | 'right'
 		play_direction?: 'left' | 'right' | 'na'
+		is_motion?: boolean
+		is_modifier?: boolean
 		created_by: number
 		assignments: Array<{
 			role?: string
@@ -77,7 +81,7 @@ export class BaseConceptRepository {
 		const [concept] = await db<BaseConcept[]>`
 			INSERT INTO base_concepts (
 				team_id, playbook_id, name, description,
-				targeting_mode, ball_position, play_direction, created_by
+				targeting_mode, ball_position, play_direction, is_motion, is_modifier, created_by
 			)
 			VALUES (
 				${data.team_id},
@@ -87,9 +91,11 @@ export class BaseConceptRepository {
 				${data.targeting_mode},
 				${data.ball_position ?? 'center'},
 				${data.play_direction ?? 'na'},
+				${data.is_motion ?? false},
+				${data.is_modifier ?? false},
 				${data.created_by}
 			)
-			RETURNING id, team_id, playbook_id, name, description, targeting_mode, ball_position, play_direction, created_by, created_at, updated_at, usage_count, last_used_at
+			RETURNING id, team_id, playbook_id, name, description, targeting_mode, ball_position, play_direction, is_motion, is_modifier, created_by, created_at, updated_at, usage_count, last_used_at
 		`
 
 		if (!concept) {
@@ -124,7 +130,7 @@ export class BaseConceptRepository {
 
 	async findById(id: number): Promise<BaseConceptWithAssignments | null> {
 		const [concept] = await db<BaseConcept[]>`
-			SELECT id, team_id, playbook_id, name, description, targeting_mode, ball_position, play_direction, created_by, created_at, updated_at, usage_count, last_used_at
+			SELECT id, team_id, playbook_id, name, description, targeting_mode, ball_position, play_direction, is_motion, is_modifier, created_by, created_at, updated_at, usage_count, last_used_at
 			FROM base_concepts
 			WHERE id = ${id}
 		`
@@ -152,7 +158,7 @@ export class BaseConceptRepository {
 	): Promise<BaseConcept[]> {
 		if (playbookId) {
 			return await db<BaseConcept[]>`
-				SELECT id, team_id, playbook_id, name, description, targeting_mode, ball_position, play_direction, created_by, created_at, updated_at, usage_count, last_used_at
+				SELECT id, team_id, playbook_id, name, description, targeting_mode, ball_position, play_direction, is_motion, is_modifier, created_by, created_at, updated_at, usage_count, last_used_at
 				FROM base_concepts
 				WHERE (team_id = ${teamId} AND playbook_id IS NULL)
 					OR (team_id = ${teamId} AND playbook_id = ${playbookId})
@@ -161,7 +167,7 @@ export class BaseConceptRepository {
 		}
 
 		return await db<BaseConcept[]>`
-			SELECT id, team_id, playbook_id, name, description, targeting_mode, ball_position, play_direction, created_by, created_at, updated_at, usage_count, last_used_at
+			SELECT id, team_id, playbook_id, name, description, targeting_mode, ball_position, play_direction, is_motion, is_modifier, created_by, created_at, updated_at, usage_count, last_used_at
 			FROM base_concepts
 			WHERE team_id = ${teamId} AND playbook_id IS NULL
 			ORDER BY usage_count DESC, last_used_at DESC NULLS LAST
@@ -179,7 +185,7 @@ export class BaseConceptRepository {
 		if (playbookId) {
 			return await db<Array<BaseConcept & { frecency_score: number }>>`
 				SELECT
-					id, team_id, playbook_id, name, description, targeting_mode, ball_position, play_direction, created_by, created_at, updated_at, usage_count, last_used_at,
+					id, team_id, playbook_id, name, description, targeting_mode, ball_position, play_direction, is_motion, is_modifier, created_by, created_at, updated_at, usage_count, last_used_at,
 					(usage_count::float / (EXTRACT(EPOCH FROM (NOW() - COALESCE(last_used_at, created_at))) / 86400 + 1)) as frecency_score
 				FROM base_concepts
 				WHERE (team_id = ${teamId} OR team_id IS NULL)
@@ -192,7 +198,7 @@ export class BaseConceptRepository {
 
 		return await db<Array<BaseConcept & { frecency_score: number }>>`
 			SELECT
-				id, team_id, playbook_id, name, description, targeting_mode, ball_position, play_direction, created_by, created_at, updated_at, usage_count, last_used_at,
+				id, team_id, playbook_id, name, description, targeting_mode, ball_position, play_direction, is_motion, is_modifier, created_by, created_at, updated_at, usage_count, last_used_at,
 				(usage_count::float / (EXTRACT(EPOCH FROM (NOW() - COALESCE(last_used_at, created_at))) / 86400 + 1)) as frecency_score
 			FROM base_concepts
 			WHERE (team_id = ${teamId} OR team_id IS NULL)
@@ -227,9 +233,11 @@ export class BaseConceptRepository {
 					targeting_mode = COALESCE(${data.targeting_mode ?? null}, targeting_mode),
 					ball_position = COALESCE(${data.ball_position ?? null}, ball_position),
 					play_direction = COALESCE(${data.play_direction ?? null}, play_direction),
+					is_motion = COALESCE(${data.is_motion ?? null}, is_motion),
+					is_modifier = COALESCE(${data.is_modifier ?? null}, is_modifier),
 					updated_at = CURRENT_TIMESTAMP
 				WHERE id = ${id}
-				RETURNING id, team_id, playbook_id, name, description, targeting_mode, ball_position, play_direction, created_by, created_at, updated_at, usage_count, last_used_at
+				RETURNING id, team_id, playbook_id, name, description, targeting_mode, ball_position, play_direction, is_motion, is_modifier, created_by, created_at, updated_at, usage_count, last_used_at
 			`
 
 			if (!concept) {

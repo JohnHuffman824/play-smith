@@ -61,8 +61,8 @@ describe('FormationOnboardingDialog', () => {
     fireEvent.click(iFormButton!)
 
     // Both should have selected state (we can verify by class)
-    expect(shotgunButton?.className).toContain('border-action-button')
-    expect(iFormButton?.className).toContain('border-action-button')
+    expect(shotgunButton?.className).toContain('formation-onboarding__option--selected')
+    expect(iFormButton?.className).toContain('formation-onboarding__option--selected')
   })
 
   test('calls onComplete with selected formations', () => {
@@ -81,9 +81,10 @@ describe('FormationOnboardingDialog', () => {
     fireEvent.click(screen.getByText(/Import Selected/))
 
     expect(onComplete).toHaveBeenCalledTimes(1)
-    const callArgs = onComplete.mock.calls[0][0]
-    expect(callArgs.length).toBe(1)
-    expect(callArgs[0].name).toBe('Shotgun')
+    const callArgs = onComplete.mock.calls[0]?.[0]
+    expect(callArgs).toBeDefined()
+    expect(callArgs?.length).toBe(1)
+    expect(callArgs?.[0]?.name).toBe('Shotgun')
   })
 
   test('shows "Create from scratch" option', () => {

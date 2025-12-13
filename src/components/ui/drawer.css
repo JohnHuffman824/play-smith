@@ -1,0 +1,113 @@
+/* || Drawer Component */
+
+/* || Overlay */
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgb(0 0 0 / 50%);
+}
+
+.drawer-overlay[data-state="open"] {
+  animation: fade-in 200ms ease-out;
+}
+
+.drawer-overlay[data-state="closed"] {
+  animation: fade-out 200ms ease-out;
+}
+
+/* || Content */
+.drawer-content {
+  position: fixed;
+  z-index: 50;
+  display: flex;
+  height: auto;
+  flex-direction: column;
+  background: var(--background);
+}
+
+/* || Directional Positioning - using data-vaul-drawer-direction */
+.drawer-content[data-vaul-drawer-direction="top"] {
+  inset-x: 0;
+  top: 0;
+  margin-bottom: 96px;
+  max-height: 80vh;
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.drawer-content[data-vaul-drawer-direction="bottom"] {
+  inset-x: 0;
+  bottom: 0;
+  margin-top: 96px;
+  max-height: 80vh;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.drawer-content[data-vaul-drawer-direction="right"] {
+  inset-y: 0;
+  right: 0;
+  width: 75%;
+  border-left: 1px solid var(--border);
+}
+
+.drawer-content[data-vaul-drawer-direction="left"] {
+  inset-y: 0;
+  left: 0;
+  width: 75%;
+  border-right: 1px solid var(--border);
+}
+
+@media (width >= 640px) {
+  .drawer-content[data-vaul-drawer-direction="right"],
+  .drawer-content[data-vaul-drawer-direction="left"] {
+    max-width: 24rem;
+  }
+}
+
+/* || Drag Handle (only for bottom drawers) */
+.drawer-handle {
+  background: var(--muted);
+  margin: 16px auto 0;
+  height: 8px;
+  width: 100px;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  display: none;
+}
+
+.drawer-content[data-vaul-drawer-direction="bottom"] .drawer-handle {
+  display: block;
+}
+
+/* || Header */
+.drawer-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px;
+}
+
+/* || Footer */
+.drawer-footer {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+}
+
+/* || Title */
+.drawer-title {
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+/* || Description */
+.drawer-description {
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+}

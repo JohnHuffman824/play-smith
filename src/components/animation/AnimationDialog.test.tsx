@@ -18,7 +18,7 @@ describe('AnimationDialog - Width', () => {
 					}
 				}),
 			} as Response)
-		)
+		) as typeof fetch
 	})
 
 	afterEach(() => {
@@ -44,12 +44,13 @@ describe('AnimationDialog - Width', () => {
 			return dialog
 		})
 
-		// Check that it has the w-[98vw] class and no max-width restrictions
-		const hasCorrectWidth = dialogContent.className.includes('w-[98vw]')
-		expect(hasCorrectWidth).toBe(true)
+		// Check that it has the animation-dialog-wrapper class which applies the 98vw width via CSS
+		// The CSS rule: .animation-dialog-wrapper { width: 98vw; max-width: none; }
+		const hasCorrectClass = dialogContent.className.includes('animation-dialog-wrapper')
+		expect(hasCorrectClass).toBe(true)
 
-		// Ensure the default sm:max-w-lg is not present
-		const hasNoSmallMaxWidth = !dialogContent.className.includes('sm:max-w-lg')
-		expect(hasNoSmallMaxWidth).toBe(true)
+		// Verify it also has the base dialog-content class
+		const hasDialogContentClass = dialogContent.className.includes('dialog-content')
+		expect(hasDialogContentClass).toBe(true)
 	})
 })

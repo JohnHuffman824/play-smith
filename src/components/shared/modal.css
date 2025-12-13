@@ -1,0 +1,53 @@
+/* || Modal Component */
+
+/* || Backdrop */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(0 0 0 / 50%);
+  backdrop-filter: blur(4px);
+}
+
+/* || Container */
+.modal {
+  position: relative;
+  background: var(--popover);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 10%), 0 8px 10px -6px rgb(0 0 0 / 10%);
+  width: 100%;
+  max-width: 28rem;
+  margin: 0 1rem;
+  max-height: 90vh;
+  overflow: auto;
+}
+
+/* || Header */
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+/* || Body */
+.modal-body {
+  padding: 1rem 1.5rem;
+}
+
+/* || Close Button */
+.modal-close-button {
+  height: auto;
+  width: auto;
+  padding: 0.25rem;
+}
+
+.modal-close-button svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}

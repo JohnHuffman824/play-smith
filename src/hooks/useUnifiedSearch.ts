@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import type { SearchResults, ConceptChip } from '../types/concept.types'
+import type { SearchResults } from '../types/concept.types'
 import { PRESET_ROLES } from '../constants/concept.constants'
 
 interface UseUnifiedSearchReturn {

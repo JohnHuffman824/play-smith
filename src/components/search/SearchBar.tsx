@@ -3,6 +3,7 @@ import { Input } from '../ui/input'
 import { Badge } from '../ui/badge'
 import { X } from 'lucide-react'
 import { useDebounce } from '../../hooks/useDebounce'
+import './search-bar.css'
 
 interface Formation {
   id: number
@@ -17,10 +18,12 @@ interface SelectedConcept {
   is_saved: boolean
 }
 
+type SearchResultItem = Formation | SelectedConcept
+
 interface SearchBarProps {
   teamId: string
-  onSelect: (item: any, type: 'formation' | 'concept') => void
-  onRemove?: (item: any, type: 'formation' | 'concept') => void
+  onSelect: (_item: SearchResultItem, _type: 'formation' | 'concept') => void
+  onRemove?: (_item: SearchResultItem, _type: 'formation' | 'concept') => void
   selectedFormation?: Formation | null
   selectedConcepts?: SelectedConcept[]
 }
@@ -33,7 +36,7 @@ export function SearchBar({
   selectedConcepts = []
 }: SearchBarProps) {
   const [query, setQuery] = useState('')
-  const [results, setResults] = useState<any>(null)
+  const [results, setResults] = useState<unknown>(null)
   const [isOpen, setIsOpen] = useState(false)
 
   const debouncedQuery = useDebounce(query, 300)
@@ -61,7 +64,7 @@ export function SearchBar({
     fetchResults()
   }, [fetchResults])
 
-  function handleSelect(item: any, type: 'formation' | 'concept') {
+  function handleSelect(item: SearchResultItem, type: 'formation' | 'concept') {
     onSelect(item, type)
     setQuery('')
     setResults(null)
@@ -77,15 +80,15 @@ export function SearchBar({
   }
 
   return (
-    <div className="relative">
+    <div className="search-bar">
       {/* Selected chips */}
-      <div className="flex flex-wrap gap-2 mb-2">
+      <div className="search-bar-chips">
         {selectedFormation && (
-          <Badge variant="secondary" className="flex items-center gap-1">
+          <Badge variant="secondary" className="search-bar-chip">
             {selectedFormation.name}
             {onRemove && (
-              <button onClick={() => onRemove(selectedFormation, 'formation')}>
-                <X className="w-3 h-3" />
+              <button className="search-bar-chip-remove" onClick={() => onRemove(selectedFormation, 'formation')} aria-label={`Remove ${selectedFormation.name}`}>
+                <X className="search-bar-chip-icon" />
               </button>
             )}
           </Badge>
@@ -94,12 +97,12 @@ export function SearchBar({
           <Badge
             key={concept.id || i}
             variant={concept.is_saved ? 'default' : 'outline'}
-            className="flex items-center gap-1"
+            className="search-bar-chip"
           >
             {getConceptDisplayName(concept)}
             {onRemove && (
-              <button onClick={() => onRemove(concept, 'concept')}>
-                <X className="w-3 h-3" />
+              <button className="search-bar-chip-remove" onClick={() => onRemove(concept, 'concept')} aria-label={`Remove ${getConceptDisplayName(concept)}`}>
+                <X className="search-bar-chip-icon" />
               </button>
             )}
           </Badge>
@@ -118,79 +121,82 @@ export function SearchBar({
       />
 
       {/* Results dropdown */}
-      {isOpen && results && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg z-50 max-h-64 overflow-auto">
-          {/* Formation results */}
-          {results.results.formations?.map((f: any) => (
-            <button
-              key={f.id}
-              className="w-full text-left px-3 py-2 hover:bg-accent transition-colors cursor-pointer"
-              onClick={() => handleSelect(f, 'formation')}
-            >
-              <span className="font-medium">{f.name}</span>
-              <span className="text-sm text-muted-foreground ml-2">Formation</span>
-            </button>
-          ))}
+      {isOpen && results && (() => {
+        const resultsData = results as { results?: { formations?: Formation[]; concepts?: (SelectedConcept & { is_motion?: boolean; is_modifier?: boolean })[] }; parseResult?: Record<string, unknown> }
+        return (
+          <div className="search-bar-dropdown">
+            {/* Formation results */}
+            {resultsData.results?.formations?.map((f: Formation) => (
+              <button
+                key={f.id}
+                className="search-bar-dropdown-item"
+                onClick={() => handleSelect(f, 'formation')}
+              >
+                <span className="search-bar-dropdown-label">{f.name}</span>
+                <span className="search-bar-dropdown-type">Formation</span>
+              </button>
+            ))}
 
-          {/* Concept results */}
-          {results.results.concepts?.map((c: any) => (
-            <button
-              key={c.id}
-              className="w-full text-left px-3 py-2 hover:bg-accent transition-colors cursor-pointer"
-              onClick={() => handleSelect({ ...c, is_saved: true }, 'concept')}
-            >
-              <span className="font-medium">{c.name}</span>
-              <span className="text-sm text-muted-foreground ml-2">
-                {c.is_motion ? 'Motion' : c.is_modifier ? 'Modifier' : 'Concept'}
-              </span>
-            </button>
-          ))}
+            {/* Concept results */}
+            {resultsData.results?.concepts?.map((c) => (
+              <button
+                key={c.id}
+                className="search-bar-dropdown-item"
+                onClick={() => handleSelect({ ...c, is_saved: true }, 'concept')}
+              >
+                <span className="search-bar-dropdown-label">{c.name}</span>
+                <span className="search-bar-dropdown-type">
+                  {c.is_motion ? 'Motion' : c.is_modifier ? 'Modifier' : 'Concept'}
+                </span>
+              </button>
+            ))}
 
-          {/* Composition suggestion */}
-          {results.parseResult?.type === 'composition' && (
-            <button
-              className="w-full text-left px-3 py-2 hover:bg-accent border-t border-border transition-colors cursor-pointer"
-              onClick={() => handleSelect(results.parseResult.composition, 'concept')}
-            >
-              <span className="font-medium">
-                {results.parseResult.composition.role} {results.parseResult.composition.template_name}
-              </span>
-              <span className="text-sm text-muted-foreground ml-2">Auto-compose (unsaved)</span>
-            </button>
-          )}
+            {/* Composition suggestion */}
+            {(resultsData.parseResult as { type?: string; composition?: SelectedConcept })?.type === 'composition' && (
+              <button
+                className="search-bar-dropdown-item search-bar-dropdown-divider"
+                onClick={() => handleSelect((resultsData.parseResult as { composition: SelectedConcept }).composition, 'concept')}
+              >
+                <span className="search-bar-dropdown-label">
+                  {(resultsData.parseResult as { composition: { role?: string; template_name?: string } }).composition.role} {(resultsData.parseResult as { composition: { role?: string; template_name?: string } }).composition.template_name}
+                </span>
+                <span className="search-bar-dropdown-type">Auto-compose (unsaved)</span>
+              </button>
+            )}
 
-          {/* Needs role prompt */}
-          {results.parseResult?.type === 'needs_role' && (
-            <div className="px-3 py-2 border-t border-border">
-              <span className="text-sm text-muted-foreground">
-                Apply "{results.parseResult.template_name}" to which player?
-              </span>
-              <div className="flex gap-2 mt-1">
-                {results.parseResult.availableRoles?.slice(0, 5).map((role: string) => (
-                  <button
-                    key={role}
-                    className="px-2 py-1 text-sm bg-secondary text-secondary-foreground rounded hover:bg-secondary/80 transition-colors cursor-pointer"
-                    onClick={() => handleSelect({
-                      role,
-                      template_name: results.parseResult.template_name,
-                      is_saved: false
-                    }, 'concept')}
-                  >
-                    {role}
-                  </button>
-                ))}
+            {/* Needs role prompt */}
+            {(resultsData.parseResult as { type?: string })?.type === 'needs_role' && (
+              <div className="search-bar-dropdown-divider">
+                <span className="search-bar-dropdown-prompt">
+                  Apply "{(resultsData.parseResult as { template_name?: string }).template_name}" to which player?
+                </span>
+                <div className="search-bar-dropdown-roles">
+                  {((resultsData.parseResult as { availableRoles?: string[] }).availableRoles || []).slice(0, 5).map((role: string) => (
+                    <button
+                      key={role}
+                      className="search-bar-role-button"
+                      onClick={() => handleSelect({
+                        role,
+                        template_name: (resultsData.parseResult as { template_name?: string }).template_name,
+                        is_saved: false
+                      }, 'concept')}
+                    >
+                      {role}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* No match */}
-          {results.parseResult?.type === 'no_match' && query && (
-            <div className="px-3 py-2 text-sm text-muted-foreground border-t border-border">
-              No match found. <button className="text-action-button hover:underline cursor-pointer">Create new concept?</button>
-            </div>
-          )}
-        </div>
-      )}
+            {/* No match */}
+            {(resultsData.parseResult as { type?: string })?.type === 'no_match' && query && (
+              <div className="search-bar-dropdown-divider search-bar-dropdown-prompt">
+                No match found. <button className="search-bar-create-link">Create new concept?</button>
+              </div>
+            )}
+          </div>
+        )
+      })()}
     </div>
   )
 }

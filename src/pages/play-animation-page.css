@@ -1,0 +1,58 @@
+.play-animation-page-loading,
+.play-animation-page-error {
+  display: flex;
+  height: 100vh;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--background);
+}
+
+.play-animation-page-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.play-animation-page-spinner {
+  width: 3rem;
+  height: 3rem;
+  color: var(--muted-foreground);
+}
+
+.play-animation-page-loading-text {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--muted-foreground);
+}
+
+.play-animation-page-error-message {
+  font-size: 1rem;
+  line-height: 1.5rem;
+  color: var(--destructive);
+}
+
+.play-animation-page-error-detail {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--muted-foreground);
+}
+
+.play-animation-page-button {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--action-button);
+  color: var(--action-button-foreground);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  outline: none;
+  transition: all 200ms;
+}
+
+.play-animation-page-button:hover {
+  background-color: color-mix(in oklch, var(--action-button) 90%, transparent);
+}
+
+.play-animation-page-button:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
