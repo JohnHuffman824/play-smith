@@ -8,7 +8,7 @@ import {
   ChevronUpIcon,
 } from "lucide-react"
 
-import { cn } from "./utils"
+
 import "./select.css"
 
 function Select({
@@ -41,7 +41,7 @@ function SelectTrigger({
     <SelectPrimitive.Trigger
       data-slot="select-trigger"
       data-size={size}
-      className={cn("select-trigger", className)}
+      className={`select-trigger ${className ?? ''}`.trim()}
       {...props}
     >
       {children}
@@ -63,7 +63,7 @@ function SelectContent({
       <SelectPrimitive.Content
         data-slot="select-content"
         data-position={position}
-        className={cn("select-content", className)}
+        className={`select-content ${className ?? ''}`.trim()}
         position={position}
         {...props}
       >
@@ -87,7 +87,7 @@ function SelectLabel({
   return (
     <SelectPrimitive.Label
       data-slot="select-label"
-      className={cn("select-label", className)}
+      className={`select-label ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -101,7 +101,7 @@ function SelectItem({
   return (
     <SelectPrimitive.Item
       data-slot="select-item"
-      className={cn("select-item", className)}
+      className={`select-item ${className ?? ''}`.trim()}
       {...props}
     >
       <span className="select-item-indicator">
@@ -121,7 +121,7 @@ function SelectSeparator({
   return (
     <SelectPrimitive.Separator
       data-slot="select-separator"
-      className={cn("select-separator", className)}
+      className={`select-separator ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -134,7 +134,7 @@ function SelectScrollUpButton({
   return (
     <SelectPrimitive.ScrollUpButton
       data-slot="select-scroll-up-button"
-      className={cn("select-scroll-up-button", className)}
+      className={`select-scroll-up-button ${className ?? ''}`.trim()}
       {...props}
     >
       <ChevronUpIcon className="size-4" />
@@ -149,7 +149,7 @@ function SelectScrollDownButton({
   return (
     <SelectPrimitive.ScrollDownButton
       data-slot="select-scroll-down-button"
-      className={cn("select-scroll-down-button", className)}
+      className={`select-scroll-down-button ${className ?? ''}`.trim()}
       {...props}
     >
       <ChevronDownIcon className="size-4" />

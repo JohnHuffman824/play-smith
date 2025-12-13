@@ -1,6 +1,5 @@
 import * as React from "react"
 import "./alert.css"
-import { cn } from "./utils"
 
 type AlertVariant = "default" | "destructive"
 
@@ -16,7 +15,7 @@ function Alert({
       data-slot="alert"
       data-variant={variant}
       role="alert"
-      className={cn("alert", className)}
+      className={`alert ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -26,7 +25,7 @@ function AlertTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="alert-title"
-      className={cn("alert-title", className)}
+      className={`alert-title ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -39,7 +38,7 @@ function AlertDescription({
   return (
     <div
       data-slot="alert-description"
-      className={cn("alert-description", className)}
+      className={`alert-description ${className ?? ''}`.trim()}
       {...props}
     />
   )

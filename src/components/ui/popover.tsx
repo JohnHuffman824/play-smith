@@ -3,7 +3,6 @@
 import * as React from "react"
 import * as PopoverPrimitive from "@radix-ui/react-popover"
 
-import { cn } from "./utils"
 import "./popover.css"
 
 function Popover({
@@ -30,7 +29,7 @@ function PopoverContent({
         data-slot="popover-content"
         align={align}
         sideOffset={sideOffset}
-        className={cn("popover-content", className)}
+        className={`popover-content ${className ?? ''}`.trim()}
         {...props}
       />
     </PopoverPrimitive.Portal>

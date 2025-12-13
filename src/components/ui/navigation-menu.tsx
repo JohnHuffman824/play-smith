@@ -2,7 +2,7 @@ import * as React from "react"
 import * as NavigationMenuPrimitive from "@radix-ui/react-navigation-menu"
 import { ChevronDownIcon } from "lucide-react"
 import "./navigation-menu.css"
-import { cn } from "./utils"
+
 
 function NavigationMenu({
   className,
@@ -16,7 +16,7 @@ function NavigationMenu({
     <NavigationMenuPrimitive.Root
       data-slot="navigation-menu"
       data-viewport={viewport}
-      className={cn("navigation-menu", className)}
+      className={`navigation-menu ${className ?? ''}`.trim()}
       {...props}
     >
       {children}
@@ -32,7 +32,7 @@ function NavigationMenuList({
   return (
     <NavigationMenuPrimitive.List
       data-slot="navigation-menu-list"
-      className={cn("navigation-menu-list", className)}
+      className={`navigation-menu-list ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -45,7 +45,7 @@ function NavigationMenuItem({
   return (
     <NavigationMenuPrimitive.Item
       data-slot="navigation-menu-item"
-      className={cn("navigation-menu-item", className)}
+      className={`navigation-menu-item ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -63,7 +63,7 @@ function NavigationMenuTrigger({
   return (
     <NavigationMenuPrimitive.Trigger
       data-slot="navigation-menu-trigger"
-      className={cn("navigation-menu-trigger", className)}
+      className={`navigation-menu-trigger ${className ?? ''}`.trim()}
       {...props}
     >
       {children}{" "}
@@ -79,7 +79,7 @@ function NavigationMenuContent({
   return (
     <NavigationMenuPrimitive.Content
       data-slot="navigation-menu-content"
-      className={cn("navigation-menu-content", className)}
+      className={`navigation-menu-content ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -93,7 +93,7 @@ function NavigationMenuViewport({
     <div className="navigation-menu-viewport-wrapper">
       <NavigationMenuPrimitive.Viewport
         data-slot="navigation-menu-viewport"
-        className={cn("navigation-menu-viewport", className)}
+        className={`navigation-menu-viewport ${className ?? ''}`.trim()}
         {...props}
       />
     </div>
@@ -107,7 +107,7 @@ function NavigationMenuLink({
   return (
     <NavigationMenuPrimitive.Link
       data-slot="navigation-menu-link"
-      className={cn("navigation-menu-link", className)}
+      className={`navigation-menu-link ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -120,7 +120,7 @@ function NavigationMenuIndicator({
   return (
     <NavigationMenuPrimitive.Indicator
       data-slot="navigation-menu-indicator"
-      className={cn("navigation-menu-indicator", className)}
+      className={`navigation-menu-indicator ${className ?? ''}`.trim()}
       {...props}
     >
       <div className="navigation-menu-indicator-arrow" />

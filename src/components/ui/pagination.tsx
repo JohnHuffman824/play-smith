@@ -6,7 +6,7 @@ import {
 } from "lucide-react"
 
 import "./pagination.css"
-import { cn } from "./utils"
+
 
 function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
   return (
@@ -14,7 +14,7 @@ function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
       role="navigation"
       aria-label="pagination"
       data-slot="pagination"
-      className={cn("pagination", className)}
+      className={`pagination ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -27,7 +27,7 @@ function PaginationContent({
   return (
     <ul
       data-slot="pagination-content"
-      className={cn("pagination-content", className)}
+      className={`pagination-content ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -54,7 +54,7 @@ function PaginationLink({
       data-slot="pagination-link"
       data-active={isActive}
       data-size={size}
-      className={cn("pagination-link", className)}
+      className={`pagination-link ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -68,7 +68,7 @@ function PaginationPrevious({
     <PaginationLink
       aria-label="Go to previous page"
       size="default"
-      className={cn("pagination-previous", className)}
+      className={`pagination-previous ${className ?? ''}`.trim()}
       {...props}
     >
       <ChevronLeftIcon />
@@ -85,7 +85,7 @@ function PaginationNext({
     <PaginationLink
       aria-label="Go to next page"
       size="default"
-      className={cn("pagination-next", className)}
+      className={`pagination-next ${className ?? ''}`.trim()}
       {...props}
     >
       <span className="pagination-text">Next</span>
@@ -102,7 +102,7 @@ function PaginationEllipsis({
     <span
       aria-hidden
       data-slot="pagination-ellipsis"
-      className={cn("pagination-ellipsis", className)}
+      className={`pagination-ellipsis ${className ?? ''}`.trim()}
       {...props}
     >
       <MoreHorizontalIcon />

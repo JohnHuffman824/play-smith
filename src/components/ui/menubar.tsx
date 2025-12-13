@@ -4,7 +4,7 @@ import * as React from "react"
 import * as MenubarPrimitive from "@radix-ui/react-menubar"
 import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react"
 
-import { cn } from "./utils"
+
 import "./menubar.css"
 
 function Menubar({
@@ -14,7 +14,7 @@ function Menubar({
   return (
     <MenubarPrimitive.Root
       data-slot="menubar"
-      className={cn("menubar", className)}
+      className={`menubar ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -53,7 +53,7 @@ function MenubarTrigger({
   return (
     <MenubarPrimitive.Trigger
       data-slot="menubar-trigger"
-      className={cn("menubar-trigger", className)}
+      className={`menubar-trigger ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -73,7 +73,7 @@ function MenubarContent({
         align={align}
         alignOffset={alignOffset}
         sideOffset={sideOffset}
-        className={cn("menubar-content", className)}
+        className={`menubar-content ${className ?? ''}`.trim()}
         {...props}
       />
     </MenubarPortal>
@@ -94,7 +94,7 @@ function MenubarItem({
       data-slot="menubar-item"
       data-inset={inset}
       data-variant={variant}
-      className={cn("menubar-item", className)}
+      className={`menubar-item ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -109,7 +109,7 @@ function MenubarCheckboxItem({
   return (
     <MenubarPrimitive.CheckboxItem
       data-slot="menubar-checkbox-item"
-      className={cn("menubar-checkbox-item", className)}
+      className={`menubar-checkbox-item ${className ?? ''}`.trim()}
       checked={checked}
       {...props}
     >
@@ -131,7 +131,7 @@ function MenubarRadioItem({
   return (
     <MenubarPrimitive.RadioItem
       data-slot="menubar-radio-item"
-      className={cn("menubar-radio-item", className)}
+      className={`menubar-radio-item ${className ?? ''}`.trim()}
       {...props}
     >
       <span className="menubar-radio-indicator">
@@ -155,7 +155,7 @@ function MenubarLabel({
     <MenubarPrimitive.Label
       data-slot="menubar-label"
       data-inset={inset}
-      className={cn("menubar-label", className)}
+      className={`menubar-label ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -168,7 +168,7 @@ function MenubarSeparator({
   return (
     <MenubarPrimitive.Separator
       data-slot="menubar-separator"
-      className={cn("menubar-separator", className)}
+      className={`menubar-separator ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -181,7 +181,7 @@ function MenubarShortcut({
   return (
     <span
       data-slot="menubar-shortcut"
-      className={cn("menubar-shortcut", className)}
+      className={`menubar-shortcut ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -205,7 +205,7 @@ function MenubarSubTrigger({
     <MenubarPrimitive.SubTrigger
       data-slot="menubar-sub-trigger"
       data-inset={inset}
-      className={cn("menubar-sub-trigger", className)}
+      className={`menubar-sub-trigger ${className ?? ''}`.trim()}
       {...props}
     >
       {children}
@@ -221,7 +221,7 @@ function MenubarSubContent({
   return (
     <MenubarPrimitive.SubContent
       data-slot="menubar-sub-content"
-      className={cn("menubar-sub-content", className)}
+      className={`menubar-sub-content ${className ?? ''}`.trim()}
       {...props}
     />
   )

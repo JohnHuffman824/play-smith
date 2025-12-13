@@ -4,7 +4,6 @@ import * as React from "react"
 import * as TabsPrimitive from "@radix-ui/react-tabs"
 
 import "./tabs.css"
-import { cn } from "./utils"
 
 function Tabs({
   className,
@@ -13,7 +12,7 @@ function Tabs({
   return (
     <TabsPrimitive.Root
       data-slot="tabs"
-      className={cn("tabs", className)}
+      className={`tabs ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -26,7 +25,7 @@ function TabsList({
   return (
     <TabsPrimitive.List
       data-slot="tabs-list"
-      className={cn("tabs-list", className)}
+      className={`tabs-list ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -39,7 +38,7 @@ function TabsTrigger({
   return (
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
-      className={cn("tabs-trigger", className)}
+      className={`tabs-trigger ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -52,7 +51,7 @@ function TabsContent({
   return (
     <TabsPrimitive.Content
       data-slot="tabs-content"
-      className={cn("tabs-content", className)}
+      className={`tabs-content ${className ?? ''}`.trim()}
       {...props}
     />
   )

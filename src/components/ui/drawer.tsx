@@ -3,7 +3,6 @@
 import * as React from "react"
 import { Drawer as DrawerPrimitive } from "vaul"
 
-import { cn } from "./utils"
 import "./drawer.css"
 
 function Drawer({
@@ -37,7 +36,7 @@ function DrawerOverlay({
   return (
     <DrawerPrimitive.Overlay
       data-slot="drawer-overlay"
-      className={cn("drawer-overlay", className)}
+      className={`drawer-overlay ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -53,7 +52,7 @@ function DrawerContent({
       <DrawerOverlay />
       <DrawerPrimitive.Content
         data-slot="drawer-content"
-        className={cn("drawer-content", className)}
+        className={`drawer-content ${className ?? ''}`.trim()}
         {...props}
       >
         <div className="drawer-handle" />
@@ -67,7 +66,7 @@ function DrawerHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="drawer-header"
-      className={cn("drawer-header", className)}
+      className={`drawer-header ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -77,7 +76,7 @@ function DrawerFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="drawer-footer"
-      className={cn("drawer-footer", className)}
+      className={`drawer-footer ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -90,7 +89,7 @@ function DrawerTitle({
   return (
     <DrawerPrimitive.Title
       data-slot="drawer-title"
-      className={cn("drawer-title", className)}
+      className={`drawer-title ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -103,7 +102,7 @@ function DrawerDescription({
   return (
     <DrawerPrimitive.Description
       data-slot="drawer-description"
-      className={cn("drawer-description", className)}
+      className={`drawer-description ${className ?? ''}`.trim()}
       {...props}
     />
   )

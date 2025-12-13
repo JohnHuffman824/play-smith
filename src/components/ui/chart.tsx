@@ -3,7 +3,7 @@
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
 
-import { cn } from "./utils"
+
 import "./chart.css"
 
 // Format: { THEME_NAME: CSS_SELECTOR }
@@ -55,7 +55,7 @@ function ChartContainer({
       <div
         data-slot="chart"
         data-chart={chartId}
-        className={cn("chart-container", className)}
+        className={`chart-container ${className ?? ''}`.trim()}
         {...props}
       >
         <ChartStyle id={chartId} config={config} />
@@ -169,7 +169,7 @@ function ChartTooltipContent({
   const nestLabel = payload.length === 1 && indicator !== "dot"
 
   return (
-    <div className={cn("chart-tooltip-content", className)}>
+    <div className={`chart-tooltip-content ${className ?? ''}`.trim()}>
       {!nestLabel ? tooltipLabel : null}
       <div className="chart-tooltip-items">
         {payload.map((item, index) => {
@@ -251,7 +251,7 @@ function ChartLegendContent({
 
   return (
     <div
-      className={cn("chart-legend-content", className)}
+      className={`chart-legend-content ${className ?? ''}`.trim()}
       data-vertical-align={verticalAlign}
     >
       {payload.map((item) => {

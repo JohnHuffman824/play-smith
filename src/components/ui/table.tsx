@@ -3,7 +3,6 @@
 import * as React from "react"
 
 import "./table.css"
-import { cn } from "./utils"
 
 function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
@@ -13,7 +12,7 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
     >
       <table
         data-slot="table"
-        className={cn("table", className)}
+        className={`table ${className ?? ''}`.trim()}
         {...props}
       />
     </div>
@@ -24,7 +23,7 @@ function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
   return (
     <thead
       data-slot="table-header"
-      className={cn("table-header", className)}
+      className={`table-header ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -34,7 +33,7 @@ function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
   return (
     <tbody
       data-slot="table-body"
-      className={cn("table-body", className)}
+      className={`table-body ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -44,7 +43,7 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
   return (
     <tfoot
       data-slot="table-footer"
-      className={cn("table-footer", className)}
+      className={`table-footer ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -54,7 +53,7 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
   return (
     <tr
       data-slot="table-row"
-      className={cn("table-row", className)}
+      className={`table-row ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -64,7 +63,7 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
   return (
     <th
       data-slot="table-head"
-      className={cn("table-head", className)}
+      className={`table-head ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -74,7 +73,7 @@ function TableCell({ className, ...props }: React.ComponentProps<"td">) {
   return (
     <td
       data-slot="table-cell"
-      className={cn("table-cell", className)}
+      className={`table-cell ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -87,7 +86,7 @@ function TableCaption({
   return (
     <caption
       data-slot="table-caption"
-      className={cn("table-caption", className)}
+      className={`table-caption ${className ?? ''}`.trim()}
       {...props}
     />
   )

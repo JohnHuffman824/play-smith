@@ -4,7 +4,7 @@ import * as React from "react"
 import { OTPInput, OTPInputContext } from "input-otp"
 import { MinusIcon } from "lucide-react"
 import "./input-otp.css"
-import { cn } from "./utils"
+
 
 function InputOTP({
   className,
@@ -27,7 +27,7 @@ function InputOTPGroup({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="input-otp-group"
-      className={cn("input-otp-group", className)}
+      className={`input-otp-group ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -47,7 +47,7 @@ function InputOTPSlot({
     <div
       data-slot="input-otp-slot"
       data-active={isActive}
-      className={cn("input-otp-slot", className)}
+      className={`input-otp-slot ${className ?? ''}`.trim()}
       {...props}
     >
       {char}

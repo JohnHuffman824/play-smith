@@ -13,7 +13,6 @@ import {
   type FieldValues,
 } from "react-hook-form"
 
-import { cn } from "./utils"
 import { Label } from "./label"
 import "./form.css"
 
@@ -81,7 +80,7 @@ function FormItem({ className, ...props }: React.ComponentProps<"div">) {
     <FormItemContext.Provider value={{ id }}>
       <div
         data-slot="form-item"
-        className={cn("form-item", className)}
+        className={`form-item ${className ?? ''}`.trim()}
         {...props}
       />
     </FormItemContext.Provider>
@@ -98,7 +97,7 @@ function FormLabel({
     <Label
       data-slot="form-label"
       data-error={!!error}
-      className={cn("form-label", className)}
+      className={`form-label ${className ?? ''}`.trim()}
       htmlFor={formItemId}
       {...props}
     />
@@ -131,7 +130,7 @@ function FormDescription({ className, ...props }: React.ComponentProps<"p">) {
     <p
       data-slot="form-description"
       id={formDescriptionId}
-      className={cn("form-description", className)}
+      className={`form-description ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -149,7 +148,7 @@ function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
     <p
       data-slot="form-message"
       id={formMessageId}
-      className={cn("form-message", className)}
+      className={`form-message ${className ?? ''}`.trim()}
       {...props}
     >
       {body}

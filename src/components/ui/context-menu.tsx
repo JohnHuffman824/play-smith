@@ -4,7 +4,6 @@ import * as React from "react"
 import * as ContextMenuPrimitive from "@radix-ui/react-context-menu"
 import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react"
 
-import { cn } from "./utils"
 import "./context-menu.css"
 
 function ContextMenu({
@@ -66,7 +65,7 @@ function ContextMenuSubTrigger({
     <ContextMenuPrimitive.SubTrigger
       data-slot="context-menu-sub-trigger"
       data-inset={inset}
-      className={cn("context-menu-sub-trigger", className)}
+      className={`context-menu-sub-trigger ${className ?? ''}`.trim()}
       {...props}
     >
       {children}
@@ -82,7 +81,7 @@ function ContextMenuSubContent({
   return (
     <ContextMenuPrimitive.SubContent
       data-slot="context-menu-sub-content"
-      className={cn("context-menu-sub-content", className)}
+      className={`context-menu-sub-content ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -96,7 +95,7 @@ function ContextMenuContent({
     <ContextMenuPrimitive.Portal>
       <ContextMenuPrimitive.Content
         data-slot="context-menu-content"
-        className={cn("context-menu-content", className)}
+        className={`context-menu-content ${className ?? ''}`.trim()}
         {...props}
       />
     </ContextMenuPrimitive.Portal>
@@ -117,7 +116,7 @@ function ContextMenuItem({
       data-slot="context-menu-item"
       data-inset={inset}
       data-variant={variant}
-      className={cn("context-menu-item", className)}
+      className={`context-menu-item ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -132,7 +131,7 @@ function ContextMenuCheckboxItem({
   return (
     <ContextMenuPrimitive.CheckboxItem
       data-slot="context-menu-checkbox-item"
-      className={cn("context-menu-checkbox-item", className)}
+      className={`context-menu-checkbox-item ${className ?? ''}`.trim()}
       checked={checked}
       {...props}
     >
@@ -154,7 +153,7 @@ function ContextMenuRadioItem({
   return (
     <ContextMenuPrimitive.RadioItem
       data-slot="context-menu-radio-item"
-      className={cn("context-menu-radio-item", className)}
+      className={`context-menu-radio-item ${className ?? ''}`.trim()}
       {...props}
     >
       <span>
@@ -178,7 +177,7 @@ function ContextMenuLabel({
     <ContextMenuPrimitive.Label
       data-slot="context-menu-label"
       data-inset={inset}
-      className={cn("context-menu-label", className)}
+      className={`context-menu-label ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -191,7 +190,7 @@ function ContextMenuSeparator({
   return (
     <ContextMenuPrimitive.Separator
       data-slot="context-menu-separator"
-      className={cn("context-menu-separator", className)}
+      className={`context-menu-separator ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -204,7 +203,7 @@ function ContextMenuShortcut({
   return (
     <span
       data-slot="context-menu-shortcut"
-      className={cn("context-menu-shortcut", className)}
+      className={`context-menu-shortcut ${className ?? ''}`.trim()}
       {...props}
     />
   )

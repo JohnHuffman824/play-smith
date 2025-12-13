@@ -6,7 +6,6 @@ import useEmblaCarousel, {
 } from "embla-carousel-react"
 import { ArrowLeft, ArrowRight } from "lucide-react"
 import "./carousel.css"
-import { cn } from "./utils"
 import { Button } from "./button"
 
 type CarouselApi = UseEmblaCarouselType[1]
@@ -120,7 +119,7 @@ function Carousel({
     >
       <div
         onKeyDownCapture={handleKeyDown}
-        className={cn("carousel", className)}
+        className={`carousel ${className ?? ''}`.trim()}
         role="region"
         aria-roledescription="carousel"
         data-slot="carousel"
@@ -142,7 +141,7 @@ function CarouselContent({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="carousel-content"
     >
       <div
-        className={cn("carousel-content", className)}
+        className={`carousel-content ${className ?? ''}`.trim()}
         data-orientation={orientation}
         {...props}
       />
@@ -159,7 +158,7 @@ function CarouselItem({ className, ...props }: React.ComponentProps<"div">) {
       aria-roledescription="slide"
       data-slot="carousel-item"
       data-orientation={orientation}
-      className={cn("carousel-item", className)}
+      className={`carousel-item ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -179,7 +178,7 @@ function CarouselPrevious({
       data-orientation={orientation}
       variant={variant}
       size={size}
-      className={cn("carousel-previous", className)}
+      className={`carousel-previous ${className ?? ''}`.trim()}
       disabled={!canScrollPrev}
       onClick={scrollPrev}
       {...props}
@@ -204,7 +203,7 @@ function CarouselNext({
       data-orientation={orientation}
       variant={variant}
       size={size}
-      className={cn("carousel-next", className)}
+      className={`carousel-next ${className ?? ''}`.trim()}
       disabled={!canScrollNext}
       onClick={scrollNext}
       {...props}

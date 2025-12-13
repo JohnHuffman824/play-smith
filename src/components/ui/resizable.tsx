@@ -3,7 +3,7 @@
 import * as React from "react"
 import * as ResizablePrimitive from "react-resizable-panels"
 
-import { cn } from "./utils"
+
 import "./resizable.css"
 
 function ResizablePanelGroup({
@@ -13,7 +13,7 @@ function ResizablePanelGroup({
   return (
     <ResizablePrimitive.PanelGroup
       data-slot="resizable-panel-group"
-      className={cn("resizable-panel-group", className)}
+      className={`resizable-panel-group ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -35,7 +35,7 @@ function ResizableHandle({
   return (
     <ResizablePrimitive.PanelResizeHandle
       data-slot="resizable-handle"
-      className={cn("resizable-handle", className)}
+      className={`resizable-handle ${className ?? ''}`.trim()}
       {...props}
     />
   )

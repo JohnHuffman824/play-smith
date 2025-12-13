@@ -1,12 +1,11 @@
 import * as React from "react"
 import "./card.css"
-import { cn } from "./utils"
 
 function Card({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card"
-      className={cn("card", className)}
+      className={`card ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -16,7 +15,7 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-header"
-      className={cn("card-header", className)}
+      className={`card-header ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -26,7 +25,7 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <h4
       data-slot="card-title"
-      className={cn("card-title", className)}
+      className={`card-title ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -36,7 +35,7 @@ function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <p
       data-slot="card-description"
-      className={cn("card-description", className)}
+      className={`card-description ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -46,7 +45,7 @@ function CardAction({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-action"
-      className={cn("card-action", className)}
+      className={`card-action ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -56,7 +55,7 @@ function CardContent({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-content"
-      className={cn("card-content", className)}
+      className={`card-content ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -66,7 +65,7 @@ function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-footer"
-      className={cn("card-footer", className)}
+      className={`card-footer ${className ?? ''}`.trim()}
       {...props}
     />
   )

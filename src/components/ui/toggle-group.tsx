@@ -3,7 +3,7 @@
 import * as React from "react"
 import * as ToggleGroupPrimitive from "@radix-ui/react-toggle-group"
 import "./toggle-group.css"
-import { cn } from "./utils"
+
 
 type ToggleGroupVariant = "default" | "outline"
 type ToggleGroupSize = "default" | "sm" | "lg"
@@ -31,7 +31,7 @@ function ToggleGroup({
       data-slot="toggle-group"
       data-variant={variant}
       data-size={size}
-      className={cn("toggle-group", className)}
+      className={`toggle-group ${className ?? ''}`.trim()}
       {...props}
     >
       <ToggleGroupContext.Provider value={{ variant, size }}>
@@ -58,7 +58,7 @@ function ToggleGroupItem({
       data-slot="toggle-group-item"
       data-variant={context.variant || variant}
       data-size={context.size || size}
-      className={cn("toggle-group-item", className)}
+      className={`toggle-group-item ${className ?? ''}`.trim()}
       {...props}
     >
       {children}

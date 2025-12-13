@@ -3,7 +3,7 @@
 import * as React from "react"
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog"
 
-import { cn } from "./utils"
+
 import "./button.css"
 import "./alert-dialog.css"
 
@@ -36,7 +36,7 @@ function AlertDialogOverlay({
   return (
     <AlertDialogPrimitive.Overlay
       data-slot="alert-dialog-overlay"
-      className={cn("alert-dialog-overlay", className)}
+      className={`alert-dialog-overlay ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -51,7 +51,7 @@ function AlertDialogContent({
       <AlertDialogOverlay />
       <AlertDialogPrimitive.Content
         data-slot="alert-dialog-content"
-        className={cn("alert-dialog-content", className)}
+        className={`alert-dialog-content ${className ?? ''}`.trim()}
         {...props}
       />
     </AlertDialogPortal>
@@ -65,7 +65,7 @@ function AlertDialogHeader({
   return (
     <div
       data-slot="alert-dialog-header"
-      className={cn("alert-dialog-header", className)}
+      className={`alert-dialog-header ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -78,7 +78,7 @@ function AlertDialogFooter({
   return (
     <div
       data-slot="alert-dialog-footer"
-      className={cn("alert-dialog-footer", className)}
+      className={`alert-dialog-footer ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -91,7 +91,7 @@ function AlertDialogTitle({
   return (
     <AlertDialogPrimitive.Title
       data-slot="alert-dialog-title"
-      className={cn("alert-dialog-title", className)}
+      className={`alert-dialog-title ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -104,7 +104,7 @@ function AlertDialogDescription({
   return (
     <AlertDialogPrimitive.Description
       data-slot="alert-dialog-description"
-      className={cn("alert-dialog-description", className)}
+      className={`alert-dialog-description ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -118,7 +118,7 @@ function AlertDialogAction({
     <AlertDialogPrimitive.Action
       data-variant="default"
       data-size="default"
-      className={cn("button", className)}
+      className={`button ${className ?? ''}`.trim()}
       {...props}
     />
   )
@@ -132,7 +132,7 @@ function AlertDialogCancel({
     <AlertDialogPrimitive.Cancel
       data-variant="outline"
       data-size="default"
-      className={cn("button", className)}
+      className={`button ${className ?? ''}`.trim()}
       {...props}
     />
   )
