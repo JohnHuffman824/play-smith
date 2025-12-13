@@ -565,10 +565,42 @@ export const playsAPI = {
 			return Response.json({ error: 'mode must be "move" or "copy"' }, { status: 400 })
 		}
 
+		// Parse and validate numeric inputs
+		const parsedDestPlaybookId = parseInt(destinationPlaybookId)
+		if (isNaN(parsedDestPlaybookId)) {
+			return Response.json({ error: 'Invalid destinationPlaybookId' }, { status: 400 })
+		}
+
+		// Validate destinationSectionId is provided
+		if (destinationSectionId === undefined || destinationSectionId === null) {
+			return Response.json({ error: 'destinationSectionId required' }, { status: 400 })
+		}
+
+		// Parse destinationSectionId if it's not null
+		const parsedDestSectionId = destinationSectionId === '__unsectioned__' ? null : parseInt(destinationSectionId)
+		if (parsedDestSectionId !== null && isNaN(parsedDestSectionId)) {
+			return Response.json({ error: 'Invalid destinationSectionId' }, { status: 400 })
+		}
+
 		// Check destination playbook access
-		const { hasAccess: destAccess, role: destRole } = await checkPlaybookAccess(destinationPlaybookId, userId)
+		const { hasAccess: destAccess, role: destRole } = await checkPlaybookAccess(parsedDestPlaybookId, userId)
 		if (!destAccess) {
 			return Response.json({ error: 'Access denied to destination playbook' }, { status: 403 })
+		}
+
+		// Validate destination section exists and belongs to destination playbook (if not null)
+		if (parsedDestSectionId !== null) {
+			const [destSection] = await db`
+				SELECT id, playbook_id
+				FROM playbook_sections
+				WHERE id = ${parsedDestSectionId}
+			`
+			if (!destSection) {
+				return Response.json({ error: 'Destination section not found' }, { status: 404 })
+			}
+			if (destSection.playbook_id !== parsedDestPlaybookId) {
+				return Response.json({ error: 'Destination section does not belong to destination playbook' }, { status: 400 })
+			}
 		}
 
 		const sentPlayIds: number[] = []
@@ -577,48 +609,62 @@ export const playsAPI = {
 		// Get next display_order for destination
 		const [maxOrder] = await db`
 			SELECT COALESCE(MAX(display_order), -1) as max_order
-			FROM plays WHERE playbook_id = ${destinationPlaybookId}
+			FROM plays WHERE playbook_id = ${parsedDestPlaybookId}
 		`
 		let nextOrder = (maxOrder?.max_order ?? -1) + 1
 
 		for (const playId of playIds) {
 			try {
+				// Parse and validate playId
+				const parsedPlayId = parseInt(playId)
+				if (isNaN(parsedPlayId)) {
+					errors.push({ playId, error: 'Invalid play ID' })
+					continue
+				}
+
 				// Get source play and verify access
 				const [play] = await db`
 					SELECT p.*, pb.team_id
 					FROM plays p
 					JOIN playbooks pb ON p.playbook_id = pb.id
-					WHERE p.id = ${playId}
+					WHERE p.id = ${parsedPlayId}
 				`
 				if (!play) {
-					errors.push({ playId, error: 'Play not found' })
+					errors.push({ playId: parsedPlayId, error: 'Play not found' })
 					continue
 				}
 
 				const { hasAccess: sourceAccess, role: sourceRole } = await checkPlaybookAccess(play.playbook_id, userId)
 				if (!sourceAccess) {
-					errors.push({ playId, error: 'Access denied to source playbook' })
+					errors.push({ playId: parsedPlayId, error: 'Access denied to source playbook' })
 					continue
 				}
 
 				if (mode === 'move') {
 					// Check move permission on source
-					const movePermission = await checkPlayPermission(userId, playId, play.section_id, 'move', sourceRole)
+					const movePermission = await checkPlayPermission(userId, parsedPlayId, play.section_id, 'move', sourceRole)
 					if (!movePermission.allowed) {
-						errors.push({ playId, error: movePermission.reason || 'Move not allowed' })
+						errors.push({ playId: parsedPlayId, error: movePermission.reason || 'Move not allowed' })
 						continue
 					}
 
 					// Update play's playbook_id and section_id
 					await db`
 						UPDATE plays
-						SET playbook_id = ${destinationPlaybookId},
-							section_id = ${destinationSectionId},
+						SET playbook_id = ${parsedDestPlaybookId},
+							section_id = ${parsedDestSectionId},
 							display_order = ${nextOrder++}
-						WHERE id = ${playId}
+						WHERE id = ${parsedPlayId}
 					`
-					sentPlayIds.push(playId)
+					sentPlayIds.push(parsedPlayId)
 				} else {
+					// Copy mode: check create permission in destination section
+					const createPermission = await checkPlayPermission(userId, null, parsedDestSectionId, 'create', destRole)
+					if (!createPermission.allowed) {
+						errors.push({ playId: parsedPlayId, error: createPermission.reason || 'Create not allowed in destination section' })
+						continue
+					}
+
 					// Copy mode: duplicate with all related data
 					const [newPlay] = await db`
 						INSERT INTO plays (
@@ -628,9 +674,9 @@ export const playsAPI = {
 							custom_players, custom_drawings
 						)
 						VALUES (
-							${destinationPlaybookId},
+							${parsedDestPlaybookId},
 							${play.name + ' (Copy)'},
-							${destinationSectionId},
+							${parsedDestSectionId},
 							${play.play_type},
 							${play.formation_id},
 							${play.personnel_id},
@@ -649,20 +695,20 @@ export const playsAPI = {
 					await db`
 						INSERT INTO concept_applications (play_id, concept_id, concept_group_id, order_index)
 						SELECT ${newPlay.id}, concept_id, concept_group_id, order_index
-						FROM concept_applications WHERE play_id = ${playId}
+						FROM concept_applications WHERE play_id = ${parsedPlayId}
 					`
 
 					// Copy labels
 					await db`
 						INSERT INTO play_labels (play_id, label_id)
 						SELECT ${newPlay.id}, label_id
-						FROM play_labels WHERE play_id = ${playId}
+						FROM play_labels WHERE play_id = ${parsedPlayId}
 					`
 
 					sentPlayIds.push(newPlay.id)
 				}
 			} catch (err) {
-				errors.push({ playId, error: err instanceof Error ? err.message : 'Unknown error' })
+				errors.push({ playId: parseInt(playId) || playId, error: err instanceof Error ? err.message : 'Unknown error' })
 			}
 		}
 
