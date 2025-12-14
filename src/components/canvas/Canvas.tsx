@@ -36,6 +36,11 @@ import {calculateUnlinkPosition, findDrawingSnapTarget} from '../../utils/drawin
 import {applyLOSSnap} from '../../utils/los-snap.utils'
 import {convertToSharp, extractMainCoordinates} from '../../utils/curve.utils'
 import {processSmoothPath} from '../../utils/smooth-path.utils'
+import {toast} from 'sonner'
+import {
+	validatePreSnapMovement,
+	playerHasPreSnapMovement as checkPlayerHasPreSnapMovement,
+} from '../../utils/presnap-validation.utils'
 import './canvas.css'
 
 const HEADER_TOOLBAR_HEIGHT = 88
@@ -123,6 +128,10 @@ export function Canvas({
 	const [editingDrawing, setEditingDrawing] = useState<{
 		drawing: Drawing;
 		position: { x: number; y: number };
+	} | null>(null);
+	const [placementMode, setPlacementMode] = useState<{
+		type: 'presnap';
+		drawingId: string;
 	} | null>(null);
 	const {state, setDrawings, setPlayers, dispatch} = usePlayContext()
 	const {drawings = [], players: contextPlayers = []} = state || {}
@@ -695,6 +704,123 @@ export function Canvas({
 		setEditingDrawing({...editingDrawing, drawing: updatedDrawing});
 	}
 
+	// Check if a player already has pre-snap movement on another drawing
+	function playerHasPreSnapMovement(playerId: string, excludeDrawingId?: string): boolean {
+		return checkPlayerHasPreSnapMovement(playerId, drawings, excludeDrawingId);
+	}
+
+	// Handle Add/Remove Pre-Snap Movement button click
+	function handlePreSnapMovement() {
+		if (!editingDrawing) return;
+
+		const drawing = editingDrawing.drawing;
+
+		// If already has pre-snap motion, remove it
+		if (drawing.preSnapMotion) {
+			// Build the updated drawing
+			let updatedDrawing = { ...drawing, preSnapMotion: undefined };
+
+			// If it was a motion, also remove the snap point from points
+			if (drawing.preSnapMotion.type === 'motion' && drawing.preSnapMotion.snapPointId) {
+				const { [drawing.preSnapMotion.snapPointId]: _removed, ...remainingPoints } = drawing.points;
+				updatedDrawing = { ...updatedDrawing, points: remainingPoints };
+			}
+
+			setDrawings(drawings.map(d =>
+				d.id === drawing.id ? updatedDrawing : d
+			));
+
+			// If it was a shift, remove the ghost player
+			if (drawing.preSnapMotion.type === 'shift' && drawing.playerId) {
+				setPlayers(players.filter(p =>
+					!(p.isGhost && p.sourcePlayerId === drawing.playerId)
+				));
+			}
+
+			return;
+		}
+
+		// Enter placement mode to add pre-snap movement
+		setPlacementMode({
+			type: 'presnap',
+			drawingId: drawing.id,
+		});
+	}
+
+	// Handle placement mode clicks on the drawing
+	function handlePreSnapPlacementClick(
+		drawingId: string,
+		clickType: 'terminal' | 'path',
+		point: { x: number; y: number },
+		pointId?: string
+	) {
+		const drawing = drawings.find(d => d.id === drawingId);
+		if (!drawing || !drawing.playerId) return;
+
+		// Validate before applying pre-snap movement
+		const validationError = validatePreSnapMovement(drawing, drawings, clickType);
+		if (validationError) {
+			toast.error(validationError);
+			setPlacementMode(null);
+			return;
+		}
+
+		if (clickType === 'terminal') {
+			// Create Shift - ghost player at terminal position
+			const sourcePlayer = players.find(p => p.id === drawing.playerId);
+			if (!sourcePlayer) return;
+
+			const ghostPlayer = {
+				id: `ghost-${Date.now()}`,
+				x: point.x,
+				y: point.y,
+				label: sourcePlayer.label,
+				color: sourcePlayer.color,
+				isGhost: true,
+				sourcePlayerId: drawing.playerId,
+			};
+
+			setPlayers([...players, ghostPlayer]);
+
+			// Update drawing with shift pre-snap motion
+			setDrawings(drawings.map(d =>
+				d.id === drawingId
+					? { ...d, preSnapMotion: { type: 'shift' } }
+					: d
+			));
+		} else {
+			// Create Motion - snap point at clicked location
+			// Insert a new control point at the clicked location
+			const snapPointId = `snap-${Date.now()}`;
+			const newPoint: ControlPoint = {
+				id: snapPointId,
+				x: point.x,
+				y: point.y,
+				type: 'snap',
+			};
+
+			// Add the snap point to the drawing's point pool
+			const updatedDrawing = {
+				...drawing,
+				points: {
+					...drawing.points,
+					[snapPointId]: newPoint,
+				},
+				preSnapMotion: {
+					type: 'motion' as const,
+					snapPointId,
+				},
+			};
+
+			setDrawings(drawings.map(d =>
+				d.id === drawingId ? updatedDrawing : d
+			));
+		}
+
+		// Exit placement mode
+		setPlacementMode(null);
+	}
+
 	function handleLinkDrawingToPlayer(
 		drawingId: string,
 		pointId: string,
@@ -877,6 +1003,8 @@ export function Canvas({
 							panY={panY}
 							onLinkDrawingToPlayer={handleLinkDrawingToPlayer}
 							onAddPlayerAtNode={handleAddPlayerAtNode}
+							placementMode={placementMode}
+							onPreSnapPlacementClick={handlePreSnapPlacementClick}
 							onMovePlayer={handleMovePlayerOnly}
 							isOverCanvas={isOverCanvas}
 							cursorPosition={cursorPosition}
@@ -886,33 +1014,46 @@ export function Canvas({
 
 					{/* Players - inside transform so they zoom/pan with content */}
 					<div className='canvas-players-layer'>
-						{players.map((player) => (
-							<Player
-								key={player.id}
-								id={player.id}
-								initialX={player.x}
-								initialY={player.y}
-								containerWidth={canvasDimensions.width}
-								containerHeight={canvasDimensions.height}
-								label={player.label}
-								color={player.color}
-								onPositionChange={handlePlayerPositionChange}
-								onLabelClick={handlePlayerLabelClick}
-								onFill={handleFillPlayer}
-								onDelete={handlePlayerDeleteById}
-								currentTool={drawingState.tool}
-								interactable={playerInteractable}
-								zoom={zoom}
-								panX={panX}
-								panY={panY}
-								onHoverChange={(isHovered) => {
-									// Only track hover state when erase tool is active
-									if (drawingState.tool == TOOL_ERASE) {
-										setIsHoveringDeletable(isHovered)
-									}
-								}}
-							/>
-						))}
+						{players.map((player) => {
+							// For ghost players, mirror source player's label and color
+							let displayLabel = player.label
+							let displayColor = player.color
+							if (player.isGhost && player.sourcePlayerId) {
+								const sourcePlayer = players.find(p => p.id === player.sourcePlayerId)
+								if (sourcePlayer) {
+									displayLabel = sourcePlayer.label
+									displayColor = sourcePlayer.color
+								}
+							}
+							return (
+								<Player
+									key={player.id}
+									id={player.id}
+									initialX={player.x}
+									initialY={player.y}
+									containerWidth={canvasDimensions.width}
+									containerHeight={canvasDimensions.height}
+									label={displayLabel}
+									color={displayColor}
+									onPositionChange={handlePlayerPositionChange}
+									onLabelClick={handlePlayerLabelClick}
+									isGhost={player.isGhost}
+									onFill={handleFillPlayer}
+									onDelete={handlePlayerDeleteById}
+									currentTool={drawingState.tool}
+									interactable={playerInteractable}
+									zoom={zoom}
+									panX={panX}
+									panY={panY}
+									onHoverChange={(isHovered) => {
+										// Only track hover state when erase tool is active
+										if (drawingState.tool == TOOL_ERASE) {
+											setIsHoveringDeletable(isHovered)
+										}
+									}}
+								/>
+							)
+						})}
 					</div>
 				</div>
 				{/* End transform container */}
@@ -1035,6 +1176,12 @@ export function Canvas({
 					onUpdate={handleDrawingStyleUpdate}
 					onClose={() => setEditingDrawing(null)}
 					coordSystem={coordSystem}
+					onAddPreSnapMovement={handlePreSnapMovement}
+					playerHasPreSnapMovement={
+						editingDrawing.drawing.playerId
+							? playerHasPreSnapMovement(editingDrawing.drawing.playerId, editingDrawing.drawing.id)
+							: false
+					}
 				/>
 			)}
 		</div>

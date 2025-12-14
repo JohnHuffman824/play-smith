@@ -6,13 +6,19 @@
 }
 
 .drawing-properties-dialog {
-  width: 256px;
-  border-radius: 16px;
+  width: 440px;
+  border-radius: 12px;
   box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
   background: var(--popover);
   border: 1px solid var(--border);
-  padding: 16px;
+  padding: 12px;
   z-index: 70;
+}
+
+.drawing-properties-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
 }
 
 /* || Header */
@@ -20,7 +26,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .drawing-properties-dialog-title {
@@ -29,17 +35,13 @@
 
 /* || Sections */
 .drawing-properties-dialog-section {
-  margin-bottom: 16px;
-}
-
-.drawing-properties-dialog-section:last-child {
   margin-bottom: 0;
 }
 
 .drawing-properties-dialog-label {
   display: block;
-  font-size: 0.75rem;
-  margin-bottom: 8px;
+  font-size: 0.7rem;
+  margin-bottom: 6px;
   color: var(--muted-foreground);
 }
 
@@ -47,12 +49,12 @@
 .drawing-properties-color-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  gap: 6px;
 }
 
 .drawing-properties-color-button {
-  height: 40px;
-  border-radius: 8px;
+  height: 44px;
+  border-radius: 6px;
   transition: all 200ms;
   cursor: pointer;
   outline: none;
@@ -74,31 +76,36 @@
 /* || Button groups */
 .drawing-properties-button-group {
   display: flex;
-  gap: 8px;
+  gap: 6px;
 }
 
 .drawing-properties-button-group-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  gap: 6px;
 }
 
 .drawing-properties-button-group-2col {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
+  gap: 6px;
 }
 
 /* || Option buttons */
 .drawing-properties-option-button {
   flex: 1;
-  padding: 8px 12px;
-  border-radius: 8px;
+  min-height: 40px;
+  padding: 6px 10px;
+  border-radius: 6px;
   transition: all 200ms;
   cursor: pointer;
   outline: none;
-  background: var(--muted);
+  background: var(--card);
   color: var(--foreground);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .drawing-properties-option-button:hover {
@@ -112,6 +119,7 @@
 .drawing-properties-option-button[data-active="true"] {
   background: var(--action-button);
   color: var(--action-button-foreground);
+  border-color: var(--action-button);
 }
 
 /* || Path mode SVG */
@@ -143,14 +151,19 @@
 
 /* || Line end buttons (text) */
 .drawing-properties-line-end-text {
-  padding: 8px 12px;
-  border-radius: 8px;
+  min-height: 40px;
+  padding: 6px 10px;
+  border-radius: 6px;
   transition: all 200ms;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   cursor: pointer;
   outline: none;
-  background: var(--muted);
+  background: var(--card);
   color: var(--foreground);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .drawing-properties-line-end-text:hover {
@@ -164,20 +177,23 @@
 .drawing-properties-line-end-text[data-active="true"] {
   background: var(--action-button);
   color: var(--action-button-foreground);
+  border-color: var(--action-button);
 }
 
 /* || Line end buttons (icon) */
 .drawing-properties-line-end-icon {
-  padding: 8px 12px;
-  border-radius: 8px;
+  min-height: 40px;
+  padding: 6px 10px;
+  border-radius: 6px;
   transition: all 200ms;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   outline: none;
-  background: var(--muted);
+  background: var(--card);
   color: var(--foreground);
+  border: 1px solid var(--border);
 }
 
 .drawing-properties-line-end-icon:hover {
@@ -191,17 +207,23 @@
 .drawing-properties-line-end-icon[data-active="true"] {
   background: var(--action-button);
   color: var(--action-button-foreground);
+  border-color: var(--action-button);
 }
 
 /* || Brush size buttons */
 .drawing-properties-brush-button {
-  padding: 12px;
-  border-radius: 8px;
+  min-height: 44px;
+  padding: 8px;
+  border-radius: 6px;
   transition: all 200ms;
   cursor: pointer;
   outline: none;
-  background: var(--muted);
+  background: var(--card);
   color: var(--foreground);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .drawing-properties-brush-button:hover {
@@ -215,13 +237,14 @@
 .drawing-properties-brush-button[data-active="true"] {
   background: var(--action-button);
   color: var(--action-button-foreground);
+  border-color: var(--action-button);
 }
 
 .drawing-properties-brush-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
 }
 
 .drawing-properties-brush-dot {
@@ -230,5 +253,35 @@
 }
 
 .drawing-properties-brush-label {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
+}
+
+/* || Pre-snap movement button */
+.drawing-properties-presnap-button {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  transition: all 200ms;
+  cursor: pointer;
+  outline: none;
+  background: var(--action-button);
+  color: var(--action-button-foreground);
+  font-size: 0.8rem;
+  font-weight: 500;
+  border: none;
+}
+
+.drawing-properties-presnap-button:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: scale(1.02);
+}
+
+.drawing-properties-presnap-button:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.drawing-properties-presnap-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

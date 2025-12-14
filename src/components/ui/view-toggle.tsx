@@ -8,24 +8,20 @@ interface ViewToggleProps {
 
 export function ViewToggle({ viewMode, onViewModeChange }: ViewToggleProps) {
 	return (
-		<div className="view-toggle">
+		<div className="view-toggle" role="group" aria-label="View mode">
 			<button
 				onClick={() => onViewModeChange('grid')}
-				className={`view-toggle-button ${
-					viewMode === 'grid' ? 'view-toggle-button-active' : 'view-toggle-button-inactive'
-				}`}
-				title="Grid View"
+				className={`view-toggle-button ${viewMode === 'grid' ? 'view-toggle-button-active' : ''}`}
 				aria-label="Grid View"
+				aria-pressed={viewMode === 'grid'}
 			>
 				<Grid className="w-4 h-4" />
 			</button>
 			<button
 				onClick={() => onViewModeChange('list')}
-				className={`view-toggle-button ${
-					viewMode === 'list' ? 'view-toggle-button-active' : 'view-toggle-button-inactive'
-				}`}
-				title="List View"
+				className={`view-toggle-button ${viewMode === 'list' ? 'view-toggle-button-active' : ''}`}
 				aria-label="List View"
+				aria-pressed={viewMode === 'list'}
 			>
 				<List className="w-4 h-4" />
 			</button>

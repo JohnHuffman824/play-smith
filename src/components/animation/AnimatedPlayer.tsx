@@ -4,11 +4,37 @@
  */
 
 import { useMemo } from 'react'
-import type { Coordinate } from '../../types/field.types'
-import type { FieldCoordinateSystem } from '../../utils/coordinates'
-import { PLAYER_RADIUS_FEET } from '../../constants/field.constants'
+import type { Coordinate } from '@/types'
+import type { FieldCoordinateSystem } from '@/utils'
+import { PLAYER_RADIUS_FEET } from '@/constants'
 import { useTheme } from '../../contexts/SettingsContext'
 import './animated-player.css'
+
+/**
+ * Calculate the luminance of a color to determine if text should be black or white
+ * Uses WCAG relative luminance formula for accessibility
+ */
+function getTextColorForBackground(hexColor: string): string {
+	// Remove # if present
+	const hex = hexColor.replace('#', '')
+
+	// Parse RGB values
+	const r = parseInt(hex.substring(0, 2), 16) / 255
+	const g = parseInt(hex.substring(2, 4), 16) / 255
+	const b = parseInt(hex.substring(4, 6), 16) / 255
+
+	// Apply gamma correction (WCAG formula)
+	const rsRGB = r <= 0.03928 ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4)
+	const gsRGB = g <= 0.03928 ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4)
+	const bsRGB = b <= 0.03928 ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4)
+
+	// Calculate relative luminance
+	const luminance = 0.2126 * rsRGB + 0.7152 * gsRGB + 0.0722 * bsRGB
+
+	// If luminance > 0.5, background is light, use black text
+	// Otherwise use white text
+	return luminance > 0.5 ? 'black' : 'white'
+}
 
 type AnimatedPlayerProps = {
 	id: string
@@ -45,6 +71,9 @@ export function AnimatedPlayer({
 	// Player outline: black in light mode, white in dark mode
 	const outlineColor = theme === 'dark' ? 'white' : 'black'
 
+	// Calculate text color based on background color for visibility
+	const textColor = getTextColorForBackground(color)
+
 	return (
 		<div
 			data-player-id={id}
@@ -63,7 +92,7 @@ export function AnimatedPlayer({
 			{showLabel && !isGhost && (
 				<span
 					className='animated-player-label'
-					style={{ fontSize: pixelRadius }}
+					style={{ fontSize: pixelRadius, color: textColor }}
 				>
 					{label}
 				</span>

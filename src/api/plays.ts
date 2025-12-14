@@ -592,7 +592,7 @@ export const playsAPI = {
 		if (parsedDestSectionId !== null) {
 			const [destSection] = await db`
 				SELECT id, playbook_id
-				FROM playbook_sections
+				FROM sections
 				WHERE id = ${parsedDestSectionId}
 			`
 			if (!destSection) {

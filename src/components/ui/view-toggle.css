@@ -2,41 +2,30 @@
 .view-toggle {
   display: flex;
   align-items: center;
-  background-color: var(--muted);
-  border-radius: 8px;
-  padding: 2px;
+  gap: 8px;
 }
 
 .view-toggle-button {
-  padding: 6px;
-  border-radius: 4px;
-  transition: all 200ms;
-  cursor: pointer;
-  border: 1px solid transparent;
-  background-color: transparent;
-  color: var(--muted-foreground);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 1.875rem;
-  height: 1.875rem;
+  border-radius: 6px;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition: all 200ms ease;
 }
 
 .view-toggle-button:hover {
-  color: var(--foreground);
+  border-color: var(--accent);
+  color: var(--accent-foreground);
 }
 
 .view-toggle-button-active {
-  background-color: var(--background);
-  border-color: var(--border);
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 10%), 0 1px 2px -1px rgb(0 0 0 / 10%);
-  color: var(--foreground);
-}
-
-.view-toggle-button-inactive {
-  background-color: transparent;
-}
-
-.view-toggle-button-inactive:hover {
-  background-color: color-mix(in oklch, var(--accent) 50%, transparent);
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-foreground);
 }

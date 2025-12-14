@@ -759,6 +759,257 @@ export function insertPointIntoDrawing(
 }
 
 /**
+ * Helper: Find the closest point in an array to a target point.
+ */
+function findClosestPoint(
+	points: Coordinate[],
+	target: Coordinate
+): { index: number; distance: number } {
+	let closestIndex = 0
+	let minDist = Infinity
+
+	for (let i = 0; i < points.length; i++) {
+		const p = points[i]
+		if (!p) continue
+		const dx = target.x - p.x
+		const dy = target.y - p.y
+		const dist = Math.sqrt(dx * dx + dy * dy)
+		if (dist < minDist) {
+			minDist = dist
+			closestIndex = i
+		}
+	}
+
+	return { index: closestIndex, distance: minDist }
+}
+
+/**
+ * Helper: Find the closest segment in ordered points to a target point.
+ */
+function findClosestSegment(
+	orderedPoints: ControlPoint[],
+	targetPixel: Coordinate,
+	coordSystem: { feetToPixels: (x: number, y: number) => Coordinate }
+): { index: number; distance: number } {
+	let closestSegmentIndex = 0
+	let minDist = Infinity
+
+	for (let i = 0; i < orderedPoints.length - 1; i++) {
+		const p1Coord = orderedPoints[i]
+		const p2Coord = orderedPoints[i + 1]
+		if (!p1Coord || !p2Coord) continue
+
+		const p1 = coordSystem.feetToPixels(p1Coord.x, p1Coord.y)
+		const p2 = coordSystem.feetToPixels(p2Coord.x, p2Coord.y)
+
+		const { distance } = pointToSegmentInfo(targetPixel, p1, p2)
+		if (distance < minDist) {
+			minDist = distance
+			closestSegmentIndex = i
+		}
+	}
+
+	return { index: closestSegmentIndex, distance: minDist }
+}
+
+/**
+ * Helper: Apply Chaikin smoothing to ordered points, returning smoothed pixel coordinates.
+ */
+function getSmoothedPixelPoints(
+	orderedPoints: ControlPoint[],
+	coordSystem: {
+		feetToPixels: (x: number, y: number) => Coordinate
+		scale: number
+	}
+): Coordinate[] {
+	const pixelPoints = orderedPoints.map(p =>
+		coordSystem.feetToPixels(p.x, p.y)
+	)
+	let smoothed = pixelPoints
+	for (let i = 0; i < CHAIKIN_SMOOTH_ITERATIONS; i++) {
+		smoothed = chaikinSubdivideSimple(smoothed, true)
+	}
+	return smoothed
+}
+
+/**
+ * Get the tangent angle at a specific point on a drawing's path.
+ * Returns the angle in radians, calculated from the path direction at that point.
+ * For curved paths, uses the smoothed curve. For sharp paths, uses line segments.
+ */
+export function getPathTangentAtPoint(
+	drawing: Drawing,
+	targetPoint: Coordinate,
+	coordSystem: CoordSystemLike
+): number {
+	const orderedPoints = getOrderedPointsFromDrawing(drawing)
+	if (orderedPoints.length < 2) return 0
+
+	if (drawing.style.pathMode === 'curve') {
+		// For curved paths, use smoothed points to get accurate tangent
+		const smoothedPixels = getSmoothedPixelPoints(
+			orderedPoints,
+			coordSystem
+		)
+
+		// Find closest point on smoothed curve
+		const targetPixel = coordSystem.feetToPixels(
+			targetPoint.x,
+			targetPoint.y
+		)
+		const { index: closestIndex } = findClosestPoint(
+			smoothedPixels,
+			targetPixel
+		)
+
+		// Get tangent from neighboring points
+		const prev = smoothedPixels[Math.max(0, closestIndex - 1)]
+		const next = smoothedPixels[Math.min(smoothedPixels.length - 1, closestIndex + 1)]
+
+		if (!prev || !next) return 0
+
+		const dx = next.x - prev.x
+		const dy = next.y - prev.y
+		return Math.atan2(dy, dx)
+	} else {
+		// For sharp paths, find which line segment the point is on
+		const targetPixel = coordSystem.feetToPixels(targetPoint.x, targetPoint.y)
+		const { index: closestSegmentIndex } = findClosestSegment(
+			orderedPoints,
+			targetPixel,
+			coordSystem
+		)
+
+		// Calculate angle from segment
+		const p1 = orderedPoints[closestSegmentIndex]
+		const p2 = orderedPoints[closestSegmentIndex + 1]
+
+		if (!p1 || !p2) return 0
+
+		const dx = p2.x - p1.x
+		const dy = p2.y - p1.y
+		return Math.atan2(dy, dx)
+	}
+}
+
+/**
+ * Split a drawing's path into two SVG path strings at a specific point (snap point).
+ * Returns paths for pre-snap (dashed) and post-snap (solid) portions for motion type pre-snap movement.
+ */
+export function splitPathAtPoint(
+	drawing: Drawing,
+	splitPoint: Coordinate,
+	coordSystem: CoordSystemLike
+): { preSnapPath: string; postSnapPath: string } {
+	const orderedPoints = getOrderedPointsFromDrawing(drawing)
+	if (orderedPoints.length < 2) {
+		return { preSnapPath: '', postSnapPath: '' }
+	}
+
+	const isAllLineSegments = drawing.segments.every(s => s.type === 'line')
+	const shouldSmooth = isAllLineSegments && drawing.style.pathMode === 'curve'
+
+	if (shouldSmooth) {
+		// For smooth paths, apply Chaikin smoothing and split the smoothed path
+		const smoothedPixels = getSmoothedPixelPoints(
+			orderedPoints,
+			coordSystem
+		)
+
+		if (smoothedPixels.length < 2) {
+			return { preSnapPath: '', postSnapPath: '' }
+		}
+
+		// Find closest smoothed point to split point
+		const splitPixel = coordSystem.feetToPixels(splitPoint.x, splitPoint.y)
+		const { index: splitIndex } = findClosestPoint(
+			smoothedPixels,
+			splitPixel
+		)
+
+		// Build pre-snap path (start to split point)
+		const preSnapCommands: string[] = []
+		if (splitIndex > 0) {
+			const firstPoint = smoothedPixels[0]
+			if (firstPoint) {
+				preSnapCommands.push(`M ${firstPoint.x} ${firstPoint.y}`)
+				for (let i = 1; i <= splitIndex; i++) {
+					const p = smoothedPixels[i]
+					if (p) {
+						preSnapCommands.push(`L ${p.x} ${p.y}`)
+					}
+				}
+			}
+		}
+
+		// Build post-snap path (split point to end)
+		const postSnapCommands: string[] = []
+		if (splitIndex < smoothedPixels.length - 1) {
+			const splitPt = smoothedPixels[splitIndex]
+			if (splitPt) {
+				postSnapCommands.push(`M ${splitPt.x} ${splitPt.y}`)
+				for (let i = splitIndex + 1; i < smoothedPixels.length; i++) {
+					const p = smoothedPixels[i]
+					if (p) {
+						postSnapCommands.push(`L ${p.x} ${p.y}`)
+					}
+				}
+			}
+		}
+
+		return {
+			preSnapPath: preSnapCommands.join(' '),
+			postSnapPath: postSnapCommands.join(' ')
+		}
+	} else {
+		// For sharp paths, find which segment the split point is closest to
+		const splitPixel = coordSystem.feetToPixels(splitPoint.x, splitPoint.y)
+		const { index: splitSegmentIndex } = findClosestSegment(
+			orderedPoints,
+			splitPixel,
+			coordSystem
+		)
+
+		// Build pre-snap path (start to split point)
+		const preSnapCommands: string[] = []
+		if (splitSegmentIndex >= 0 && orderedPoints.length > 0) {
+			const firstPoint = orderedPoints[0]
+			if (firstPoint) {
+				const first = coordSystem.feetToPixels(firstPoint.x, firstPoint.y)
+				preSnapCommands.push(`M ${first.x} ${first.y}`)
+				for (let i = 1; i <= splitSegmentIndex; i++) {
+					const pt = orderedPoints[i]
+					if (pt) {
+						const p = coordSystem.feetToPixels(pt.x, pt.y)
+						preSnapCommands.push(`L ${p.x} ${p.y}`)
+					}
+				}
+				// Add line to split point
+				preSnapCommands.push(`L ${splitPixel.x} ${splitPixel.y}`)
+			}
+		}
+
+		// Build post-snap path (split point to end)
+		const postSnapCommands: string[] = []
+		if (splitSegmentIndex < orderedPoints.length - 1) {
+			postSnapCommands.push(`M ${splitPixel.x} ${splitPixel.y}`)
+			for (let i = splitSegmentIndex + 1; i < orderedPoints.length; i++) {
+				const pt = orderedPoints[i]
+				if (pt) {
+					const p = coordSystem.feetToPixels(pt.x, pt.y)
+					postSnapCommands.push(`L ${p.x} ${p.y}`)
+				}
+			}
+		}
+
+		return {
+			preSnapPath: preSnapCommands.join(' '),
+			postSnapPath: postSnapCommands.join(' ')
+		}
+	}
+}
+
+/**
  * Check if a drawing should be smoothed with Chaikin algorithm.
  * Smooth drawings are those with all line segments and pathMode === 'curve'.
  */

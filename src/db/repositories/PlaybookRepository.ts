@@ -12,7 +12,7 @@ export class PlaybookRepository {
 	private sectionRepo = new SectionRepository()
 
 	// Inserts a playbook and returns DB defaults in one call
-	// Auto-creates an Ideas section for the playbook
+	// Auto-creates Base Plays and Ideas sections for the playbook
 	async create(data: {
 		team_id: number | null
 		name: string
@@ -30,8 +30,9 @@ export class PlaybookRepository {
 			RETURNING *
 		`
 
-		// Auto-create Ideas section with display_order 0
-		await this.sectionRepo.create(playbook.id, 'Ideas', 0, 'ideas')
+		// Auto-create default sections: Base Plays (undeletable) and Ideas (undeletable)
+		await this.sectionRepo.create(playbook.id, 'Base Plays', 0, 'base')
+		await this.sectionRepo.create(playbook.id, 'Ideas', 1, 'ideas')
 
 		return playbook
 	}
@@ -177,11 +178,12 @@ export class PlaybookRepository {
 		return result.count
 	}
 
-	// Cleanup old trash - permanently deletes playbooks deleted more than 30 days ago
+	// Cleanup old trash - permanently deletes playbooks deleted more than 7 days ago
+	// Note: Retention period should match TRASH_RETENTION_DAYS constant (src/constants/trash.ts)
 	async cleanupOldTrash(): Promise<number> {
 		const result = await db`
 			DELETE FROM playbooks
-			WHERE deleted_at IS NOT NULL AND deleted_at < NOW() - INTERVAL '30 day'
+			WHERE deleted_at IS NOT NULL AND deleted_at < NOW() - INTERVAL '7 day'
 		`
 		return result.count
 	}

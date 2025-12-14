@@ -18,6 +18,7 @@ import { unifiedSearchAPI } from './api/unified-search'
 import { modifierOverridesAPI } from './api/modifierOverrides'
 import { labelsAPI, playLabelsAPI, playbookLabelsAPI } from './api/labels'
 import { handleCallSheetExport } from './api/exports'
+import { startScheduler, runCleanupNow } from './services/scheduler'
 
 const _server = serve({
   routes: {
@@ -245,6 +246,22 @@ const _server = serve({
       POST: handleCallSheetExport
     },
 
+    // Maintenance API endpoints
+    '/api/maintenance/cleanup-trash': {
+      async POST(_req) {
+        try {
+          await runCleanupNow()
+          return Response.json({ success: true, message: 'Trash cleanup completed' })
+        } catch (error) {
+          console.error('Manual cleanup failed:', error)
+          return Response.json(
+            { success: false, error: 'Cleanup failed' },
+            { status: 500 }
+          )
+        }
+      }
+    },
+
     // Example API endpoints
     "/api/hello": {
       async GET(_req) {
@@ -287,3 +304,6 @@ const _server = serve({
     console: true,
   },
 })
+
+// Start scheduled tasks
+startScheduler()

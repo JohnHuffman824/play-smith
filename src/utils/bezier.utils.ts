@@ -147,6 +147,7 @@ export function calculateRouteTiming(
 			totalLength,
 			duration: currentTime,
 			segments,
+			startOffset: 0, // Default, will be calculated in calculateAllRouteTimings
 		}
 	}
 
@@ -200,12 +201,13 @@ export function calculateRouteTiming(
 		totalLength,
 		duration: currentTime,
 		segments,
+		startOffset: 0, // Default, will be calculated in calculateAllRouteTimings
 	}
 }
 
 /**
  * Calculate timing for all player-linked drawings in a play.
- * Returns a map keyed by drawing ID.
+ * Returns a map keyed by drawing ID with proper startOffset for pre-snap motion.
  */
 export function calculateAllRouteTimings(
 	drawings: Drawing[],
@@ -213,13 +215,55 @@ export function calculateAllRouteTimings(
 ): Map<string, RouteTiming> {
 	const timings = new Map<string, RouteTiming>()
 
+	// Separate drawings by type
+	const shifts: Drawing[] = []
+	const motions: Drawing[] = []
+	const regular: Drawing[] = []
+
 	for (const drawing of drawings) {
-		// Only calculate timing for drawings linked to players
+		// Only process drawings linked to players
 		if (!drawing.playerId) continue
 
+		if (drawing.preSnapMotion?.type === 'shift') {
+			shifts.push(drawing)
+		} else if (drawing.preSnapMotion?.type === 'motion') {
+			motions.push(drawing)
+		} else {
+			regular.push(drawing)
+		}
+	}
+
+	// Calculate base timing for all drawings
+	for (const drawing of [...shifts, ...motions, ...regular]) {
 		const timing = calculateRouteTiming(drawing, speedFps)
 		timings.set(drawing.id, timing)
 	}
+
+	// Calculate pre-snap offsets
+	// Shifts animate sequentially, then motion, then regular routes at snap (offset 0)
+	let currentPreSnapOffset = 0
+
+	// Process shifts sequentially
+	for (const shift of shifts) {
+		const timing = timings.get(shift.id)
+		if (timing) {
+			// Shift starts at current pre-snap offset (negative time)
+			timing.startOffset = currentPreSnapOffset - timing.duration
+			// Next shift starts after this one completes
+			currentPreSnapOffset = timing.startOffset
+		}
+	}
+
+	// Process motion after all shifts
+	for (const motion of motions) {
+		const timing = timings.get(motion.id)
+		if (timing) {
+			// Motion starts after all shifts complete
+			timing.startOffset = currentPreSnapOffset - timing.duration
+		}
+	}
+
+	// Regular routes start at snap (offset 0) - already set as default
 
 	return timings
 }
@@ -243,22 +287,40 @@ export function getMaxRouteDuration(
 }
 
 /**
- * Calculate the total animation duration including snap count and endpoint hold.
+ * Calculate the total animation duration including pre-snap, snap count, and endpoint hold.
  */
 export function calculateTotalDuration(
 	routeTimings: Map<string, RouteTiming>,
 	includeSnapCount: boolean = true,
 	includeEndpointHold: boolean = true
 ): number {
-	let duration = getMaxRouteDuration(routeTimings)
+	let preSnapDuration = 0
+	let postSnapDuration = 0
+
+	// Find the earliest start (most negative offset) and latest end
+	for (const timing of routeTimings.values()) {
+		// Pre-snap duration is the absolute value of the most negative startOffset
+		if (timing.startOffset < 0) {
+			const routePreSnapTime = Math.abs(timing.startOffset)
+			preSnapDuration = Math.max(preSnapDuration, routePreSnapTime)
+		}
+
+		// Post-snap duration is the maximum of (startOffset + duration) for routes starting at/after snap
+		const routeEndTime = timing.startOffset + timing.duration
+		if (routeEndTime > postSnapDuration) {
+			postSnapDuration = routeEndTime
+		}
+	}
+
+	let totalDuration = preSnapDuration + postSnapDuration
 
 	if (includeSnapCount) {
-		duration += ANIMATION_DEFAULTS.SNAP_COUNT_DURATION
+		totalDuration += ANIMATION_DEFAULTS.SNAP_COUNT_DURATION
 	}
 
 	if (includeEndpointHold) {
-		duration += ANIMATION_DEFAULTS.ENDPOINT_HOLD_DURATION
+		totalDuration += ANIMATION_DEFAULTS.ENDPOINT_HOLD_DURATION
 	}
 
-	return duration
+	return totalDuration
 }

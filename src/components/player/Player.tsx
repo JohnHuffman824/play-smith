@@ -48,6 +48,7 @@ interface PlayerProps {
   zoom?: number
   panX?: number
   panY?: number
+  isGhost?: boolean
 }
 
 export function Player({
@@ -68,6 +69,7 @@ export function Player({
   zoom,
   panX,
   panY,
+  isGhost = false,
 }: PlayerProps) {
   const { theme } = useTheme()
   const playerRef = useRef<HTMLDivElement>(null)
@@ -245,6 +247,7 @@ export function Player({
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
+          opacity: isGhost ? 0.4 : 1,
         }}
       >
         {label}

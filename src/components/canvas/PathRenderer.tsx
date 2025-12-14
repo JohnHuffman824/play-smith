@@ -4,10 +4,14 @@ import {
 	ARROW_LENGTH_MULTIPLIER,
 	DASH_PATTERN_GAP_MULTIPLIER,
 	DASH_PATTERN_LENGTH_MULTIPLIER,
+	DRAG_THRESHOLD,
 	LINE_END_ARROW,
 	LINE_END_NONE,
 	LINE_END_TSHAPE,
+	PLACEMENT_MODE_GLOW_COLOR,
 	SELECTION_GLOW_BLUR,
+	SNAP_POINT_FILL_COLOR,
+	SNAP_POINT_STROKE_COLOR,
 	TSHAPE_LENGTH_MULTIPLIER,
 } from '../../constants/field.constants'
 import { FieldCoordinateSystem } from '../../utils/coordinates'
@@ -18,6 +22,8 @@ import {
 	getSegmentPoints,
 	getPoint,
 	findClosestSegmentPosition,
+	getPathTangentAtPoint,
+	splitPathAtPoint,
 } from '../../utils/drawing.utils'
 import {
 	applyChaikin as applyChaikinUtil,
@@ -56,6 +62,13 @@ interface PathRendererProps {
 	zoom?: number
 	panX?: number
 	panY?: number
+	placementMode?: { type: 'presnap'; drawingId: string } | null
+	onPlacementModeClick?: (
+		drawingId: string,
+		clickType: 'terminal' | 'path',
+		point: Coordinate,
+		pointId?: string
+	) => void
 }
 
 /**
@@ -76,9 +89,10 @@ export function PathRenderer({
 	zoom = 1,
 	panX = 0,
 	panY = 0,
+	placementMode = null,
+	onPlacementModeClick,
 }: PathRendererProps) {
 	const mouseDownPosRef = useRef<{ x: number; y: number } | null>(null)
-	const DRAG_THRESHOLD = 5
 
 	const { d, endDirection } = useMemo(() => {
 		return buildPath(drawing, coordSystem)
@@ -89,8 +103,23 @@ export function PathRenderer({
 	const strokeWidth = drawing.style.strokeWidth * coordSystem.scale
 	const hitPaddingPx = 12
 	const hitStrokeWidth = strokeWidth + hitPaddingPx * 2
+
+	// For shift, entire path is dashed. For motion, we'll split the rendering later.
+	const isShift = drawing.preSnapMotion?.type === 'shift'
+	const effectiveLineStyle = isShift ? 'dashed' : drawing.style.lineStyle
+
+	// Check if this drawing is in placement mode for pre-snap movement
+	const isInPlacementMode = placementMode?.drawingId === drawing.id
+
+	// Compute filter for glow effects
+	const pathFilter = isInPlacementMode
+		? `url(#placement-glow-${drawing.id})`
+		: isSelected
+			? `url(#glow-${drawing.id})`
+			: undefined
+
 	const lineDash =
-		drawing.style.lineStyle == 'dashed'
+		effectiveLineStyle == 'dashed'
 			? [
 					strokeWidth * DASH_PATTERN_LENGTH_MULTIPLIER,
 					strokeWidth * DASH_PATTERN_GAP_MULTIPLIER,
@@ -121,6 +150,47 @@ export function PathRenderer({
 			}
 		}
 		mouseDownPosRef.current = null
+
+		// Handle placement mode clicks
+		if (placementMode && onPlacementModeClick) {
+			const svg = event.currentTarget.ownerSVGElement
+			if (!svg) return
+			const rect = svg.getBoundingClientRect()
+			const screenX = event.clientX - rect.left
+			const screenY = event.clientY - rect.top
+			const feetPos = coordSystem.screenToFeet(screenX, screenY, zoom, panX, panY)
+
+			// Check if click is near a terminal node
+			const terminalPoints = Object.values(drawing.points).filter(p =>
+				p.type === 'start' || p.type === 'end'
+			)
+
+			for (const termPoint of terminalPoints) {
+				const pixelPoint = coordSystem.feetToPixels(termPoint.x, termPoint.y)
+				const dx = screenX - pixelPoint.x
+				const dy = screenY - pixelPoint.y
+				const distance = Math.sqrt(dx * dx + dy * dy)
+
+				// If within 20 pixels of a terminal point, it's a terminal click
+				if (distance < 20) {
+					onPlacementModeClick(drawing.id, 'terminal', { x: termPoint.x, y: termPoint.y }, termPoint.id)
+					return
+				}
+			}
+
+			// Otherwise, check if click is near the path for snap point placement
+			const segmentResult = findClosestSegmentPosition(drawing, feetPos, coordSystem)
+
+			// Only allow path clicks within threshold
+			if (segmentResult && segmentResult.distance < SEGMENT_HIT_THRESHOLD_PX) {
+				// Use the snapped position on the path, not the raw click position
+				onPlacementModeClick(drawing.id, 'path', segmentResult.insertPosition)
+				return
+			}
+
+			// Click was too far from path - don't register it (do nothing)
+			return
+		}
 
 		if (activeTool == 'select' && onSelectWithPosition) {
 			onSelectWithPosition(drawing.id, { x: event.clientX, y: event.clientY })
@@ -181,6 +251,26 @@ export function PathRenderer({
 			onMouseLeave={() => onHover?.(false)}
 		>
 			{/* SVG filter for selection glow */}
+			{isInPlacementMode && (
+				<defs>
+					<filter
+						id={`placement-glow-${drawing.id}`}
+						x='-50%'
+						y='-50%'
+						width='200%'
+						height='200%'
+					>
+						<feGaussianBlur in='SourceAlpha' stdDeviation={SELECTION_GLOW_BLUR * 1.5} result='blur' />
+						<feFlood floodColor={PLACEMENT_MODE_GLOW_COLOR} result='glowColor' />
+						<feComposite in='glowColor' in2='blur' operator='in' result='coloredGlow' />
+						<feMerge>
+							<feMergeNode in='coloredGlow' />
+							<feMergeNode in='coloredGlow' />
+							<feMergeNode in='SourceGraphic' />
+						</feMerge>
+					</filter>
+				</defs>
+			)}
 			{isSelected && (
 				<defs>
 					<filter
@@ -214,44 +304,143 @@ export function PathRenderer({
 					onPointerDown={handlePointerDown}
 				/>
 			)}
-			<path
-				d={d}
-				fill='none'
-				stroke={drawing.style.color}
-				strokeWidth={strokeWidth}
-				strokeLinecap='round'
-				strokeLinejoin='round'
-				strokeDasharray={lineDash.join(' ')}
-				opacity={isSelected ? 0.9 : 1}
-				filter={isSelected ? `url(#glow-${drawing.id})` : undefined}
-				style={{ ...eraseHover, ...selectStyle }}
-				pointerEvents='stroke'
-				onPointerDown={handlePointerDown}
-				onContextMenu={(e) => {
-					if (!onPathContextMenu) return
-					e.preventDefault()
-					e.stopPropagation()
-
-					// Get click position in feet
-					const svg = e.currentTarget.ownerSVGElement
-					if (!svg) return
-					const rect = svg.getBoundingClientRect()
-					const screenX = e.clientX - rect.left
-					const screenY = e.clientY - rect.top
-					const feetPos = coordSystem.screenToFeet(screenX, screenY, zoom, panX, panY)
-
-					// Find which segment was clicked
-					const result = findClosestSegmentPosition(drawing, feetPos, coordSystem)
-					if (result && result.distance < SEGMENT_HIT_THRESHOLD_PX) {
-						onPathContextMenu(
-							drawing.id,
-							result.segmentIndex,
-							result.insertPosition,
-							{ x: screenX, y: screenY }
+			{/* Render split paths for motion type, or single path otherwise */}
+			{drawing.preSnapMotion?.type === 'motion' && drawing.preSnapMotion.snapPointId ? (
+				(() => {
+					// Motion type: Split path at snap point (pre-snap dashed, post-snap solid)
+					const snapPoint = drawing.points[drawing.preSnapMotion.snapPointId]
+					if (!snapPoint) {
+						// Fallback to regular rendering if snap point not found
+						return (
+							<path
+								d={d}
+								fill='none'
+								stroke={drawing.style.color}
+								strokeWidth={strokeWidth}
+								strokeLinecap='round'
+								strokeLinejoin='round'
+								strokeDasharray={lineDash.join(' ')}
+								opacity={isSelected ? 0.9 : 1}
+								filter={pathFilter}
+								style={{ ...eraseHover, ...selectStyle }}
+								pointerEvents='stroke'
+								onPointerDown={handlePointerDown}
+							/>
 						)
 					}
-				}}
-			/>
+
+					const { preSnapPath, postSnapPath } = splitPathAtPoint(drawing, snapPoint, coordSystem)
+
+					// Calculate dash pattern for pre-snap portion
+					const dashPattern = [
+						strokeWidth * DASH_PATTERN_LENGTH_MULTIPLIER,
+						strokeWidth * DASH_PATTERN_GAP_MULTIPLIER,
+					]
+
+					const contextMenuHandler = (e: React.MouseEvent<SVGPathElement>) => {
+						if (!onPathContextMenu) return
+						e.preventDefault()
+						e.stopPropagation()
+
+						const svg = e.currentTarget.ownerSVGElement
+						if (!svg) return
+						const rect = svg.getBoundingClientRect()
+						const screenX = e.clientX - rect.left
+						const screenY = e.clientY - rect.top
+						const feetPos = coordSystem.screenToFeet(screenX, screenY, zoom, panX, panY)
+
+						const result = findClosestSegmentPosition(drawing, feetPos, coordSystem)
+						if (result && result.distance < SEGMENT_HIT_THRESHOLD_PX) {
+							onPathContextMenu(
+								drawing.id,
+								result.segmentIndex,
+								result.insertPosition,
+								{ x: screenX, y: screenY }
+							)
+						}
+					}
+
+					return (
+						<>
+							{/* Pre-snap portion: DASHED */}
+							{preSnapPath && (
+								<path
+									d={preSnapPath}
+									fill='none'
+									stroke={drawing.style.color}
+									strokeWidth={strokeWidth}
+									strokeLinecap='round'
+									strokeLinejoin='round'
+									strokeDasharray={dashPattern.join(' ')}
+									opacity={isSelected ? 0.9 : 1}
+									filter={pathFilter}
+									style={{ ...eraseHover, ...selectStyle }}
+									pointerEvents='stroke'
+									onPointerDown={handlePointerDown}
+									onContextMenu={contextMenuHandler}
+								/>
+							)}
+							{/* Post-snap portion: SOLID (or original style) */}
+							{postSnapPath && (
+								<path
+									d={postSnapPath}
+									fill='none'
+									stroke={drawing.style.color}
+									strokeWidth={strokeWidth}
+									strokeLinecap='round'
+									strokeLinejoin='round'
+									strokeDasharray={drawing.style.lineStyle === 'dashed' ? dashPattern.join(' ') : ''}
+									opacity={isSelected ? 0.9 : 1}
+									filter={pathFilter}
+									style={{ ...eraseHover, ...selectStyle }}
+									pointerEvents='stroke'
+									onPointerDown={handlePointerDown}
+									onContextMenu={contextMenuHandler}
+								/>
+							)}
+						</>
+					)
+				})()
+			) : (
+				<path
+					d={d}
+					fill='none'
+					stroke={drawing.style.color}
+					strokeWidth={strokeWidth}
+					strokeLinecap='round'
+					strokeLinejoin='round'
+					strokeDasharray={lineDash.join(' ')}
+					opacity={isSelected ? 0.9 : 1}
+					filter={pathFilter}
+					style={{ ...eraseHover, ...selectStyle }}
+					pointerEvents='stroke'
+					onPointerDown={handlePointerDown}
+					onContextMenu={(e) => {
+						if (!onPathContextMenu) return
+						e.preventDefault()
+						e.stopPropagation()
+
+						// Get click position in feet
+						const svg = e.currentTarget.ownerSVGElement
+						if (!svg) return
+						const rect = svg.getBoundingClientRect()
+						const screenX = e.clientX - rect.left
+						const screenY = e.clientY - rect.top
+						const feetPos = coordSystem.screenToFeet(screenX, screenY, zoom, panX, panY)
+
+						// Find which segment was clicked
+						const result = findClosestSegmentPosition(drawing, feetPos, coordSystem)
+						if (result && result.distance < SEGMENT_HIT_THRESHOLD_PX) {
+							onPathContextMenu(
+								drawing.id,
+								result.segmentIndex,
+								result.insertPosition,
+								{ x: screenX, y: screenY }
+							)
+						}
+					}}
+				/>
+			)}
 			{ending}
 			{drawing.playerId && linkedPixel && (
 				<circle
@@ -263,6 +452,47 @@ export function PathRenderer({
 					strokeWidth={1}
 					pointerEvents='none'
 				/>
+			)}
+			{/* Render snap point for motion */}
+			{drawing.preSnapMotion?.type === 'motion' && drawing.preSnapMotion.snapPointId && (
+				(() => {
+					const snapPoint = drawing.points[drawing.preSnapMotion.snapPointId]
+					if (!snapPoint) return null
+					const snapPixel = coordSystem.feetToPixels(snapPoint.x, snapPoint.y)
+
+					// Calculate perpendicular angle for snap line
+					const tangentAngle = getPathTangentAtPoint(drawing, snapPoint, coordSystem)
+					const perpAngle = tangentAngle + Math.PI / 2
+					const lineLength = 12
+
+					return (
+						<>
+							{/* Yellow snap point indicator */}
+							<circle
+								cx={snapPixel.x}
+								cy={snapPixel.y}
+								r={6}
+								fill={SNAP_POINT_FILL_COLOR}
+								stroke={SNAP_POINT_STROKE_COLOR}
+								strokeWidth={2}
+								pointerEvents='none'
+							/>
+							{/* Perpendicular snap line (when not in draw mode) */}
+							{activeTool !== 'draw' && (
+								<line
+									x1={snapPixel.x - lineLength * Math.cos(perpAngle)}
+									y1={snapPixel.y - lineLength * Math.sin(perpAngle)}
+									x2={snapPixel.x + lineLength * Math.cos(perpAngle)}
+									y2={snapPixel.y + lineLength * Math.sin(perpAngle)}
+									stroke={SNAP_POINT_FILL_COLOR}
+									strokeWidth={2}
+									strokeLinecap='round'
+									pointerEvents='none'
+								/>
+							)}
+						</>
+					)
+				})()
 			)}
 		</g>
 	)

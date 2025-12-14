@@ -34,8 +34,9 @@ const AnimationContext = createContext<AnimationContextType | undefined>(undefin
 
 /**
  * Update player positions based on current time.
+ * Exported for testing.
  */
-function updatePlayerPositions(
+export function updatePlayerPositions(
 	state: AnimationState,
 	currentTime: number
 ): PlayerAnimationState[] {
@@ -59,9 +60,22 @@ function updatePlayerPositions(
 			}
 		}
 
-		// Calculate position along route
-		const currentPosition = getPositionAlongRoute(routeTiming, currentTime)
-		const progress = calculateProgress(currentTime, routeTiming.duration)
+		// Adjust time for this player's start offset (negative = pre-snap)
+		// startOffset is the time when this route should START relative to snap (time=0)
+		const effectiveTime = currentTime - routeTiming.startOffset
+
+		// If player hasn't started yet (negative effective time), stay at start
+		if (effectiveTime < 0) {
+			return {
+				...playerState,
+				progress: 0,
+				currentPosition: playerState.startPosition,
+			}
+		}
+
+		// Calculate position along route using effective time
+		const currentPosition = getPositionAlongRoute(routeTiming, effectiveTime)
+		const progress = calculateProgress(effectiveTime, routeTiming.duration)
 
 		return {
 			...playerState,
@@ -73,8 +87,9 @@ function updatePlayerPositions(
 
 /**
  * Reducer for animation state.
+ * Exported for testing.
  */
-function animationReducer(
+export function animationReducer(
 	state: AnimationState,
 	action: AnimationAction
 ): AnimationState {

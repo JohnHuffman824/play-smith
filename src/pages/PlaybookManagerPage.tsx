@@ -12,6 +12,16 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from '../components/ui/dialog'
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from '../components/ui/alert-dialog'
 import { UnifiedSettingsDialog } from '../components/shared/UnifiedSettingsDialog'
 import { ManageTeamsDialog } from '../components/playbook-manager/ManageTeamsDialog'
 import { NewFolderDialog } from '../components/playbook-manager/NewFolderDialog'
@@ -23,6 +33,7 @@ import {
 	ResizableHandle,
 } from '../components/ui/resizable'
 import { useSettings, MIN_SIDEBAR_WIDTH, MAX_SIDEBAR_WIDTH } from '../contexts/SettingsContext'
+import { TRASH_RETENTION_DAYS } from '../constants/trash'
 import './playbook-manager-page.css'
 
 export function PlaybookManagerPage() {
@@ -43,6 +54,12 @@ export function PlaybookManagerPage() {
 	const [sharePlaybookName, setSharePlaybookName] = useState('')
 	const [sharePlaybookTeamId, setSharePlaybookTeamId] = useState<number | null>(null)
 	const [newPlaybookName, setNewPlaybookName] = useState('')
+
+	// Confirmation dialog state
+	const [deleteConfirmation, setDeleteConfirmation] = useState<{ id: number; name: string } | null>(null)
+	const [permanentDeleteConfirmation, setPermanentDeleteConfirmation] = useState<{ id: number; name: string } | null>(null)
+	const [restoreConfirmation, setRestoreConfirmation] = useState<{ id: number; name: string } | null>(null)
+	const [emptyTrashConfirmation, setEmptyTrashConfirmation] = useState(false)
 
 	// Now hooks that depend on state
 	const { teams, currentTeamId, switchTeam, isLoading: teamsLoading } = useTeamsData()
@@ -159,10 +176,13 @@ export function PlaybookManagerPage() {
 		await permanentDelete(id)
 	}
 
-	const handleEmptyTrash = async () => {
-		if (confirm('Permanently delete all items in trash? This cannot be undone.')) {
-			await emptyTrash()
-		}
+	const handleEmptyTrash = () => {
+		setEmptyTrashConfirmation(true)
+	}
+
+	const confirmEmptyTrash = async () => {
+		await emptyTrash()
+		setEmptyTrashConfirmation(false)
 	}
 
 	const handleRenamePrompt = useCallback((id: number, currentName: string) => {
@@ -173,22 +193,37 @@ export function PlaybookManagerPage() {
 	}, [updatePlaybook])
 
 	const handleDeletePrompt = useCallback((id: number, name: string) => {
-		if (confirm(`Delete "${name}"?`)) {
-			deletePlaybook(id)
+		setDeleteConfirmation({ id, name })
+	}, [])
+
+	const confirmDelete = async () => {
+		if (deleteConfirmation) {
+			await deletePlaybook(deleteConfirmation.id)
+			setDeleteConfirmation(null)
 		}
-	}, [deletePlaybook])
+	}
 
 	const handleRestorePrompt = useCallback((id: number, name: string) => {
-		if (confirm(`Restore "${name}"?`)) {
-			restore(id)
+		setRestoreConfirmation({ id, name })
+	}, [])
+
+	const confirmRestore = async () => {
+		if (restoreConfirmation) {
+			await restore(restoreConfirmation.id)
+			setRestoreConfirmation(null)
 		}
-	}, [restore])
+	}
 
 	const handlePermanentDeletePrompt = useCallback((id: number, name: string) => {
-		if (confirm(`Permanently delete "${name}"? This cannot be undone.`)) {
-			permanentDelete(id)
+		setPermanentDeleteConfirmation({ id, name })
+	}, [])
+
+	const confirmPermanentDelete = async () => {
+		if (permanentDeleteConfirmation) {
+			await permanentDelete(permanentDeleteConfirmation.id)
+			setPermanentDeleteConfirmation(null)
 		}
-	}, [permanentDelete])
+	}
 
 	if (isLoading) {
 		return (
@@ -278,7 +313,7 @@ export function PlaybookManagerPage() {
 							{playbooks.length > 0 && (
 								<div className="trash-header">
 									<p className="trash-notice">
-										Items in trash will be permanently deleted after 30 days
+										Items in trash will be permanently deleted after {TRASH_RETENTION_DAYS} days
 									</p>
 									<button
 										onClick={handleEmptyTrash}
@@ -492,6 +527,70 @@ export function PlaybookManagerPage() {
 					currentTeamId={sharePlaybookTeamId}
 				/>
 			)}
+
+			{/* Delete Confirmation Dialog */}
+			<AlertDialog open={!!deleteConfirmation} onOpenChange={(open) => !open && setDeleteConfirmation(null)}>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>Delete Playbook</AlertDialogTitle>
+						<AlertDialogDescription>
+							Are you sure you want to delete "{deleteConfirmation?.name}"? This will move it to trash where it can be restored within {TRASH_RETENTION_DAYS} days.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel>Cancel</AlertDialogCancel>
+						<AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
+
+			{/* Permanent Delete Confirmation Dialog */}
+			<AlertDialog open={!!permanentDeleteConfirmation} onOpenChange={(open) => !open && setPermanentDeleteConfirmation(null)}>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>Permanently Delete Playbook</AlertDialogTitle>
+						<AlertDialogDescription>
+							Are you sure you want to permanently delete "{permanentDeleteConfirmation?.name}"? This action cannot be undone.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel>Cancel</AlertDialogCancel>
+						<AlertDialogAction onClick={confirmPermanentDelete}>Permanently Delete</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
+
+			{/* Restore Confirmation Dialog */}
+			<AlertDialog open={!!restoreConfirmation} onOpenChange={(open) => !open && setRestoreConfirmation(null)}>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>Restore Playbook</AlertDialogTitle>
+						<AlertDialogDescription>
+							Restore "{restoreConfirmation?.name}" from trash?
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel>Cancel</AlertDialogCancel>
+						<AlertDialogAction onClick={confirmRestore}>Restore</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
+
+			{/* Empty Trash Confirmation Dialog */}
+			<AlertDialog open={emptyTrashConfirmation} onOpenChange={setEmptyTrashConfirmation}>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>Empty Trash</AlertDialogTitle>
+						<AlertDialogDescription>
+							Are you sure you want to permanently delete all items in trash? This action cannot be undone.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel>Cancel</AlertDialogCancel>
+						<AlertDialogAction onClick={confirmEmptyTrash}>Empty Trash</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 		</div>
 		</>
 	)

@@ -9,6 +9,13 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '../ui/input'
 import { SearchInput } from '../ui/search-input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { UnifiedSettingsDialog } from '@/components/shared/UnifiedSettingsDialog'
 import { ShareDialog } from '@/components/shared/ShareDialog'
 import { AnimationDialog } from '@/components/animation/AnimationDialog'
@@ -114,6 +121,7 @@ function PlaybookEditorContent({
   const [showRenameModal, setShowRenameModal] = useState(false)
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false)
   const [newItemName, setNewItemName] = useState('')
+  const [newPlaySectionId, setNewPlaySectionId] = useState<string | null>(null)
   const [renamePlayId, setRenamePlayId] = useState<string | null>(null)
   const [renamePlayName, setRenamePlayName] = useState('')
   const [deletePlayId, setDeletePlayId] = useState<string | null>(null)
@@ -333,10 +341,11 @@ function PlaybookEditorContent({
     if (!newItemName.trim()) return
 
     try {
-      const sectionId = sections[0]?.id ?? null
+      const sectionId = newPlaySectionId === '__unsectioned__' ? null : newPlaySectionId
       const newPlay = await createPlay(newItemName, sectionId)
 
       setNewItemName('')
+      setNewPlaySectionId(null)
       setShowNewPlayModal(false)
 
       if (onOpenPlay) {
@@ -455,6 +464,7 @@ function PlaybookEditorContent({
   function closeNewPlayModal() {
     setShowNewPlayModal(false)
     setNewItemName('')
+    setNewPlaySectionId(null)
   }
 
   function closeNewSectionModal() {
@@ -580,7 +590,10 @@ function PlaybookEditorContent({
               <>
                 <div className="playbook-editor-toolbar-buttons">
                   <button
-                    onClick={() => setShowNewPlayModal(true)}
+                    onClick={() => {
+                      setNewPlaySectionId(activeSectionFilter ?? sections[0]?.id ?? null)
+                      setShowNewPlayModal(true)
+                    }}
                     className="playbook-editor-action-button playbook-editor-action-button--primary"
                   >
                     <Plus className="icon-sm" />
@@ -860,6 +873,25 @@ function PlaybookEditorContent({
                 placeholder="Enter play name..."
                 autoFocus
               />
+            </div>
+            <div>
+              <label className="playbook-editor-modal-label">Section</label>
+              <Select value={newPlaySectionId ?? '__unsectioned__'} onValueChange={setNewPlaySectionId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select section" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__unsectioned__">Plays</SelectItem>
+                  {sections
+                    .filter(s => s.id !== '__unsectioned__')
+                    .map(section => (
+                      <SelectItem key={section.id} value={section.id}>
+                        {section.name}
+                      </SelectItem>
+                    ))
+                  }
+                </SelectContent>
+              </Select>
             </div>
             <div className="playbook-editor-modal-actions">
               <button onClick={closeNewPlayModal} className="playbook-editor-modal-button playbook-editor-modal-button--secondary">

@@ -69,6 +69,13 @@ interface SVGCanvasProps {
 	onSelectionChange?: (id: string | null) => void
 	onDrawingHoverChange?: (isHovered: boolean) => void
 	onSelectWithPosition?: (id: string, position: { x: number; y: number }) => void
+	placementMode?: { type: 'presnap'; drawingId: string } | null
+	onPreSnapPlacementClick?: (
+		drawingId: string,
+		clickType: 'terminal' | 'path',
+		point: Coordinate,
+		pointId?: string
+	) => void
 }
 
 /**
@@ -100,6 +107,8 @@ export function SVGCanvas({
 	onSelectionChange,
 	onDrawingHoverChange,
 	onSelectWithPosition,
+	placementMode = null,
+	onPreSnapPlacementClick,
 }: SVGCanvasProps) {
 	const [_selectedDrawingId, setSelectedDrawingId] = useState<string | null>(
 		null,
@@ -145,6 +154,17 @@ export function SVGCanvas({
 		setLastDrawnDrawingId(null)
 		onSelectionChange?.(id)
 		onSelectWithPosition?.(id, position)
+	}
+
+	function handlePlacementModeClick(
+		drawingId: string,
+		clickType: 'terminal' | 'path',
+		point: Coordinate,
+		pointId?: string
+	) {
+		if (onPreSnapPlacementClick) {
+			onPreSnapPlacementClick(drawingId, clickType, point, pointId)
+		}
 	}
 
 	function handleDragPoint(
@@ -511,6 +531,8 @@ export function SVGCanvas({
 					zoom={zoom}
 					panX={panX}
 					panY={panY}
+					placementMode={placementMode?.drawingId === drawing.id ? placementMode : null}
+					onPlacementModeClick={handlePlacementModeClick}
 				/>
 			))}
 

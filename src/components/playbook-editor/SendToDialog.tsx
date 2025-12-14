@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from '@/components/ui/select'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Button } from '@/components/ui/button'
 import { useDestinationPlaybooks } from '@/hooks/useDestinationPlaybooks'
 import type { Section } from './types'
@@ -104,10 +103,22 @@ export function SendToDialog({
 				<div className="send-to-dialog-body">
 					<div className="send-to-field">
 						<label className="send-to-label">Action</label>
-						<ToggleGroup type="single" value={mode} onValueChange={(v) => v && setMode(v as 'move' | 'copy')} variant="outline">
-							<ToggleGroupItem value="move">Move</ToggleGroupItem>
-							<ToggleGroupItem value="copy">Copy</ToggleGroupItem>
-						</ToggleGroup>
+						<div className="send-to-mode-toggle" role="group" aria-label="Action mode">
+							<button
+								onClick={() => setMode('move')}
+								className={`send-to-mode-button ${mode === 'move' ? 'send-to-mode-button-active' : ''}`}
+								aria-pressed={mode === 'move'}
+							>
+								Move
+							</button>
+							<button
+								onClick={() => setMode('copy')}
+								className={`send-to-mode-button ${mode === 'copy' ? 'send-to-mode-button-active' : ''}`}
+								aria-pressed={mode === 'copy'}
+							>
+								Copy
+							</button>
+						</div>
 						<p className="send-to-hint">
 							{mode === 'move' ? 'Plays will be removed from the current location' : 'Plays will be duplicated to the destination'}
 						</p>
@@ -145,7 +156,7 @@ export function SendToDialog({
 							<SelectContent>
 								{availableSections.map(section => (
 									<SelectItem key={section.id} value={section.id}>
-										{section.name}{section.section_type === 'ideas' && ' (Ideas)'}
+										{section.name}
 									</SelectItem>
 								))}
 							</SelectContent>

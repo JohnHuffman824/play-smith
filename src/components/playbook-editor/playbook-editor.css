@@ -421,8 +421,8 @@
 /* || Empty State Button */
 .playbook-editor-empty-button {
   padding: 10px 24px;
-  background-color: var(--primary);
-  color: var(--primary-foreground);
+  background-color: var(--action-button);
+  color: var(--action-button-foreground);
   border-radius: 8px;
   border: none;
   cursor: pointer;
@@ -488,8 +488,8 @@
 }
 
 .playbook-editor-modal-button--primary {
-  background-color: var(--primary);
-  color: var(--primary-foreground);
+  background-color: var(--action-button);
+  color: var(--action-button-foreground);
   border: none;
 }
 

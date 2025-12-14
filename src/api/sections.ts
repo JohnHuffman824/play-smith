@@ -121,10 +121,11 @@ export const sectionsAPI = {
 			return Response.json({ error: 'Access denied' }, { status: 403 })
 		}
 
-		// Prevent deletion of Ideas section
-		if (section.section_type === 'ideas') {
+		// Prevent deletion of special sections (Base Plays and Ideas)
+		if (section.section_type === 'ideas' || section.section_type === 'base') {
+			const sectionName = section.section_type === 'ideas' ? 'Ideas' : 'Base Plays'
 			return Response.json(
-				{ error: 'The Ideas section cannot be deleted' },
+				{ error: `The ${sectionName} section cannot be deleted` },
 				{ status: 403 }
 			)
 		}

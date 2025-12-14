@@ -568,18 +568,18 @@ describe('PlaybookRepository', () => {
 		await db`DELETE FROM playbooks WHERE id = ${activePlaybook.id}`
 	})
 
-	test('cleanupOldTrash - deletes playbooks older than 30 days', async () => {
-		// Create a playbook and manually set deleted_at to 31 days ago
+	test('cleanupOldTrash - deletes playbooks older than 7 days', async () => {
+		// Create a playbook and manually set deleted_at to beyond retention period
 		const oldPlaybook = await playbookRepo.create({
 			team_id: null,
 			name: 'Old Trash',
 			created_by: testUserId,
 		})
 
-		// Set deleted_at to 31 days ago (works for both SQLite and PostgreSQL)
+		// Set deleted_at to beyond retention period (TRASH_RETENTION_DAYS + 1 = 8 days)
 		await db`
 			UPDATE playbooks
-			SET deleted_at = datetime('now', '-31 days')
+			SET deleted_at = datetime('now', '-8 days')
 			WHERE id = ${oldPlaybook.id}
 		`
 

@@ -1,8 +1,8 @@
 import { afterEach, describe, test, expect } from 'bun:test'
 import { cleanup, render } from '@testing-library/react'
 import { SVGCanvas } from './SVGCanvas'
-import { FieldCoordinateSystem } from '../../utils/coordinates'
-import type { Drawing } from '../../types/drawing.types'
+import { FieldCoordinateSystem } from '@/utils'
+import type { Drawing } from '@/types'
 
 describe('SVGCanvas - StrokeWidth Scaling Bug', () => {
 

@@ -20,6 +20,8 @@ export interface Player {
 	label: string
 	color: string
 	isLineman?: boolean
+	isGhost?: boolean
+	sourcePlayerId?: string
 }
 
 interface PlayState {

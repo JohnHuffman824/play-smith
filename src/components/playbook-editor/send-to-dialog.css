@@ -31,3 +31,38 @@
 	font-size: 0.875rem;
 	margin: 0;
 }
+
+/* Mode toggle buttons */
+.send-to-mode-toggle {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.send-to-mode-button {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 10px 16px;
+	border-radius: 6px;
+	min-width: 5rem;
+	height: 2.5rem;
+	border: 1px solid var(--border);
+	background: transparent;
+	color: var(--muted-foreground);
+	cursor: pointer;
+	transition: all 200ms ease;
+	font-size: 0.875rem;
+	font-weight: 500;
+}
+
+.send-to-mode-button:hover {
+	border-color: var(--accent);
+	color: var(--accent-foreground);
+}
+
+.send-to-mode-button-active {
+	background: var(--accent);
+	border-color: var(--accent);
+	color: var(--accent-foreground);
+}

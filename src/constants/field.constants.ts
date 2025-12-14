@@ -38,6 +38,12 @@ export const TSHAPE_LENGTH_MULTIPLIER = 2.5
 export const ARROW_ANGLE_DEGREES = Math.PI / 6
 export const DASH_PATTERN_LENGTH_MULTIPLIER = 3
 export const DASH_PATTERN_GAP_MULTIPLIER = 2
+export const DRAG_THRESHOLD = 5
+
+// Pre-Snap Motion Constants
+export const SNAP_POINT_FILL_COLOR = '#F59E0B'
+export const SNAP_POINT_STROKE_COLOR = '#000000'
+export const PLACEMENT_MODE_GLOW_COLOR = '#F59E0B' // Yellow/amber glow for route in placement mode
 
 // UI Constants
 export const INITIALIZATION_DELAY_MS = 150

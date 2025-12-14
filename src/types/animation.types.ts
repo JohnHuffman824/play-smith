@@ -7,7 +7,7 @@ import type { Coordinate } from './field.types'
 /**
  * Animation playback phases.
  */
-export type AnimationPhase = 'ready' | 'snapCount' | 'execution' | 'complete'
+export type AnimationPhase = 'ready' | 'presnap' | 'snapCount' | 'execution' | 'complete'
 
 /**
  * Playback speed options.
@@ -45,6 +45,7 @@ export interface RouteTiming {
 	totalLength: number // feet
 	duration: number // ms at default speed
 	segments: SegmentTiming[]
+	startOffset: number // ms offset from snap (negative = pre-snap)
 }
 
 /**

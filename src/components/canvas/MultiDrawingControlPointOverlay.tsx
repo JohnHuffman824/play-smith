@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { FieldCoordinateSystem } from '../../utils/coordinates'
 import type { Drawing } from '../../types/drawing.types'
 import type { Coordinate } from '../../types/field.types'
-import { findSnapTarget, findPlayerSnapTarget } from '../../utils/drawing.utils'
+import { findSnapTarget, findPlayerSnapTarget, findClosestSegmentPosition } from '../../utils/drawing.utils'
 import type { SnapTarget, PlayerSnapTarget } from '../../utils/drawing.utils'
 import { PLAYER_RADIUS_FEET } from '../../constants/field.constants'
 import { pointToLineDistance } from '../../utils/canvas.utils'
@@ -69,6 +69,8 @@ type MultiDrawingControlPointOverlayProps = {
 interface MultiDragState {
 	drawingId: string // Which drawing owns the dragged point
 	pointId: string // Which point is being dragged
+	offsetX: number // Feet offset from cursor to node center (prevents jump on drag start)
+	offsetY: number // Feet offset from cursor to node center
 }
 
 /**
@@ -309,7 +311,26 @@ export function MultiDrawingControlPointOverlay({
 			const screenY = event.clientY - rect.top
 			const feet = coordSystem.screenToFeet(screenX, screenY, zoom, panX, panY)
 
-			onDragPoint(dragState.drawingId, dragState.pointId, feet.x, feet.y)
+			// Apply stored offset so node stays under cursor (prevents jump on drag start)
+			let targetX = feet.x + dragState.offsetX
+			let targetY = feet.y + dragState.offsetY
+
+			// For snap points, constrain to path
+			const drawing = drawings.find(d => d.id === dragState.drawingId)
+			const point = drawing?.points[dragState.pointId]
+			if (point?.type === 'snap' && drawing) {
+				const segmentResult = findClosestSegmentPosition(
+					drawing,
+					{ x: targetX, y: targetY },
+					coordSystem
+				)
+				if (segmentResult) {
+					targetX = segmentResult.insertPosition.x
+					targetY = segmentResult.insertPosition.y
+				}
+			}
+
+			onDragPoint(dragState.drawingId, dragState.pointId, targetX, targetY)
 
 			const playerRadiusFeet = PLAYER_RADIUS_FEET
 
@@ -399,7 +420,25 @@ export function MultiDrawingControlPointOverlay({
 	function startDrag(drawingId: string, pointId: string) {
 		return (event: React.PointerEvent) => {
 			event.stopPropagation()
-			const newDragState = { drawingId, pointId }
+			const svg = overlayRef.current?.ownerSVGElement
+			if (!svg) return
+
+			const rect = svg.getBoundingClientRect()
+			const screenX = event.clientX - rect.left
+			const screenY = event.clientY - rect.top
+			const cursorFeet = coordSystem.screenToFeet(screenX, screenY, zoom, panX, panY)
+
+			// Get current node position
+			const drawing = drawings.find(d => d.id === drawingId)
+			const point = drawing?.points[pointId]
+			if (!point) return
+
+			// Calculate offset: node center - cursor position
+			// This prevents the node from jumping to the cursor on drag start
+			const offsetX = point.x - cursorFeet.x
+			const offsetY = point.y - cursorFeet.y
+
+			const newDragState = { drawingId, pointId, offsetX, offsetY }
 			setDragState(newDragState)
 			dragStateRef.current = newDragState
 		}

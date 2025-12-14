@@ -8,7 +8,7 @@ export type { Coordinate }
 
 export interface ControlPoint extends Coordinate {
 	id: string
-	type: 'start' | 'end' | 'corner' | 'intermediate' | 'control'
+	type: 'start' | 'end' | 'corner' | 'intermediate' | 'control' | 'snap'
 	handleIn?: Coordinate
 	handleOut?: Coordinate
 }
@@ -44,6 +44,10 @@ export interface Drawing {
 	annotations: Annotation[]
 	templateId?: string
 	templateParams?: Record<string, number>
+	preSnapMotion?: {
+		type: 'motion' | 'shift'
+		snapPointId?: string // For motion: the control point marking the snap
+	}
 }
 
 /**
